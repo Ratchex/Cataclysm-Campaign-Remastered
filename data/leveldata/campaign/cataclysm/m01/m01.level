@@ -354,6 +354,9 @@ function DetermChunk()
     addToSOBGroup("KushanProximityArray32", "KushanProximityArray")
 
     addSphere("Unexplored", {7500.85, -4617.55, -17310.58}, 7350)
+    addAxisAlignBox("Everything", {-2105.18, 0, 2368.345}, 175000)
+    addAxisAlignBox("BattleZone", {6664.525, 355.25, 13835.045}, 12250)
+    addAxisAlignBox("PointAtUnexplored", {7500.85, -4617.55, -17310.58}, 35)
     addPoint("StartPointPlayer", {-12270.37, 0, 5701.71}, {0, -241, 0})
     addPoint("ProxPatrol_0", {-24568.005, -2087.26, -7384.09}, {0, 0, 0})
     addPoint("ProxPatrol_1", {-26566.47, -1888.565, -14632.38}, {0, 0, 0})
@@ -382,5 +385,5 @@ player = {}
 player[0] = { id = 0, name = "Kushan", resources = 0, raceName = "Kushan", startPos = 0 }
 player[1] = { id = 1, name = "Taiidan", resources = 0, raceName = "Taiidan", startPos = 0 }
 
--- unconverted MissionMan lines: AIBox x3, Derelict x2, Resources x4
+-- unconverted MissionMan lines: Derelict x2, Resources x4
 -- unmapped ship types (placeholder used): RACE_SECT:sRecon x3

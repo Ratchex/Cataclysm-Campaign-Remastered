@@ -411,3 +411,26 @@ end
 function KAS_StartEngine()
     Rule_AddInterval("KAS_EngineTick", 0.5)
 end
+
+-- ------------------------------------------------------------------ orders and selections (Gearbox KASUtil helpers)
+function K_492190(targets) KAS_Attack(KAS_Team, targets) end                                      -- kasfAttack
+
+function KAS_SelectInto(newShips, orig, fill)
+    if newShips == orig then
+        SobGroup_CreateIfNotExist("KAS_SelTemp")
+        SobGroup_Clear("KAS_SelTemp")
+        SobGroup_SobGroupAdd("KAS_SelTemp", orig)
+        orig = "KAS_SelTemp"
+    end
+    SobGroup_Clear(newShips)
+    return fill(newShips, orig)
+end
+function K_495560(n, o) return KAS_SelectInto(n, o, KAS_FillShipsByCapital) end                  -- kasfShipsSelectCapital
+function K_495620(n, o) return KAS_SelectInto(n, o, KAS_FillShipsByNonCapital) end               -- kasfShipsSelectNonCapital
+
+-- Cataclysm's kasfTeamSwitchPlayerOwner takes the new owner (HW1's had none): Mission01 hands allied Kushan teams
+-- to player 0 this way.
+function K_494160(player) SobGroup_SwitchOwner(KAS_Team, player) end                              -- kasfTeamSwitchPlayerOwner
+
+-- kasfResetShipRenderFlags: clears per-ship "has been rendered" bits used by kasfRenderedShips; no HWRM state.
+function K_498c70(sel) end

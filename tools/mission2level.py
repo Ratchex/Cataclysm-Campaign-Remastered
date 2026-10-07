@@ -11,7 +11,8 @@ Transform (derived from HW1 Mission01 vs Gearbox's mission01.level, every paired
 Ownership (HW1 Game/LevelLoad.c scriptSetShipsCB): default = the MissionSphere's player (-1 -> 0); any labelled
 team -> computer player 1; CryoTray -> player 0. HW1's generic R1/R2 races take the owning player's race.
 
-Not converted yet (listed in the output's "unconverted" comment): Resources, Derelict, Mine, AIBox, lighting.
+AIBox -> addAxisAlignBox(name, centre, 0.35 x largest dimension), as Gearbox did.
+Not converted yet (listed in the output's "unconverted" comment): Resources, Derelict, Mine, lighting.
 
 Usage: mission2level.py <mission_dir> <out.level> [--shipmap shipmap.tsv] [--placeholder Kus_Scout]
          [--player-race Kushan] [--enemy-race Taiidan] [--background ez01] [--player-start-ship Kus_Mothership]
@@ -52,6 +53,7 @@ class Level:
         self.shipmap, self.placeholder, self.races = shipmap, placeholder, races
         self.squadrons, self.groups = [], OrderedDict()
         self.points, self.spheres, self.paths = [], [], OrderedDict()
+        self.boxes = []
         self.settings, self.unconverted, self.unmapped = {}, Counter(), Counter()
         self.label_counts = Counter()
 
@@ -91,6 +93,9 @@ class Level:
             self.points.append((f[0], pos(*map(float, f[1:4])), (0, float(f[4]) - 90 if len(f) > 4 else 0, 0)))
         elif kind == "AISphere":
             self.spheres.append((f[0], pos(*map(float, f[1:4])), float(f[4]) * RADIUS_SCALE))
+        elif kind == "AIBox":
+            # Gearbox: addAxisAlignBox(name, centre, size) with size = 0.35 x the box dimension (one value)
+            self.boxes.append((f[0], pos(*map(float, f[1:4])), SCALE * max(float(v) for v in f[4:7])))
         elif kind == "AIPath":
             idx = int(f[5].split("/")[0]) - 1 if len(f) > 5 else len(self.paths.get(f[0], []))
             self.paths.setdefault(f[0], []).append((idx, pos(*map(float, f[1:4])), f[4] if len(f) > 4 else "Open"))
@@ -111,6 +116,8 @@ class Level:
         L.append("")
         for name, p, r in self.spheres:
             L.append(f'    addSphere("{name}", {vec(p)}, {fmt(r)})')
+        for name, p, size in self.boxes:
+            L.append(f'    addAxisAlignBox("{name}", {vec(p)}, {fmt(size)})')
         for name, p, rot in self.points:
             L.append(f'    addPoint("{name}", {vec(p)}, {vec(rot)})')
         for name, pts in self.paths.items():
