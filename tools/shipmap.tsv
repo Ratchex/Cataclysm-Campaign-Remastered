@@ -1,0 +1,156 @@
+race	ship	hwrm	note
+RACE_BEAST	bacolyte		needs a new HWRM ship (Phase 1)
+RACE_BEAST	bacv		needs a new HWRM ship (Phase 1)
+RACE_BEAST	battackbomber		needs a new HWRM ship (Phase 1)
+RACE_BEAST	bcarrier		needs a new HWRM ship (Phase 1)
+RACE_BEAST	bcloakedfighter		needs a new HWRM ship (Phase 1)
+RACE_BEAST	bcruisemissile		needs a new HWRM ship (Phase 1)
+RACE_BEAST	bdfgfrigate		needs a new HWRM ship (Phase 1)
+RACE_BEAST	bheavycorvette		needs a new HWRM ship (Phase 1)
+RACE_BEAST	bheavycruiser		needs a new HWRM ship (Phase 1)
+RACE_BEAST	bhivefrigate		needs a new HWRM ship (Phase 1)
+RACE_BEAST	binterceptor		needs a new HWRM ship (Phase 1)
+RACE_BEAST	bionarrayfrigate		needs a new HWRM ship (Phase 1)
+RACE_BEAST	bmissilecorvette		needs a new HWRM ship (Phase 1)
+RACE_BEAST	bmothership		needs a new HWRM ship (Phase 1)
+RACE_BEAST	bmothershipdockingbay		needs a new HWRM ship (Phase 1)
+RACE_BEAST	bmothershipengineslower		needs a new HWRM ship (Phase 1)
+RACE_BEAST	bmothershipsupport		needs a new HWRM ship (Phase 1)
+RACE_BEAST	bmultibeamfrigate		needs a new HWRM ship (Phase 1)
+RACE_BEAST	bmultiguncorvette		needs a new HWRM ship (Phase 1)
+RACE_BEAST	bprocessor		needs a new HWRM ship (Phase 1)
+RACE_BEAST	brammingfrigate		needs a new HWRM ship (Phase 1)
+RACE_BEAST	brecon		needs a new HWRM ship (Phase 1)
+RACE_BEAST	brepairdroid		needs a new HWRM ship (Phase 1)
+RACE_BEAST	bsectmoship		needs a new HWRM ship (Phase 1)
+RACE_BEAST	bsentinel		needs a new HWRM ship (Phase 1)
+RACE_BEAST	bswarmer		needs a new HWRM ship (Phase 1)
+RACE_BEAST	bworker		needs a new HWRM ship (Phase 1)
+RACE_BEAST	mine		needs a new HWRM ship (Phase 1)
+RACE_BEAST	missile		needs a new HWRM ship (Phase 1)
+RACE_DERELICT	dacolyte		needs a new HWRM ship (Phase 1)
+RACE_DERELICT	dbeastdockingbay		needs a new HWRM ship (Phase 1)
+RACE_DERELICT	dbeastmothership		needs a new HWRM ship (Phase 1)
+RACE_DERELICT	dbiggun		needs a new HWRM ship (Phase 1)
+RACE_DERELICT	dbiggununit		needs a new HWRM ship (Phase 1)
+RACE_DERELICT	dbuoy		needs a new HWRM ship (Phase 1)
+RACE_DERELICT	dcrate		needs a new HWRM ship (Phase 1)
+RACE_DERELICT	dcrystal0		needs a new HWRM ship (Phase 1)
+RACE_DERELICT	dcrystal1		needs a new HWRM ship (Phase 1)
+RACE_DERELICT	ddeadplanet		needs a new HWRM ship (Phase 1)
+RACE_DERELICT	decclesiam		needs a new HWRM ship (Phase 1)
+RACE_DERELICT	decclesiaminfected		needs a new HWRM ship (Phase 1)
+RACE_DERELICT	dfirstplanet		needs a new HWRM ship (Phase 1)
+RACE_DERELICT	dionarrayfrigate		needs a new HWRM ship (Phase 1)
+RACE_DERELICT	dioncannonfrigate		needs a new HWRM ship (Phase 1)
+RACE_DERELICT	djunk1parta		needs a new HWRM ship (Phase 1)
+RACE_DERELICT	djunk1shell		needs a new HWRM ship (Phase 1)
+RACE_DERELICT	djunk1strut		needs a new HWRM ship (Phase 1)
+RACE_DERELICT	djunk2shipwreck		needs a new HWRM ship (Phase 1)
+RACE_DERELICT	djunk3boiler		needs a new HWRM ship (Phase 1)
+RACE_DERELICT	djunk3boilercasing		needs a new HWRM ship (Phase 1)
+RACE_DERELICT	dkushancarrier		needs a new HWRM ship (Phase 1)
+RACE_DERELICT	dmessagepod		needs a new HWRM ship (Phase 1)
+RACE_DERELICT	dnisbuoy		needs a new HWRM ship (Phase 1)
+RACE_DERELICT	dnomadfieldemitter		needs a new HWRM ship (Phase 1)
+RACE_DERELICT	dnomadmoon		needs a new HWRM ship (Phase 1)
+RACE_DERELICT	dplasmacloud		needs a new HWRM ship (Phase 1)
+RACE_DERELICT	dprisonship		needs a new HWRM ship (Phase 1)
+RACE_DERELICT	dprisonshipinfected		needs a new HWRM ship (Phase 1)
+RACE_DERELICT	drko		needs a new HWRM ship (Phase 1)
+RACE_DERELICT	dslipgatelarge		needs a new HWRM ship (Phase 1)
+RACE_DERELICT	dslipgatemedium		needs a new HWRM ship (Phase 1)
+RACE_DERELICT	dslipgatenode		needs a new HWRM ship (Phase 1)
+RACE_DERELICT	dslipgatesmall		needs a new HWRM ship (Phase 1)
+RACE_DERELICT	mine		needs a new HWRM ship (Phase 1)
+RACE_DERELICT	nislensflaresource1		needs a new HWRM ship (Phase 1)
+RACE_DERELICT	nislightsource1		needs a new HWRM ship (Phase 1)
+RACE_DERELICT	nislightsource2		needs a new HWRM ship (Phase 1)
+RACE_KUSHAN	kadvancesupportfrigate	kus_supportfrigate	Gearbox substitute
+RACE_KUSHAN	kattackbomber	kus_attackbomber	same HWRM type
+RACE_KUSHAN	kcarrier	kus_carrier	same HWRM type
+RACE_KUSHAN	kcloakgenerator	kus_cloakgenerator	same HWRM type
+RACE_KUSHAN	kgravwellgenerator	kus_gravwellgenerator	same HWRM type
+RACE_KUSHAN	kheavycorvette	kus_heavycorvette	same HWRM type
+RACE_KUSHAN	kheavycruiser	kus_heavycruiser	same HWRM type
+RACE_KUSHAN	kheavydefender	kus_defender	Gearbox substitute
+RACE_KUSHAN	kheavyinterceptor	kus_interceptor	Gearbox substitute
+RACE_KUSHAN	kioncannonfrigate	kus_ioncannonfrigate	same HWRM type
+RACE_KUSHAN	kmultiguncorvette	kus_multiguncorvette	same HWRM type
+RACE_KUSHAN	kproximitysensor	kus_proximitysensor	same HWRM type
+RACE_KUSHAN	ksalcapcorvette	kus_salvagecorvette	Gearbox substitute
+RACE_KUSHAN	kstandarddestroyer	kus_destroyer	Gearbox substitute
+RACE_KUSHAN	mine		no HWRM equivalent
+RACE_KUSHAN	missile		no HWRM equivalent
+RACE_P1	missile		needs a new HWRM ship (Phase 1)
+RACE_P1	p1fighter		needs a new HWRM ship (Phase 1)
+RACE_P1	p1ionarrayfrigate		needs a new HWRM ship (Phase 1)
+RACE_P1	p1missilecorvette		needs a new HWRM ship (Phase 1)
+RACE_P1	p1mothership		needs a new HWRM ship (Phase 1)
+RACE_P1	p1outpost		needs a new HWRM ship (Phase 1)
+RACE_P1	p1standardcorvette		needs a new HWRM ship (Phase 1)
+RACE_SECT	generic_ship		needs a new HWRM ship (Phase 1)
+RACE_SECT	mine		needs a new HWRM ship (Phase 1)
+RACE_SECT	missile		needs a new HWRM ship (Phase 1)
+RACE_SECT	sacolyte		needs a new HWRM ship (Phase 1)
+RACE_SECT	sacv		needs a new HWRM ship (Phase 1)
+RACE_SECT	scarrier		needs a new HWRM ship (Phase 1)
+RACE_SECT	scarriersupport		needs a new HWRM ship (Phase 1)
+RACE_SECT	sdestroyer		needs a new HWRM ship (Phase 1)
+RACE_SECT	sdreadnought		needs a new HWRM ship (Phase 1)
+RACE_SECT	sdreadnoughtcannon		needs a new HWRM ship (Phase 1)
+RACE_SECT	shivefrigate		needs a new HWRM ship (Phase 1)
+RACE_SECT	sleech		needs a new HWRM ship (Phase 1)
+RACE_SECT	smcv		needs a new HWRM ship (Phase 1)
+RACE_SECT	smimic		needs a new HWRM ship (Phase 1)
+RACE_SECT	smothership		needs a new HWRM ship (Phase 1)
+RACE_SECT	smothershiparmour		needs a new HWRM ship (Phase 1)
+RACE_SECT	smothershipbiggun		needs a new HWRM ship (Phase 1)
+RACE_SECT	smothershipcommand		needs a new HWRM ship (Phase 1)
+RACE_SECT	smothershipdockingbay		needs a new HWRM ship (Phase 1)
+RACE_SECT	smothershipengineering		needs a new HWRM ship (Phase 1)
+RACE_SECT	smothershipengineslower		needs a new HWRM ship (Phase 1)
+RACE_SECT	smothershipenginesupper		needs a new HWRM ship (Phase 1)
+RACE_SECT	smothershiplowerspine		needs a new HWRM ship (Phase 1)
+RACE_SECT	smothershipmicro		needs a new HWRM ship (Phase 1)
+RACE_SECT	smothershiporecanarmour		needs a new HWRM ship (Phase 1)
+RACE_SECT	smothershipspecial		needs a new HWRM ship (Phase 1)
+RACE_SECT	smothershipsupport		needs a new HWRM ship (Phase 1)
+RACE_SECT	smothershipweapons		needs a new HWRM ship (Phase 1)
+RACE_SECT	smultibeamfrigate		needs a new HWRM ship (Phase 1)
+RACE_SECT	sprocessor		needs a new HWRM ship (Phase 1)
+RACE_SECT	srammingfrigate		needs a new HWRM ship (Phase 1)
+RACE_SECT	srecon		needs a new HWRM ship (Phase 1)
+RACE_SECT	srepairdroid		needs a new HWRM ship (Phase 1)
+RACE_SECT	ssentinel		needs a new HWRM ship (Phase 1)
+RACE_SECT	sswarmer		needs a new HWRM ship (Phase 1)
+RACE_SECT	sworker		needs a new HWRM ship (Phase 1)
+RACE_TAIDAN	mine		no HWRM equivalent
+RACE_TAIDAN	missile		no HWRM equivalent
+RACE_TAIDAN	tadvancesupportfrigate	tai_supportfrigate	Gearbox substitute
+RACE_TAIDAN	tattackbomber	tai_attackbomber	same HWRM type
+RACE_TAIDAN	tcarrier	tai_carrier	same HWRM type
+RACE_TAIDAN	tcloakgenerator	tai_cloakgenerator	same HWRM type
+RACE_TAIDAN	tdfgfrigate	tai_fieldfrigate	Gearbox substitute
+RACE_TAIDAN	tgravwellgenerator	tai_gravwellgenerator	same HWRM type
+RACE_TAIDAN	theavycruiser	tai_heavycruiser	same HWRM type
+RACE_TAIDAN	theavydefender	tai_defender	Gearbox substitute
+RACE_TAIDAN	theavyinterceptor	tai_interceptor	Gearbox substitute
+RACE_TAIDAN	tioncannonfrigate	tai_ioncannonfrigate	same HWRM type
+RACE_TAIDAN	tminelayercorvette	tai_minelayercorvette	same HWRM type
+RACE_TAIDAN	tmissiledestroyer	tai_missiledestroyer	same HWRM type
+RACE_TAIDAN	tmultiguncorvette	tai_multiguncorvette	same HWRM type
+RACE_TAIDAN	tproximitysensor	tai_proximitysensor	same HWRM type
+RACE_TAIDAN	tresourcecollector	tai_resourcecollector	same HWRM type
+RACE_TAIDAN	tsalcapcorvette	tai_salvagecorvette	Gearbox substitute
+RACE_TAIDAN	tstandarddestroyer	tai_destroyer	Gearbox substitute
+RACE_TAIDAN	tstandardfrigate	tai_assaultfrigate	Gearbox substitute
+RACE_TRADERS	trcargobarge		needs a new HWRM ship (Phase 1)
+RACE_TRADERS	trfloatingcity		needs a new HWRM ship (Phase 1)
+RACE_TRADERS	trghostship		needs a new HWRM ship (Phase 1)
+RACE_TRADERS	trjunk_lgun		needs a new HWRM ship (Phase 1)
+RACE_TRADERS	trjunk_sgun		needs a new HWRM ship (Phase 1)
+RACE_TRADERS	trjunkyarddawg		needs a new HWRM ship (Phase 1)
+RACE_TRADERS	trjunkyardhq		needs a new HWRM ship (Phase 1)
+RACE_TRADERS	trminingbase		needs a new HWRM ship (Phase 1)
+RACE_TRADERS	trresearchstation		needs a new HWRM ship (Phase 1)

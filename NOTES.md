@@ -34,3 +34,19 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
   `$2100000`). ID 4200000 produced "Requested string range doesn't exists"; 2100000 gives no error but still
   does not resolve. The Taiidan Republic mod ships its strings as `english.big` in the mod root - try that
   (Phase 0.4). Plain-text strings work meanwhile.
+
+## Level conversion (Phase 0.2, `tools/mission2level.py`)
+- HW1/Cataclysm → HWRM: position `{-0.35x, 0.35z, 0.35y}`, yaw `rot - 90`, sphere radius `× 0.175`, inner bounds
+  `0.35 × (sizeX, sizeZ, sizeY)`, outer `1.2 × inner`. `.missphere` positions are absolute.
+- Verified with `tools/compare_level.py` against Gearbox's converted HW1 Mission01/05/10: every common squadron,
+  point and sphere matches (tolerance 1 unit), except Gearbox's hand edits (Mission01 `SalvageTrialPING`, extra
+  `PlayerStartPoint*` and `ExtraRes`) and its type substitutions for HW1 ships HWRM dropped
+  (now in `make_shipmap.py`). Gearbox writes some yaws as `{180, 90 - rot, 180}`; same orientation.
+- Ownership: labelled teams → player 1, CryoTray → player 0, others → the MissionSphere's player.
+- `tools/shipmap.tsv`: 32 of Cataclysm's 36 Kushan/Taiidan types map to existing `Kus_`/`Tai_` ships; Somtaaw,
+  Beast, Turanic, Traders and derelicts need new ships (Phase 1); `--placeholder` fills them meanwhile.
+- Not converted yet: `Resources` (asteroid/dust fields from `.dist` files), `AIBox`, `Derelict`, `Mine`.
+- **Cataclysm missions do not place the player's fleet.** Their only RACE_SECT entries are empty KAS teams
+  (FleetIntel, Objectives, Music). `sMothership` is referenced only by mission code from Mission05 on, so the
+  starting fleet comes from game code or persistence; HWRM's equivalent is `startingplayerfleet.lua` +
+  `usedefaultpersist`. To find in the decompile (Phase 0.6/0.7).
