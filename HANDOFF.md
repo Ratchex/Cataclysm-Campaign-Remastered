@@ -27,7 +27,7 @@ findings).
 | 0.1 | Campaign skeleton | Done. Rules in `NOTES.md` (keeper.txt, `<campaign>.dds`, createSOBGroup before addToSOBGroup, launch args). |
 | 0.2 | Level converter `mission2level.py` | Done; matches Gearbox's HW1 conversions; Mission01 layout checked in game. Resources/AIBox/derelicts/mines not converted yet. |
 | 0.3 | One Somtaaw ship end to end | Not started. |
-| 0.4 | Speech/subtitles; localized `$IDs` | Not started. Open issue: loose `locale/english/*.dat` strings don't resolve (Taiidan Republic mod ships an `english.big` instead — try that). |
+| 0.4 | Speech/subtitles; localized `$IDs` | **Done.** `build_speech.py` makes one 44.1 kHz WAV + speech.dat string per phrase; runtime plays them via Subtitle_AddSkippable. Confirmed in game (lines, subtitles, objective text). |
 | 0.5 | NIS cutscenes | Not started. References: Gearbox's converted HW1 NIS, Battlestar Galactica: Fleet Commander mod (subscribed). |
 | 0.6 | KAS API naming | Partial. `out/kas_usage.tsv`: 302 functions used; confident names only for the first third of the API. Verified names in `out/kas_api_overrides.tsv`. Tools: `kasalign.py`, `kasverify.py <Mission>`. |
 | 0.7 | C → Lua translator | **Done.** Mission01 runs from translated code: no Lua errors, teams start, objectives appear with real text after ~30s. 38/108 KAS functions implemented; others are logged stubs. |
@@ -57,4 +57,4 @@ findings).
 1. Mission01: implement the stubs the run hits (orders: Guard/Patrol/MoveTo/Stop/Launch/Dock; pings; sensors;
    tutorial pointers; purchase/tech; ~15 unnamed ones) and check objectives complete as the original does.
 2. Then build Missions 02-17 with `build_mission.py` and fix what each one hits.
-3. Then 0.3 (Somtaaw ship), 0.4 (speech + strings), 0.5 (NIS), and the remaining level conversions.
+3. Then 0.3 (Somtaaw ship), 0.5 (NIS), and the remaining level conversions.

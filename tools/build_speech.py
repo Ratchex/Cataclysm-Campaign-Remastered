@@ -3,9 +3,9 @@
   data/locale/english/leveldata/campaign/cataclysm/speech.dat   subtitle per phrase (ends with rangeend)
   data/scripts/scar/cataclysmspeech.lua   KAS_SpeechEvent[event] = { nvar, maxvar, base, bank } for the runtime
 String/file id = base id of the bank + phrase index (Sect 2200000, Beast 2210000: all below the 22-bit limit).
-Phrases are written at the decoded 22050 Hz (HWRM plays stock speech at 44.1 kHz; --rate 44100 to resample).
+Phrases are resampled from the decoded 22050 Hz to 44.1 kHz (HWRM plays WAVs at 44.1 kHz regardless of their header).
 
-Usage: build_speech.py [--rate 22050] [--banks sect,beast]
+Usage: build_speech.py [--rate 44100] [--banks sect,beast]
 """
 import argparse
 import csv
@@ -36,7 +36,7 @@ def join_wavs(paths, out, rate):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--rate", type=int, default=22050)
+    ap.add_argument("--rate", type=int, default=44100)
     ap.add_argument("--banks", default="sect")
     a = ap.parse_args()
     wav_dir = os.path.join(MOD, "data", "sound", "speech", "missions", "cataclysm")

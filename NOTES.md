@@ -29,11 +29,16 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
 - `dofilepath("data:scripts/SCAR/KASUtil.lua")` and the other four HW1 emulation files load fine from a mod
   mission; `OnStartOrLoad`, `OnInit`, `Rule_AddInterval`, `Objective_Add`/`Objective_SetState` all work.
 
-## Localized strings (solved in Phase 0.4)
-- Mission `datfiles.lua` + loose `locale/english/...dat` do not resolve `$IDs` yet (objective shows the raw
-  `$2100000`). ID 4200000 produced "Requested string range doesn't exists"; 2100000 gives no error but still
-  does not resolve. The Taiidan Republic mod ships its strings as `english.big` in the mod root - try that
-  (Phase 0.4). Plain-text strings work meanwhile.
+## Localized strings and speech (Phase 0.4, confirmed in game)
+- Loose `locale/english/...dat` files listed in the mission's `datfiles.lua` work. The `.dat` **must end with
+  `rangeend`**, otherwise HwRM.log says "LOCALIZER -- Missing final range end" and every `$ID` shows raw.
+  IDs must lie inside a `filerange`; 4200000 was out of range ("Requested string range doesn't exists").
+- Speech: `Sound_SpeechSubtitlePath("speech:missions/<folder>/")` in OnStartOrLoad, then
+  `Subtitle_AddSkippable(actor, "$<id>", secs)` plays `data/sound/speech/missions/<folder>/<id>.wav` and shows
+  string `<id>` as the subtitle. WAVs must be 44.1 kHz: 22050 Hz files play chipmunked (no resampling).
+- The actor sets the portrait shown above the subtitle; the subtitle text is shown without a speaker prefix
+  being added, so Cataclysm's own "Tactical Officer: ..." text appears once.
+- Cataclysm actor bits in speech events: 0x1000 Fleet Command, 0x2000 Tactical Officer, 0x8000 other fleets.
 
 ## Level conversion (Phase 0.2, `tools/mission2level.py`)
 - HW1/Cataclysm → HWRM: position `{-0.35x, 0.35z, 0.35y}`, yaw `rot - 90`, sphere radius `× 0.175`, inner bounds
