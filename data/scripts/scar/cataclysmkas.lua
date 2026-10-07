@@ -383,20 +383,32 @@ KAS_Key_NisletComplete[19] = "0:139857541"
 KAS_Key_NisComplete[20] = "0:46232517"
 KAS_Key_NisletComplete[20] = "0:139858309"
 
+-- A requested cutscene "plays" for KAS_NisSeconds before it is marked complete. Completing it at once also
+-- started every team before the level's ships were in their SobGroups (team counts of 0 -> instant failure).
+KAS_NisSeconds = 5
+KAS_NisPending = nil
+
 function KAS_EngineTick()
-    local n = KAS_Vars[KAS_Key_PlayNislet]
-    if n and n ~= 0 then
-        print("CKAS: nislet " .. n .. " requested (NIS playback not ported yet: marking complete)")
-        KAS_Vars[KAS_Key_PlayNislet] = 0
-        if KAS_Key_NisletComplete[n] then KAS_Vars[KAS_Key_NisletComplete[n]] = 1 end
+    local now = Universe_GameTime()
+    if KAS_NisPending == nil then
+        local n = KAS_Vars[KAS_Key_PlayNislet]
+        if n and n ~= 0 then
+            KAS_Vars[KAS_Key_PlayNislet] = 0
+            KAS_NisPending = { key = KAS_Key_NisletComplete[n], at = now + KAS_NisSeconds }
+            print("CKAS: nislet " .. n .. " requested (NIS playback not ported yet: completes in " .. KAS_NisSeconds .. "s)")
+        end
+        n = KAS_Vars[KAS_Key_PlayNis]
+        if n and n ~= 0 then
+            KAS_Vars[KAS_Key_PlayNis] = 0
+            KAS_NisPending = { key = KAS_Key_NisComplete[n], at = now + KAS_NisSeconds }
+            print("CKAS: NIS " .. n .. " requested (NIS playback not ported yet: completes in " .. KAS_NisSeconds .. "s)")
+        end
+    elseif now >= KAS_NisPending.at then
+        if KAS_NisPending.key then KAS_Vars[KAS_NisPending.key] = 1 end
+        KAS_NisPending = nil
+        print("CKAS: cutscene complete")
     end
-    n = KAS_Vars[KAS_Key_PlayNis]
-    if n and n ~= 0 then
-        print("CKAS: NIS " .. n .. " requested (NIS playback not ported yet: marking complete)")
-        KAS_Vars[KAS_Key_PlayNis] = 0
-        if KAS_Key_NisComplete[n] then KAS_Vars[KAS_Key_NisComplete[n]] = 1 end
-    end
-    if KAS_ShipsArriveAt and Universe_GameTime() >= KAS_ShipsArriveAt then
+    if KAS_ShipsArriveAt and now >= KAS_ShipsArriveAt then
         KAS_ShipsArriveAt = nil
         KAS_Vars[KAS_Key_ShipsHaveArrived] = 1
         print("CKAS: G_ShipsHaveArrived")
