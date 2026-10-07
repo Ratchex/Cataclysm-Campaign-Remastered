@@ -227,6 +227,7 @@ function KAS_TeamMsgGet(team, i)
     local m = q[i + 1]
     q[i + 1] = q[getn(q)]
     tremove(q)
+    if KAS_TraceMsgs == 1 then print("CKAS got " .. team .. " : " .. m) end
     return m
 end
 
@@ -489,3 +490,8 @@ function K_497b00()                                                             
 end
 
 function K_497b80() end                                                                           -- kasfSubtitleReset
+
+-- state-change trace (the translator emits KAS_TraceJump before each kasJump / kasFSMCreate)
+function KAS_TraceJump(team, from, to)
+    if KAS_TraceMsgs == 1 then print("CKAS jump " .. team .. " : " .. from .. " -> " .. to) end
+end

@@ -745,6 +745,7 @@ class Translator:
         wwatch = f"{self.fn_name(watch)}" if watch else None
         if name == "kasJump":
             lines = [f"-- kasJump(state {h:#x})" if h is not None else "-- kasJump"]
+            lines.append(f'KAS_TraceJump(TeamName, "{self.cur}", "{wwatch}")')
             lines.append(f'KASRule_Add(TeamName, "{wwatch}", "{self.cur}")' if wwatch else "KAS_ClearStateRule(TeamName)")
             if winit:
                 lines.append(f"{winit}(TeamName)")

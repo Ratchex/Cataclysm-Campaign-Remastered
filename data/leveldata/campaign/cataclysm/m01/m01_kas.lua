@@ -483,6 +483,7 @@ function F_5d9a20(TeamName)
   K_496720("CancelFocus")  -- kasfTutEnableFlags
   K_491d30(77979796, 0)  -- Failed; kasfVarCreateSet
   -- kasJump(state 0x2e80a01)
+  KAS_TraceJump(TeamName, "F_5d9a20", "F_5d9b20")
   KASRule_Add(TeamName, "F_5d9b20", "F_5d9a20")
   F_5d9af0(TeamName)
   do return end
@@ -720,6 +721,7 @@ function F_5d9b20(TeamName)
     K_496e20(1, 100000)  -- kasfRUsSet
     K_491f90(50796994, 1)  -- kasfTimerCreateSetStart
     -- kasJump(state 0x1f32b25)
+    KAS_TraceJump(TeamName, "F_5d9b20", "F_5da2c0")
     KASRule_Add(TeamName, "F_5da2c0", "F_5d9b20")
     F_613940(TeamName)
     do return end
@@ -810,6 +812,7 @@ function F_5da2c0(TeamName)
       K_491d70(127756738, 3)  -- StartTimer; kasfVarValueSet
       K_496eb0(268443870, 0)  -- kasfSpeechEvent
       -- kasJump(state 0xe8e63cc)
+      KAS_TraceJump(TeamName, "F_5da2c0", "F_5da060")
       KASRule_Add(TeamName, "F_5da060", "F_5da2c0")
       F_5f4730(TeamName)
       do return end
@@ -833,6 +836,7 @@ function F_5da2c0(TeamName)
       K_496eb0(268444003, 0)  -- kasfSpeechEvent
       K_494a00(TeamName, 17855508)  -- kasfMsgSend
       -- kasJump(state 0xe8e63cc)
+      KAS_TraceJump(TeamName, "F_5da2c0", "F_5da060")
       KASRule_Add(TeamName, "F_5da060", "F_5da2c0")
       F_5f4730(TeamName)
       do return end
@@ -855,6 +859,7 @@ function F_5da2c0(TeamName)
       K_495ea0("ResourcerPing")  -- kasfPingRemove
       K_496eb0(268439906, 0)  -- kasfSpeechEvent
       -- kasJump(state 0xe8e63cc)
+      KAS_TraceJump(TeamName, "F_5da2c0", "F_5da060")
       KASRule_Add(TeamName, "F_5da060", "F_5da2c0")
       F_5f4730(TeamName)
       do return end
@@ -893,6 +898,7 @@ function F_5da2c0(TeamName)
       K_494a00(iVar1, iVar4)  -- kasfMsgSend
       K_491d70(168240451, 1)  -- kasfVarValueSet
       -- kasJump(state 0xe8e63cc)
+      KAS_TraceJump(TeamName, "F_5da2c0", "F_5da060")
       KASRule_Add(TeamName, "F_5da060", "F_5da2c0")
       F_5f4730(TeamName)
       do return end
@@ -962,6 +968,7 @@ function F_5da2c0(TeamName)
       iVar1 = K_4907a0(iVar1)  -- kasAITeamPtr
       K_494a00(iVar1, puVar2)  -- kasfMsgSend
       -- kasJump(state 0xe8e63cc)
+      KAS_TraceJump(TeamName, "F_5da2c0", "F_5da060")
       KASRule_Add(TeamName, "F_5da060", "F_5da2c0")
       F_5f4730(TeamName)
       do return end
@@ -987,6 +994,7 @@ function F_5da2c0(TeamName)
       K_491d70(127756738, 3)  -- StartTimer; kasfVarValueSet
       K_494a00(TeamName, 27065970)  -- kasfMsgSend
       -- kasJump(state 0xe989af2)
+      KAS_TraceJump(TeamName, "F_5da2c0", "F_5da210")
       KASRule_Add(TeamName, "F_5da210", "F_5da2c0")
       F_652ef0(TeamName)
       do return end
@@ -1007,6 +1015,7 @@ function F_5da2c0(TeamName)
     elseif _pc == 83 then
       K_496eb0(268444007, 0)  -- kasfSpeechEvent
       -- kasJump(state 0xe8e63cc)
+      KAS_TraceJump(TeamName, "F_5da2c0", "F_5da060")
       KASRule_Add(TeamName, "F_5da060", "F_5da2c0")
       F_5f4730(TeamName)
       do return end
@@ -1029,6 +1038,7 @@ function F_5da2c0(TeamName)
       K_491d70(127756738, 50)  -- StartTimer; kasfVarValueSet
       K_494a00(TeamName, 10664496)  -- kasfMsgSend
       -- kasJump(state 0xe8e63cc)
+      KAS_TraceJump(TeamName, "F_5da2c0", "F_5da060")
       KASRule_Add(TeamName, "F_5da060", "F_5da2c0")
       F_5f4730(TeamName)
       do return end
@@ -1040,6 +1050,7 @@ function F_5da2c0(TeamName)
       _pc = 88
     elseif _pc == 91 then
       -- kasJump(state 0x4a5dc)
+      KAS_TraceJump(TeamName, "F_5da2c0", "F_652ef0")
       KASRule_Add(TeamName, "F_652ef0", "F_5da2c0")
       F_5db0b0(TeamName)
       do return end
@@ -1083,6 +1094,7 @@ function F_5da2c0(TeamName)
     elseif _pc == 101 then
       K_494a00(TeamName, iVar1)  -- kasfMsgSend
       -- kasJump(state 0xe8e63cc)
+      KAS_TraceJump(TeamName, "F_5da2c0", "F_5da060")
       KASRule_Add(TeamName, "F_5da060", "F_5da2c0")
       F_5f4730(TeamName)
       do return end
@@ -1101,6 +1113,7 @@ function F_5da2c0(TeamName)
       iVar4 = "FleetIntel"
       K_494a00(iVar4, iVar1)  -- kasfMsgSend
       -- kasJump(state 0xe989af2)
+      KAS_TraceJump(TeamName, "F_5da2c0", "F_5da210")
       KASRule_Add(TeamName, "F_5da210", "F_5da2c0")
       F_652ef0(TeamName)
       do return end
@@ -1118,6 +1131,7 @@ function F_5da2c0(TeamName)
       K_496eb0(268444006, 0)  -- kasfSpeechEvent
       K_491d70(77979796, 1)  -- Failed; kasfVarValueSet
       -- kasJump(state 0xe8e63cc)
+      KAS_TraceJump(TeamName, "F_5da2c0", "F_5da060")
       KASRule_Add(TeamName, "F_5da060", "F_5da2c0")
       F_5f4730(TeamName)
       do return end
@@ -1259,6 +1273,7 @@ function F_5da2c0(TeamName)
       K_491d70(168240451, 1)  -- kasfVarValueSet
       K_491d70(127756738, 3)  -- StartTimer; kasfVarValueSet
       -- kasJump(state 0xe8e63cc)
+      KAS_TraceJump(TeamName, "F_5da2c0", "F_5da060")
       KASRule_Add(TeamName, "F_5da060", "F_5da2c0")
       F_5f4730(TeamName)
       do return end
@@ -1318,6 +1333,7 @@ function F_5da2c0(TeamName)
       K_494a00(TeamName, 51924198)  -- kasfMsgSend
       K_497710(11, " ")  -- kasfSetTraderDialog
       -- kasJump(state 0xe8e63cc)
+      KAS_TraceJump(TeamName, "F_5da2c0", "F_5da060")
       KASRule_Add(TeamName, "F_5da060", "F_5da2c0")
       F_5f4730(TeamName)
       do return end
@@ -1362,6 +1378,7 @@ function F_5da2c0(TeamName)
       K_497710(8000, " ")  -- kasfSetTraderDialog
       K_494a00(TeamName, 10664500)  -- kasfMsgSend
       -- kasJump(state 0xe8e63cc)
+      KAS_TraceJump(TeamName, "F_5da2c0", "F_5da060")
       KASRule_Add(TeamName, "F_5da060", "F_5da2c0")
       F_5f4730(TeamName)
       do return end
@@ -1382,6 +1399,7 @@ function F_5da2c0(TeamName)
       K_491d70(127756738, 3)  -- StartTimer; kasfVarValueSet
       K_494a00(TeamName, 2772294)  -- kasfMsgSend
       -- kasJump(state 0xe989af2)
+      KAS_TraceJump(TeamName, "F_5da2c0", "F_5da210")
       KASRule_Add(TeamName, "F_5da210", "F_5da2c0")
       F_652ef0(TeamName)
       do return end
@@ -1451,6 +1469,7 @@ function F_5da2c0(TeamName)
       _pc = 205
     elseif _pc == 205 then
       -- kasJump(state 0xe8e63cc)
+      KAS_TraceJump(TeamName, "F_5da2c0", "F_5da060")
       KASRule_Add(TeamName, "F_5da060", "F_5da2c0")
       F_5f4730(TeamName)
       do return end
@@ -1566,11 +1585,13 @@ function F_5da060(TeamName)
       if (iVar1 == 0) then _pc = 21 else _pc = 22 end
     elseif _pc == 21 then
       -- kasJump(state 0xe989af2)
+      KAS_TraceJump(TeamName, "F_5da060", "F_5da210")
       KASRule_Add(TeamName, "F_5da210", "F_5da060")
       F_652ef0(TeamName)
       do return end
     elseif _pc == 22 then
       -- kasJump(state 0x4a5dc)
+      KAS_TraceJump(TeamName, "F_5da060", "F_652ef0")
       KASRule_Add(TeamName, "F_652ef0", "F_5da060")
       F_5db0b0(TeamName)
       do return end
@@ -1618,6 +1639,7 @@ function F_5da210(TeamName)
   iVar1 = K_492120(220350372)  -- kasfMsgReceived
   if (iVar1 ~= 0) then
     -- kasJump(state 0x4a5dc)
+    KAS_TraceJump(TeamName, "F_5da210", "F_652ef0")
     KASRule_Add(TeamName, "F_652ef0", "F_5da210")
     F_5db0b0(TeamName)
     do return end
@@ -1633,6 +1655,7 @@ function F_5da210(TeamName)
   iVar1 = K_492060(144337492)  -- Default; kasfTimerExpired
   if (iVar1 ~= 0) then
     -- kasJump(state 0x1f32b25)
+    KAS_TraceJump(TeamName, "F_5da210", "F_5da2c0")
     KASRule_Add(TeamName, "F_5da2c0", "F_5da210")
     F_613940(TeamName)
     do return end
@@ -1647,6 +1670,7 @@ function F_5d98f0(TeamName)
   KAS_Scope = KAS_TeamHash(TeamName)
   K_498c70(TeamName)  -- kasfResetShipRenderFlags
   -- kasJump(state 0xe98cf15)
+  KAS_TraceJump(TeamName, "F_5d98f0", "F_5d9930")
   KASRule_Add(TeamName, "F_5d9930", "F_5d98f0")
   F_652ef0(TeamName)
   do return end
@@ -1662,6 +1686,7 @@ function F_5d9930(TeamName)
   iVar1 = K_492120(237703397)  -- Reinforce; kasfMsgReceived
   if (iVar1 ~= 0) then
     -- kasJump(state 0x3669d95)
+    KAS_TraceJump(TeamName, "F_5d9930", "F_652ef0")
     KASRule_Add(TeamName, "F_652ef0", "F_5d9930")
     F_5d9980(TeamName)
     do return end
@@ -1710,6 +1735,7 @@ function F_5d9430(TeamName)
   K_494750(p1)  -- kasfDockInstant
   K_491d30((-1970110140), 1)  -- kasfVarCreateSet
   -- kasJump(state 0xc2ee6b2)
+  KAS_TraceJump(TeamName, "F_5d9430", "F_5d9490")
   KASRule_Add(TeamName, "F_5d9490", "F_5d9430")
   F_652ef0(TeamName)
   do return end
@@ -1726,6 +1752,7 @@ function F_5d9490(TeamName)
   if (iVar1 ~= 0) then
     K_4947c0()  -- kasfLaunch
     -- kasJump(state 0x506a278)
+    KAS_TraceJump(TeamName, "F_5d9490", "F_5d9870")
     KASRule_Add(TeamName, "F_5d9870", "F_5d9490")
     F_652ef0(TeamName)
     do return end
@@ -1749,6 +1776,7 @@ function F_5d9870(TeamName)
       K_494a00(iVar1, p2)  -- kasfMsgSend
     end
     -- kasJump(state 0x857bcb7)
+    KAS_TraceJump(TeamName, "F_5d9870", "F_5d9600")
     KASRule_Add(TeamName, "F_5d9600", "F_5d9870")
     F_5d94e0(TeamName)
     do return end
@@ -1835,12 +1863,14 @@ function F_5d9600(TeamName)
   if (iVar1 < 3) then
     K_491db0((-1970110140))  -- kasfVarValueInc
     -- kasJump(state 0x8832365)
+    KAS_TraceJump(TeamName, "F_5d9600", "F_5d97b0")
     KASRule_Add(TeamName, "F_5d97b0", "F_5d9600")
     F_5d9780(TeamName)
     do return end
     do return end
   end
   -- kasJump(state 0x53a0c)
+  KAS_TraceJump(TeamName, "F_5d9600", "F_652ef0")
   KASRule_Add(TeamName, "F_652ef0", "F_5d9600")
   F_652ef0(TeamName)
   do return end
@@ -1865,6 +1895,7 @@ function F_5d97b0(TeamName)
   iVar1 = K_4920a0(148949186)  -- kasfTimerExpiredDestroy
   if (iVar1 ~= 0) then
     -- kasJump(state 0x4869685)
+    KAS_TraceJump(TeamName, "F_5d97b0", "F_5d9800")
     KASRule_Add(TeamName, "F_5d9800", "F_5d97b0")
     F_5d9310(TeamName)
     do return end
@@ -1903,6 +1934,7 @@ function F_5d9800(TeamName)
     iVar1 = KAS_GS("gs_000052a7")
     K_493cf0(TeamName, iVar1)  -- kasfReinforceTeamWithShips
     -- kasJump(state 0x506a278)
+    KAS_TraceJump(TeamName, "F_5d9800", "F_5d9870")
     KASRule_Add(TeamName, "F_5d9870", "F_5d9800")
     F_652ef0(TeamName)
     do return end
@@ -1917,6 +1949,7 @@ function F_5d8370(TeamName)
   KAS_Scope = KAS_TeamHash(TeamName)
   K_498c70(TeamName)  -- kasfResetShipRenderFlags
   -- kasJump(state 0x498cf55)
+  KAS_TraceJump(TeamName, "F_5d8370", "F_5d83b0")
   KASRule_Add(TeamName, "F_5d83b0", "F_5d8370")
   F_652ef0(TeamName)
   do return end
@@ -1933,6 +1966,7 @@ function F_5d83b0(TeamName)
   if (iVar1 ~= 0) then
     K_4947c0()  -- kasfLaunch
     -- kasJump(state 0x506a278)
+    KAS_TraceJump(TeamName, "F_5d83b0", "F_5d8580")
     KASRule_Add(TeamName, "F_5d8580", "F_5d83b0")
     F_652ef0(TeamName)
     do return end
@@ -1949,6 +1983,7 @@ function F_5d8580(TeamName)
   iVar1 = K_4948a0()  -- kasfTeamFinishedLaunching
   if (iVar1 ~= 0) then
     -- kasJump(state 0x857bcb7)
+    KAS_TraceJump(TeamName, "F_5d8580", "F_5d8400")
     KASRule_Add(TeamName, "F_5d8400", "F_5d8580")
     F_652ef0(TeamName)
     do return end
@@ -1965,6 +2000,7 @@ function F_5d8400(TeamName)
   iVar1 = K_492ce0()  -- kasfTeamCount
   if (iVar1 == 0) then
     -- kasJump(state 0x4869685)
+    KAS_TraceJump(TeamName, "F_5d8400", "F_5d8510")
     KASRule_Add(TeamName, "F_5d8510", "F_5d8400")
     F_5d84a0(TeamName)
     do return end
@@ -2014,6 +2050,7 @@ function F_5d8510(TeamName)
     iVar1 = KAS_GS("gs_000052a7")
     K_493cf0(TeamName, iVar1)  -- kasfReinforceTeamWithShips
     -- kasJump(state 0x506a278)
+    KAS_TraceJump(TeamName, "F_5d8510", "F_5d8580")
     KASRule_Add(TeamName, "F_5d8580", "F_5d8510")
     F_652ef0(TeamName)
     do return end
@@ -2037,6 +2074,7 @@ function F_5d85f0(TeamName)
   KAS_Scope = KAS_TeamHash(TeamName)
   K_498c70(TeamName)  -- kasfResetShipRenderFlags
   -- kasJump(state 0x5569d3)
+  KAS_TraceJump(TeamName, "F_5d85f0", "F_5d8660")
   KASRule_Add(TeamName, "F_5d8660", "F_5d85f0")
   F_5d8630(TeamName)
   do return end
@@ -2066,6 +2104,7 @@ function F_5d8660(TeamName)
     iVar1 = "TaiidanCarrier2"
     K_494a00(iVar1, p2)  -- kasfMsgSend
     -- kasJump(state 0x4e2d3)
+    KAS_TraceJump(TeamName, "F_5d8660", "F_5d86c0")
     KASRule_Add(TeamName, "F_5d86c0", "F_5d8660")
     F_652ef0(TeamName)
     do return end
@@ -2088,6 +2127,7 @@ function F_5d86c0(TeamName)
   if (iVar1 ~= 0) then
     K_4947c0()  -- kasfLaunch
     -- kasJump(state 0x506a278)
+    KAS_TraceJump(TeamName, "F_5d86c0", "F_5d88f0")
     KASRule_Add(TeamName, "F_5d88f0", "F_5d86c0")
     F_652ef0(TeamName)
     do return end
@@ -2104,6 +2144,7 @@ function F_5d88f0(TeamName)
   iVar1 = K_4948a0()  -- kasfTeamFinishedLaunching
   if (iVar1 ~= 0) then
     -- kasJump(state 0x857bcb7)
+    KAS_TraceJump(TeamName, "F_5d88f0", "F_5d8750")
     KASRule_Add(TeamName, "F_5d8750", "F_5d88f0")
     F_5d8730(TeamName)
     do return end
@@ -2129,6 +2170,7 @@ function F_5d8750(TeamName)
   iVar1 = K_492ce0()  -- kasfTeamCount
   if (iVar1 == 0) then
     -- kasJump(state 0x4869685)
+    KAS_TraceJump(TeamName, "F_5d8750", "F_5d8880")
     KASRule_Add(TeamName, "F_5d8880", "F_5d8750")
     F_5d87f0(TeamName)
     do return end
@@ -2185,6 +2227,7 @@ function F_5d8880(TeamName)
     iVar1 = KAS_GS("gs_000052a7")
     K_493cf0(TeamName, iVar1)  -- kasfReinforceTeamWithShips
     -- kasJump(state 0x506a278)
+    KAS_TraceJump(TeamName, "F_5d8880", "F_5d88f0")
     KASRule_Add(TeamName, "F_5d88f0", "F_5d8880")
     F_652ef0(TeamName)
     do return end
@@ -2272,6 +2315,7 @@ function F_5d8930(TeamName)
   K_498c70(TeamName)  -- kasfResetShipRenderFlags
   K_4977a0(TeamName)  -- kasfSetTraderPriceScale
   -- kasJump(state 0x348ce77)
+  KAS_TraceJump(TeamName, "F_5d8930", "F_5d8980")
   KASRule_Add(TeamName, "F_5d8980", "F_5d8930")
   F_652ef0(TeamName)
   do return end
@@ -2287,6 +2331,7 @@ function F_5d8980(TeamName)
   iVar1 = K_492120(139644696)  -- kasfMsgReceived
   if (iVar1 ~= 0) then
     -- kasJump(state 0x58440c8)
+    KAS_TraceJump(TeamName, "F_5d8980", "F_5d8a60")
     KASRule_Add(TeamName, "F_5d8a60", "F_5d8980")
     F_5d89d0(TeamName)
     do return end
@@ -2377,6 +2422,7 @@ function F_5d7c20(TeamName)
     K_497ed0(TeamName)
   end
   -- kasJump(state 0x7464cb7)
+  KAS_TraceJump(TeamName, "F_5d7c20", "F_5d7cc0")
   KASRule_Add(TeamName, "F_5d7cc0", "F_5d7c20")
   F_5d7c90(TeamName)
   do return end
@@ -2403,6 +2449,7 @@ function F_5d7cc0(TeamName)
   iVar1 = K_492120(139644696)  -- kasfMsgReceived
   if (iVar1 ~= 0) then
     -- kasJump(state 0x857bcb7)
+    KAS_TraceJump(TeamName, "F_5d7cc0", "F_5d7d40")
     KASRule_Add(TeamName, "F_5d7d40", "F_5d7cc0")
     F_5d7d10(TeamName)
     do return end
@@ -2431,6 +2478,7 @@ function F_5d7d40(TeamName)
   iVar1 = K_492d20(iVar1)  -- kasfShipsCount
   if (iVar1 == 0) then
     -- kasJump(state 0x7464cb7)
+    KAS_TraceJump(TeamName, "F_5d7d40", "F_5d7cc0")
     KASRule_Add(TeamName, "F_5d7cc0", "F_5d7d40")
     F_5d7c90(TeamName)
     do return end
@@ -2476,6 +2524,7 @@ function F_5d7df0(TeamName)
   KAS_Scope = KAS_TeamHash(TeamName)
   K_498c70(TeamName)  -- kasfResetShipRenderFlags
   -- kasJump(state 0x7bd9e7b)
+  KAS_TraceJump(TeamName, "F_5d7df0", "F_5d7e80")
   KASRule_Add(TeamName, "F_5d7e80", "F_5d7df0")
   F_5d7e30(TeamName)
   do return end
@@ -2520,6 +2569,7 @@ function F_5d7e80(TeamName)
   iVar1 = K_492d20(iVar1)  -- kasfShipsCount
   if (iVar1 == 0) then
     -- kasJump(state 0x9dbf1e0)
+    KAS_TraceJump(TeamName, "F_5d7e80", "F_652ef0")
     KASRule_Add(TeamName, "F_652ef0", "F_5d7e80")
     F_5d7f60(TeamName)
     do return end
@@ -2554,6 +2604,7 @@ function F_5d78d0(TeamName)
   K_493aa0(80)  -- kasfTeamSetPercentDamaged
   K_493980(TeamName, 50)  -- kasfShipsSetDamageFactor
   -- kasJump(state 0x633addb)
+  KAS_TraceJump(TeamName, "F_5d78d0", "F_5d7990")
   KASRule_Add(TeamName, "F_5d7990", "F_5d78d0")
   F_5d7960(TeamName)
   do return end
@@ -2581,6 +2632,7 @@ function F_5d7990(TeamName)
   if (iVar1 == 0) then
     K_4949b0(54112162)  -- kasfMsgSendAll
     -- kasJump(state 0x53a0c)
+    KAS_TraceJump(TeamName, "F_5d7990", "F_652ef0")
     KASRule_Add(TeamName, "F_652ef0", "F_5d7990")
     F_652ef0(TeamName)
     do return end
@@ -2590,6 +2642,7 @@ function F_5d7990(TeamName)
   iVar1 = K_492d20(iVar1)  -- kasfShipsCount
   if (iVar1 == 0) then
     -- kasJump(state 0x1ff3a12)
+    KAS_TraceJump(TeamName, "F_5d7990", "F_5d7a40")
     KASRule_Add(TeamName, "F_5d7a40", "F_5d7990")
     F_5d7a10(TeamName)
     do return end
@@ -2621,6 +2674,7 @@ function F_5d7a40(TeamName)
     iVar1 = "TaiidanReinforcement1"
     K_494a00(iVar1, p2)  -- kasfMsgSend
     -- kasJump(state 0x3669d95)
+    KAS_TraceJump(TeamName, "F_5d7a40", "F_652ef0")
     KASRule_Add(TeamName, "F_652ef0", "F_5d7a40")
     F_5d7aa0(TeamName)
     do return end
@@ -2668,12 +2722,14 @@ function F_5d8fa0(TeamName)
   iVar1 = K_493de0(iVar1)  -- kasfThisTeamIs
   if (iVar1 ~= 0) then
     -- kasJump(state 0x4937f94)
+    KAS_TraceJump(TeamName, "F_5d8fa0", "F_5d9050")
     KASRule_Add(TeamName, "F_5d9050", "F_5d8fa0")
     F_5d9020(TeamName)
     do return end
     do return end
   end
   -- kasJump(state 0x857bcb7)
+  KAS_TraceJump(TeamName, "F_5d8fa0", "F_5d9180")
   KASRule_Add(TeamName, "F_5d9180", "F_5d8fa0")
   F_5d90d0(TeamName)
   do return end
@@ -2737,12 +2793,14 @@ function F_5d9180(TeamName)
   iVar1 = K_493de0(iVar1)  -- kasfThisTeamIs
   if (iVar1 ~= 0) then
     -- kasJump(state 0x4869685)
+    KAS_TraceJump(TeamName, "F_5d9180", "F_5d9380")
     KASRule_Add(TeamName, "F_5d9380", "F_5d9180")
     F_5d9310(TeamName)
     do return end
     do return end
   end
   -- kasJump(state 0x53a0c)
+  KAS_TraceJump(TeamName, "F_5d9180", "F_652ef0")
   KASRule_Add(TeamName, "F_652ef0", "F_5d9180")
   F_652ef0(TeamName)
   do return end
@@ -2762,6 +2820,7 @@ function F_5d9380(TeamName)
     iVar1 = KAS_GS("gs_000052a7")
     K_493cf0(TeamName, iVar1)  -- kasfReinforceTeamWithShips
     -- kasJump(state 0x506a278)
+    KAS_TraceJump(TeamName, "F_5d9380", "F_5d93f0")
     KASRule_Add(TeamName, "F_5d93f0", "F_5d9380")
     F_652ef0(TeamName)
     do return end
@@ -2778,6 +2837,7 @@ function F_5d93f0(TeamName)
   iVar1 = K_4948a0()  -- kasfTeamFinishedLaunching
   if (iVar1 ~= 0) then
     -- kasJump(state 0x857bcb7)
+    KAS_TraceJump(TeamName, "F_5d93f0", "F_5d9180")
     KASRule_Add(TeamName, "F_5d9180", "F_5d93f0")
     F_5d90d0(TeamName)
     do return end
@@ -2809,12 +2869,14 @@ function F_5d9050(TeamName)
     iVar1 = K_493de0(iVar1)  -- kasfThisTeamIs
     if (iVar1 ~= 0) then
       -- kasJump(state 0xe114982)
+      KAS_TraceJump(TeamName, "F_5d9050", "F_5d92d0")
       KASRule_Add(TeamName, "F_5d92d0", "F_5d9050")
       F_5d92a0(TeamName)
       do return end
       do return end
     end
     -- kasJump(state 0x857bcb7)
+    KAS_TraceJump(TeamName, "F_5d9050", "F_5d9180")
     KASRule_Add(TeamName, "F_5d9180", "F_5d9050")
     F_5d90d0(TeamName)
     do return end
@@ -2853,6 +2915,7 @@ function F_5d8130(TeamName)
   K_4984c0(TeamName, 1)
   K_498c70(TeamName)  -- kasfResetShipRenderFlags
   -- kasJump(state 0x569b0c5)
+  KAS_TraceJump(TeamName, "F_5d8130", "F_5d8220")
   KASRule_Add(TeamName, "F_5d8220", "F_5d8130")
   F_5d8180(TeamName)
   do return end
@@ -2891,6 +2954,7 @@ function F_5d8220(TeamName)
   iVar1 = K_492120(307349)  -- kasfMsgReceived
   if (iVar1 ~= 0) then
     -- kasJump(state 0x4b095)
+    KAS_TraceJump(TeamName, "F_5d8220", "F_5d8340")
     KASRule_Add(TeamName, "F_5d8340", "F_5d8220")
     F_5d82e0(TeamName)
     do return end
@@ -2953,6 +3017,7 @@ function F_5d8bd0(TeamName)
     K_497ed0(TeamName)
   end
   -- kasJump(state 0x857bcb7)
+  KAS_TraceJump(TeamName, "F_5d8bd0", "F_5d8d20")
   KASRule_Add(TeamName, "F_5d8d20", "F_5d8bd0")
   F_5d8c30(TeamName)
   do return end
@@ -3028,12 +3093,14 @@ function F_5d8d20(TeamName)
   iVar1 = K_493de0(iVar1)  -- kasfThisTeamIs
   if (iVar1 ~= 0) then
     -- kasJump(state 0x4869685)
+    KAS_TraceJump(TeamName, "F_5d8d20", "F_5d8ef0")
     KASRule_Add(TeamName, "F_5d8ef0", "F_5d8d20")
     F_5d8e80(TeamName)
     do return end
     do return end
   end
   -- kasJump(state 0x53a0c)
+  KAS_TraceJump(TeamName, "F_5d8d20", "F_652ef0")
   KASRule_Add(TeamName, "F_652ef0", "F_5d8d20")
   F_652ef0(TeamName)
   do return end
@@ -3071,6 +3138,7 @@ function F_5d8ef0(TeamName)
     iVar1 = KAS_GS("gs_000052a7")
     K_493cf0(TeamName, iVar1)  -- kasfReinforceTeamWithShips
     -- kasJump(state 0x506a278)
+    KAS_TraceJump(TeamName, "F_5d8ef0", "F_5d8f60")
     KASRule_Add(TeamName, "F_5d8f60", "F_5d8ef0")
     F_652ef0(TeamName)
     do return end
@@ -3087,6 +3155,7 @@ function F_5d8f60(TeamName)
   iVar1 = K_4948a0()  -- kasfTeamFinishedLaunching
   if (iVar1 ~= 0) then
     -- kasJump(state 0x857bcb7)
+    KAS_TraceJump(TeamName, "F_5d8f60", "F_5d8d20")
     KASRule_Add(TeamName, "F_5d8d20", "F_5d8f60")
     F_5d8c30(TeamName)
     do return end
