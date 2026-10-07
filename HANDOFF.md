@@ -30,7 +30,7 @@ findings).
 | 0.4 | Speech/subtitles; localized `$IDs` | Not started. Open issue: loose `locale/english/*.dat` strings don't resolve (Taiidan Republic mod ships an `english.big` instead — try that). |
 | 0.5 | NIS cutscenes | Not started. References: Gearbox's converted HW1 NIS, Battlestar Galactica: Fleet Commander mod (subscribed). |
 | 0.6 | KAS API naming | Partial. `out/kas_usage.tsv`: 302 functions used; confident names only for the first third of the API. Verified names in `out/kas_api_overrides.tsv`. Tools: `kasalign.py`, `kasverify.py <Mission>`. |
-| 0.7 | C → Lua translator | Built. Mission01 translates (89 functions incl. shared ones), syntax OK, runtime names all resolve. **In-game test pending** ("Mission 1 (translated)" in the campaign). |
+| 0.7 | C → Lua translator | **Done.** Mission01 runs from translated code: no Lua errors, teams start, objectives appear with real text after ~30s. 38/108 KAS functions implemented; others are logged stubs. |
 
 ## Key technical facts
 - KAS name hashes: ELF hash on uppercased bytes; bit 31 set = global variable/timer, else scoped to mission/team.
@@ -45,7 +45,16 @@ findings).
 - Allied Kushan teams are probably moved to the player's side with kasfTeamSwitchPlayerOwner (Mission01 calls it 5x).
 - Gotcha: don't pass regexes with backslashes through bash heredocs into Python edits; write a script file.
 
+## Lessons from getting Mission01 to run (all fixed; details in NOTES.md / MODLOG.md)
+- Translate KAS calls by address only (Ghidra names them K_<addr>); names drift as they are verified.
+- The SP engine talks to missions via G_ variables (G_PlayNislet / G_Nislet%dComplete / G_ShipsHaveArrived);
+  the runtime emulates them, giving cutscenes 5 s so teams don't start before the level's groups are filled.
+- SobGroups need SobGroup_SetSwitchOwnerFlag(group, 0) or ships leave them on owner change.
+- Timers follow HW1 Timer.c: an existing timer that isn't running counts as expired.
+- Runtime traces (`CKAS msg/got/jump/speech`) in HwRM.log show the mission flow; set KAS_TraceMsgs = 0 to silence.
+
 ## Next steps
-1. Run the Mission01 in-game test; fix script errors; collect `CKAS: unimplemented` lines from the log.
-2. Implement the hit KAS functions in `cataclysmkas.lua` (read `Cataclysm-decomp/out/kasapi/<addr>.c` + HW1 source).
+1. Mission01: implement the stubs the run hits (orders: Guard/Patrol/MoveTo/Stop/Launch/Dock; pings; sensors;
+   tutorial pointers; purchase/tech; ~15 unnamed ones) and check objectives complete as the original does.
+2. Then build Missions 02-17 with `build_mission.py` and fix what each one hits.
 3. Then 0.3 (Somtaaw ship), 0.4 (speech + strings), 0.5 (NIS), and the remaining level conversions.
