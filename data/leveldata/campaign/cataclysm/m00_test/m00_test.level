@@ -1,0 +1,46 @@
+-- Phase 0.1 smoke test level (hand-written; real levels come from mission2level.py).
+
+function DetermChunk()
+    addPoint("StartPos0", {0, 0, 0}, {0, 0, 0})
+    addPoint("StartPos1", {0, 0, 12000}, {0, 180, 0})
+
+    addSquadron("PlayerMothership", "Kus_Mothership", {0, 0, 0}, 0, {0, 0, 0}, 0, 0)
+    addSquadron("PlayerScouts", "Kus_Scout", {1500, 0, 1500}, 0, {0, 0, 0}, 0, 0)
+    addSquadron("PlayerScouts1", "Kus_Scout", {1700, 0, 1500}, 0, {0, 0, 0}, 0, 0)
+    -- groups must exist before addToSOBGroup; a missing group crashes the engine (access violation)
+    createSOBGroup("Scouts")
+    addToSOBGroup("PlayerScouts", "Scouts")
+    addToSOBGroup("PlayerScouts1", "Scouts")
+
+    -- strike group so the test objective can be finished quickly
+    addSquadron("PlayerDestroyer", "Kus_Destroyer", {0, 0, 1500}, 0, {0, 0, 0}, 0, 0)
+    addSquadron("PlayerIonFrigate1", "Kus_IonCannonFrigate", {-800, 0, 1200}, 0, {0, 0, 0}, 0, 0)
+    addSquadron("PlayerIonFrigate2", "Kus_IonCannonFrigate", {800, 0, 1200}, 0, {0, 0, 0}, 0, 0)
+    createSOBGroup("Strike")
+    addToSOBGroup("PlayerDestroyer", "Strike")
+    addToSOBGroup("PlayerIonFrigate1", "Strike")
+    addToSOBGroup("PlayerIonFrigate2", "Strike")
+
+    addSquadron("EnemyFrigate", "Tai_AssaultFrigate", {0, 0, 4000}, 1, {0, 180, 0}, 0, 0)
+    createSOBGroup("Enemies")
+    addToSOBGroup("EnemyFrigate", "Enemies")
+
+    addSphere("Everything", {0, 0, 0}, 30000)
+    addCamera("Camera_Startpos", {0, 0, 0}, {2500, 1500, -3500})
+    setWorldBoundsInner({0, 0, 0}, {30000, 15000, 30000})
+    setWorldBoundsOuter({0, 0, 0}, {36000, 18000, 36000})
+end
+
+function NonDetermChunk()
+    fogSetActive(0)
+    setGlareIntensity(0.0)
+    setLevelShadowColour(0, 0, 0, 1)
+    loadBackground("ez01")
+    setSensorsManagerCameraDistances(10500, 87500)
+end
+
+maxPlayers = 2
+
+player = {}
+player[0] = { id = 0, name = "Somtaaw", resources = 1000, raceName = "Kushan", startPos = 0 }
+player[1] = { id = 1, name = "Taiidan", resources = 0, raceName = "Taiidan", startPos = 1 }

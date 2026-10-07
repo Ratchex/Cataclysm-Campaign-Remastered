@@ -1,0 +1,29 @@
+-- Homeworld: Cataclysm campaign for Homeworld Remastered (Stage A, local port).
+-- Mod campaigns are "Extra" content (contentType 2), following the stock rr_oem.campaign and the
+-- Taiidan Republic mod. The campaign list tile is leveldata/campaign/cataclysm.dds (1024x512);
+-- per-mission thumbnails live in ui/mapthumbnails/campaign/cataclysm/<directory>.dds.
+
+displayName = "Homeworld Cataclysm"
+
+-- 2 = Extra
+contentType = 2
+contentName = "cataclysm" -- must match the directory name
+contentOrdered = 0 -- unlocked while porting; set to 1 for release
+contentChooseText = "CHOOSE MISSION"
+contentThumbName = "Homeworld Cataclysm"
+contentThumbDesc = "The Kuun-Lan and Kiith Somtaaw against the Beast."
+contentSort = 0.3
+
+Mission = {}
+
+-- Phase 0.1 smoke test: proves the campaign loads, a level spawns ships and the KAS layer runs.
+Mission[1] =
+{
+    directory   = "m00_test",
+    level       = "m00_test.level",
+    postlevel   = function ( bWin ) postLevelComplete() end,
+
+    displayName = "Pipeline test",
+    description = "Phase 0 smoke test mission.",
+}
+

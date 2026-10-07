@@ -1,0 +1,4 @@
+# Built archives and logs
+*.big
+*.log
+__pycache__/
