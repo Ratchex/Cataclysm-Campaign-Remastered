@@ -7,10 +7,12 @@ dofilepath("data:scripts/SCAR/SinglePlayerHyperspace.lua")
 dofilepath("data:scripts/SCAR/SpecialFlags.lua")
 dofilepath("data:scripts/scar/cataclysmkas_stubs.lua")
 dofilepath("data:scripts/scar/cataclysmkas.lua")
+dofilepath("data:scripts/scar/cataclysmspeech.lua")
 dofilepath("data:leveldata/campaign/cataclysm/m01/m01_kas.lua")
 
 function OnStartOrLoad()
     print("CATACLYSM Mission01: OnStartOrLoad")
+    Sound_SpeechSubtitlePath(KAS_SpeechPath)
 end
 
 function OnInit()

@@ -28,9 +28,9 @@ function Watch_Mission01(TeamName)
     if (iVar1 ~= 0) then
       K_491d30(71552183, 1)  -- kasfVarCreateSet
       iVar1 = KAS_GS("Smothership")
-      K_498790(iVar1)  -- kasfMusicPlay
+      K_498790(iVar1)  -- kasfGetPlayerMothership
       iVar1 = KAS_GS("Mothership")
-      K_498790(iVar1)  -- kasfMusicPlay
+      K_498790(iVar1)  -- kasfGetPlayerMothership
       iVar1 = KAS_GS("gs_0117ca33")
       iVar2 = "Everything"
       K_492db0(iVar2, iVar1)  -- kasfFindShipsInside

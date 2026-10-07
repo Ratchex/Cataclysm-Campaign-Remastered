@@ -2,3 +2,6 @@
 *.big
 *.log
 __pycache__/
+
+# Generated speech audio (tools/build_speech.py), ~700 MB
+data/sound/speech/

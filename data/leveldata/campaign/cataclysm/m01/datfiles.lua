@@ -1,6 +1,6 @@
 Dictionaries =
 {
 	{
-		name = "locale:leveldata/campaign/cataclysm/m00_test.dat",
+		name = "locale:leveldata/campaign/cataclysm/speech.dat",
 	},
 }

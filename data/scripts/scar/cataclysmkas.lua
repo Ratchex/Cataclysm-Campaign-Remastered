@@ -513,16 +513,38 @@ function KAS_MsgSendRaw(from, to, msg)
     KAS_MsgSendRawUntraced(from, to, msg)
 end
 
--- ------------------------------------------------------------------ speech (timing only until Phase 0.4)
--- kasfSpeechEvent starts a Fleet Intel/Command line; kasfIntelEventEnded (exe 0x497b00) reports 1 once it has
--- finished (or nothing has been playing for a while). Without audio yet, each line "plays" for KAS_SpeechSeconds.
-KAS_SpeechSeconds = 4
+-- ------------------------------------------------------------------ speech (Phase 0.4)
+-- kasfSpeechEvent(event, variable): low 10 bits = event number (HW1 SPEECH_EVENT_MASK), higher bits pick the actor. The phrase is chosen as HW1 SEselectsentence does (cataclysmspeech.lua, generated) and played
+-- with Subtitle_AddSkippable: data/sound/speech/missions/cataclysm/<id>.wav plus string <id> from speech.dat.
+-- kasfIntelEventEnded (exe 0x497b00) reports 1 once the line has finished.
 KAS_SpeechEnd = 0
+KAS_SpeechPath = "speech:missions/cataclysm/"
 
-function K_496eb0(event, variable)                                                                -- kasfSpeechEvent
-    KAS_SpeechEnd = Universe_GameTime() + KAS_SpeechSeconds
-    print("CKAS speech event " .. event .. " (" .. variable .. ")")
+function KAS_SpeechPlay(event, variable)
+    if event < 0 then event = event + 4294967296 end
+    local ev = mod(event, 1024)
+    local e = KAS_SpeechEvents and KAS_SpeechEvents["sect" .. ev]
+    if e == nil then
+        KAS_WarnOnce("speech" .. ev, "no speech for event " .. ev .. " (" .. event .. ")")
+        KAS_SpeechEnd = Universe_GameTime() + 1
+        return
+    end
+    local maxvar = e[2]
+    if maxvar < 1 then maxvar = 1 end
+    if variable < 0 or variable >= maxvar then variable = 0 end
+    local id = KAS_SpeechBankBase.sect + e[3] + variable
+    -- Cataclysm actor bits (from Mission01's lines): 0x1000 Fleet Command, 0x2000 Tactical Officer, 0x8000 other
+    -- fleets (allies). HWRM has no Tactical Officer actor; Fleet Intel's voice slot is the nearest match.
+    local actor = Actor_HW1_FleetIntel
+    if mod(floor(event / 4096), 2) == 1 then actor = Actor_HW1_FleetCommand end
+    local secs = (KAS_SpeechDurations[id] or 3000) / 1000
+    local t = Subtitle_AddSkippable(actor, "$" .. id, secs)
+    if t and t > secs then secs = t end
+    KAS_SpeechEnd = Universe_GameTime() + secs
+    print("CKAS speech event " .. ev .. " -> $" .. id .. " (" .. secs .. "s)")
 end
+
+function K_496eb0(event, variable) KAS_SpeechPlay(event, variable) end                              -- kasfSpeechEvent
 
 function K_497b00()                                                                               -- kasfIntelEventEnded
     return KAS_B(Universe_GameTime() >= KAS_SpeechEnd)

@@ -26,10 +26,12 @@ dofilepath("data:scripts/SCAR/SinglePlayerHyperspace.lua")
 dofilepath("data:scripts/SCAR/SpecialFlags.lua")
 dofilepath("data:scripts/scar/cataclysmkas_stubs.lua")
 dofilepath("data:scripts/scar/cataclysmkas.lua")
+dofilepath("data:scripts/scar/cataclysmspeech.lua")
 dofilepath("data:leveldata/campaign/cataclysm/m{nn}/m{nn}_kas.lua")
 
 function OnStartOrLoad()
     print("CATACLYSM Mission{nn}: OnStartOrLoad")
+    Sound_SpeechSubtitlePath(KAS_SpeechPath)
 end
 
 function OnInit()
@@ -39,6 +41,14 @@ function OnInit()
     KAS_Team = "Mission{nn}"
     Init_Mission{nn}("Mission{nn}")
 end
+'''
+
+DATFILES = '''Dictionaries =
+{
+\t{
+\t\tname = "locale:leveldata/campaign/cataclysm/speech.dat",
+\t},
+}
 '''
 
 
@@ -68,8 +78,9 @@ def main():
     with open(os.path.join(out, f"m{nn}.lua"), "w", newline="\n") as f:
         f.write(WRAPPER.format(nn=nn))
     test = os.path.join(MOD, "data", "leveldata", "campaign", "cataclysm", "m00_test")
-    for fn in ("datfiles.lua", "teamcolour.lua"):
-        shutil.copyfile(os.path.join(test, fn), os.path.join(out, fn))
+    shutil.copyfile(os.path.join(test, "teamcolour.lua"), os.path.join(out, "teamcolour.lua"))
+    with open(os.path.join(out, "datfiles.lua"), "w", newline="\n") as f:
+        f.write(DATFILES)
     run(os.path.join(HERE, "make_dds.py"), os.path.join(src, "loading.jpg"),
         os.path.join(MOD, "data", "ui", "mapthumbnails", "campaign", "cataclysm", f"m{nn}.dds"), "1024", "512")
     run(os.path.join(HERE, "make_kas_stubs.py"), MOD)
