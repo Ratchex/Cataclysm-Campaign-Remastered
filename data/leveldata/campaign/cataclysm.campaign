@@ -38,3 +38,14 @@ Mission[2] =
     displayName = "Layout check: Mission 1",
     description = "Converted Cataclysm Mission01 ship layout, no scripting.",
 }
+
+-- Phase 0.7: Cataclysm Mission01, translated from cataclysm.exe (stand-in ships; most KAS functions stubbed).
+Mission[3] =
+{
+    directory   = "m01",
+    level       = "m01.level",
+    postlevel   = function ( bWin ) postLevelComplete() end,
+
+    displayName = "Mission 1 (translated)",
+    description = "Cataclysm Mission01 running on translated mission code.",
+}

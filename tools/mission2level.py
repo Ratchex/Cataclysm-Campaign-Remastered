@@ -18,6 +18,8 @@ Usage: mission2level.py <mission_dir> <out.level> [--shipmap shipmap.tsv] [--pla
   --background         override the HW1/Cataclysm background name (Cataclysm's have no HWRM version yet)
   --player-start-ship  stand-in for the player's fleet, placed at StartPointPlayer (Cataclysm missions don't
                        place the player's fleet themselves)
+  --player-fleet       several ships, e.g. "Kus_Mothership,Kus_Scout*3,Kus_ResourceCollector*2", spread in a
+                       line beside StartPointPlayer (first one on the point)
 """
 import argparse
 import csv
@@ -162,7 +164,7 @@ def read_file(level, path, sphere_player, folder, seen):
             level.settings["Background"] = args.split(",")[0].strip()
 
 
-def convert(folder, out, shipmap, placeholder, races, background=None, start_ship=None):
+def convert(folder, out, shipmap, placeholder, races, background=None, start_ship=None, player_fleet=None):
     level = Level(shipmap, placeholder, races)
     files = sorted(os.listdir(folder))
     mission = next(f for f in files if f.lower().endswith(".mission"))
@@ -174,10 +176,19 @@ def convert(folder, out, shipmap, placeholder, races, background=None, start_shi
             read_file(level, os.path.join(folder, f), 0, folder, seen)
     if background:
         level.settings["Background"] = background
+    fleet = []
     if start_ship:
+        fleet.append(start_ship)
+    for item in (player_fleet or "").split(","):
+        if item.strip():
+            t, _, n = item.strip().partition("*")
+            fleet += [t] * int(n or 1)
+    if fleet:
         start = next((p for p in level.points if p[0].lower() == "startpointplayer"), None)
         where, rot = (start[1], start[2]) if start else ((0, 0, 0), (0, 0, 0))
-        level.squadrons.insert(0, ("PlayerStartShip", start_ship, where, 0, rot, "stand-in player fleet"))
+        for i, t in enumerate(fleet):
+            pos_i = (where[0] + 600 * i, where[1], where[2])
+            level.squadrons.insert(i, (f"PlayerFleet{i}", t, pos_i, 0, rot, "stand-in player fleet"))
     level.write(out, os.path.basename(folder))
     return level
 
@@ -199,9 +210,10 @@ if __name__ == "__main__":
     ap.add_argument("--enemy-race", default="Taiidan")
     ap.add_argument("--background")
     ap.add_argument("--player-start-ship")
+    ap.add_argument("--player-fleet")
     a = ap.parse_args()
     lv = convert(a.mission_dir, a.out, load_shipmap(a.shipmap), a.placeholder, {0: a.player_race, 1: a.enemy_race},
-                 a.background, a.player_start_ship)
+                 a.background, a.player_start_ship, a.player_fleet)
     print(f"{a.out}: {len(lv.squadrons)} squadrons, {len(lv.groups)} groups, {len(lv.points)} points, "
           f"{len(lv.spheres)} spheres, {len(lv.paths)} paths; unmapped types {sum(lv.unmapped.values())}; "
           f"unconverted {dict(lv.unconverted)}")
