@@ -7,36 +7,36 @@ function Watch_Mission01(TeamName)
   local iVar1, iVar2 = 0, 0
   KAS_ScopeKind = 0
   KAS_Scope = 142503665
-  iVar1 = K_492060(50796994) --[[kasfTimerExpired]]
+  iVar1 = K_492060(50796994)  -- kasfTimerExpired
   if (iVar1 ~= 0) then
     iVar1 = KAS_GS("gs_0117ca33")
     iVar2 = "Everything"
-    K_492db0(iVar2, iVar1) --[[kasfFindShipsInside]]
+    K_492db0(iVar2, iVar1)  -- kasfFindShipsInside
     iVar1 = KAS_GS("gs_0117ca33")
     iVar2 = KAS_GS("Enemy")
-    K_495560(iVar2, iVar1) --[[kasfShipsSelectCapital]]
+    K_495560(iVar2, iVar1)  -- kasfShipsSelectCapital
     iVar1 = KAS_GS("gs_0117ca33")
     iVar2 = KAS_GS("FRIENDLY")
-    K_495620(iVar2, iVar1) --[[kasfShipsSelectNonCapital]]
-    iVar1 = K_492910(8, 15) --[[kasfRandom]]
-    K_491f00(50796994, iVar1) --[[kasfTimerSet]]
-    K_491f50(50796994) --[[kasfTimerStart]]
+    K_495620(iVar2, iVar1)  -- kasfShipsSelectNonCapital
+    iVar1 = K_492910(8, 15)  -- kasfRandom
+    K_491f00(50796994, iVar1)  -- kasfTimerSet
+    K_491f50(50796994)  -- kasfTimerStart
   end
-  iVar1 = K_491e30(71552183) --[[kasfVarValueGet]]
+  iVar1 = K_491e30(71552183)  -- kasfVarValueGet
   if (iVar1 == 0) then
-    iVar1 = K_491e30((-2015429404)) --[[kasfVarValueGet]]
+    iVar1 = K_491e30((-2015429404))  -- kasfVarValueGet
     if (iVar1 ~= 0) then
-      K_491d30(71552183, 1) --[[kasfVarCreateSet]]
+      K_491d30(71552183, 1)  -- kasfVarCreateSet
       iVar1 = KAS_GS("Smothership")
-      K_498790(iVar1) --[[kasfMusicPlay]]
+      K_498790(iVar1)  -- kasfMusicPlay
       iVar1 = KAS_GS("Mothership")
-      K_498790(iVar1) --[[kasfMusicPlay]]
+      K_498790(iVar1)  -- kasfMusicPlay
       iVar1 = KAS_GS("gs_0117ca33")
       iVar2 = "Everything"
-      K_492db0(iVar2, iVar1) --[[kasfFindShipsInside]]
+      K_492db0(iVar2, iVar1)  -- kasfFindShipsInside
       iVar1 = KAS_GS("gs_0117ca33")
       iVar2 = KAS_GS("Enemy")
-      K_495560(iVar2, iVar1) --[[kasfShipsSelectCapital]]
+      K_495560(iVar2, iVar1)  -- kasfShipsSelectCapital
     end
   end
   do return end
@@ -68,13 +68,13 @@ function F_5d6fe0(TeamName)
   KAS_Team = TeamName
   KAS_ScopeKind = 1
   KAS_Scope = KAS_TeamHash(TeamName)
-  K_491d30(238436644, 0) --[[kasfVarCreateSet]]
-  K_491d30(84869460, 0) --[[kasfVarCreateSet]]
-  K_491d30(161120004, 0) --[[kasfVarCreateSet]]
-  K_491d30(190768900, 0) --[[kasfVarCreateSet]]
-  K_491d30(147303492, 0) --[[kasfVarCreateSet]]
-  K_491d30(223169844, 0) --[[kasfVarCreateSet]]
-  K_491d30(138385333, 0) --[[kasfVarCreateSet]]
+  K_491d30(238436644, 0)  -- kasfVarCreateSet
+  K_491d30(84869460, 0)  -- kasfVarCreateSet
+  K_491d30(161120004, 0)  -- kasfVarCreateSet
+  K_491d30(190768900, 0)  -- kasfVarCreateSet
+  K_491d30(147303492, 0)  -- kasfVarCreateSet
+  K_491d30(223169844, 0)  -- kasfVarCreateSet
+  K_491d30(138385333, 0)  -- kasfVarCreateSet
   do return end
 end
 
@@ -87,271 +87,271 @@ function F_5d7050(TeamName)
     if _pc == 0 then
       KAS_ScopeKind = 1
       KAS_Scope = KAS_TeamHash(TeamName)
-      iVar1 = K_491e30(223169844) --[[kasfVarValueGet]]
+      iVar1 = K_491e30(223169844)  -- kasfVarValueGet
       if (iVar1 ~= 0) then _pc = 1 else _pc = 2 end
     elseif _pc == 1 then
-      iVar1 = K_491e30(138385333) --[[kasfVarValueGet]]
+      iVar1 = K_491e30(138385333)  -- kasfVarValueGet
       if (iVar1 == 1) then _pc = 3 else _pc = 4 end
     elseif _pc == 2 then
-      iVar1 = K_492120(233346314) --[[kasfMsgReceived]]
+      iVar1 = K_492120(233346314)  -- kasfMsgReceived
       if (iVar1 == 0) then _pc = 47 else _pc = 48 end
     elseif _pc == 3 then
-      iVar1 = K_491e30(238436644) --[[kasfVarValueGet]]
+      iVar1 = K_491e30(238436644)  -- kasfVarValueGet
       if (iVar1 == 1) then _pc = 5 else _pc = 6 end
     elseif _pc == 4 then
-      iVar1 = K_491e30(138385333) --[[kasfVarValueGet]]
+      iVar1 = K_491e30(138385333)  -- kasfVarValueGet
       if (iVar1 == 2) then _pc = 7 else _pc = 8 end
     elseif _pc == 5 then
-      K_491db0(138385333) --[[kasfVarValueInc]]
+      K_491db0(138385333)  -- kasfVarValueInc
       _pc = 6
     elseif _pc == 6 then
       _pc = 4
     elseif _pc == 7 then
-      iVar1 = K_491e30(84869460) --[[kasfVarValueGet]]
+      iVar1 = K_491e30(84869460)  -- kasfVarValueGet
       if (iVar1 == 1) then _pc = 9 else _pc = 10 end
     elseif _pc == 8 then
-      iVar1 = K_491e30(138385333) --[[kasfVarValueGet]]
+      iVar1 = K_491e30(138385333)  -- kasfVarValueGet
       if (iVar1 == 3) then _pc = 11 else _pc = 12 end
     elseif _pc == 9 then
-      K_491db0(138385333) --[[kasfVarValueInc]]
+      K_491db0(138385333)  -- kasfVarValueInc
       _pc = 10
     elseif _pc == 10 then
       _pc = 8
     elseif _pc == 11 then
-      iVar1 = K_491e30(161120004) --[[kasfVarValueGet]]
+      iVar1 = K_491e30(161120004)  -- kasfVarValueGet
       if (iVar1 == 1) then _pc = 13 else _pc = 14 end
     elseif _pc == 12 then
-      iVar1 = K_491e30(138385333) --[[kasfVarValueGet]]
+      iVar1 = K_491e30(138385333)  -- kasfVarValueGet
       if (iVar1 == 4) then _pc = 15 else _pc = 16 end
     elseif _pc == 13 then
-      K_491db0(138385333) --[[kasfVarValueInc]]
+      K_491db0(138385333)  -- kasfVarValueInc
       _pc = 14
     elseif _pc == 14 then
       _pc = 12
     elseif _pc == 15 then
-      iVar1 = K_491e30(190768900) --[[kasfVarValueGet]]
+      iVar1 = K_491e30(190768900)  -- kasfVarValueGet
       if (iVar1 == 1) then _pc = 17 else _pc = 18 end
     elseif _pc == 16 then
-      iVar1 = K_491e30(138385333) --[[kasfVarValueGet]]
+      iVar1 = K_491e30(138385333)  -- kasfVarValueGet
       if (iVar1 == 5) then _pc = 19 else _pc = 20 end
     elseif _pc == 17 then
-      K_491db0(138385333) --[[kasfVarValueInc]]
+      K_491db0(138385333)  -- kasfVarValueInc
       _pc = 18
     elseif _pc == 18 then
       _pc = 16
     elseif _pc == 19 then
-      iVar1 = K_491e30(147303492) --[[kasfVarValueGet]]
+      iVar1 = K_491e30(147303492)  -- kasfVarValueGet
       if (iVar1 == 1) then _pc = 21 else _pc = 22 end
     elseif _pc == 20 then
-      iVar1 = K_491e30(71552161) --[[kasfVarValueGet]]
+      iVar1 = K_491e30(71552161)  -- kasfVarValueGet
       if (iVar1 == 0) then _pc = 23 else _pc = 24 end
     elseif _pc == 21 then
-      K_491db0(138385333) --[[kasfVarValueInc]]
+      K_491db0(138385333)  -- kasfVarValueInc
       _pc = 22
     elseif _pc == 22 then
       _pc = 20
     elseif _pc == 23 then
-      iVar1 = K_491e30(138385333) --[[kasfVarValueGet]]
+      iVar1 = K_491e30(138385333)  -- kasfVarValueGet
       if (iVar1 == 1) then _pc = 25 else _pc = 26 end
     elseif _pc == 24 then
-      iVar1 = K_491e30(71552162) --[[kasfVarValueGet]]
+      iVar1 = K_491e30(71552162)  -- kasfVarValueGet
       if (iVar1 == 0) then _pc = 27 else _pc = 28 end
     elseif _pc == 25 then
-      K_491d30(71552161, 1) --[[kasfVarCreateSet]]
+      K_491d30(71552161, 1)  -- kasfVarCreateSet
       iVar2 = 5801588
       iVar1 = "FleetIntel"
-      K_494a00(iVar1, iVar2) --[[kasfMsgSend]]
+      K_494a00(iVar1, iVar2)  -- kasfMsgSend
       _pc = 26
     elseif _pc == 26 then
       _pc = 24
     elseif _pc == 27 then
-      iVar1 = K_491e30(138385333) --[[kasfVarValueGet]]
+      iVar1 = K_491e30(138385333)  -- kasfVarValueGet
       if (iVar1 == 2) then _pc = 29 else _pc = 30 end
     elseif _pc == 28 then
-      iVar1 = K_491e30(71552163) --[[kasfVarValueGet]]
+      iVar1 = K_491e30(71552163)  -- kasfVarValueGet
       if (iVar1 == 0) then _pc = 31 else _pc = 32 end
     elseif _pc == 29 then
-      K_491d30(71552162, 1) --[[kasfVarCreateSet]]
+      K_491d30(71552162, 1)  -- kasfVarCreateSet
       iVar2 = 154730542
       iVar1 = "FleetIntel"
-      K_494a00(iVar1, iVar2) --[[kasfMsgSend]]
+      K_494a00(iVar1, iVar2)  -- kasfMsgSend
       _pc = 30
     elseif _pc == 30 then
       _pc = 28
     elseif _pc == 31 then
-      iVar1 = K_491e30(138385333) --[[kasfVarValueGet]]
+      iVar1 = K_491e30(138385333)  -- kasfVarValueGet
       if (iVar1 == 3) then _pc = 33 else _pc = 34 end
     elseif _pc == 32 then
-      iVar1 = K_491e30(71552164) --[[kasfVarValueGet]]
+      iVar1 = K_491e30(71552164)  -- kasfVarValueGet
       if (iVar1 == 0) then _pc = 35 else _pc = 36 end
     elseif _pc == 33 then
-      K_491d30(71552163, 1) --[[kasfVarCreateSet]]
+      K_491d30(71552163, 1)  -- kasfVarCreateSet
       iVar2 = 81303907
       iVar1 = "FleetIntel"
-      K_494a00(iVar1, iVar2) --[[kasfMsgSend]]
+      K_494a00(iVar1, iVar2)  -- kasfMsgSend
       _pc = 34
     elseif _pc == 34 then
       _pc = 32
     elseif _pc == 35 then
-      iVar1 = K_491e30(138385333) --[[kasfVarValueGet]]
+      iVar1 = K_491e30(138385333)  -- kasfVarValueGet
       if (iVar1 == 4) then _pc = 37 else _pc = 38 end
     elseif _pc == 36 then
-      iVar1 = K_491e30(71552165) --[[kasfVarValueGet]]
+      iVar1 = K_491e30(71552165)  -- kasfVarValueGet
       if (iVar1 == 0) then _pc = 39 else _pc = 40 end
     elseif _pc == 37 then
-      K_491d30(71552164, 1) --[[kasfVarCreateSet]]
+      K_491d30(71552164, 1)  -- kasfVarCreateSet
       iVar2 = 139644696
       iVar1 = "TaiidanProxAttackAbomb1"
-      K_494a00(iVar1, iVar2) --[[kasfMsgSend]]
+      K_494a00(iVar1, iVar2)  -- kasfMsgSend
       iVar2 = 139644696
       iVar1 = "TaiidanProxAttackMGCorv1"
-      K_494a00(iVar1, iVar2) --[[kasfMsgSend]]
+      K_494a00(iVar1, iVar2)  -- kasfMsgSend
       iVar2 = 139644696
       iVar1 = "TaiidanProxAttackHInt1"
-      K_494a00(iVar1, iVar2) --[[kasfMsgSend]]
+      K_494a00(iVar1, iVar2)  -- kasfMsgSend
       iVar2 = 139644696
       iVar1 = "KushanProxDefend1"
-      K_494a00(iVar1, iVar2) --[[kasfMsgSend]]
+      K_494a00(iVar1, iVar2)  -- kasfMsgSend
       iVar2 = 139644696
       iVar1 = "KushanProxDefend2"
-      K_494a00(iVar1, iVar2) --[[kasfMsgSend]]
+      K_494a00(iVar1, iVar2)  -- kasfMsgSend
       _pc = 38
     elseif _pc == 38 then
       _pc = 36
     elseif _pc == 39 then
-      iVar1 = K_491e30(138385333) --[[kasfVarValueGet]]
+      iVar1 = K_491e30(138385333)  -- kasfVarValueGet
       if (iVar1 == 5) then _pc = 41 else _pc = 42 end
     elseif _pc == 40 then
-      iVar1 = K_491e30(71552166) --[[kasfVarValueGet]]
+      iVar1 = K_491e30(71552166)  -- kasfVarValueGet
       if (iVar1 == 0) then _pc = 43 else _pc = 44 end
     elseif _pc == 41 then
-      K_491d30(71552165, 1) --[[kasfVarCreateSet]]
+      K_491d30(71552165, 1)  -- kasfVarCreateSet
       iVar2 = 261283218
       iVar1 = "FleetIntel"
-      K_494a00(iVar1, iVar2) --[[kasfMsgSend]]
+      K_494a00(iVar1, iVar2)  -- kasfMsgSend
       _pc = 42
     elseif _pc == 42 then
       _pc = 40
     elseif _pc == 43 then
-      iVar1 = K_491e30(138385333) --[[kasfVarValueGet]]
+      iVar1 = K_491e30(138385333)  -- kasfVarValueGet
       if (iVar1 == 6) then _pc = 45 else _pc = 46 end
     elseif _pc == 44 then
-      K_491d70(223169844, 0) --[[kasfVarValueSet]]
-      K_4964e0("ObjPtr") --[[kasfTutRemovePointer]]
+      K_491d70(223169844, 0)  -- kasfVarValueSet
+      K_4964e0("ObjPtr")  -- kasfTutRemovePointer
       _pc = 2
     elseif _pc == 45 then
-      K_491d30(71552166, 1) --[[kasfVarCreateSet]]
+      K_491d30(71552166, 1)  -- kasfVarCreateSet
       iVar2 = 96744581
       iVar1 = "FleetIntel"
-      K_494a00(iVar1, iVar2) --[[kasfMsgSend]]
+      K_494a00(iVar1, iVar2)  -- kasfMsgSend
       _pc = 46
     elseif _pc == 46 then
       _pc = 44
     elseif _pc == 47 then
-      iVar1 = K_492120(3873386) --[[kasfMsgReceived]]
+      iVar1 = K_492120(3873386)  -- kasfMsgReceived
       if (iVar1 == 0) then _pc = 50 else _pc = 51 end
     elseif _pc == 48 then
-      K_494e70("DestroyBombers", "Destroy Taiidani Bombers", "The Taiidani ATTACK BOMBERS attacking our ION CANNON FRIGATES must be destroyed.  Build some ACOLYTES as soon as possible and send them over to help out the frigates.") --[[kasfObjectiveCreate]]
+      K_494e70("DestroyBombers", "Destroy Taiidani Bombers", "The Taiidani ATTACK BOMBERS attacking our ION CANNON FRIGATES must be destroyed.  Build some ACOLYTES as soon as possible and send them over to help out the frigates.")  -- kasfObjectiveCreate
       iVar1 = 83684307
       _pc = 55
     elseif _pc == 49 then
-      iVar1 = K_491e30(71552167) --[[kasfVarValueGet]]
+      iVar1 = K_491e30(71552167)  -- kasfVarValueGet
       if (iVar1 == 0) then _pc = 68 else _pc = 69 end
     elseif _pc == 50 then
-      iVar1 = K_492120(158202874) --[[kasfMsgReceived]]
+      iVar1 = K_492120(158202874)  -- kasfMsgReceived
       if (iVar1 ~= 0) then _pc = 53 else _pc = 54 end
     elseif _pc == 51 then
-      K_494e70("ExploreRegion", "Explore Designated Region", "Our sensor grid has been knocked out in this area.  Send Recons in to explore and find out what enemy ships may be lurking there.") --[[kasfObjectiveCreate]]
+      K_494e70("ExploreRegion", "Explore Designated Region", "Our sensor grid has been knocked out in this area.  Send Recons in to explore and find out what enemy ships may be lurking there.")  -- kasfObjectiveCreate
       iVar1 = "Unexplored"
       K_4964b0(9208760, iVar1)
       _pc = 52
     elseif _pc == 52 then
       _pc = 49
     elseif _pc == 53 then
-      K_494e70("DestroyResourcers", "Destroy Resourcing Convoy", "Destroy all enemy resource collectors harvesting in the area.  Be on the look out for any ships guarding the resourcers.") --[[kasfObjectiveCreate]]
+      K_494e70("DestroyResourcers", "Destroy Resourcing Convoy", "Destroy all enemy resource collectors harvesting in the area.  Be on the look out for any ships guarding the resourcers.")  -- kasfObjectiveCreate
       iVar1 = 213732803
       _pc = 55
     elseif _pc == 54 then
-      iVar1 = K_492120(51924198) --[[kasfMsgReceived]]
+      iVar1 = K_492120(51924198)  -- kasfMsgReceived
       if (iVar1 == 0) then _pc = 57 else _pc = 58 end
     elseif _pc == 55 then
-      iVar1 = K_4907e0(iVar1) --[[kasAITeamShipsPtr]]
-      K_4963e0("ObjPtr", iVar1) --[[kasfTutSetPointerTargetShipSelection]]
+      iVar1 = K_4907e0(iVar1)  -- kasAITeamShipsPtr
+      K_4963e0("ObjPtr", iVar1)  -- kasfTutSetPointerTargetShipSelection
       _pc = 49
     elseif _pc == 56 then
       _pc = 54
     elseif _pc == 57 then
-      iVar1 = K_492120(228176314) --[[kasfMsgReceived]]
+      iVar1 = K_492120(228176314)  -- kasfMsgReceived
       if (iVar1 ~= 0) then _pc = 60 else _pc = 61 end
     elseif _pc == 58 then
-      K_496cf0("TECH_LINK") --[[kasfAllowPlayerToResearch]]
+      K_496cf0("TECH_LINK")  -- kasfAllowPlayerToResearch
       _pc = 59
     elseif _pc == 59 then
       _pc = 52
     elseif _pc == 60 then
-      K_494e70("DestroyDestroyer", "Destroy Crippled Heavy Cruiser", "This Taiidan Heavy Cruiser is fleeing and badly crippled.  Finish it off. Make sure to watch for any escort it might have.") --[[kasfObjectiveCreate]]
+      K_494e70("DestroyDestroyer", "Destroy Crippled Heavy Cruiser", "This Taiidan Heavy Cruiser is fleeing and badly crippled.  Finish it off. Make sure to watch for any escort it might have.")  -- kasfObjectiveCreate
       iVar1 = 85516498
       _pc = 55
     elseif _pc == 61 then
-      iVar1 = K_492120(185562970) --[[kasfMsgReceived]]
+      iVar1 = K_492120(185562970)  -- kasfMsgReceived
       if (iVar1 == 0) then _pc = 63 else _pc = 64 end
     elseif _pc == 62 then
       _pc = 61
     elseif _pc == 63 then
-      iVar1 = K_492120(187785210) --[[kasfMsgReceived]]
+      iVar1 = K_492120(187785210)  -- kasfMsgReceived
       if (iVar1 ~= 0) then _pc = 66 else _pc = 67 end
     elseif _pc == 64 then
-      K_494e70("DestroyProxAttackers", "Defend proximity sensors", "Proximity sensors in sector 110 are under attack.  They must not be destroyed!  Defend them immediately.") --[[kasfObjectiveCreate]]
+      K_494e70("DestroyProxAttackers", "Defend proximity sensors", "Proximity sensors in sector 110 are under attack.  They must not be destroyed!  Defend them immediately.")  -- kasfObjectiveCreate
       iVar1 = KAS_GS("gs_0cb402f8")
-      K_4963e0("ObjPtr", iVar1) --[[kasfTutSetPointerTargetShipSelection]]
+      K_4963e0("ObjPtr", iVar1)  -- kasfTutSetPointerTargetShipSelection
       _pc = 65
     elseif _pc == 65 then
       _pc = 59
     elseif _pc == 66 then
-      K_494f70() --[[kasfObjectiveDestroyAll]]
-      K_494e70("Hyperspace", "Hyperspace", "Rally the fleet.") --[[kasfObjectiveCreate]]
+      K_494f70()  -- kasfObjectiveDestroyAll
+      K_494e70("Hyperspace", "Hyperspace", "Rally the fleet.")  -- kasfObjectiveCreate
       K_497290(1, "~ End of Mission")
       _pc = 67
     elseif _pc == 67 then
       _pc = 65
     elseif _pc == 68 then
-      iVar1 = K_491e30((-2015429404)) --[[kasfVarValueGet]]
+      iVar1 = K_491e30((-2015429404))  -- kasfVarValueGet
       if (iVar1 == 1) then _pc = 70 else _pc = 71 end
     elseif _pc == 69 then
-      iVar1 = K_491e30(71552168) --[[kasfVarValueGet]]
+      iVar1 = K_491e30(71552168)  -- kasfVarValueGet
       if (iVar1 == 0) then _pc = 72 else _pc = 73 end
     elseif _pc == 70 then
-      K_491d30(71552167, 1) --[[kasfVarCreateSet]]
-      K_491d70(138385333, 1) --[[kasfVarValueSet]]
-      K_491d70(223169844, 1) --[[kasfVarValueSet]]
+      K_491d30(71552167, 1)  -- kasfVarCreateSet
+      K_491d70(138385333, 1)  -- kasfVarValueSet
+      K_491d70(223169844, 1)  -- kasfVarValueSet
       _pc = 71
     elseif _pc == 71 then
       _pc = 69
     elseif _pc == 72 then
       iVar1 = "TaiidanBombers"
-      iVar1 = K_492d20(iVar1) --[[kasfShipsCount]]
+      iVar1 = K_492d20(iVar1)  -- kasfShipsCount
       if (iVar1 ~= 0) then _pc = 74 else _pc = 75 end
     elseif _pc == 73 then
       _pc = 78
     elseif _pc == 74 then
       iVar1 = "KushanFlankFrigates"
-      iVar1 = K_492d20(iVar1) --[[kasfShipsCount]]
+      iVar1 = K_492d20(iVar1)  -- kasfShipsCount
       if (iVar1 ~= 0) then _pc = 76 else _pc = 77 end
     elseif _pc == 75 then
-      K_491d30(71552168, 1) --[[kasfVarCreateSet]]
+      K_491d30(71552168, 1)  -- kasfVarCreateSet
       iVar2 = 47658068
       iVar1 = "FleetIntel"
-      K_494a00(iVar1, iVar2) --[[kasfMsgSend]]
-      K_491d70(238436644, 1) --[[kasfVarValueSet]]
-      K_494f60("DestroyBombers") --[[kasfObjectiveDestroy]]
-      K_491d70(223169844, 1) --[[kasfVarValueSet]]
+      K_494a00(iVar1, iVar2)  -- kasfMsgSend
+      K_491d70(238436644, 1)  -- kasfVarValueSet
+      K_494f60("DestroyBombers")  -- kasfObjectiveDestroy
+      K_491d70(223169844, 1)  -- kasfVarValueSet
       _pc = 73
     elseif _pc == 76 then
       _pc = 78
     elseif _pc == 77 then
       _pc = 75
     elseif _pc == 78 then
-      iVar1 = K_491e30(71552169) --[[kasfVarValueGet]]
+      iVar1 = K_491e30(71552169)  -- kasfVarValueGet
       if (iVar1 == 0) then _pc = 80 else _pc = 81 end
     elseif _pc == 79 then
       _pc = 77
@@ -360,101 +360,101 @@ function F_5d7050(TeamName)
       iVar1 = K_499570(iVar1)
       if (iVar1 ~= 0) then _pc = 82 else _pc = 83 end
     elseif _pc == 81 then
-      iVar1 = K_491e30(71552170) --[[kasfVarValueGet]]
+      iVar1 = K_491e30(71552170)  -- kasfVarValueGet
       if (iVar1 == 0) then _pc = 84 else _pc = 85 end
     elseif _pc == 82 then
-      K_491d30(71552169, 1) --[[kasfVarCreateSet]]
+      K_491d30(71552169, 1)  -- kasfVarCreateSet
       iVar2 = 112538532
       iVar1 = "FleetIntel"
-      K_494a00(iVar1, iVar2) --[[kasfMsgSend]]
-      K_491d70(84869460, 1) --[[kasfVarValueSet]]
-      K_494f60("ExploreRegion") --[[kasfObjectiveDestroy]]
-      K_491d70(223169844, 1) --[[kasfVarValueSet]]
+      K_494a00(iVar1, iVar2)  -- kasfMsgSend
+      K_491d70(84869460, 1)  -- kasfVarValueSet
+      K_494f60("ExploreRegion")  -- kasfObjectiveDestroy
+      K_491d70(223169844, 1)  -- kasfVarValueSet
       _pc = 83
     elseif _pc == 83 then
       _pc = 81
     elseif _pc == 84 then
       iVar1 = "TaiidanResourcers"
-      iVar1 = K_492d20(iVar1) --[[kasfShipsCount]]
+      iVar1 = K_492d20(iVar1)  -- kasfShipsCount
       if (iVar1 == 0) then _pc = 86 else _pc = 87 end
     elseif _pc == 85 then
-      iVar1 = K_491e30(71552171) --[[kasfVarValueGet]]
+      iVar1 = K_491e30(71552171)  -- kasfVarValueGet
       if (iVar1 == 0) then _pc = 88 else _pc = 89 end
     elseif _pc == 86 then
-      K_491d30(71552170, 1) --[[kasfVarCreateSet]]
+      K_491d30(71552170, 1)  -- kasfVarCreateSet
       iVar2 = 141350436
       iVar1 = "FleetIntel"
-      K_494a00(iVar1, iVar2) --[[kasfMsgSend]]
-      K_491d70(161120004, 1) --[[kasfVarValueSet]]
-      K_494f60("DestroyResourcers") --[[kasfObjectiveDestroy]]
-      K_491d70(223169844, 1) --[[kasfVarValueSet]]
+      K_494a00(iVar1, iVar2)  -- kasfMsgSend
+      K_491d70(161120004, 1)  -- kasfVarValueSet
+      K_494f60("DestroyResourcers")  -- kasfObjectiveDestroy
+      K_491d70(223169844, 1)  -- kasfVarValueSet
       _pc = 87
     elseif _pc == 87 then
       _pc = 85
     elseif _pc == 88 then
       iVar1 = "TaiidanDestroyer"
-      iVar1 = K_492d20(iVar1) --[[kasfShipsCount]]
+      iVar1 = K_492d20(iVar1)  -- kasfShipsCount
       if (iVar1 == 0) then _pc = 90 else _pc = 91 end
     elseif _pc == 89 then
-      iVar1 = K_491e30(71552172) --[[kasfVarValueGet]]
+      iVar1 = K_491e30(71552172)  -- kasfVarValueGet
       if (iVar1 == 0) then _pc = 92 else _pc = 93 end
     elseif _pc == 90 then
-      K_491d30(71552171, 1) --[[kasfVarCreateSet]]
+      K_491d30(71552171, 1)  -- kasfVarCreateSet
       iVar2 = 227009076
       iVar1 = "FleetIntel"
-      K_494a00(iVar1, iVar2) --[[kasfMsgSend]]
-      K_491d70(147303492, 1) --[[kasfVarValueSet]]
-      K_494f60("DestroyDestroyer") --[[kasfObjectiveDestroy]]
-      K_491d70(223169844, 1) --[[kasfVarValueSet]]
+      K_494a00(iVar1, iVar2)  -- kasfMsgSend
+      K_491d70(147303492, 1)  -- kasfVarValueSet
+      K_494f60("DestroyDestroyer")  -- kasfObjectiveDestroy
+      K_491d70(223169844, 1)  -- kasfVarValueSet
       _pc = 91
     elseif _pc == 91 then
       _pc = 89
     elseif _pc == 92 then
       iVar1 = "TaiidanProxAttackAbomb1"
-      iVar1 = K_492d20(iVar1) --[[kasfShipsCount]]
+      iVar1 = K_492d20(iVar1)  -- kasfShipsCount
       if (iVar1 == 0) then _pc = 94 else _pc = 95 end
     elseif _pc == 93 then
-      iVar1 = K_491e30(71552173) --[[kasfVarValueGet]]
+      iVar1 = K_491e30(71552173)  -- kasfVarValueGet
       if (iVar1 == 0) then _pc = 100 else _pc = 101 end
     elseif _pc == 94 then
       iVar1 = "TaiidanProxAttackMGCorv1"
-      iVar1 = K_492d20(iVar1) --[[kasfShipsCount]]
+      iVar1 = K_492d20(iVar1)  -- kasfShipsCount
       if (iVar1 == 0) then _pc = 96 else _pc = 97 end
     elseif _pc == 95 then
       _pc = 93
     elseif _pc == 96 then
       iVar1 = "TaiidanProxAttackHInt1"
-      iVar1 = K_492d20(iVar1) --[[kasfShipsCount]]
+      iVar1 = K_492d20(iVar1)  -- kasfShipsCount
       if (iVar1 == 0) then _pc = 98 else _pc = 99 end
     elseif _pc == 97 then
       _pc = 95
     elseif _pc == 98 then
-      K_491d30(71552172, 1) --[[kasfVarCreateSet]]
+      K_491d30(71552172, 1)  -- kasfVarCreateSet
       iVar2 = 19885300
       iVar1 = "FleetIntel"
-      K_494a00(iVar1, iVar2) --[[kasfMsgSend]]
-      K_491d70(190768900, 1) --[[kasfVarValueSet]]
-      K_494f60("DestroyProxAttackers") --[[kasfObjectiveDestroy]]
-      K_491d70(223169844, 1) --[[kasfVarValueSet]]
+      K_494a00(iVar1, iVar2)  -- kasfMsgSend
+      K_491d70(190768900, 1)  -- kasfVarValueSet
+      K_494f60("DestroyProxAttackers")  -- kasfObjectiveDestroy
+      K_491d70(223169844, 1)  -- kasfVarValueSet
       _pc = 99
     elseif _pc == 99 then
       _pc = 97
     elseif _pc == 100 then
       iVar1 = KAS_GS("Mothership")
-      iVar1 = K_492d20(iVar1) --[[kasfShipsCount]]
+      iVar1 = K_492d20(iVar1)  -- kasfShipsCount
       if (iVar1 == 0) then _pc = 102 else _pc = 103 end
     elseif _pc == 101 then
       do return end
     elseif _pc == 102 then
-      iVar1 = K_491e30((-2015429404)) --[[kasfVarValueGet]]
+      iVar1 = K_491e30((-2015429404))  -- kasfVarValueGet
       if (iVar1 ~= 0) then _pc = 104 else _pc = 105 end
     elseif _pc == 103 then
       _pc = 101
     elseif _pc == 104 then
-      K_491d30(71552173, 1) --[[kasfVarCreateSet]]
+      K_491d30(71552173, 1)  -- kasfVarCreateSet
       iVar2 = 220350372
       iVar1 = "FleetIntel"
-      K_494a00(iVar1, iVar2) --[[kasfMsgSend]]
+      K_494a00(iVar1, iVar2)  -- kasfMsgSend
       _pc = 105
     elseif _pc == 105 then
       _pc = 103
@@ -469,19 +469,19 @@ function F_5d9a20(TeamName)
   KAS_Team = TeamName
   KAS_ScopeKind = 1
   KAS_Scope = KAS_TeamHash(TeamName)
-  K_491ec0(144337492 --[[Default]]) --[[kasfTimerCreate]]
-  K_491d30(266064926, 0) --[[kasfVarCreateSet]]
-  K_491d30(109086661 --[[UnPauseUniverse]], 0) --[[kasfVarCreateSet]]
-  K_491d30(211831571 --[[UnpauseOtherKAS]], 0) --[[kasfVarCreateSet]]
-  K_491d30(52577235 --[[CloseSensors]], 0) --[[kasfVarCreateSet]]
-  K_491d30(172907219 --[[CancelFocus]], 0) --[[kasfVarCreateSet]]
-  K_491d30(232774915, 0) --[[kasfVarCreateSet]]
-  K_491d30(168240451, 0) --[[kasfVarCreateSet]]
-  K_491d30(127756738 --[[StartTimer]], 0) --[[kasfVarCreateSet]]
-  K_491d30(126773838, 1) --[[kasfVarCreateSet]]
-  K_496720("Focus") --[[kasfTutEnableFlags]]
-  K_496720("CancelFocus") --[[kasfTutEnableFlags]]
-  K_491d30(77979796 --[[Failed]], 0) --[[kasfVarCreateSet]]
+  K_491ec0(144337492)  -- Default; kasfTimerCreate
+  K_491d30(266064926, 0)  -- kasfVarCreateSet
+  K_491d30(109086661, 0)  -- UnPauseUniverse; kasfVarCreateSet
+  K_491d30(211831571, 0)  -- UnpauseOtherKAS; kasfVarCreateSet
+  K_491d30(52577235, 0)  -- CloseSensors; kasfVarCreateSet
+  K_491d30(172907219, 0)  -- CancelFocus; kasfVarCreateSet
+  K_491d30(232774915, 0)  -- kasfVarCreateSet
+  K_491d30(168240451, 0)  -- kasfVarCreateSet
+  K_491d30(127756738, 0)  -- StartTimer; kasfVarCreateSet
+  K_491d30(126773838, 1)  -- kasfVarCreateSet
+  K_496720("Focus")  -- kasfTutEnableFlags
+  K_496720("CancelFocus")  -- kasfTutEnableFlags
+  K_491d30(77979796, 0)  -- Failed; kasfVarCreateSet
   -- kasJump(state 0x2e80a01)
   KASRule_Add(TeamName, "F_5d9b20", "F_5d9a20")
   F_5d9af0(TeamName)
@@ -494,7 +494,7 @@ function F_5d9af0(TeamName)
   KAS_Team = TeamName
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
-  K_491d30((-1963315004), 1) --[[kasfVarCreateSet]]
+  K_491d30((-1963315004), 1)  -- kasfVarCreateSet
   do return end
 end
 
@@ -504,9 +504,9 @@ function F_5d9b20(TeamName)
   local iVar1, iVar2 = 0, 0
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
-  iVar1 = K_491e30((-1939595995)) --[[kasfVarValueGet]]
+  iVar1 = K_491e30((-1939595995))  -- kasfVarValueGet
   if (iVar1 == 1) then
-    K_498230() --[[kasfStartLevelByHyperspacingShips]]
+    K_498230()  -- kasfStartLevelByHyperspacingShips
     K_497000(36)
     iVar1 = "KushanCarriers"
     -- kasFSMCreate(fsm 0xc0abd03)
@@ -701,24 +701,24 @@ function F_5d9b20(TeamName)
     F_5d98f0(iVar1)
     KAS_Pop()
     iVar1 = KAS_GS("gs_0cb402f8")
-    K_492d10(iVar1) --[[kasfGrowSelectionClear]]
+    K_492d10(iVar1)  -- kasfGrowSelectionClear
     iVar1 = "TaiidanProxAttackAbomb1"
     iVar2 = KAS_GS("gs_0cb402f8")
-    K_495bd0(iVar2, iVar1) --[[kasfShipsAdd]]
+    K_495bd0(iVar2, iVar1)  -- kasfShipsAdd
     iVar1 = "TaiidanProxAttackMGCorv1"
     iVar2 = KAS_GS("gs_0cb402f8")
-    K_495bd0(iVar2, iVar1) --[[kasfShipsAdd]]
+    K_495bd0(iVar2, iVar1)  -- kasfShipsAdd
     iVar1 = "TaiidanProxAttackHInt1"
     iVar2 = KAS_GS("gs_0cb402f8")
-    K_495bd0(iVar2, iVar1) --[[kasfShipsAdd]]
-    K_496d10("TECH_DRIVE_FIGHTER") --[[kasfAllowPlayerToPurchase]]
+    K_495bd0(iVar2, iVar1)  -- kasfShipsAdd
+    K_496d10("TECH_DRIVE_FIGHTER")  -- kasfAllowPlayerToPurchase
     K_4980c0(8960248, 8958156, 0)
     K_4980c0(8960204, 8958156, 0)
     K_4980c0(8960184, 8958156, 0)
     K_4980c0(8960164, 8958156, 0)
-    K_496e20(0, 2000) --[[kasfRUsSet]]
-    K_496e20(1, 100000) --[[kasfRUsSet]]
-    K_491f90(50796994, 1) --[[kasfTimerCreateSetStart]]
+    K_496e20(0, 2000)  -- kasfRUsSet
+    K_496e20(1, 100000)  -- kasfRUsSet
+    K_491f90(50796994, 1)  -- kasfTimerCreateSetStart
     -- kasJump(state 0x1f32b25)
     KASRule_Add(TeamName, "F_5da2c0", "F_5d9b20")
     F_613940(TeamName)
@@ -732,7 +732,7 @@ function F_613940(TeamName)
   KAS_Team = TeamName
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
-  K_491d70((-2054310428), 0) --[[kasfVarValueSet]]
+  K_491d70((-2054310428), 0)  -- kasfVarValueSet
   do return end
 end
 
@@ -774,26 +774,26 @@ function F_5da2c0(TeamName)
     elseif _pc == 12 then
       if (puVar2 < 253349864) then _pc = 70 else _pc = 71 end
     elseif _pc == 13 then
-      iVar1 = K_496c80(0) --[[kasfSensorsIsOpen]]
+      iVar1 = K_496c80(0)  -- kasfSensorsIsOpen
       if (iVar1 == 0) then _pc = 16 else _pc = 17 end
     elseif _pc == 14 then
       if (puVar2 < 153999812) then _pc = 18 else _pc = 19 end
     elseif _pc == 15 then
       _pc = 66
     elseif _pc == 16 then
-      K_496bc0(100000) --[[kasfOpenSensors]]
-      K_491d70(126773838, 0) --[[kasfVarValueSet]]
+      K_496bc0(100000)  -- kasfOpenSensors
+      K_491d70(126773838, 0)  -- kasfVarValueSet
       _pc = 17
     elseif _pc == 17 then
       K_497a90()
       K_497ad0()
       iVar1 = "TaiidanBombers"
-      K_4963a0("BomberPointer", iVar1) --[[kasfTutSetPointerTargetShip]]
+      K_4963a0("BomberPointer", iVar1)  -- kasfTutSetPointerTargetShip
       iVar1 = KAS_TeamVector("TaiidanBombers")
       K_49a2a0(iVar1)
       pcVar5 = "BomberPing"
       iVar1 = "TaiidanBombers"
-      K_495e50(iVar1, pcVar5) --[[kasfPingAddShips]]
+      K_495e50(iVar1, pcVar5)  -- kasfPingAddShips
       K_496eb0(268468441, 0)
       puVar2 = 191291062
       _pc = 15
@@ -804,10 +804,10 @@ function F_5da2c0(TeamName)
     elseif _pc == 20 then
       iVar4 = 228176314
       iVar1 = "Objectives"
-      K_494a00(iVar1, iVar4) --[[kasfMsgSend]]
-      K_491d70(52577235 --[[CloseSensors]], 1) --[[kasfVarValueSet]]
-      K_491d70(266064926, 1) --[[kasfVarValueSet]]
-      K_491d70(127756738 --[[StartTimer]], 3) --[[kasfVarValueSet]]
+      K_494a00(iVar1, iVar4)  -- kasfMsgSend
+      K_491d70(52577235, 1)  -- CloseSensors; kasfVarValueSet
+      K_491d70(266064926, 1)  -- kasfVarValueSet
+      K_491d70(127756738, 3)  -- StartTimer; kasfVarValueSet
       K_496eb0(268443870, 0)
       -- kasJump(state 0xe8e63cc)
       KASRule_Add(TeamName, "F_5da060", "F_5da2c0")
@@ -829,9 +829,9 @@ function F_5da2c0(TeamName)
       iVar1 = KAS_TeamVector("TaiidanCarrier")
       K_49a2a0(iVar1)
       iVar1 = "TaiidanCarrier"
-      K_4963a0("ResourcerPointer", iVar1) --[[kasfTutSetPointerTargetShip]]
+      K_4963a0("ResourcerPointer", iVar1)  -- kasfTutSetPointerTargetShip
       K_496eb0(268444003, 0)
-      K_494a00(TeamName, 17855508) --[[kasfMsgSend]]
+      K_494a00(TeamName, 17855508)  -- kasfMsgSend
       -- kasJump(state 0xe8e63cc)
       KASRule_Add(TeamName, "F_5da060", "F_5da2c0")
       F_5f4730(TeamName)
@@ -843,7 +843,7 @@ function F_5da2c0(TeamName)
     elseif _pc == 30 then
       _pc = 28
     elseif _pc == 31 then
-      K_495ea0("UnExploredPing") --[[kasfPingRemove]]
+      K_495ea0("UnExploredPing")  -- kasfPingRemove
       _pc = 33
     elseif _pc == 32 then
       if (puVar2 == 141350436) then _pc = 35 else _pc = 36 end
@@ -852,7 +852,7 @@ function F_5da2c0(TeamName)
     elseif _pc == 34 then
       _pc = 32
     elseif _pc == 35 then
-      K_495ea0("ResourcerPing") --[[kasfPingRemove]]
+      K_495ea0("ResourcerPing")  -- kasfPingRemove
       K_496eb0(268439906, 0)
       -- kasJump(state 0xe8e63cc)
       KASRule_Add(TeamName, "F_5da060", "F_5da2c0")
@@ -865,33 +865,33 @@ function F_5da2c0(TeamName)
     elseif _pc == 38 then
       _pc = 36
     elseif _pc == 39 then
-      iVar1 = K_496c80(0) --[[kasfSensorsIsOpen]]
+      iVar1 = K_496c80(0)  -- kasfSensorsIsOpen
       if (iVar1 == 0) then _pc = 41 else _pc = 42 end
     elseif _pc == 40 then
       _pc = 26
     elseif _pc == 41 then
-      K_496bc0(100000) --[[kasfOpenSensors]]
-      K_491d70(126773838, 0) --[[kasfVarValueSet]]
+      K_496bc0(100000)  -- kasfOpenSensors
+      K_491d70(126773838, 0)  -- kasfVarValueSet
       _pc = 42
     elseif _pc == 42 then
       iVar1 = KAS_TeamVector("TaiidanDestroyer")
       K_49a2a0(iVar1)
       pcVar5 = "DestroyerPing"
       iVar1 = "TaiidanDestroyer"
-      K_495e50(iVar1, pcVar5) --[[kasfPingAddShips]]
+      K_495e50(iVar1, pcVar5)  -- kasfPingAddShips
       iVar1 = "TaiidanDestroyer"
-      K_4963a0("DestroyerPointer", iVar1) --[[kasfTutSetPointerTargetShip]]
+      K_4963a0("DestroyerPointer", iVar1)  -- kasfTutSetPointerTargetShip
       K_496eb0(268468445, 0)
       iVar4 = 153999811
       iVar1 = "FleetIntel"
-      K_494a00(iVar1, iVar4) --[[kasfMsgSend]]
+      K_494a00(iVar1, iVar4)  -- kasfMsgSend
       iVar4 = 307349
       iVar1 = "TaiidanDestroyer"
-      K_494a00(iVar1, iVar4) --[[kasfMsgSend]]
+      K_494a00(iVar1, iVar4)  -- kasfMsgSend
       iVar4 = 84320888
       iVar1 = "TaiidanDefendCruiser"
-      K_494a00(iVar1, iVar4) --[[kasfMsgSend]]
-      K_491d70(168240451, 1) --[[kasfVarValueSet]]
+      K_494a00(iVar1, iVar4)  -- kasfMsgSend
+      K_491d70(168240451, 1)  -- kasfVarValueSet
       -- kasJump(state 0xe8e63cc)
       KASRule_Add(TeamName, "F_5da060", "F_5da2c0")
       F_5f4730(TeamName)
@@ -920,7 +920,7 @@ function F_5da2c0(TeamName)
     elseif _pc == 52 then
       _pc = 49
     elseif _pc == 53 then
-      iVar4 = K_493b90() --[[kasfMissionSkillGet]]
+      iVar4 = K_493b90()  -- kasfMissionSkillGet
       if (iVar4 < 2) then _pc = 55 else _pc = 56 end
     elseif _pc == 54 then
       if (puVar2 ~= 161890388) then _pc = 60 else _pc = 61 end
@@ -934,8 +934,8 @@ function F_5da2c0(TeamName)
       iVar3 = 176850956
       _pc = 58
     elseif _pc == 58 then
-      iVar3 = K_4907a0(iVar3) --[[kasAITeamPtr]]
-      K_494a00(iVar3, iVar4) --[[kasfMsgSend]]
+      iVar3 = K_4907a0(iVar3)  -- kasAITeamPtr
+      K_494a00(iVar3, iVar4)  -- kasfMsgSend
       _pc = 134
     elseif _pc == 59 then
       _pc = 54
@@ -959,8 +959,8 @@ function F_5da2c0(TeamName)
       iVar1 = 176850956
       _pc = 67
     elseif _pc == 67 then
-      iVar1 = K_4907a0(iVar1) --[[kasAITeamPtr]]
-      K_494a00(iVar1, puVar2) --[[kasfMsgSend]]
+      iVar1 = K_4907a0(iVar1)  -- kasAITeamPtr
+      K_494a00(iVar1, puVar2)  -- kasfMsgSend
       -- kasJump(state 0xe8e63cc)
       KASRule_Add(TeamName, "F_5da060", "F_5da2c0")
       F_5f4730(TeamName)
@@ -976,16 +976,16 @@ function F_5da2c0(TeamName)
     elseif _pc == 72 then
       _pc = 45
     elseif _pc == 73 then
-      iVar4 = K_491e30(71552182) --[[kasfVarValueGet]]
+      iVar4 = K_491e30(71552182)  -- kasfVarValueGet
       if (iVar4 == 0) then _pc = 75 else _pc = 76 end
     elseif _pc == 74 then
       if (puVar2 < 227009077) then _pc = 80 else _pc = 81 end
     elseif _pc == 75 then
-      K_491d30(71552182, 1) --[[kasfVarCreateSet]]
+      K_491d30(71552182, 1)  -- kasfVarCreateSet
       K_497000(19)
       K_497580(90)
-      K_491d70(127756738 --[[StartTimer]], 3) --[[kasfVarValueSet]]
-      K_494a00(TeamName, 27065970) --[[kasfMsgSend]]
+      K_491d70(127756738, 3)  -- StartTimer; kasfVarValueSet
+      K_494a00(TeamName, 27065970)  -- kasfMsgSend
       -- kasJump(state 0xe989af2)
       KASRule_Add(TeamName, "F_5da210", "F_5da2c0")
       F_652ef0(TeamName)
@@ -1019,15 +1019,15 @@ function F_5da2c0(TeamName)
     elseif _pc == 87 then
       iVar4 = 233346314
       iVar1 = "Objectives"
-      K_494a00(iVar1, iVar4) --[[kasfMsgSend]]
-      K_491d70(168240451, 1) --[[kasfVarValueSet]]
+      K_494a00(iVar1, iVar4)  -- kasfMsgSend
+      K_491d70(168240451, 1)  -- kasfVarValueSet
       K_496eb0(268443866, 0)
-      K_491d70(109086661 --[[UnPauseUniverse]], 1) --[[kasfVarValueSet]]
-      K_491d70(211831571 --[[UnpauseOtherKAS]], 1) --[[kasfVarValueSet]]
-      K_491d70(266064926, 1) --[[kasfVarValueSet]]
-      K_491d70(52577235 --[[CloseSensors]], 1) --[[kasfVarValueSet]]
-      K_491d70(127756738 --[[StartTimer]], 50) --[[kasfVarValueSet]]
-      K_494a00(TeamName, 10664496) --[[kasfMsgSend]]
+      K_491d70(109086661, 1)  -- UnPauseUniverse; kasfVarValueSet
+      K_491d70(211831571, 1)  -- UnpauseOtherKAS; kasfVarValueSet
+      K_491d70(266064926, 1)  -- kasfVarValueSet
+      K_491d70(52577235, 1)  -- CloseSensors; kasfVarValueSet
+      K_491d70(127756738, 50)  -- StartTimer; kasfVarValueSet
+      K_494a00(TeamName, 10664496)  -- kasfMsgSend
       -- kasJump(state 0xe8e63cc)
       KASRule_Add(TeamName, "F_5da060", "F_5da2c0")
       F_5f4730(TeamName)
@@ -1053,14 +1053,14 @@ function F_5da2c0(TeamName)
       K_496eb0(268443868, 0)
       iVar4 = 158202874
       iVar1 = "Objectives"
-      K_494a00(iVar1, iVar4) --[[kasfMsgSend]]
-      iVar1 = K_496c80(0) --[[kasfSensorsIsOpen]]
+      K_494a00(iVar1, iVar4)  -- kasfMsgSend
+      iVar1 = K_496c80(0)  -- kasfSensorsIsOpen
       if (iVar1 == 0) then _pc = 97 else _pc = 98 end
     elseif _pc == 96 then
       _pc = 82
     elseif _pc == 97 then
-      K_496bc0(100000) --[[kasfOpenSensors]]
-      K_491d70(126773838, 0) --[[kasfVarValueSet]]
+      K_496bc0(100000)  -- kasfOpenSensors
+      K_491d70(126773838, 0)  -- kasfVarValueSet
       _pc = 98
     elseif _pc == 98 then
       K_497a90()
@@ -1068,11 +1068,11 @@ function F_5da2c0(TeamName)
       iVar1 = KAS_TeamVector("TaiidanResourcers")
       K_49a2a0(iVar1)
       iVar1 = "TaiidanResourcers"
-      K_4963a0("ResourcerPointer", iVar1) --[[kasfTutSetPointerTargetShip]]
+      K_4963a0("ResourcerPointer", iVar1)  -- kasfTutSetPointerTargetShip
       pcVar5 = "ResourcerPing"
       iVar1 = "TaiidanResourcers"
-      K_495e50(iVar1, pcVar5) --[[kasfPingAddShips]]
-      iVar1 = K_493b90() --[[kasfMissionSkillGet]]
+      K_495e50(iVar1, pcVar5)  -- kasfPingAddShips
+      iVar1 = K_493b90()  -- kasfMissionSkillGet
       if (iVar1 < 2) then _pc = 99 else _pc = 100 end
     elseif _pc == 99 then
       iVar1 = 151346658
@@ -1081,7 +1081,7 @@ function F_5da2c0(TeamName)
       iVar1 = 17855508
       _pc = 101
     elseif _pc == 101 then
-      K_494a00(TeamName, iVar1) --[[kasfMsgSend]]
+      K_494a00(TeamName, iVar1)  -- kasfMsgSend
       -- kasJump(state 0xe8e63cc)
       KASRule_Add(TeamName, "F_5da060", "F_5da2c0")
       F_5f4730(TeamName)
@@ -1092,14 +1092,14 @@ function F_5da2c0(TeamName)
       _pc = 96
     elseif _pc == 104 then
       K_497580(90)
-      K_491d70(127756738 --[[StartTimer]], 3) --[[kasfVarValueSet]]
+      K_491d70(127756738, 3)  -- StartTimer; kasfVarValueSet
       iVar1 = 153999810
       _pc = 106
     elseif _pc == 105 then
       if (puVar2 == 263613923) then _pc = 108 else _pc = 109 end
     elseif _pc == 106 then
       iVar4 = "FleetIntel"
-      K_494a00(iVar4, iVar1) --[[kasfMsgSend]]
+      K_494a00(iVar4, iVar1)  -- kasfMsgSend
       -- kasJump(state 0xe989af2)
       KASRule_Add(TeamName, "F_5da210", "F_5da2c0")
       F_652ef0(TeamName)
@@ -1116,7 +1116,7 @@ function F_5da2c0(TeamName)
       _pc = 109
     elseif _pc == 111 then
       K_496eb0(268444006, 0)
-      K_491d70(77979796 --[[Failed]], 1) --[[kasfVarValueSet]]
+      K_491d70(77979796, 1)  -- Failed; kasfVarValueSet
       -- kasJump(state 0xe8e63cc)
       KASRule_Add(TeamName, "F_5da060", "F_5da2c0")
       F_5f4730(TeamName)
@@ -1153,7 +1153,7 @@ function F_5da2c0(TeamName)
       if (51924198 < puVar2) then _pc = 126 else _pc = 127 end
     elseif _pc == 125 then
       iVar1 = "KushanFlankFrigates"
-      iVar1 = K_492d20(iVar1) --[[kasfShipsCount]]
+      iVar1 = K_492d20(iVar1)  -- kasfShipsCount
       if (iVar1 == 0) then _pc = 144 else _pc = 145 end
     elseif _pc == 126 then
       if (puVar2 == 59769441) then _pc = 128 else _pc = 129 end
@@ -1161,7 +1161,7 @@ function F_5da2c0(TeamName)
       if (puVar2 == 51924198) then _pc = 132 else _pc = 133 end
     elseif _pc == 128 then
       K_497580(90)
-      K_491d70(127756738 --[[StartTimer]], 3) --[[kasfVarValueSet]]
+      K_491d70(127756738, 3)  -- StartTimer; kasfVarValueSet
       iVar1 = 59769442
       _pc = 106
     elseif _pc == 129 then
@@ -1181,29 +1181,29 @@ function F_5da2c0(TeamName)
       _pc = 33
     elseif _pc == 135 then
       K_496eb0(268444005, 0)
-      iVar1 = K_496c80(0) --[[kasfSensorsIsOpen]]
+      iVar1 = K_496c80(0)  -- kasfSensorsIsOpen
       if (iVar1 == 0) then _pc = 137 else _pc = 138 end
     elseif _pc == 136 then
       if (puVar2 ~= 47658068) then _pc = 140 else _pc = 141 end
     elseif _pc == 137 then
-      K_496bc0(100000) --[[kasfOpenSensors]]
-      K_491d70(126773838, 0) --[[kasfVarValueSet]]
+      K_496bc0(100000)  -- kasfOpenSensors
+      K_491d70(126773838, 0)  -- kasfVarValueSet
       _pc = 138
     elseif _pc == 138 then
       K_497a90()
       K_497ad0()
-      K_491d70(109086661 --[[UnPauseUniverse]], 1) --[[kasfVarValueSet]]
-      K_491d70(211831571 --[[UnpauseOtherKAS]], 1) --[[kasfVarValueSet]]
+      K_491d70(109086661, 1)  -- UnPauseUniverse; kasfVarValueSet
+      K_491d70(211831571, 1)  -- UnpauseOtherKAS; kasfVarValueSet
       iVar1 = KAS_ShipsVector(213123832)
       K_49a2a0(iVar1)
       iVar1 = KAS_GS("gs_0cb402f8")
-      K_4963a0("ProxPointer", iVar1) --[[kasfTutSetPointerTargetShip]]
+      K_4963a0("ProxPointer", iVar1)  -- kasfTutSetPointerTargetShip
       pcVar5 = "ProxPing"
       iVar1 = KAS_GS("gs_0cb402f8")
-      K_495e50(iVar1, pcVar5) --[[kasfPingAddShips]]
-      K_491d70(52577235 --[[CloseSensors]], 1) --[[kasfVarValueSet]]
-      K_491d70(168240451, 1) --[[kasfVarValueSet]]
-      K_491d70(266064926, 1) --[[kasfVarValueSet]]
+      K_495e50(iVar1, pcVar5)  -- kasfPingAddShips
+      K_491d70(52577235, 1)  -- CloseSensors; kasfVarValueSet
+      K_491d70(168240451, 1)  -- kasfVarValueSet
+      K_491d70(266064926, 1)  -- kasfVarValueSet
       puVar2 = 185562970
       iVar1 = 160291907
       _pc = 67
@@ -1213,7 +1213,7 @@ function F_5da2c0(TeamName)
       _pc = 45
     elseif _pc == 141 then
       K_497000(0)
-      K_495ea0("BomberPing") --[[kasfPingRemove]]
+      K_495ea0("BomberPing")  -- kasfPingRemove
       _pc = 134
     elseif _pc == 142 then
       _pc = 141
@@ -1232,32 +1232,32 @@ function F_5da2c0(TeamName)
     elseif _pc == 147 then
       iVar4 = 3873386
       iVar1 = "Objectives"
-      K_494a00(iVar1, iVar4) --[[kasfMsgSend]]
+      K_494a00(iVar1, iVar4)  -- kasfMsgSend
       K_496eb0(268468443, 0)
-      iVar1 = K_496c80(0) --[[kasfSensorsIsOpen]]
+      iVar1 = K_496c80(0)  -- kasfSensorsIsOpen
       if (iVar1 == 0) then _pc = 149 else _pc = 150 end
     elseif _pc == 148 then
       if (puVar2 == 81303907) then _pc = 153 else _pc = 154 end
     elseif _pc == 149 then
-      K_496bc0(100000) --[[kasfOpenSensors]]
-      K_491d70(126773838, 0) --[[kasfVarValueSet]]
+      K_496bc0(100000)  -- kasfOpenSensors
+      K_491d70(126773838, 0)  -- kasfVarValueSet
       _pc = 150
     elseif _pc == 150 then
       iVar1 = KAS_VolumeVector("Unexplored")
       K_49a2a0(iVar1)
       iVar1 = "PointAtUnexplored"
-      K_496490("UnexploredPointer", iVar1) --[[kasfTutSetPointerTargetAIVolume]]
+      K_496490("UnexploredPointer", iVar1)  -- kasfTutSetPointerTargetAIVolume
       pcVar5 = "UnExploredPing"
       iVar1 = KAS_VolumeVector("Unexplored")
-      K_495e80(iVar1, pcVar5) --[[kasfPingAddPoint]]
+      K_495e80(iVar1, pcVar5)  -- kasfPingAddPoint
       K_497a90()
       K_497ad0()
-      K_491d70(109086661 --[[UnPauseUniverse]], 1) --[[kasfVarValueSet]]
-      K_491d70(211831571 --[[UnpauseOtherKAS]], 1) --[[kasfVarValueSet]]
-      K_491d70(52577235 --[[CloseSensors]], 1) --[[kasfVarValueSet]]
-      K_491d70(266064926, 1) --[[kasfVarValueSet]]
-      K_491d70(168240451, 1) --[[kasfVarValueSet]]
-      K_491d70(127756738 --[[StartTimer]], 3) --[[kasfVarValueSet]]
+      K_491d70(109086661, 1)  -- UnPauseUniverse; kasfVarValueSet
+      K_491d70(211831571, 1)  -- UnpauseOtherKAS; kasfVarValueSet
+      K_491d70(52577235, 1)  -- CloseSensors; kasfVarValueSet
+      K_491d70(266064926, 1)  -- kasfVarValueSet
+      K_491d70(168240451, 1)  -- kasfVarValueSet
+      K_491d70(127756738, 3)  -- StartTimer; kasfVarValueSet
       -- kasJump(state 0xe8e63cc)
       KASRule_Add(TeamName, "F_5da060", "F_5da2c0")
       F_5f4730(TeamName)
@@ -1268,7 +1268,7 @@ function F_5da2c0(TeamName)
       _pc = 148
     elseif _pc == 153 then
       K_497580(90)
-      K_491d70(127756738 --[[StartTimer]], 3) --[[kasfVarValueSet]]
+      K_491d70(127756738, 3)  -- StartTimer; kasfVarValueSet
       iVar1 = 227120642
       _pc = 106
     elseif _pc == 154 then
@@ -1280,7 +1280,7 @@ function F_5da2c0(TeamName)
     elseif _pc == 157 then
       _pc = 45
     elseif _pc == 158 then
-      K_491d70((-2054310428), 0) --[[kasfVarValueSet]]
+      K_491d70((-2054310428), 0)  -- kasfVarValueSet
       K_497000(36)
       K_496eb0(268443996, 0)
       puVar2 = 263613923
@@ -1290,7 +1290,7 @@ function F_5da2c0(TeamName)
     elseif _pc == 160 then
       _pc = 120
     elseif _pc == 161 then
-      K_495ea0("ProxPing") --[[kasfPingRemove]]
+      K_495ea0("ProxPing")  -- kasfPingRemove
       _pc = 33
     elseif _pc == 162 then
       if (10664497 < puVar2) then _pc = 164 else _pc = 165 end
@@ -1309,14 +1309,14 @@ function F_5da2c0(TeamName)
     elseif _pc == 169 then
       _pc = 45
     elseif _pc == 170 then
-      K_491d70(109086661 --[[UnPauseUniverse]], 1) --[[kasfVarValueSet]]
-      K_491d70(211831571 --[[UnpauseOtherKAS]], 1) --[[kasfVarValueSet]]
-      K_491d70(52577235 --[[CloseSensors]], 1) --[[kasfVarValueSet]]
-      K_491d70(266064926, 1) --[[kasfVarValueSet]]
-      K_491d70(168240451, 1) --[[kasfVarValueSet]]
-      K_491d70(127756738 --[[StartTimer]], 30) --[[kasfVarValueSet]]
-      K_494a00(TeamName, 51924198) --[[kasfMsgSend]]
-      K_497710(11, " ") --[[kasfSetTraderDialog]]
+      K_491d70(109086661, 1)  -- UnPauseUniverse; kasfVarValueSet
+      K_491d70(211831571, 1)  -- UnpauseOtherKAS; kasfVarValueSet
+      K_491d70(52577235, 1)  -- CloseSensors; kasfVarValueSet
+      K_491d70(266064926, 1)  -- kasfVarValueSet
+      K_491d70(168240451, 1)  -- kasfVarValueSet
+      K_491d70(127756738, 30)  -- StartTimer; kasfVarValueSet
+      K_494a00(TeamName, 51924198)  -- kasfMsgSend
+      K_497710(11, " ")  -- kasfSetTraderDialog
       -- kasJump(state 0xe8e63cc)
       KASRule_Add(TeamName, "F_5da060", "F_5da2c0")
       F_5f4730(TeamName)
@@ -1329,13 +1329,13 @@ function F_5da2c0(TeamName)
       _pc = 171
     elseif _pc == 174 then
       iVar4 = KAS_GS("Mothership")
-      K_496870(iVar4) --[[kasfTutCameraFocus]]
-      iVar4 = K_491e30(260833221) --[[kasfVarValueGet]]
-      K_4961b0(iVar4) --[[kasfCameraSetAngleDeg]]
-      iVar4 = K_491e30(60936190) --[[kasfVarValueGet]]
-      K_496210(iVar4) --[[kasfCameraSetDeclinationDeg]]
-      iVar4 = K_491e30(64272901) --[[kasfVarValueGet]]
-      K_496260(iVar4) --[[kasfCameraSetDistance]]
+      K_496870(iVar4)  -- kasfTutCameraFocus
+      iVar4 = K_491e30(260833221)  -- kasfVarValueGet
+      K_4961b0(iVar4)  -- kasfCameraSetAngleDeg
+      iVar4 = K_491e30(60936190)  -- kasfVarValueGet
+      K_496210(iVar4)  -- kasfCameraSetDeclinationDeg
+      iVar4 = K_491e30(64272901)  -- kasfVarValueGet
+      K_496260(iVar4)  -- kasfCameraSetDistance
       _pc = 33
     elseif _pc == 175 then
       if (puVar2 == 10664498) then _pc = 177 else _pc = 178 end
@@ -1343,8 +1343,8 @@ function F_5da2c0(TeamName)
       _pc = 175
     elseif _pc == 177 then
       K_496eb0(268443998, 0)
-      K_491d70(109086661 --[[UnPauseUniverse]], 1) --[[kasfVarValueSet]]
-      K_491d70(211831571 --[[UnpauseOtherKAS]], 1) --[[kasfVarValueSet]]
+      K_491d70(109086661, 1)  -- UnPauseUniverse; kasfVarValueSet
+      K_491d70(211831571, 1)  -- UnpauseOtherKAS; kasfVarValueSet
       puVar2 = 10664499
       _pc = 66
     elseif _pc == 178 then
@@ -1352,15 +1352,15 @@ function F_5da2c0(TeamName)
     elseif _pc == 179 then
       _pc = 178
     elseif _pc == 180 then
-      K_491d70(52577235 --[[CloseSensors]], 1) --[[kasfVarValueSet]]
-      K_491d70(266064926, 1) --[[kasfVarValueSet]]
+      K_491d70(52577235, 1)  -- CloseSensors; kasfVarValueSet
+      K_491d70(266064926, 1)  -- kasfVarValueSet
       iVar1 = "PesterHInt1"
-      K_496870(iVar1) --[[kasfTutCameraFocus]]
-      K_4961b0(38) --[[kasfCameraSetAngleDeg]]
-      K_496210((-20)) --[[kasfCameraSetDeclinationDeg]]
-      K_496260(505) --[[kasfCameraSetDistance]]
-      K_497710(8000, " ") --[[kasfSetTraderDialog]]
-      K_494a00(TeamName, 10664500) --[[kasfMsgSend]]
+      K_496870(iVar1)  -- kasfTutCameraFocus
+      K_4961b0(38)  -- kasfCameraSetAngleDeg
+      K_496210((-20))  -- kasfCameraSetDeclinationDeg
+      K_496260(505)  -- kasfCameraSetDistance
+      K_497710(8000, " ")  -- kasfSetTraderDialog
+      K_494a00(TeamName, 10664500)  -- kasfMsgSend
       -- kasJump(state 0xe8e63cc)
       KASRule_Add(TeamName, "F_5da060", "F_5da2c0")
       F_5f4730(TeamName)
@@ -1372,15 +1372,15 @@ function F_5da2c0(TeamName)
     elseif _pc == 183 then
       _pc = 181
     elseif _pc == 184 then
-      iVar1 = K_496190() --[[kasfCameraGetAngleDeg]]
-      K_491d30(260833221, iVar1) --[[kasfVarCreateSet]]
-      iVar1 = K_4961f0() --[[kasfCameraGetDeclinationDeg]]
-      K_491d30(60936190, iVar1) --[[kasfVarCreateSet]]
-      iVar1 = K_496250() --[[kasfCameraGetDistance]]
-      K_491d30(64272901, iVar1) --[[kasfVarCreateSet]]
+      iVar1 = K_496190()  -- kasfCameraGetAngleDeg
+      K_491d30(260833221, iVar1)  -- kasfVarCreateSet
+      iVar1 = K_4961f0()  -- kasfCameraGetDeclinationDeg
+      K_491d30(60936190, iVar1)  -- kasfVarCreateSet
+      iVar1 = K_496250()  -- kasfCameraGetDistance
+      K_491d30(64272901, iVar1)  -- kasfVarCreateSet
       K_497580(90)
-      K_491d70(127756738 --[[StartTimer]], 3) --[[kasfVarValueSet]]
-      K_494a00(TeamName, 2772294) --[[kasfMsgSend]]
+      K_491d70(127756738, 3)  -- StartTimer; kasfVarValueSet
+      K_494a00(TeamName, 2772294)  -- kasfMsgSend
       -- kasJump(state 0xe989af2)
       KASRule_Add(TeamName, "F_5da210", "F_5da2c0")
       F_652ef0(TeamName)
@@ -1406,7 +1406,7 @@ function F_5da2c0(TeamName)
     elseif _pc == 193 then
       _pc = 189
     elseif _pc == 194 then
-      K_494a00(TeamName, 92825426) --[[kasfMsgSend]]
+      K_494a00(TeamName, 92825426)  -- kasfMsgSend
       K_497290(1, "Hiigara")
       _pc = 196
     elseif _pc == 195 then
@@ -1418,36 +1418,36 @@ function F_5da2c0(TeamName)
     elseif _pc == 198 then
       _pc = 196
     elseif _pc == 199 then
-      K_491d70(168240451, 1) --[[kasfVarValueSet]]
-      iVar1 = K_496c80(0) --[[kasfSensorsIsOpen]]
+      K_491d70(168240451, 1)  -- kasfVarValueSet
+      iVar1 = K_496c80(0)  -- kasfSensorsIsOpen
       if (iVar1 == 0) then _pc = 201 else _pc = 202 end
     elseif _pc == 200 then
       _pc = 45
     elseif _pc == 201 then
-      K_496bc0(100000) --[[kasfOpenSensors]]
-      K_491d70(126773838, 0) --[[kasfVarValueSet]]
+      K_496bc0(100000)  -- kasfOpenSensors
+      K_491d70(126773838, 0)  -- kasfVarValueSet
       _pc = 202
     elseif _pc == 202 then
       K_497a90()
       K_497ad0()
       K_496eb0(268443997, 0)
       iVar1 = "PesterHInt1"
-      K_4963a0("PesterPointer", iVar1) --[[kasfTutSetPointerTargetShip]]
+      K_4963a0("PesterPointer", iVar1)  -- kasfTutSetPointerTargetShip
       iVar1 = KAS_TeamVector("PesterHInt1")
       K_49a2a0(iVar1)
-      iVar1 = K_493b90() --[[kasfMissionSkillGet]]
+      iVar1 = K_493b90()  -- kasfMissionSkillGet
       if (iVar1 < 2) then _pc = 203 else _pc = 204 end
     elseif _pc == 203 then
       puVar2 = 10664498
       iVar1 = "FleetIntel"
-      K_494a00(iVar1, puVar2) --[[kasfMsgSend]]
+      K_494a00(iVar1, puVar2)  -- kasfMsgSend
       _pc = 205
     elseif _pc == 204 then
       puVar2 = 10664499
       iVar1 = "FleetIntel"
-      K_494a00(iVar1, puVar2) --[[kasfMsgSend]]
-      K_491d70(109086661 --[[UnPauseUniverse]], 1) --[[kasfVarValueSet]]
-      K_491d70(211831571 --[[UnpauseOtherKAS]], 1) --[[kasfVarValueSet]]
+      K_494a00(iVar1, puVar2)  -- kasfMsgSend
+      K_491d70(109086661, 1)  -- UnPauseUniverse; kasfVarValueSet
+      K_491d70(211831571, 1)  -- UnpauseOtherKAS; kasfVarValueSet
       _pc = 205
     elseif _pc == 205 then
       -- kasJump(state 0xe8e63cc)
@@ -1495,74 +1495,74 @@ function F_5da060(TeamName)
     if _pc == 0 then
       KAS_ScopeKind = 2
       KAS_Scope = KAS_TeamHash(TeamName)
-      iVar1 = K_497b00() --[[kasfGetTraderPriceScale]]
+      iVar1 = K_497b00()  -- kasfGetTraderPriceScale
       if (iVar1 == 0) then _pc = 3 else _pc = 2 end
     elseif _pc == 1 then
       do return end
     elseif _pc == 2 then
-      K_491d70((-2054310428), 0) --[[kasfVarValueSet]]
-      iVar1 = K_491e30(168240451) --[[kasfVarValueGet]]
+      K_491d70((-2054310428), 0)  -- kasfVarValueSet
+      iVar1 = K_491e30(168240451)  -- kasfVarValueGet
       if (iVar1 ~= 0) then _pc = 5 else _pc = 6 end
     elseif _pc == 3 then
-      iVar1 = K_491e30((-2054310428)) --[[kasfVarValueGet]]
+      iVar1 = K_491e30((-2054310428))  -- kasfVarValueGet
       if (iVar1 == 0) then _pc = 1 else _pc = 2 end
     elseif _pc == 4 then
       _pc = 2
     elseif _pc == 5 then
-      K_496530() --[[kasfTutRemoveAllPointers]]
-      K_491d70(168240451, 0) --[[kasfVarValueSet]]
+      K_496530()  -- kasfTutRemoveAllPointers
+      K_491d70(168240451, 0)  -- kasfVarValueSet
       _pc = 6
     elseif _pc == 6 then
-      iVar1 = K_491e30(266064926) --[[kasfVarValueGet]]
+      iVar1 = K_491e30(266064926)  -- kasfVarValueGet
       if (iVar1 ~= 0) then _pc = 7 else _pc = 8 end
     elseif _pc == 7 then
       K_497630(90)
-      K_491d70(266064926, 0) --[[kasfVarValueSet]]
+      K_491d70(266064926, 0)  -- kasfVarValueSet
       _pc = 8
     elseif _pc == 8 then
-      iVar1 = K_491e30(109086661 --[[UnPauseUniverse]]) --[[kasfVarValueGet]]
+      iVar1 = K_491e30(109086661)  -- UnPauseUniverse; kasfVarValueGet
       if (iVar1 ~= 0) then _pc = 9 else _pc = 10 end
     elseif _pc == 9 then
       K_497aa0()
-      K_491d70(109086661 --[[UnPauseUniverse]], 0) --[[kasfVarValueSet]]
+      K_491d70(109086661, 0)  -- UnPauseUniverse; kasfVarValueSet
       _pc = 10
     elseif _pc == 10 then
-      iVar1 = K_491e30(211831571 --[[UnpauseOtherKAS]]) --[[kasfVarValueGet]]
+      iVar1 = K_491e30(211831571)  -- UnpauseOtherKAS; kasfVarValueGet
       if (iVar1 ~= 0) then _pc = 11 else _pc = 12 end
     elseif _pc == 11 then
       K_497af0()
-      K_491d70(211831571 --[[UnpauseOtherKAS]], 0) --[[kasfVarValueSet]]
+      K_491d70(211831571, 0)  -- UnpauseOtherKAS; kasfVarValueSet
       _pc = 12
     elseif _pc == 12 then
-      iVar1 = K_491e30(52577235 --[[CloseSensors]]) --[[kasfVarValueGet]]
+      iVar1 = K_491e30(52577235)  -- CloseSensors; kasfVarValueGet
       if (iVar1 ~= 0) then _pc = 13 else _pc = 14 end
     elseif _pc == 13 then
-      iVar1 = K_491e30(126773838) --[[kasfVarValueGet]]
+      iVar1 = K_491e30(126773838)  -- kasfVarValueGet
       if (iVar1 == 0) then _pc = 15 else _pc = 16 end
     elseif _pc == 14 then
-      iVar1 = K_491e30(172907219 --[[CancelFocus]]) --[[kasfVarValueGet]]
+      iVar1 = K_491e30(172907219)  -- CancelFocus; kasfVarValueGet
       if (iVar1 ~= 0) then _pc = 17 else _pc = 18 end
     elseif _pc == 15 then
-      K_496c30(1) --[[kasfCloseSensors]]
-      K_491d70(126773838, 1) --[[kasfVarValueSet]]
+      K_496c30(1)  -- kasfCloseSensors
+      K_491d70(126773838, 1)  -- kasfVarValueSet
       _pc = 16
     elseif _pc == 16 then
-      K_491d70(52577235 --[[CloseSensors]], 0) --[[kasfVarValueSet]]
+      K_491d70(52577235, 0)  -- CloseSensors; kasfVarValueSet
       _pc = 14
     elseif _pc == 17 then
-      K_496ae0() --[[kasfTutCameraFocusCancel]]
-      K_491d70(172907219 --[[CancelFocus]], 0) --[[kasfVarValueSet]]
+      K_496ae0()  -- kasfTutCameraFocusCancel
+      K_491d70(172907219, 0)  -- CancelFocus; kasfVarValueSet
       _pc = 18
     elseif _pc == 18 then
-      iVar1 = K_491e30(232774915) --[[kasfVarValueGet]]
+      iVar1 = K_491e30(232774915)  -- kasfVarValueGet
       if (iVar1 ~= 0) then _pc = 19 else _pc = 20 end
     elseif _pc == 19 then
-      K_496ae0() --[[kasfTutCameraFocusCancel]]
-      K_496ae0() --[[kasfTutCameraFocusCancel]]
-      K_491d70(232774915, 0) --[[kasfVarValueSet]]
+      K_496ae0()  -- kasfTutCameraFocusCancel
+      K_496ae0()  -- kasfTutCameraFocusCancel
+      K_491d70(232774915, 0)  -- kasfVarValueSet
       _pc = 20
     elseif _pc == 20 then
-      iVar1 = K_491e30(77979796 --[[Failed]]) --[[kasfVarValueGet]]
+      iVar1 = K_491e30(77979796)  -- Failed; kasfVarValueGet
       if (iVar1 == 0) then _pc = 21 else _pc = 22 end
     elseif _pc == 21 then
       -- kasJump(state 0xe989af2)
@@ -1593,9 +1593,9 @@ function F_5db0b0(TeamName)
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
   iVar1 = KAS_GS("Mothership")
-  iVar1 = K_492d20(iVar1) --[[kasfShipsCount]]
+  iVar1 = K_492d20(iVar1)  -- kasfShipsCount
   if (iVar1 ~= 0) then
-    K_491cb0() --[[kasfMissionFailed]]
+    K_491cb0()  -- kasfMissionFailed
     do return end
   end
   do return end
@@ -1615,7 +1615,7 @@ function F_5da210(TeamName)
   local iVar1 = 0
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
-  iVar1 = K_492120(220350372) --[[kasfMsgReceived]]
+  iVar1 = K_492120(220350372)  -- kasfMsgReceived
   if (iVar1 ~= 0) then
     -- kasJump(state 0x4a5dc)
     KASRule_Add(TeamName, "F_652ef0", "F_5da210")
@@ -1623,14 +1623,14 @@ function F_5da210(TeamName)
     do return end
     do return end
   end
-  iVar1 = K_491e30(127756738 --[[StartTimer]]) --[[kasfVarValueGet]]
+  iVar1 = K_491e30(127756738)  -- StartTimer; kasfVarValueGet
   if (iVar1 ~= 0) then
-    iVar1 = K_491e30(127756738 --[[StartTimer]]) --[[kasfVarValueGet]]
-    K_491f00(144337492 --[[Default]], iVar1) --[[kasfTimerSet]]
-    K_491f50(144337492 --[[Default]]) --[[kasfTimerStart]]
-    K_491d70(127756738 --[[StartTimer]], 0) --[[kasfVarValueSet]]
+    iVar1 = K_491e30(127756738)  -- StartTimer; kasfVarValueGet
+    K_491f00(144337492, iVar1)  -- Default; kasfTimerSet
+    K_491f50(144337492)  -- Default; kasfTimerStart
+    K_491d70(127756738, 0)  -- StartTimer; kasfVarValueSet
   end
-  iVar1 = K_492060(144337492 --[[Default]]) --[[kasfTimerExpired]]
+  iVar1 = K_492060(144337492)  -- Default; kasfTimerExpired
   if (iVar1 ~= 0) then
     -- kasJump(state 0x1f32b25)
     KASRule_Add(TeamName, "F_5da2c0", "F_5da210")
@@ -1645,7 +1645,7 @@ function F_5d98f0(TeamName)
   KAS_Team = TeamName
   KAS_ScopeKind = 1
   KAS_Scope = KAS_TeamHash(TeamName)
-  K_498c70(TeamName) --[[kasfResetShipRenderFlags]]
+  K_498c70(TeamName)  -- kasfResetShipRenderFlags
   -- kasJump(state 0xe98cf15)
   KASRule_Add(TeamName, "F_5d9930", "F_5d98f0")
   F_652ef0(TeamName)
@@ -1659,7 +1659,7 @@ function F_5d9930(TeamName)
   local iVar1 = 0
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
-  iVar1 = K_492120(237703397 --[[Reinforce]]) --[[kasfMsgReceived]]
+  iVar1 = K_492120(237703397)  -- Reinforce; kasfMsgReceived
   if (iVar1 ~= 0) then
     -- kasJump(state 0x3669d95)
     KASRule_Add(TeamName, "F_652ef0", "F_5d9930")
@@ -1675,19 +1675,19 @@ function F_5d9980(TeamName)
   local iVar1, iVar2 = 0, 0
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
-  K_493980(TeamName, 10) --[[kasfShipsSetDamageFactor]]
+  K_493980(TeamName, 10)  -- kasfShipsSetDamageFactor
   iVar1 = KAS_GS("gs_00005920")
-  K_492d10(iVar1) --[[kasfGrowSelectionClear]]
+  K_492d10(iVar1)  -- kasfGrowSelectionClear
   iVar1 = KAS_GS("ToAttack")
-  K_492d10(iVar1) --[[kasfGrowSelectionClear]]
+  K_492d10(iVar1)  -- kasfGrowSelectionClear
   iVar1 = KAS_GS("gs_00005920")
   iVar2 = "BattleZone"
-  K_492db0(iVar2, iVar1) --[[kasfFindShipsInside]]
+  K_492db0(iVar2, iVar1)  -- kasfFindShipsInside
   iVar1 = KAS_GS("gs_00005920")
   iVar2 = KAS_GS("ToAttack")
-  K_495560(iVar2, iVar1) --[[kasfShipsSelectCapital]]
+  K_495560(iVar2, iVar1)  -- kasfShipsSelectCapital
   iVar1 = KAS_GS("ToAttack")
-  K_492190(iVar1) --[[kasfAttack]]
+  K_492190(iVar1)  -- kasfAttack
   do return end
 end
 
@@ -1705,10 +1705,10 @@ function F_5d9430(TeamName)
   local p1 = 0
   KAS_ScopeKind = 1
   KAS_Scope = KAS_TeamHash(TeamName)
-  K_498c70(TeamName) --[[kasfResetShipRenderFlags]]
+  K_498c70(TeamName)  -- kasfResetShipRenderFlags
   p1 = "TaiidanMainCarrier"
-  K_494750(p1) --[[kasfDockInstant]]
-  K_491d30((-1970110140), 1) --[[kasfVarCreateSet]]
+  K_494750(p1)  -- kasfDockInstant
+  K_491d30((-1970110140), 1)  -- kasfVarCreateSet
   -- kasJump(state 0xc2ee6b2)
   KASRule_Add(TeamName, "F_5d9490", "F_5d9430")
   F_652ef0(TeamName)
@@ -1722,9 +1722,9 @@ function F_5d9490(TeamName)
   local iVar1 = 0
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
-  iVar1 = K_492120(213247342) --[[kasfMsgReceived]]
+  iVar1 = K_492120(213247342)  -- kasfMsgReceived
   if (iVar1 ~= 0) then
-    K_4947c0() --[[kasfLaunch]]
+    K_4947c0()  -- kasfLaunch
     -- kasJump(state 0x506a278)
     KASRule_Add(TeamName, "F_5d9870", "F_5d9490")
     F_652ef0(TeamName)
@@ -1739,14 +1739,14 @@ function F_5d9870(TeamName)
   local iVar1, p2 = 0, 0
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
-  iVar1 = K_4948a0() --[[kasfTeamFinishedLaunching]]
+  iVar1 = K_4948a0()  -- kasfTeamFinishedLaunching
   if (iVar1 ~= 0) then
-    iVar1 = K_491e30(71552181) --[[kasfVarValueGet]]
+    iVar1 = K_491e30(71552181)  -- kasfVarValueGet
     if (iVar1 == 0) then
-      K_491d30(71552181, 1) --[[kasfVarCreateSet]]
+      K_491d30(71552181, 1)  -- kasfVarCreateSet
       p2 = 10664497
       iVar1 = "FleetIntel"
-      K_494a00(iVar1, p2) --[[kasfMsgSend]]
+      K_494a00(iVar1, p2)  -- kasfMsgSend
     end
     -- kasJump(state 0x857bcb7)
     KASRule_Add(TeamName, "F_5d9600", "F_5d9870")
@@ -1762,19 +1762,19 @@ function F_5d94e0(TeamName)
   local iVar1, iVar2, p3 = 0, 0, 0
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
-  K_492780() --[[kasfFormationDelta]]
+  K_492780()  -- kasfFormationDelta
   p3 = "sWorker"
   iVar1 = KAS_GS("Enemy")
   iVar2 = KAS_GS("Workers")
-  K_495690(iVar2, iVar1, p3) --[[kasfShipsSelectType]]
+  K_495690(iVar2, iVar1, p3)  -- kasfShipsSelectType
   iVar1 = KAS_GS("Workers")
-  iVar1 = K_492d20(iVar1) --[[kasfShipsCount]]
+  iVar1 = K_492d20(iVar1)  -- kasfShipsCount
   if (iVar1 == 0) then
     iVar1 = KAS_GS("ToAttack")
-    K_492d10(iVar1) --[[kasfGrowSelectionClear]]
+    K_492d10(iVar1)  -- kasfGrowSelectionClear
     iVar1 = KAS_GS("Enemy")
     iVar2 = KAS_GS("ToAttack")
-    K_495bd0(iVar2, iVar1) --[[kasfShipsAdd]]
+    K_495bd0(iVar2, iVar1)  -- kasfShipsAdd
     iVar1 = KAS_GS("ToAttack")
     iVar2 = KAS_GS("ToAttack")
     K_4952b0(iVar2, iVar1)
@@ -1782,13 +1782,13 @@ function F_5d94e0(TeamName)
     iVar2 = KAS_GS("ToAttack")
     K_49a100(iVar2, iVar1)
     iVar1 = KAS_GS("ToAttack")
-    K_492190(iVar1) --[[kasfAttack]]
-    K_491f90(139352562 --[[AttackTimer]], 7) --[[kasfTimerCreateSetStart]]
+    K_492190(iVar1)  -- kasfAttack
+    K_491f90(139352562, 7)  -- AttackTimer; kasfTimerCreateSetStart
     do return end
   end
   iVar1 = KAS_GS("Workers")
-  K_492190(iVar1) --[[kasfAttack]]
-  K_491f90(139352562 --[[AttackTimer]], 7) --[[kasfTimerCreateSetStart]]
+  K_492190(iVar1)  -- kasfAttack
+  K_491f90(139352562, 7)  -- AttackTimer; kasfTimerCreateSetStart
   do return end
 end
 
@@ -1798,22 +1798,22 @@ function F_5d9600(TeamName)
   local iVar1, iVar2, p3 = 0, 0, 0
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
-  iVar1 = K_492ce0() --[[kasfTeamCount]]
+  iVar1 = K_492ce0()  -- kasfTeamCount
   if (iVar1 ~= 0) then
     iVar1 = K_499870(TeamName)
     if (iVar1 ~= 0) then
       p3 = "sWorker"
       iVar1 = KAS_GS("Enemy")
       iVar2 = KAS_GS("Workers")
-      K_495690(iVar2, iVar1, p3) --[[kasfShipsSelectType]]
+      K_495690(iVar2, iVar1, p3)  -- kasfShipsSelectType
       iVar1 = KAS_GS("Workers")
-      iVar1 = K_492d20(iVar1) --[[kasfShipsCount]]
+      iVar1 = K_492d20(iVar1)  -- kasfShipsCount
       if (iVar1 == 0) then
         iVar1 = KAS_GS("ToAttack")
-        K_492d10(iVar1) --[[kasfGrowSelectionClear]]
+        K_492d10(iVar1)  -- kasfGrowSelectionClear
         iVar1 = KAS_GS("Enemy")
         iVar2 = KAS_GS("ToAttack")
-        K_495bd0(iVar2, iVar1) --[[kasfShipsAdd]]
+        K_495bd0(iVar2, iVar1)  -- kasfShipsAdd
         iVar1 = KAS_GS("ToAttack")
         iVar2 = KAS_GS("ToAttack")
         K_4952b0(iVar2, iVar1)
@@ -1821,19 +1821,19 @@ function F_5d9600(TeamName)
         iVar2 = KAS_GS("ToAttack")
         K_49a100(iVar2, iVar1)
         iVar1 = KAS_GS("ToAttack")
-        K_492190(iVar1) --[[kasfAttack]]
+        K_492190(iVar1)  -- kasfAttack
       else
         iVar1 = KAS_GS("Workers")
-        K_492190(iVar1) --[[kasfAttack]]
+        K_492190(iVar1)  -- kasfAttack
       end
-      K_491f00(139352562 --[[AttackTimer]], 7) --[[kasfTimerSet]]
-      K_491f50(139352562 --[[AttackTimer]]) --[[kasfTimerStart]]
+      K_491f00(139352562, 7)  -- AttackTimer; kasfTimerSet
+      K_491f50(139352562)  -- AttackTimer; kasfTimerStart
     end
     do return end
   end
-  iVar1 = K_491e30((-1970110140)) --[[kasfVarValueGet]]
+  iVar1 = K_491e30((-1970110140))  -- kasfVarValueGet
   if (iVar1 < 3) then
-    K_491db0((-1970110140)) --[[kasfVarValueInc]]
+    K_491db0((-1970110140))  -- kasfVarValueInc
     -- kasJump(state 0x8832365)
     KASRule_Add(TeamName, "F_5d97b0", "F_5d9600")
     F_5d9780(TeamName)
@@ -1852,7 +1852,7 @@ function F_5d9780(TeamName)
   KAS_Team = TeamName
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
-  K_491f90(148949186, 45) --[[kasfTimerCreateSetStart]]
+  K_491f90(148949186, 45)  -- kasfTimerCreateSetStart
   do return end
 end
 
@@ -1862,7 +1862,7 @@ function F_5d97b0(TeamName)
   local iVar1 = 0
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
-  iVar1 = K_4920a0(148949186) --[[kasfTimerExpiredDestroy]]
+  iVar1 = K_4920a0(148949186)  -- kasfTimerExpiredDestroy
   if (iVar1 ~= 0) then
     -- kasJump(state 0x4869685)
     KASRule_Add(TeamName, "F_5d9800", "F_5d97b0")
@@ -1878,12 +1878,12 @@ function F_5d9310(TeamName)
   local iVar1, p3, p1, p2, p5 = 0, 0, 0, 0, 0
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
-  K_495eb0() --[[kasfStop]]
+  K_495eb0()  -- kasfStop
   iVar1 = KAS_GS("gs_000052a7")
-  K_492d10(iVar1) --[[kasfGrowSelectionClear]]
+  K_492d10(iVar1)  -- kasfGrowSelectionClear
   p5 = 1
   iVar1 = "TaiidanMainCarrier"
-  p3 = K_493e00() --[[kasfTeamCountOriginal]]
+  p3 = K_493e00()  -- kasfTeamCountOriginal
   p2 = "tHeavyInterceptor"
   p1 = KAS_GS("gs_000052a7")
   K_499c70(p1, p2, p3, iVar1, p5)
@@ -1897,11 +1897,11 @@ function F_5d9800(TeamName)
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
   iVar1 = KAS_GS("gs_000052a7")
-  iVar1 = K_492d20(iVar1) --[[kasfShipsCount]]
-  iVar2 = K_493e00() --[[kasfTeamCountOriginal]]
+  iVar1 = K_492d20(iVar1)  -- kasfShipsCount
+  iVar2 = K_493e00()  -- kasfTeamCountOriginal
   if (iVar2 <= iVar1) then
     iVar1 = KAS_GS("gs_000052a7")
-    K_493cf0(TeamName, iVar1) --[[kasfReinforceTeamWithShips]]
+    K_493cf0(TeamName, iVar1)  -- kasfReinforceTeamWithShips
     -- kasJump(state 0x506a278)
     KASRule_Add(TeamName, "F_5d9870", "F_5d9800")
     F_652ef0(TeamName)
@@ -1915,7 +1915,7 @@ function F_5d8370(TeamName)
   KAS_Team = TeamName
   KAS_ScopeKind = 1
   KAS_Scope = KAS_TeamHash(TeamName)
-  K_498c70(TeamName) --[[kasfResetShipRenderFlags]]
+  K_498c70(TeamName)  -- kasfResetShipRenderFlags
   -- kasJump(state 0x498cf55)
   KASRule_Add(TeamName, "F_5d83b0", "F_5d8370")
   F_652ef0(TeamName)
@@ -1929,9 +1929,9 @@ function F_5d83b0(TeamName)
   local iVar1 = 0
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
-  iVar1 = K_492120(88401603) --[[kasfMsgReceived]]
+  iVar1 = K_492120(88401603)  -- kasfMsgReceived
   if (iVar1 ~= 0) then
-    K_4947c0() --[[kasfLaunch]]
+    K_4947c0()  -- kasfLaunch
     -- kasJump(state 0x506a278)
     KASRule_Add(TeamName, "F_5d8580", "F_5d83b0")
     F_652ef0(TeamName)
@@ -1946,7 +1946,7 @@ function F_5d8580(TeamName)
   local iVar1 = 0
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
-  iVar1 = K_4948a0() --[[kasfTeamFinishedLaunching]]
+  iVar1 = K_4948a0()  -- kasfTeamFinishedLaunching
   if (iVar1 ~= 0) then
     -- kasJump(state 0x857bcb7)
     KASRule_Add(TeamName, "F_5d8400", "F_5d8580")
@@ -1962,7 +1962,7 @@ function F_5d8400(TeamName)
   local iVar1, iVar2 = 0, 0
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
-  iVar1 = K_492ce0() --[[kasfTeamCount]]
+  iVar1 = K_492ce0()  -- kasfTeamCount
   if (iVar1 == 0) then
     -- kasJump(state 0x4869685)
     KASRule_Add(TeamName, "F_5d8510", "F_5d8400")
@@ -1971,15 +1971,15 @@ function F_5d8400(TeamName)
     do return end
   end
   iVar1 = KAS_GS("ToAttack")
-  K_492d10(iVar1) --[[kasfGrowSelectionClear]]
+  K_492d10(iVar1)  -- kasfGrowSelectionClear
   iVar1 = KAS_GS("Mothership")
   iVar2 = KAS_GS("ToAttack")
-  K_495bd0(iVar2, iVar1) --[[kasfShipsAdd]]
+  K_495bd0(iVar2, iVar1)  -- kasfShipsAdd
   iVar2 = 10000
   iVar1 = KAS_GS("ToAttack")
-  K_492e90(iVar1, iVar2) --[[kasfFindEnemyShipsInside]]
+  K_492e90(iVar1, iVar2)  -- kasfFindEnemyShipsInside
   iVar1 = KAS_GS("ToAttack")
-  K_492190(iVar1) --[[kasfAttack]]
+  K_492190(iVar1)  -- kasfAttack
   do return end
 end
 
@@ -1989,12 +1989,12 @@ function F_5d84a0(TeamName)
   local iVar1, p3, p1, p2, p5 = 0, 0, 0, 0, 0
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
-  K_495eb0() --[[kasfStop]]
+  K_495eb0()  -- kasfStop
   iVar1 = KAS_GS("gs_000052a7")
-  K_492d10(iVar1) --[[kasfGrowSelectionClear]]
+  K_492d10(iVar1)  -- kasfGrowSelectionClear
   p5 = 1
   iVar1 = "TaiidanCarrier"
-  p3 = K_493e00() --[[kasfTeamCountOriginal]]
+  p3 = K_493e00()  -- kasfTeamCountOriginal
   p2 = "tStandardFrigate"
   p1 = KAS_GS("gs_000052a7")
   K_499c70(p1, p2, p3, iVar1, p5)
@@ -2008,11 +2008,11 @@ function F_5d8510(TeamName)
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
   iVar1 = KAS_GS("gs_000052a7")
-  iVar1 = K_492d20(iVar1) --[[kasfShipsCount]]
-  iVar2 = K_493e00() --[[kasfTeamCountOriginal]]
+  iVar1 = K_492d20(iVar1)  -- kasfShipsCount
+  iVar2 = K_493e00()  -- kasfTeamCountOriginal
   if (iVar2 <= iVar1) then
     iVar1 = KAS_GS("gs_000052a7")
-    K_493cf0(TeamName, iVar1) --[[kasfReinforceTeamWithShips]]
+    K_493cf0(TeamName, iVar1)  -- kasfReinforceTeamWithShips
     -- kasJump(state 0x506a278)
     KASRule_Add(TeamName, "F_5d8580", "F_5d8510")
     F_652ef0(TeamName)
@@ -2026,7 +2026,7 @@ function F_5d85c0(TeamName)
   KAS_Team = TeamName
   KAS_ScopeKind = 1
   KAS_Scope = KAS_TeamHash(TeamName)
-  K_498c70(TeamName) --[[kasfResetShipRenderFlags]]
+  K_498c70(TeamName)  -- kasfResetShipRenderFlags
   do return end
 end
 
@@ -2035,7 +2035,7 @@ function F_5d85f0(TeamName)
   KAS_Team = TeamName
   KAS_ScopeKind = 1
   KAS_Scope = KAS_TeamHash(TeamName)
-  K_498c70(TeamName) --[[kasfResetShipRenderFlags]]
+  K_498c70(TeamName)  -- kasfResetShipRenderFlags
   -- kasJump(state 0x5569d3)
   KASRule_Add(TeamName, "F_5d8660", "F_5d85f0")
   F_5d8630(TeamName)
@@ -2050,7 +2050,7 @@ function F_5d8630(TeamName)
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
   p1 = "TaiidanCarrier2"
-  K_494750(p1) --[[kasfDockInstant]]
+  K_494750(p1)  -- kasfDockInstant
   do return end
 end
 
@@ -2060,11 +2060,11 @@ function F_5d8660(TeamName)
   local iVar1, p2 = 0, 0
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
-  iVar1 = K_494940() --[[kasfTeamDockedReadyForLaunch]]
+  iVar1 = K_494940()  -- kasfTeamDockedReadyForLaunch
   if (iVar1 ~= 0) then
     p2 = 137343732
     iVar1 = "TaiidanCarrier2"
-    K_494a00(iVar1, p2) --[[kasfMsgSend]]
+    K_494a00(iVar1, p2)  -- kasfMsgSend
     -- kasJump(state 0x4e2d3)
     KASRule_Add(TeamName, "F_5d86c0", "F_5d8660")
     F_652ef0(TeamName)
@@ -2079,14 +2079,14 @@ function F_5d86c0(TeamName)
   local iVar1 = 0
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
-  iVar1 = K_492120(54112162) --[[kasfMsgReceived]]
+  iVar1 = K_492120(54112162)  -- kasfMsgReceived
   if (iVar1 ~= 0) then
-    K_491f90(139352562 --[[AttackTimer]], 13) --[[kasfTimerCreateSetStart]]
+    K_491f90(139352562, 13)  -- AttackTimer; kasfTimerCreateSetStart
     do return end
   end
-  iVar1 = K_4920a0(139352562 --[[AttackTimer]]) --[[kasfTimerExpiredDestroy]]
+  iVar1 = K_4920a0(139352562)  -- AttackTimer; kasfTimerExpiredDestroy
   if (iVar1 ~= 0) then
-    K_4947c0() --[[kasfLaunch]]
+    K_4947c0()  -- kasfLaunch
     -- kasJump(state 0x506a278)
     KASRule_Add(TeamName, "F_5d88f0", "F_5d86c0")
     F_652ef0(TeamName)
@@ -2101,7 +2101,7 @@ function F_5d88f0(TeamName)
   local iVar1 = 0
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
-  iVar1 = K_4948a0() --[[kasfTeamFinishedLaunching]]
+  iVar1 = K_4948a0()  -- kasfTeamFinishedLaunching
   if (iVar1 ~= 0) then
     -- kasJump(state 0x857bcb7)
     KASRule_Add(TeamName, "F_5d8750", "F_5d88f0")
@@ -2116,7 +2116,7 @@ function F_5d8730(TeamName)
   KAS_Team = TeamName
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
-  K_492810() --[[kasfFormationClaw]]
+  K_492810()  -- kasfFormationClaw
   do return end
 end
 
@@ -2126,7 +2126,7 @@ function F_5d8750(TeamName)
   local iVar1, p2, p1, p4 = 0, 0, 0, 0
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
-  iVar1 = K_492ce0() --[[kasfTeamCount]]
+  iVar1 = K_492ce0()  -- kasfTeamCount
   if (iVar1 == 0) then
     -- kasJump(state 0x4869685)
     KASRule_Add(TeamName, "F_5d8880", "F_5d8750")
@@ -2135,14 +2135,14 @@ function F_5d8750(TeamName)
     do return end
   end
   iVar1 = KAS_GS("ToAttack")
-  K_492d10(iVar1) --[[kasfGrowSelectionClear]]
+  K_492d10(iVar1)  -- kasfGrowSelectionClear
   p4 = 10000
-  iVar1 = KAS_ShipsVector(211966048 --[[Mothership]])
+  iVar1 = KAS_ShipsVector(211966048)  -- Mothership
   p2 = KAS_GS("Enemy")
   p1 = KAS_GS("ToAttack")
-  K_495a50(p1, p2, iVar1, p4) --[[kasfShipsSelectNearby]]
+  K_495a50(p1, p2, iVar1, p4)  -- kasfShipsSelectNearby
   iVar1 = KAS_GS("ToAttack")
-  K_492190(iVar1) --[[kasfAttack]]
+  K_492190(iVar1)  -- kasfAttack
   do return end
 end
 
@@ -2152,19 +2152,19 @@ function F_5d87f0(TeamName)
   local iVar1, p3, p1, p2, p5 = 0, 0, 0, 0, 0
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
-  K_495eb0() --[[kasfStop]]
+  K_495eb0()  -- kasfStop
   iVar1 = KAS_GS("gs_000052a7")
-  K_492d10(iVar1) --[[kasfGrowSelectionClear]]
+  K_492d10(iVar1)  -- kasfGrowSelectionClear
   iVar1 = "TaiidanC2MGCorv1"
-  iVar1 = K_493de0(iVar1) --[[kasfThisTeamIs]]
+  iVar1 = K_493de0(iVar1)  -- kasfThisTeamIs
   p5 = 1
   if (iVar1 == 0) then
     iVar1 = "TaiidanCarrier2"
-    p3 = K_493e00() --[[kasfTeamCountOriginal]]
+    p3 = K_493e00()  -- kasfTeamCountOriginal
     p2 = "tHeavyInterceptor"
   else
     iVar1 = "TaiidanCarrier2"
-    p3 = K_493e00() --[[kasfTeamCountOriginal]]
+    p3 = K_493e00()  -- kasfTeamCountOriginal
     p2 = "tMultiGunCorvette"
   end
   p1 = KAS_GS("gs_000052a7")
@@ -2179,11 +2179,11 @@ function F_5d8880(TeamName)
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
   iVar1 = KAS_GS("gs_000052a7")
-  iVar1 = K_492d20(iVar1) --[[kasfShipsCount]]
-  iVar2 = K_493e00() --[[kasfTeamCountOriginal]]
+  iVar1 = K_492d20(iVar1)  -- kasfShipsCount
+  iVar2 = K_493e00()  -- kasfTeamCountOriginal
   if (iVar2 <= iVar1) then
     iVar1 = KAS_GS("gs_000052a7")
-    K_493cf0(TeamName, iVar1) --[[kasfReinforceTeamWithShips]]
+    K_493cf0(TeamName, iVar1)  -- kasfReinforceTeamWithShips
     -- kasJump(state 0x506a278)
     KASRule_Add(TeamName, "F_5d88f0", "F_5d8880")
     F_652ef0(TeamName)
@@ -2198,9 +2198,9 @@ function F_5d80f0(TeamName)
   local p1 = 0
   KAS_ScopeKind = 1
   KAS_Scope = KAS_TeamHash(TeamName)
-  K_498c70(TeamName) --[[kasfResetShipRenderFlags]]
+  K_498c70(TeamName)  -- kasfResetShipRenderFlags
   p1 = "TaiidanResourcers"
-  K_492960(p1) --[[kasfGuardShips]]
+  K_492960(p1)  -- kasfGuardShips
   do return end
 end
 
@@ -2210,9 +2210,9 @@ function F_5d7fd0(TeamName)
   local p1 = 0
   KAS_ScopeKind = 1
   KAS_Scope = KAS_TeamHash(TeamName)
-  K_498c70(TeamName) --[[kasfResetShipRenderFlags]]
+  K_498c70(TeamName)  -- kasfResetShipRenderFlags
   p1 = KAS_VolumeVector("Unexplored")
-  K_4941a0(p1) --[[kasfMoveTo]]
+  K_4941a0(p1)  -- kasfMoveTo
   do return end
 end
 
@@ -2222,30 +2222,30 @@ function F_5d8010(TeamName)
   local iVar1, iVar2 = 0, 0
   KAS_ScopeKind = 1
   KAS_Scope = KAS_TeamHash(TeamName)
-  iVar1 = K_491e30(71552178) --[[kasfVarValueGet]]
+  iVar1 = K_491e30(71552178)  -- kasfVarValueGet
   if (iVar1 == 0) then
     iVar1 = K_499570(TeamName)
     if (iVar1 ~= 0) then
-      K_491d30(71552178, 1) --[[kasfVarCreateSet]]
-      K_495f00() --[[kasfHarvest]]
+      K_491d30(71552178, 1)  -- kasfVarCreateSet
+      K_495f00()  -- kasfHarvest
     end
   end
-  iVar1 = K_491e30(71552179) --[[kasfVarValueGet]]
+  iVar1 = K_491e30(71552179)  -- kasfVarValueGet
   if (iVar1 == 0) then
-    iVar1 = K_496e40() --[[kasfGetWorldResources]]
+    iVar1 = K_496e40()  -- kasfGetWorldResources
     if (iVar1 == 0) then
-      iVar1 = K_492ce0() --[[kasfTeamCount]]
+      iVar1 = K_492ce0()  -- kasfTeamCount
       if (iVar1 ~= 0) then
-        K_491d30(71552179, 1) --[[kasfVarCreateSet]]
+        K_491d30(71552179, 1)  -- kasfVarCreateSet
         iVar2 = 88401603
         iVar1 = "TaiidanPunishmentFrigate1"
-        K_494a00(iVar1, iVar2) --[[kasfMsgSend]]
+        K_494a00(iVar1, iVar2)  -- kasfMsgSend
         iVar2 = 88401603
         iVar1 = "TaiidanPunishmentFrigate2"
-        K_494a00(iVar1, iVar2) --[[kasfMsgSend]]
+        K_494a00(iVar1, iVar2)  -- kasfMsgSend
         iVar2 = 88401603
         iVar1 = "TaiidanPunishmentFrigate3"
-        K_494a00(iVar1, iVar2) --[[kasfMsgSend]]
+        K_494a00(iVar1, iVar2)  -- kasfMsgSend
       end
     end
   end
@@ -2258,9 +2258,9 @@ function F_5d7f90(TeamName)
   local p1 = 0
   KAS_ScopeKind = 1
   KAS_Scope = KAS_TeamHash(TeamName)
-  K_498c70(TeamName) --[[kasfResetShipRenderFlags]]
+  K_498c70(TeamName)  -- kasfResetShipRenderFlags
   p1 = "TaiidanCarrier"
-  K_492960(p1) --[[kasfGuardShips]]
+  K_492960(p1)  -- kasfGuardShips
   do return end
 end
 
@@ -2269,8 +2269,8 @@ function F_5d8930(TeamName)
   KAS_Team = TeamName
   KAS_ScopeKind = 1
   KAS_Scope = KAS_TeamHash(TeamName)
-  K_498c70(TeamName) --[[kasfResetShipRenderFlags]]
-  K_4977a0(TeamName) --[[kasfSetTraderPriceScale]]
+  K_498c70(TeamName)  -- kasfResetShipRenderFlags
+  K_4977a0(TeamName)  -- kasfSetTraderPriceScale
   -- kasJump(state 0x348ce77)
   KASRule_Add(TeamName, "F_5d8980", "F_5d8930")
   F_652ef0(TeamName)
@@ -2284,7 +2284,7 @@ function F_5d8980(TeamName)
   local iVar1 = 0
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
-  iVar1 = K_492120(139644696) --[[kasfMsgReceived]]
+  iVar1 = K_492120(139644696)  -- kasfMsgReceived
   if (iVar1 ~= 0) then
     -- kasJump(state 0x58440c8)
     KASRule_Add(TeamName, "F_5d8a60", "F_5d8980")
@@ -2300,17 +2300,17 @@ function F_5d89d0(TeamName)
   local iVar1, iVar2, p3 = 0, 0, 0
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
-  K_497800(TeamName) --[[kasfSetTraderDisabled]]
+  K_497800(TeamName)  -- kasfSetTraderDisabled
   p3 = "kProximitySensor"
   iVar1 = KAS_GS("Enemy")
   iVar2 = KAS_GS("gs_0b87dad3")
-  K_495690(iVar2, iVar1, p3) --[[kasfShipsSelectType]]
+  K_495690(iVar2, iVar1, p3)  -- kasfShipsSelectType
   iVar1 = KAS_GS("gs_0b87dad3")
   iVar2 = KAS_GS("FirstShip")
   K_498d90(iVar2, iVar1)
-  iVar1 = KAS_ShipsVector(126432768 --[[FirstShip]])
-  K_4941a0(iVar1) --[[kasfMoveTo]]
-  K_491f90(150120898, 6) --[[kasfTimerCreateSetStart]]
+  iVar1 = KAS_ShipsVector(126432768)  -- FirstShip
+  K_4941a0(iVar1)  -- kasfMoveTo
+  K_491f90(150120898, 6)  -- kasfTimerCreateSetStart
   do return end
 end
 
@@ -2320,46 +2320,46 @@ function F_5d8a60(TeamName)
   local iVar1, iVar2, p3, pcVar3 = 0, 0, 0, 0
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
-  iVar1 = K_492060(150120898) --[[kasfTimerExpired]]
+  iVar1 = K_492060(150120898)  -- kasfTimerExpired
   if (iVar1 ~= 0) then
     p3 = 10000
     iVar1 = KAS_TeamVector(TeamName)
     iVar2 = KAS_GS("NearBy")
-    K_4931a0(iVar2, iVar1, p3) --[[kasfFindEnemiesInside]]
+    K_4931a0(iVar2, iVar1, p3)  -- kasfFindEnemiesInside
     iVar1 = KAS_GS("NearBy")
     iVar2 = KAS_GS("NearBy")
-    iVar1 = K_495560(iVar2, iVar1) --[[kasfShipsSelectCapital]]
+    iVar1 = K_495560(iVar2, iVar1)  -- kasfShipsSelectCapital
     if (iVar1 == 0) then
       pcVar3 = "kProximitySensor"
       iVar1 = KAS_GS("Enemy")
       iVar2 = KAS_GS("gs_0b87dad3")
-      iVar1 = K_495690(iVar2, iVar1, pcVar3) --[[kasfShipsSelectType]]
+      iVar1 = K_495690(iVar2, iVar1, pcVar3)  -- kasfShipsSelectType
       if (iVar1 ~= 0) then
         iVar1 = KAS_GS("gs_0b87dad3")
         iVar2 = KAS_GS("FirstShip")
         K_498d90(iVar2, iVar1)
-        iVar1 = KAS_ShipsVector(126432768 --[[FirstShip]])
-        K_4941a0(iVar1) --[[kasfMoveTo]]
+        iVar1 = KAS_ShipsVector(126432768)  -- FirstShip
+        K_4941a0(iVar1)  -- kasfMoveTo
       end
     else
-      iVar1 = K_491e30(71552180) --[[kasfVarValueGet]]
+      iVar1 = K_491e30(71552180)  -- kasfVarValueGet
       if (iVar1 == 0) then
         pcVar3 = "kProximitySensor"
         iVar1 = KAS_GS("NearBy")
         iVar2 = KAS_GS("Null")
-        iVar1 = K_495690(iVar2, iVar1, pcVar3) --[[kasfShipsSelectType]]
+        iVar1 = K_495690(iVar2, iVar1, pcVar3)  -- kasfShipsSelectType
         if (iVar1 ~= 0) then
-          K_491d30(71552180, 1) --[[kasfVarCreateSet]]
+          K_491d30(71552180, 1)  -- kasfVarCreateSet
           iVar2 = 253349863
           iVar1 = "FleetIntel"
-          K_494a00(iVar1, iVar2) --[[kasfMsgSend]]
+          K_494a00(iVar1, iVar2)  -- kasfMsgSend
         end
       end
       iVar1 = KAS_GS("NearBy")
-      K_492190(iVar1) --[[kasfAttack]]
+      K_492190(iVar1)  -- kasfAttack
     end
-    K_491f00(150120898, 6) --[[kasfTimerSet]]
-    K_491f50(150120898) --[[kasfTimerStart]]
+    K_491f00(150120898, 6)  -- kasfTimerSet
+    K_491f50(150120898)  -- kasfTimerStart
   end
   do return end
 end
@@ -2370,10 +2370,10 @@ function F_5d7c20(TeamName)
   local iVar1 = 0
   KAS_ScopeKind = 1
   KAS_Scope = KAS_TeamHash(TeamName)
-  iVar1 = K_491e30(71552176) --[[kasfVarValueGet]]
+  iVar1 = K_491e30(71552176)  -- kasfVarValueGet
   if (iVar1 == 0) then
-    K_491d30(71552176, 1) --[[kasfVarCreateSet]]
-    K_494160(0) --[[kasfTeamSwitchPlayerOwner]]
+    K_491d30(71552176, 1)  -- kasfVarCreateSet
+    K_494160(0)  -- kasfTeamSwitchPlayerOwner
     K_497ed0(TeamName)
   end
   -- kasJump(state 0x7464cb7)
@@ -2390,7 +2390,7 @@ function F_5d7c90(TeamName)
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
   p1 = "ProxPatrol"
-  K_4929d0(p1) --[[kasfPatrolPath]]
+  K_4929d0(p1)  -- kasfPatrolPath
   do return end
 end
 
@@ -2400,7 +2400,7 @@ function F_5d7cc0(TeamName)
   local iVar1 = 0
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
-  iVar1 = K_492120(139644696) --[[kasfMsgReceived]]
+  iVar1 = K_492120(139644696)  -- kasfMsgReceived
   if (iVar1 ~= 0) then
     -- kasJump(state 0x857bcb7)
     KASRule_Add(TeamName, "F_5d7d40", "F_5d7cc0")
@@ -2417,7 +2417,7 @@ function F_5d7d10(TeamName)
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
   p1 = KAS_GS("gs_0cb402f8")
-  K_492190(p1) --[[kasfAttack]]
+  K_492190(p1)  -- kasfAttack
   do return end
 end
 
@@ -2428,7 +2428,7 @@ function F_5d7d40(TeamName)
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
   iVar1 = KAS_GS("gs_0cb402f8")
-  iVar1 = K_492d20(iVar1) --[[kasfShipsCount]]
+  iVar1 = K_492d20(iVar1)  -- kasfShipsCount
   if (iVar1 == 0) then
     -- kasJump(state 0x7464cb7)
     KASRule_Add(TeamName, "F_5d7cc0", "F_5d7d40")
@@ -2445,10 +2445,10 @@ function F_5d7b80(TeamName)
   KAS_ScopeKind = 1
   KAS_Scope = KAS_TeamHash(TeamName)
   K_49aae0(TeamName, 6)
-  iVar1 = K_491e30(71552175) --[[kasfVarValueGet]]
+  iVar1 = K_491e30(71552175)  -- kasfVarValueGet
   if (iVar1 == 0) then
-    K_491d30(71552175, 1) --[[kasfVarCreateSet]]
-    K_494160(0) --[[kasfTeamSwitchPlayerOwner]]
+    K_491d30(71552175, 1)  -- kasfVarCreateSet
+    K_494160(0)  -- kasfTeamSwitchPlayerOwner
     K_497ed0(TeamName)
   end
   do return end
@@ -2460,11 +2460,11 @@ function F_5d7be0(TeamName)
   local iVar1, p2 = 0, 0
   KAS_ScopeKind = 1
   KAS_Scope = KAS_TeamHash(TeamName)
-  iVar1 = K_492ce0() --[[kasfTeamCount]]
+  iVar1 = K_492ce0()  -- kasfTeamCount
   if (iVar1 == 0) then
     p2 = 265908324
     iVar1 = "FleetIntel"
-    K_494a00(iVar1, p2) --[[kasfMsgSend]]
+    K_494a00(iVar1, p2)  -- kasfMsgSend
   end
   do return end
 end
@@ -2474,7 +2474,7 @@ function F_5d7df0(TeamName)
   KAS_Team = TeamName
   KAS_ScopeKind = 1
   KAS_Scope = KAS_TeamHash(TeamName)
-  K_498c70(TeamName) --[[kasfResetShipRenderFlags]]
+  K_498c70(TeamName)  -- kasfResetShipRenderFlags
   -- kasJump(state 0x7bd9e7b)
   KASRule_Add(TeamName, "F_5d7e80", "F_5d7df0")
   F_5d7e30(TeamName)
@@ -2488,10 +2488,10 @@ function F_5d7e30(TeamName)
   local p1 = 0
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
-  K_491f90(139352562 --[[AttackTimer]], 7) --[[kasfTimerCreateSetStart]]
-  K_493980(TeamName, 50) --[[kasfShipsSetDamageFactor]]
+  K_491f90(139352562, 7)  -- AttackTimer; kasfTimerCreateSetStart
+  K_493980(TeamName, 50)  -- kasfShipsSetDamageFactor
   p1 = "KushanFlankFrigates"
-  K_492190(p1) --[[kasfAttack]]
+  K_492190(p1)  -- kasfAttack
   do return end
 end
 
@@ -2501,23 +2501,23 @@ function F_5d7e80(TeamName)
   local iVar1, iVar2, p1, p4 = 0, 0, 0, 0
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
-  iVar1 = K_492060(139352562 --[[AttackTimer]]) --[[kasfTimerExpired]]
+  iVar1 = K_492060(139352562)  -- AttackTimer; kasfTimerExpired
   if (iVar1 ~= 0) then
-    K_491f00(139352562 --[[AttackTimer]], 7) --[[kasfTimerSet]]
-    K_491f50(139352562 --[[AttackTimer]]) --[[kasfTimerStart]]
+    K_491f00(139352562, 7)  -- AttackTimer; kasfTimerSet
+    K_491f50(139352562)  -- AttackTimer; kasfTimerStart
     p4 = 10000
     iVar1 = KAS_TeamVector("KushanFlankFrigates")
     iVar2 = KAS_GS("Enemy")
     p1 = KAS_GS("ToAttack")
-    K_495a50(p1, iVar2, iVar1, p4) --[[kasfShipsSelectNearby]]
+    K_495a50(p1, iVar2, iVar1, p4)  -- kasfShipsSelectNearby
     iVar1 = KAS_TeamVector(TeamName)
     iVar2 = KAS_GS("ToAttack")
     K_49a100(iVar2, iVar1)
     iVar1 = KAS_GS("ToAttack")
-    K_492190(iVar1) --[[kasfAttack]]
+    K_492190(iVar1)  -- kasfAttack
   end
   iVar1 = "KushanFlankFrigates"
-  iVar1 = K_492d20(iVar1) --[[kasfShipsCount]]
+  iVar1 = K_492d20(iVar1)  -- kasfShipsCount
   if (iVar1 == 0) then
     -- kasJump(state 0x9dbf1e0)
     KASRule_Add(TeamName, "F_652ef0", "F_5d7e80")
@@ -2534,7 +2534,7 @@ function F_5d7f60(TeamName)
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
   p1 = KAS_GS("Mothership")
-  K_492190(p1) --[[kasfAttack]]
+  K_492190(p1)  -- kasfAttack
   do return end
 end
 
@@ -2544,15 +2544,15 @@ function F_5d78d0(TeamName)
   local iVar1 = 0
   KAS_ScopeKind = 1
   KAS_Scope = KAS_TeamHash(TeamName)
-  iVar1 = K_491e30(71552174) --[[kasfVarValueGet]]
+  iVar1 = K_491e30(71552174)  -- kasfVarValueGet
   if (iVar1 == 0) then
-    K_491d30(71552174, 1) --[[kasfVarCreateSet]]
-    K_498c70(TeamName) --[[kasfResetShipRenderFlags]]
-    K_494160(0) --[[kasfTeamSwitchPlayerOwner]]
+    K_491d30(71552174, 1)  -- kasfVarCreateSet
+    K_498c70(TeamName)  -- kasfResetShipRenderFlags
+    K_494160(0)  -- kasfTeamSwitchPlayerOwner
     K_497ed0(TeamName)
   end
-  K_493aa0(80) --[[kasfTeamSetPercentDamaged]]
-  K_493980(TeamName, 50) --[[kasfShipsSetDamageFactor]]
+  K_493aa0(80)  -- kasfTeamSetPercentDamaged
+  K_493980(TeamName, 50)  -- kasfShipsSetDamageFactor
   -- kasJump(state 0x633addb)
   KASRule_Add(TeamName, "F_5d7990", "F_5d78d0")
   F_5d7960(TeamName)
@@ -2567,7 +2567,7 @@ function F_5d7960(TeamName)
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
   p1 = "TaiidanBombers"
-  K_492190(p1) --[[kasfAttack]]
+  K_492190(p1)  -- kasfAttack
   do return end
 end
 
@@ -2577,9 +2577,9 @@ function F_5d7990(TeamName)
   local iVar1 = 0
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
-  iVar1 = K_492ce0() --[[kasfTeamCount]]
+  iVar1 = K_492ce0()  -- kasfTeamCount
   if (iVar1 == 0) then
-    K_4949b0(54112162) --[[kasfMsgSendAll]]
+    K_4949b0(54112162)  -- kasfMsgSendAll
     -- kasJump(state 0x53a0c)
     KASRule_Add(TeamName, "F_652ef0", "F_5d7990")
     F_652ef0(TeamName)
@@ -2587,7 +2587,7 @@ function F_5d7990(TeamName)
     do return end
   end
   iVar1 = "TaiidanBombers"
-  iVar1 = K_492d20(iVar1) --[[kasfShipsCount]]
+  iVar1 = K_492d20(iVar1)  -- kasfShipsCount
   if (iVar1 == 0) then
     -- kasJump(state 0x1ff3a12)
     KASRule_Add(TeamName, "F_5d7a40", "F_5d7990")
@@ -2604,7 +2604,7 @@ function F_5d7a10(TeamName)
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
   p1 = "TaiidanCarrier2"
-  K_492190(p1) --[[kasfAttack]]
+  K_492190(p1)  -- kasfAttack
   do return end
 end
 
@@ -2615,11 +2615,11 @@ function F_5d7a40(TeamName)
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
   iVar1 = "TaiidanCarrier2"
-  iVar1 = K_492d20(iVar1) --[[kasfShipsCount]]
+  iVar1 = K_492d20(iVar1)  -- kasfShipsCount
   if (iVar1 == 0) then
     p2 = 237703397
     iVar1 = "TaiidanReinforcement1"
-    K_494a00(iVar1, p2) --[[kasfMsgSend]]
+    K_494a00(iVar1, p2)  -- kasfMsgSend
     -- kasJump(state 0x3669d95)
     KASRule_Add(TeamName, "F_652ef0", "F_5d7a40")
     F_5d7aa0(TeamName)
@@ -2634,25 +2634,25 @@ function F_5d7aa0(TeamName)
   local iVar1, iVar2 = 0, 0
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
-  K_493980(TeamName, 10) --[[kasfShipsSetDamageFactor]]
+  K_493980(TeamName, 10)  -- kasfShipsSetDamageFactor
   iVar1 = KAS_GS("gs_00005920")
-  K_492d10(iVar1) --[[kasfGrowSelectionClear]]
+  K_492d10(iVar1)  -- kasfGrowSelectionClear
   iVar1 = KAS_GS("ToAttack")
-  K_492d10(iVar1) --[[kasfGrowSelectionClear]]
+  K_492d10(iVar1)  -- kasfGrowSelectionClear
   iVar1 = KAS_GS("gs_00005920")
   iVar2 = "BattleZone"
-  K_492db0(iVar2, iVar1) --[[kasfFindShipsInside]]
+  K_492db0(iVar2, iVar1)  -- kasfFindShipsInside
   iVar1 = KAS_GS("gs_00005920")
   iVar2 = KAS_GS("ToAttack")
-  K_495620(iVar2, iVar1) --[[kasfShipsSelectNonCapital]]
+  K_495620(iVar2, iVar1)  -- kasfShipsSelectNonCapital
   iVar1 = "TaiidanDestroyer"
   iVar2 = KAS_GS("ToAttack")
-  K_495c40(iVar2, iVar1) --[[kasfShipsRemove]]
+  K_495c40(iVar2, iVar1)  -- kasfShipsRemove
   iVar1 = "TaiidanDefendCruiser"
   iVar2 = KAS_GS("ToAttack")
-  K_495c40(iVar2, iVar1) --[[kasfShipsRemove]]
+  K_495c40(iVar2, iVar1)  -- kasfShipsRemove
   iVar1 = KAS_GS("ToAttack")
-  K_492190(iVar1) --[[kasfAttack]]
+  K_492190(iVar1)  -- kasfAttack
   do return end
 end
 
@@ -2662,10 +2662,10 @@ function F_5d8fa0(TeamName)
   local iVar1 = 0
   KAS_ScopeKind = 1
   KAS_Scope = KAS_TeamHash(TeamName)
-  K_498c70(TeamName) --[[kasfResetShipRenderFlags]]
-  K_493980(TeamName, 10) --[[kasfShipsSetDamageFactor]]
+  K_498c70(TeamName)  -- kasfResetShipRenderFlags
+  K_493980(TeamName, 10)  -- kasfShipsSetDamageFactor
   iVar1 = "TaiidanDefendCruiser"
-  iVar1 = K_493de0(iVar1) --[[kasfThisTeamIs]]
+  iVar1 = K_493de0(iVar1)  -- kasfThisTeamIs
   if (iVar1 ~= 0) then
     -- kasJump(state 0x4937f94)
     KASRule_Add(TeamName, "F_5d9050", "F_5d8fa0")
@@ -2687,19 +2687,19 @@ function F_5d90d0(TeamName)
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
   iVar1 = KAS_GS("gs_00005920")
-  K_492d10(iVar1) --[[kasfGrowSelectionClear]]
+  K_492d10(iVar1)  -- kasfGrowSelectionClear
   iVar1 = KAS_GS("ToAttack")
-  K_492d10(iVar1) --[[kasfGrowSelectionClear]]
+  K_492d10(iVar1)  -- kasfGrowSelectionClear
   iVar1 = KAS_GS("gs_00005920")
   iVar2 = "BattleZone"
-  K_492db0(iVar2, iVar1) --[[kasfFindShipsInside]]
+  K_492db0(iVar2, iVar1)  -- kasfFindShipsInside
   iVar1 = KAS_GS("gs_00005920")
   iVar2 = KAS_GS("ToAttack")
-  K_495560(iVar2, iVar1) --[[kasfShipsSelectCapital]]
+  K_495560(iVar2, iVar1)  -- kasfShipsSelectCapital
   iVar1 = KAS_GS("ToAttack")
-  K_492190(iVar1) --[[kasfAttack]]
-  iVar1 = K_492910(1, 7) --[[kasfRandom]]
-  K_491f90(139352562 --[[AttackTimer]], iVar1) --[[kasfTimerCreateSetStart]]
+  K_492190(iVar1)  -- kasfAttack
+  iVar1 = K_492910(1, 7)  -- kasfRandom
+  K_491f90(139352562, iVar1)  -- AttackTimer; kasfTimerCreateSetStart
   do return end
 end
 
@@ -2709,32 +2709,32 @@ function F_5d9180(TeamName)
   local iVar1, iVar2 = 0, 0
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
-  iVar1 = K_492ce0() --[[kasfTeamCount]]
+  iVar1 = K_492ce0()  -- kasfTeamCount
   if (iVar1 ~= 0) then
-    iVar1 = K_4948a0() --[[kasfTeamFinishedLaunching]]
+    iVar1 = K_4948a0()  -- kasfTeamFinishedLaunching
     if (iVar1 ~= 0) then
-      iVar1 = K_492060(139352562 --[[AttackTimer]]) --[[kasfTimerExpired]]
+      iVar1 = K_492060(139352562)  -- AttackTimer; kasfTimerExpired
       if (iVar1 ~= 0) then
         iVar1 = KAS_GS("gs_00005920")
-        K_492d10(iVar1) --[[kasfGrowSelectionClear]]
+        K_492d10(iVar1)  -- kasfGrowSelectionClear
         iVar1 = KAS_GS("ToAttack")
-        K_492d10(iVar1) --[[kasfGrowSelectionClear]]
+        K_492d10(iVar1)  -- kasfGrowSelectionClear
         iVar1 = KAS_GS("gs_00005920")
         iVar2 = "BattleZone"
-        K_492db0(iVar2, iVar1) --[[kasfFindShipsInside]]
+        K_492db0(iVar2, iVar1)  -- kasfFindShipsInside
         iVar1 = KAS_GS("gs_00005920")
         iVar2 = KAS_GS("ToAttack")
-        K_495560(iVar2, iVar1) --[[kasfShipsSelectCapital]]
+        K_495560(iVar2, iVar1)  -- kasfShipsSelectCapital
         iVar1 = KAS_GS("ToAttack")
-        K_492190(iVar1) --[[kasfAttack]]
-        K_491f00(139352562 --[[AttackTimer]], 7) --[[kasfTimerSet]]
-        K_491f50(139352562 --[[AttackTimer]]) --[[kasfTimerStart]]
+        K_492190(iVar1)  -- kasfAttack
+        K_491f00(139352562, 7)  -- AttackTimer; kasfTimerSet
+        K_491f50(139352562)  -- AttackTimer; kasfTimerStart
       end
     end
     do return end
   end
   iVar1 = "TaiHInt1"
-  iVar1 = K_493de0(iVar1) --[[kasfThisTeamIs]]
+  iVar1 = K_493de0(iVar1)  -- kasfThisTeamIs
   if (iVar1 ~= 0) then
     -- kasJump(state 0x4869685)
     KASRule_Add(TeamName, "F_5d9380", "F_5d9180")
@@ -2756,11 +2756,11 @@ function F_5d9380(TeamName)
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
   iVar1 = KAS_GS("gs_000052a7")
-  iVar1 = K_492d20(iVar1) --[[kasfShipsCount]]
-  iVar2 = K_493e00() --[[kasfTeamCountOriginal]]
+  iVar1 = K_492d20(iVar1)  -- kasfShipsCount
+  iVar2 = K_493e00()  -- kasfTeamCountOriginal
   if (iVar2 <= iVar1) then
     iVar1 = KAS_GS("gs_000052a7")
-    K_493cf0(TeamName, iVar1) --[[kasfReinforceTeamWithShips]]
+    K_493cf0(TeamName, iVar1)  -- kasfReinforceTeamWithShips
     -- kasJump(state 0x506a278)
     KASRule_Add(TeamName, "F_5d93f0", "F_5d9380")
     F_652ef0(TeamName)
@@ -2775,7 +2775,7 @@ function F_5d93f0(TeamName)
   local iVar1 = 0
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
-  iVar1 = K_4948a0() --[[kasfTeamFinishedLaunching]]
+  iVar1 = K_4948a0()  -- kasfTeamFinishedLaunching
   if (iVar1 ~= 0) then
     -- kasJump(state 0x857bcb7)
     KASRule_Add(TeamName, "F_5d9180", "F_5d93f0")
@@ -2792,7 +2792,7 @@ function F_5d9020(TeamName)
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
   p1 = "TaiidanMainCarrier"
-  K_494750(p1) --[[kasfDockInstant]]
+  K_494750(p1)  -- kasfDockInstant
   do return end
 end
 
@@ -2802,11 +2802,11 @@ function F_5d9050(TeamName)
   local iVar1 = 0
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
-  iVar1 = K_492120(84320888 --[[Launch]]) --[[kasfMsgReceived]]
+  iVar1 = K_492120(84320888)  -- Launch; kasfMsgReceived
   if (iVar1 ~= 0) then
-    K_4947c0() --[[kasfLaunch]]
+    K_4947c0()  -- kasfLaunch
     iVar1 = "TaiidanDefendCruiser"
-    iVar1 = K_493de0(iVar1) --[[kasfThisTeamIs]]
+    iVar1 = K_493de0(iVar1)  -- kasfThisTeamIs
     if (iVar1 ~= 0) then
       -- kasJump(state 0xe114982)
       KASRule_Add(TeamName, "F_5d92d0", "F_5d9050")
@@ -2837,10 +2837,10 @@ function F_5d92d0(TeamName)
   local iVar1 = 0
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
-  iVar1 = K_4948a0() --[[kasfTeamFinishedLaunching]]
+  iVar1 = K_4948a0()  -- kasfTeamFinishedLaunching
   if (iVar1 ~= 0) then
     iVar1 = "TaiidanDestroyer"
-    K_492960(iVar1) --[[kasfGuardShips]]
+    K_492960(iVar1)  -- kasfGuardShips
   end
   do return end
 end
@@ -2850,8 +2850,8 @@ function F_5d8130(TeamName)
   KAS_Team = TeamName
   KAS_ScopeKind = 1
   KAS_Scope = KAS_TeamHash(TeamName)
-  K_4984c0(TeamName, 1) --[[kasfSpeechEvent]]
-  K_498c70(TeamName) --[[kasfResetShipRenderFlags]]
+  K_4984c0(TeamName, 1)  -- kasfSpeechEvent
+  K_498c70(TeamName)  -- kasfResetShipRenderFlags
   -- kasJump(state 0x569b0c5)
   KASRule_Add(TeamName, "F_5d8220", "F_5d8130")
   F_5d8180(TeamName)
@@ -2865,20 +2865,20 @@ function F_5d8180(TeamName)
   local iVar1, iVar2 = 0, 0
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
-  K_493980(TeamName, 10) --[[kasfShipsSetDamageFactor]]
+  K_493980(TeamName, 10)  -- kasfShipsSetDamageFactor
   iVar1 = KAS_GS("gs_00005920")
-  K_492d10(iVar1) --[[kasfGrowSelectionClear]]
+  K_492d10(iVar1)  -- kasfGrowSelectionClear
   iVar1 = KAS_GS("ToAttack")
-  K_492d10(iVar1) --[[kasfGrowSelectionClear]]
+  K_492d10(iVar1)  -- kasfGrowSelectionClear
   iVar1 = KAS_GS("gs_00005920")
   iVar2 = "BattleZone"
-  K_492db0(iVar2, iVar1) --[[kasfFindShipsInside]]
+  K_492db0(iVar2, iVar1)  -- kasfFindShipsInside
   iVar1 = KAS_GS("gs_00005920")
   iVar2 = KAS_GS("ToAttack")
-  K_495560(iVar2, iVar1) --[[kasfShipsSelectCapital]]
+  K_495560(iVar2, iVar1)  -- kasfShipsSelectCapital
   iVar1 = KAS_GS("ToAttack")
-  K_492190(iVar1) --[[kasfAttack]]
-  K_493aa0(40) --[[kasfTeamSetPercentDamaged]]
+  K_492190(iVar1)  -- kasfAttack
+  K_493aa0(40)  -- kasfTeamSetPercentDamaged
   do return end
 end
 
@@ -2888,7 +2888,7 @@ function F_5d8220(TeamName)
   local iVar1, extraout_EAX, iVar2, p3 = 0, 0, 0, 0
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
-  iVar1 = K_492120(307349) --[[kasfMsgReceived]]
+  iVar1 = K_492120(307349)  -- kasfMsgReceived
   if (iVar1 ~= 0) then
     -- kasJump(state 0x4b095)
     KASRule_Add(TeamName, "F_5d8340", "F_5d8220")
@@ -2898,18 +2898,18 @@ function F_5d8220(TeamName)
   end
   iVar2 = 5000
   iVar1 = KAS_GS("gs_00005920")
-  iVar1 = K_492e90(iVar1, iVar2) --[[kasfFindEnemyShipsInside]]
+  iVar1 = K_492e90(iVar1, iVar2)  -- kasfFindEnemyShipsInside
   if (iVar1 ~= 0) then
     p3 = 0
     iVar1 = KAS_GS("gs_00005920")
     iVar2 = KAS_GS("gs_00005920")
-    K_4985f0(iVar2, iVar1, p3) --[[kasfSpeechEventShips]]
+    K_4985f0(iVar2, iVar1, p3)  -- kasfSpeechEventShips
     if (extraout_EAX ~= 0) then
-      K_4984c0(TeamName, 0) --[[kasfSpeechEvent]]
+      K_4984c0(TeamName, 0)  -- kasfSpeechEvent
       do return end
     end
   end
-  K_4984c0(TeamName, 1) --[[kasfSpeechEvent]]
+  K_4984c0(TeamName, 1)  -- kasfSpeechEvent
   do return end
 end
 
@@ -2919,11 +2919,11 @@ function F_5d82e0(TeamName)
   local p1 = 0
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
-  K_493980(TeamName, 50) --[[kasfShipsSetDamageFactor]]
+  K_493980(TeamName, 50)  -- kasfShipsSetDamageFactor
   K_493a10(TeamName, 0)
-  K_4984c0(TeamName, 0) --[[kasfSpeechEvent]]
+  K_4984c0(TeamName, 0)  -- kasfSpeechEvent
   p1 = "DestroyerPath"
-  K_4929d0(p1) --[[kasfPatrolPath]]
+  K_4929d0(p1)  -- kasfPatrolPath
   do return end
 end
 
@@ -2933,9 +2933,9 @@ function F_5d8340(TeamName)
   local iVar1 = 0
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
-  iVar1 = K_492b20() --[[kasfTeamHealthAverage]]
+  iVar1 = K_492b20()  -- kasfTeamHealthAverage
   if (20 < iVar1) then
-    K_493aa0(20) --[[kasfTeamSetPercentDamaged]]
+    K_493aa0(20)  -- kasfTeamSetPercentDamaged
   end
   do return end
 end
@@ -2946,9 +2946,9 @@ function F_5d8bd0(TeamName)
   local iVar1 = 0
   KAS_ScopeKind = 1
   KAS_Scope = KAS_TeamHash(TeamName)
-  K_493980(TeamName, 10) --[[kasfShipsSetDamageFactor]]
-  K_494160(0) --[[kasfTeamSwitchPlayerOwner]]
-  iVar1 = K_492ce0() --[[kasfTeamCount]]
+  K_493980(TeamName, 10)  -- kasfShipsSetDamageFactor
+  K_494160(0)  -- kasfTeamSwitchPlayerOwner
+  iVar1 = K_492ce0()  -- kasfTeamCount
   if (0 < iVar1) then
     K_497ed0(TeamName)
   end
@@ -2966,25 +2966,25 @@ function F_5d8c30(TeamName)
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
   iVar1 = KAS_GS("gs_00005920")
-  K_492d10(iVar1) --[[kasfGrowSelectionClear]]
+  K_492d10(iVar1)  -- kasfGrowSelectionClear
   iVar1 = KAS_GS("ToAttack")
-  K_492d10(iVar1) --[[kasfGrowSelectionClear]]
+  K_492d10(iVar1)  -- kasfGrowSelectionClear
   iVar1 = KAS_GS("gs_00005920")
   iVar2 = "BattleZone"
-  K_492db0(iVar2, iVar1) --[[kasfFindShipsInside]]
+  K_492db0(iVar2, iVar1)  -- kasfFindShipsInside
   iVar1 = KAS_GS("gs_00005920")
   iVar2 = KAS_GS("ToAttack")
-  K_495620(iVar2, iVar1) --[[kasfShipsSelectNonCapital]]
+  K_495620(iVar2, iVar1)  -- kasfShipsSelectNonCapital
   iVar1 = "TaiidanDestroyer"
   iVar2 = KAS_GS("ToAttack")
-  K_495c40(iVar2, iVar1) --[[kasfShipsRemove]]
+  K_495c40(iVar2, iVar1)  -- kasfShipsRemove
   iVar1 = "TaiidanDefendCruiser"
   iVar2 = KAS_GS("ToAttack")
-  K_495c40(iVar2, iVar1) --[[kasfShipsRemove]]
+  K_495c40(iVar2, iVar1)  -- kasfShipsRemove
   iVar1 = KAS_GS("ToAttack")
-  K_492190(iVar1) --[[kasfAttack]]
-  iVar1 = K_492910(1, 7) --[[kasfRandom]]
-  K_491f90(139352562 --[[AttackTimer]], iVar1) --[[kasfTimerCreateSetStart]]
+  K_492190(iVar1)  -- kasfAttack
+  iVar1 = K_492910(1, 7)  -- kasfRandom
+  K_491f90(139352562, iVar1)  -- AttackTimer; kasfTimerCreateSetStart
   do return end
 end
 
@@ -2994,38 +2994,38 @@ function F_5d8d20(TeamName)
   local iVar1, iVar2 = 0, 0
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
-  iVar1 = K_492ce0() --[[kasfTeamCount]]
+  iVar1 = K_492ce0()  -- kasfTeamCount
   if (iVar1 ~= 0) then
-    iVar1 = K_4948a0() --[[kasfTeamFinishedLaunching]]
+    iVar1 = K_4948a0()  -- kasfTeamFinishedLaunching
     if (iVar1 ~= 0) then
-      iVar1 = K_492060(139352562 --[[AttackTimer]]) --[[kasfTimerExpired]]
+      iVar1 = K_492060(139352562)  -- AttackTimer; kasfTimerExpired
       if (iVar1 ~= 0) then
         iVar1 = KAS_GS("gs_00005920")
-        K_492d10(iVar1) --[[kasfGrowSelectionClear]]
+        K_492d10(iVar1)  -- kasfGrowSelectionClear
         iVar1 = KAS_GS("ToAttack")
-        K_492d10(iVar1) --[[kasfGrowSelectionClear]]
+        K_492d10(iVar1)  -- kasfGrowSelectionClear
         iVar1 = KAS_GS("gs_00005920")
         iVar2 = "BattleZone"
-        K_492db0(iVar2, iVar1) --[[kasfFindShipsInside]]
+        K_492db0(iVar2, iVar1)  -- kasfFindShipsInside
         iVar1 = KAS_GS("gs_00005920")
         iVar2 = KAS_GS("ToAttack")
-        K_495620(iVar2, iVar1) --[[kasfShipsSelectNonCapital]]
+        K_495620(iVar2, iVar1)  -- kasfShipsSelectNonCapital
         iVar1 = "TaiidanDestroyer"
         iVar2 = KAS_GS("ToAttack")
-        K_495c40(iVar2, iVar1) --[[kasfShipsRemove]]
+        K_495c40(iVar2, iVar1)  -- kasfShipsRemove
         iVar1 = "TaiidanDefendCruiser"
         iVar2 = KAS_GS("ToAttack")
-        K_495c40(iVar2, iVar1) --[[kasfShipsRemove]]
+        K_495c40(iVar2, iVar1)  -- kasfShipsRemove
         iVar1 = KAS_GS("ToAttack")
-        K_492190(iVar1) --[[kasfAttack]]
-        K_491f00(139352562 --[[AttackTimer]], 7) --[[kasfTimerSet]]
-        K_491f50(139352562 --[[AttackTimer]]) --[[kasfTimerStart]]
+        K_492190(iVar1)  -- kasfAttack
+        K_491f00(139352562, 7)  -- AttackTimer; kasfTimerSet
+        K_491f50(139352562)  -- AttackTimer; kasfTimerStart
       end
     end
     do return end
   end
   iVar1 = "KushanMainGuardFighters1"
-  iVar1 = K_493de0(iVar1) --[[kasfThisTeamIs]]
+  iVar1 = K_493de0(iVar1)  -- kasfThisTeamIs
   if (iVar1 ~= 0) then
     -- kasJump(state 0x4869685)
     KASRule_Add(TeamName, "F_5d8ef0", "F_5d8d20")
@@ -3046,12 +3046,12 @@ function F_5d8e80(TeamName)
   local iVar1, p3, p1, p2, p5 = 0, 0, 0, 0, 0
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
-  K_495eb0() --[[kasfStop]]
+  K_495eb0()  -- kasfStop
   iVar1 = KAS_GS("gs_000052a7")
-  K_492d10(iVar1) --[[kasfGrowSelectionClear]]
+  K_492d10(iVar1)  -- kasfGrowSelectionClear
   p5 = 0
   iVar1 = "KushanCarriers"
-  p3 = K_493e00() --[[kasfTeamCountOriginal]]
+  p3 = K_493e00()  -- kasfTeamCountOriginal
   p2 = "kHeavyInterceptor"
   p1 = KAS_GS("gs_000052a7")
   K_499c70(p1, p2, p3, iVar1, p5)
@@ -3065,11 +3065,11 @@ function F_5d8ef0(TeamName)
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
   iVar1 = KAS_GS("gs_000052a7")
-  iVar1 = K_492d20(iVar1) --[[kasfShipsCount]]
-  iVar2 = K_493e00() --[[kasfTeamCountOriginal]]
+  iVar1 = K_492d20(iVar1)  -- kasfShipsCount
+  iVar2 = K_493e00()  -- kasfTeamCountOriginal
   if (iVar2 <= iVar1) then
     iVar1 = KAS_GS("gs_000052a7")
-    K_493cf0(TeamName, iVar1) --[[kasfReinforceTeamWithShips]]
+    K_493cf0(TeamName, iVar1)  -- kasfReinforceTeamWithShips
     -- kasJump(state 0x506a278)
     KASRule_Add(TeamName, "F_5d8f60", "F_5d8ef0")
     F_652ef0(TeamName)
@@ -3084,7 +3084,7 @@ function F_5d8f60(TeamName)
   local iVar1 = 0
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
-  iVar1 = K_4948a0() --[[kasfTeamFinishedLaunching]]
+  iVar1 = K_4948a0()  -- kasfTeamFinishedLaunching
   if (iVar1 ~= 0) then
     -- kasJump(state 0x857bcb7)
     KASRule_Add(TeamName, "F_5d8d20", "F_5d8f60")
@@ -3100,11 +3100,11 @@ function F_5d7d90(TeamName)
   local iVar1 = 0
   KAS_ScopeKind = 1
   KAS_Scope = KAS_TeamHash(TeamName)
-  iVar1 = K_491e30(71552177) --[[kasfVarValueGet]]
+  iVar1 = K_491e30(71552177)  -- kasfVarValueGet
   if (iVar1 == 0) then
-    K_491d30(71552177, 1) --[[kasfVarCreateSet]]
-    K_498c70(TeamName) --[[kasfResetShipRenderFlags]]
-    K_494160(0) --[[kasfTeamSwitchPlayerOwner]]
+    K_491d30(71552177, 1)  -- kasfVarCreateSet
+    K_498c70(TeamName)  -- kasfResetShipRenderFlags
+    K_494160(0)  -- kasfTeamSwitchPlayerOwner
     K_497ed0(TeamName)
   end
   do return end

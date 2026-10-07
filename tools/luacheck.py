@@ -13,6 +13,10 @@ from luaparser import ast
 def main():
     path, runtimes = sys.argv[1], sys.argv[2:]
     src = open(path, encoding="latin-1").read()
+    if "--[[" in src:
+        n = src[:src.index("--[[")].count("\n") + 1
+        print(f"LUA 4 ERROR in {path}: block comment '--[[' at line {n} (Lua 4 comments run to end of line)")
+        sys.exit(1)
     try:
         ast.parse(src)
     except Exception as e:  # noqa: BLE001 - report any parser failure with its position

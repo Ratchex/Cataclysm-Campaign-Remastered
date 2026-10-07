@@ -1094,6 +1094,14 @@ def main():
     missing = sorted({int(m, 16) for m in re.findall(r"\bF_([0-9a-f]{6})\b", "\n".join(lines))} - done)
     if missing:
         tr.report["referenced functions not decompiled"] = len(missing)
+    # Lua 4 has no block comments: "--" always runs to the end of the line. Move every inline --[[note]] to a
+    # trailing comment so it can't swallow the rest of an expression.
+    def trailing(line):
+        notes = re.findall(r"--\[\[(.*?)\]\]", line)
+        if not notes:
+            return line
+        return re.sub(r"\s*--\[\[.*?\]\]", "", line) + "  -- " + "; ".join(notes)
+    lines = [trailing(l) for l in lines]
     # label -> kasLabelHash, so the runtime can give a team's hash (variable scope) without bit arithmetic in Lua 4
     labels = sorted(set(d.labels.values()) | {mission})
     lines += ["KAS_LabelHash = KAS_LabelHash or {}"]

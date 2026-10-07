@@ -50,3 +50,10 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
   (FleetIntel, Objectives, Music). `sMothership` is referenced only by mission code from Mission05 on, so the
   starting fleet comes from game code or persistence; HWRM's equivalent is `startingplayerfleet.lua` +
   `usedefaultpersist`. To find in the decompile (Phase 0.6/0.7).
+
+## HWRM Lua (learned in Phase 0.7)
+- HWRM refuses to redefine a global function ("Cannot overwrite function X"); the later definition is ignored.
+  So generated stubs must not define what `cataclysmkas.lua` implements (`make_kas_stubs.py` skips them).
+- Lua 4 has no block comments: `--[[note]]` comments out the rest of the line. Generated code puts notes only at
+  line ends; `luacheck.py` rejects `--[[`. A syntax error makes `dofilepath` fail silently except in the log, and
+  the mission then dies with "could not find OnInit" / FATAL EXIT.
