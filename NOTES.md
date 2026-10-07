@@ -29,7 +29,7 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
 - `dofilepath("data:scripts/SCAR/KASUtil.lua")` and the other four HW1 emulation files load fine from a mod
   mission; `OnStartOrLoad`, `OnInit`, `Rule_AddInterval`, `Objective_Add`/`Objective_SetState` all work.
 
-## Open: localized strings
+## Localized strings (solved in Phase 0.4)
 - Mission `datfiles.lua` + loose `locale/english/...dat` do not resolve `$IDs` yet (objective shows the raw
   `$2100000`). ID 4200000 produced "Requested string range doesn't exists"; 2100000 gives no error but still
   does not resolve. The Taiidan Republic mod ships its strings as `english.big` in the mod root - try that
@@ -59,3 +59,9 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
   the mission then dies with "could not find OnInit" / FATAL EXIT.
 - SobGroups drop ships that change owner unless `SobGroup_SetSwitchOwnerFlag(group, 0)` (Gearbox does this in
   KASSobGroup_Create). Without it a KAS team emptied itself after kasfTeamSwitchPlayerOwner.
+- **A `.dat` string table must end with a `rangeend` line** (after `filerange A B` / `rangestart A B` / `ID<TAB>text`).
+  Without it the log says "Missing final range end" and every `$ID` stays raw. Loose `locale/english/...dat` files
+  in the mod folder work once this is fixed; IDs 2100000+ are fine.
+- Speech: `Sound_SpeechSubtitlePath("speech:missions/<folder>/")` + `Subtitle_AddSkippable(actor, "$<id>", secs)`
+  plays `data/sound/speech/missions/<folder>/<id>.wav` (44.1 kHz mono 16-bit, as stock) and shows string <id> as the
+  subtitle; it returns the line's real duration. Actors are engine globals (Actor_HW1_FleetIntel, ...).

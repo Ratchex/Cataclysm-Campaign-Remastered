@@ -11,6 +11,8 @@ ObjectiveID_Test = 0
 
 function OnStartOrLoad()
     print("CATACLYSM m00_test: OnStartOrLoad")
+    -- Phase 0.4: speech files are looked up as <path><string id>.wav
+    Sound_SpeechSubtitlePath("speech:missions/cataclysm/")
 end
 
 function OnInit()
@@ -22,6 +24,10 @@ end
 function Rule_PostObjective()
     print("CATACLYSM m00_test: rule fired, ships in Scouts = " .. SobGroup_Count("Scouts"))
     ObjectiveID_Test = Objective_Add("$2100000", OT_Primary)
+    -- Phase 0.4 checks: a stock HWRM string (does Objective_Add localise at all?) and a speech line + subtitle
+    Objective_Add("$3492", OT_Secondary)
+    local t = Subtitle_AddSkippable(Actor_HW1_FleetIntel, "$2100001", 30)
+    print("CATACLYSM m00_test: Subtitle_AddSkippable returned " .. t)
     Rule_Remove("Rule_PostObjective")
     Rule_AddInterval("Rule_CheckWin", 1)
 end

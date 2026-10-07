@@ -3,3 +3,6 @@ rangestart 2100000 2100099
 
 // m00_test (Phase 0 pipeline test)
 2100000	Pipeline test: destroy the Taiidan frigate
+2100001	The war for Hiigara has left the galaxy in turmoil. The past fifteen years have seen the birth of new possibilities ... and the festering of old grudges. The once dominant Taiidan Empire has fractured under the strain of civil war. The new Taiidani Republic tries to hold the old territories together. Forces loyal to the old Emperor lurk in the new bandit kingdoms, waiting for their chance to strike back.
+
+rangeend
