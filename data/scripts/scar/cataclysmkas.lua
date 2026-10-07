@@ -472,3 +472,20 @@ function KAS_MsgSendRaw(from, to, msg)
     end
     KAS_MsgSendRawUntraced(from, to, msg)
 end
+
+-- ------------------------------------------------------------------ speech (timing only until Phase 0.4)
+-- kasfSpeechEvent starts a Fleet Intel/Command line; kasfIntelEventEnded (exe 0x497b00) reports 1 once it has
+-- finished (or nothing has been playing for a while). Without audio yet, each line "plays" for KAS_SpeechSeconds.
+KAS_SpeechSeconds = 4
+KAS_SpeechEnd = 0
+
+function K_496eb0(event, variable)                                                                -- kasfSpeechEvent
+    KAS_SpeechEnd = Universe_GameTime() + KAS_SpeechSeconds
+    print("CKAS speech event " .. event .. " (" .. variable .. ")")
+end
+
+function K_497b00()                                                                               -- kasfIntelEventEnded
+    return KAS_B(Universe_GameTime() >= KAS_SpeechEnd)
+end
+
+function K_497b80() end                                                                           -- kasfSubtitleReset

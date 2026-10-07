@@ -794,7 +794,7 @@ function F_5da2c0(TeamName)
       pcVar5 = "BomberPing"
       iVar1 = "TaiidanBombers"
       K_495e50(iVar1, pcVar5)  -- kasfPingAddShips
-      K_496eb0(268468441, 0)
+      K_496eb0(268468441, 0)  -- kasfSpeechEvent
       puVar2 = 191291062
       _pc = 15
     elseif _pc == 18 then
@@ -808,7 +808,7 @@ function F_5da2c0(TeamName)
       K_491d70(52577235, 1)  -- CloseSensors; kasfVarValueSet
       K_491d70(266064926, 1)  -- kasfVarValueSet
       K_491d70(127756738, 3)  -- StartTimer; kasfVarValueSet
-      K_496eb0(268443870, 0)
+      K_496eb0(268443870, 0)  -- kasfSpeechEvent
       -- kasJump(state 0xe8e63cc)
       KASRule_Add(TeamName, "F_5da060", "F_5da2c0")
       F_5f4730(TeamName)
@@ -830,7 +830,7 @@ function F_5da2c0(TeamName)
       K_49a2a0(iVar1)
       iVar1 = "TaiidanCarrier"
       K_4963a0("ResourcerPointer", iVar1)  -- kasfTutSetPointerTargetShip
-      K_496eb0(268444003, 0)
+      K_496eb0(268444003, 0)  -- kasfSpeechEvent
       K_494a00(TeamName, 17855508)  -- kasfMsgSend
       -- kasJump(state 0xe8e63cc)
       KASRule_Add(TeamName, "F_5da060", "F_5da2c0")
@@ -853,7 +853,7 @@ function F_5da2c0(TeamName)
       _pc = 32
     elseif _pc == 35 then
       K_495ea0("ResourcerPing")  -- kasfPingRemove
-      K_496eb0(268439906, 0)
+      K_496eb0(268439906, 0)  -- kasfSpeechEvent
       -- kasJump(state 0xe8e63cc)
       KASRule_Add(TeamName, "F_5da060", "F_5da2c0")
       F_5f4730(TeamName)
@@ -881,7 +881,7 @@ function F_5da2c0(TeamName)
       K_495e50(iVar1, pcVar5)  -- kasfPingAddShips
       iVar1 = "TaiidanDestroyer"
       K_4963a0("DestroyerPointer", iVar1)  -- kasfTutSetPointerTargetShip
-      K_496eb0(268468445, 0)
+      K_496eb0(268468445, 0)  -- kasfSpeechEvent
       iVar4 = 153999811
       iVar1 = "FleetIntel"
       K_494a00(iVar1, iVar4)  -- kasfMsgSend
@@ -912,7 +912,7 @@ function F_5da2c0(TeamName)
     elseif _pc == 49 then
       _pc = 15
     elseif _pc == 50 then
-      K_496eb0(268468439, 0)
+      K_496eb0(268468439, 0)  -- kasfSpeechEvent
       puVar2 = 191291060
       _pc = 52
     elseif _pc == 51 then
@@ -942,7 +942,7 @@ function F_5da2c0(TeamName)
     elseif _pc == 60 then
       _pc = 45
     elseif _pc == 61 then
-      K_496eb0(268443999, 0)
+      K_496eb0(268443999, 0)  -- kasfSpeechEvent
       puVar2 = 59769441
       _pc = 52
     elseif _pc == 62 then
@@ -950,7 +950,7 @@ function F_5da2c0(TeamName)
     elseif _pc == 63 then
       _pc = 45
     elseif _pc == 64 then
-      K_496eb0(268439768, 0)
+      K_496eb0(268439768, 0)  -- kasfSpeechEvent
       puVar2 = 191291061
       _pc = 49
     elseif _pc == 65 then
@@ -1005,7 +1005,7 @@ function F_5da2c0(TeamName)
     elseif _pc == 82 then
       _pc = 72
     elseif _pc == 83 then
-      K_496eb0(268444007, 0)
+      K_496eb0(268444007, 0)  -- kasfSpeechEvent
       -- kasJump(state 0xe8e63cc)
       KASRule_Add(TeamName, "F_5da060", "F_5da2c0")
       F_5f4730(TeamName)
@@ -1021,7 +1021,7 @@ function F_5da2c0(TeamName)
       iVar1 = "Objectives"
       K_494a00(iVar1, iVar4)  -- kasfMsgSend
       K_491d70(168240451, 1)  -- kasfVarValueSet
-      K_496eb0(268443866, 0)
+      K_496eb0(268443866, 0)  -- kasfSpeechEvent
       K_491d70(109086661, 1)  -- UnPauseUniverse; kasfVarValueSet
       K_491d70(211831571, 1)  -- UnpauseOtherKAS; kasfVarValueSet
       K_491d70(266064926, 1)  -- kasfVarValueSet
@@ -1050,7 +1050,7 @@ function F_5da2c0(TeamName)
     elseif _pc == 94 then
       _pc = 92
     elseif _pc == 95 then
-      K_496eb0(268443868, 0)
+      K_496eb0(268443868, 0)  -- kasfSpeechEvent
       iVar4 = 158202874
       iVar1 = "Objectives"
       K_494a00(iVar1, iVar4)  -- kasfMsgSend
@@ -1107,7 +1107,7 @@ function F_5da2c0(TeamName)
     elseif _pc == 107 then
       _pc = 105
     elseif _pc == 108 then
-      K_496eb0(268439766, 0)
+      K_496eb0(268439766, 0)  -- kasfSpeechEvent
       puVar2 = 191291059
       _pc = 66
     elseif _pc == 109 then
@@ -1115,7 +1115,7 @@ function F_5da2c0(TeamName)
     elseif _pc == 110 then
       _pc = 109
     elseif _pc == 111 then
-      K_496eb0(268444006, 0)
+      K_496eb0(268444006, 0)  -- kasfSpeechEvent
       K_491d70(77979796, 1)  -- Failed; kasfVarValueSet
       -- kasJump(state 0xe8e63cc)
       KASRule_Add(TeamName, "F_5da060", "F_5da2c0")
@@ -1131,7 +1131,7 @@ function F_5da2c0(TeamName)
       _pc = 10
     elseif _pc == 116 then
       K_497000(0)
-      K_496eb0(33559242, 0)
+      K_496eb0(33559242, 0)  -- kasfSpeechEvent
       puVar2 = 187785210
       iVar1 = 160291907
       _pc = 67
@@ -1171,7 +1171,7 @@ function F_5da2c0(TeamName)
     elseif _pc == 131 then
       _pc = 127
     elseif _pc == 132 then
-      K_496eb0(268444004, 0)
+      K_496eb0(268444004, 0)  -- kasfSpeechEvent
       iVar4 = 51924198
       iVar3 = 160291907
       _pc = 58
@@ -1180,7 +1180,7 @@ function F_5da2c0(TeamName)
     elseif _pc == 134 then
       _pc = 33
     elseif _pc == 135 then
-      K_496eb0(268444005, 0)
+      K_496eb0(268444005, 0)  -- kasfSpeechEvent
       iVar1 = K_496c80(0)  -- kasfSensorsIsOpen
       if (iVar1 == 0) then _pc = 137 else _pc = 138 end
     elseif _pc == 136 then
@@ -1220,11 +1220,11 @@ function F_5da2c0(TeamName)
     elseif _pc == 143 then
       _pc = 125
     elseif _pc == 144 then
-      K_496eb0(268444001, 0)
+      K_496eb0(268444001, 0)  -- kasfSpeechEvent
       puVar2 = 59769443
       _pc = 146
     elseif _pc == 145 then
-      K_496eb0(268444000, 0)
+      K_496eb0(268444000, 0)  -- kasfSpeechEvent
       puVar2 = 59769443
       _pc = 146
     elseif _pc == 146 then
@@ -1233,7 +1233,7 @@ function F_5da2c0(TeamName)
       iVar4 = 3873386
       iVar1 = "Objectives"
       K_494a00(iVar1, iVar4)  -- kasfMsgSend
-      K_496eb0(268468443, 0)
+      K_496eb0(268468443, 0)  -- kasfSpeechEvent
       iVar1 = K_496c80(0)  -- kasfSensorsIsOpen
       if (iVar1 == 0) then _pc = 149 else _pc = 150 end
     elseif _pc == 148 then
@@ -1282,7 +1282,7 @@ function F_5da2c0(TeamName)
     elseif _pc == 158 then
       K_491d70((-2054310428), 0)  -- kasfVarValueSet
       K_497000(36)
-      K_496eb0(268443996, 0)
+      K_496eb0(268443996, 0)  -- kasfSpeechEvent
       puVar2 = 263613923
       _pc = 123
     elseif _pc == 159 then
@@ -1342,7 +1342,7 @@ function F_5da2c0(TeamName)
     elseif _pc == 176 then
       _pc = 175
     elseif _pc == 177 then
-      K_496eb0(268443998, 0)
+      K_496eb0(268443998, 0)  -- kasfSpeechEvent
       K_491d70(109086661, 1)  -- UnPauseUniverse; kasfVarValueSet
       K_491d70(211831571, 1)  -- UnpauseOtherKAS; kasfVarValueSet
       puVar2 = 10664499
@@ -1430,7 +1430,7 @@ function F_5da2c0(TeamName)
     elseif _pc == 202 then
       K_497a90()
       K_497ad0()
-      K_496eb0(268443997, 0)
+      K_496eb0(268443997, 0)  -- kasfSpeechEvent
       iVar1 = "PesterHInt1"
       K_4963a0("PesterPointer", iVar1)  -- kasfTutSetPointerTargetShip
       iVar1 = KAS_TeamVector("PesterHInt1")
@@ -1482,123 +1482,13 @@ function F_5f4730(TeamName)
   KAS_Team = TeamName
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
-  K_497b80()
+  K_497b80()  -- kasfSubtitleReset
   do return end
 end
 
 -- FUN_005da060 @ 005da060
 function F_5da060(TeamName)
-  KAS_Team = TeamName
-  local iVar1 = 0
-  local _pc, _sw = 0, 0
-  while 1 do
-    if _pc == 0 then
-      KAS_ScopeKind = 2
-      KAS_Scope = KAS_TeamHash(TeamName)
-      iVar1 = K_497b00()  -- kasfGetTraderPriceScale
-      if (iVar1 == 0) then _pc = 3 else _pc = 2 end
-    elseif _pc == 1 then
-      do return end
-    elseif _pc == 2 then
-      K_491d70((-2054310428), 0)  -- kasfVarValueSet
-      iVar1 = K_491e30(168240451)  -- kasfVarValueGet
-      if (iVar1 ~= 0) then _pc = 5 else _pc = 6 end
-    elseif _pc == 3 then
-      iVar1 = K_491e30((-2054310428))  -- kasfVarValueGet
-      if (iVar1 == 0) then _pc = 1 else _pc = 2 end
-    elseif _pc == 4 then
-      _pc = 2
-    elseif _pc == 5 then
-      K_496530()  -- kasfTutRemoveAllPointers
-      K_491d70(168240451, 0)  -- kasfVarValueSet
-      _pc = 6
-    elseif _pc == 6 then
-      iVar1 = K_491e30(266064926)  -- kasfVarValueGet
-      if (iVar1 ~= 0) then _pc = 7 else _pc = 8 end
-    elseif _pc == 7 then
-      K_497630(90)
-      K_491d70(266064926, 0)  -- kasfVarValueSet
-      _pc = 8
-    elseif _pc == 8 then
-      iVar1 = K_491e30(109086661)  -- UnPauseUniverse; kasfVarValueGet
-      if (iVar1 ~= 0) then _pc = 9 else _pc = 10 end
-    elseif _pc == 9 then
-      K_497aa0()
-      K_491d70(109086661, 0)  -- UnPauseUniverse; kasfVarValueSet
-      _pc = 10
-    elseif _pc == 10 then
-      iVar1 = K_491e30(211831571)  -- UnpauseOtherKAS; kasfVarValueGet
-      if (iVar1 ~= 0) then _pc = 11 else _pc = 12 end
-    elseif _pc == 11 then
-      K_497af0()
-      K_491d70(211831571, 0)  -- UnpauseOtherKAS; kasfVarValueSet
-      _pc = 12
-    elseif _pc == 12 then
-      iVar1 = K_491e30(52577235)  -- CloseSensors; kasfVarValueGet
-      if (iVar1 ~= 0) then _pc = 13 else _pc = 14 end
-    elseif _pc == 13 then
-      iVar1 = K_491e30(126773838)  -- kasfVarValueGet
-      if (iVar1 == 0) then _pc = 15 else _pc = 16 end
-    elseif _pc == 14 then
-      iVar1 = K_491e30(172907219)  -- CancelFocus; kasfVarValueGet
-      if (iVar1 ~= 0) then _pc = 17 else _pc = 18 end
-    elseif _pc == 15 then
-      K_496c30(1)  -- kasfCloseSensors
-      K_491d70(126773838, 1)  -- kasfVarValueSet
-      _pc = 16
-    elseif _pc == 16 then
-      K_491d70(52577235, 0)  -- CloseSensors; kasfVarValueSet
-      _pc = 14
-    elseif _pc == 17 then
-      K_496ae0()  -- kasfTutCameraFocusCancel
-      K_491d70(172907219, 0)  -- CancelFocus; kasfVarValueSet
-      _pc = 18
-    elseif _pc == 18 then
-      iVar1 = K_491e30(232774915)  -- kasfVarValueGet
-      if (iVar1 ~= 0) then _pc = 19 else _pc = 20 end
-    elseif _pc == 19 then
-      K_496ae0()  -- kasfTutCameraFocusCancel
-      K_496ae0()  -- kasfTutCameraFocusCancel
-      K_491d70(232774915, 0)  -- kasfVarValueSet
-      _pc = 20
-    elseif _pc == 20 then
-      iVar1 = K_491e30(77979796)  -- Failed; kasfVarValueGet
-      if (iVar1 == 0) then _pc = 21 else _pc = 22 end
-    elseif _pc == 21 then
-      -- kasJump(state 0xe989af2)
-      KASRule_Add(TeamName, "F_5da210", "F_5da060")
-      F_652ef0(TeamName)
-      do return end
-    elseif _pc == 22 then
-      -- kasJump(state 0x4a5dc)
-      KASRule_Add(TeamName, "F_652ef0", "F_5da060")
-      F_5db0b0(TeamName)
-      do return end
-    elseif _pc == 23 then
-      do return end
-    elseif _pc == 24 then
-      _pc = 22
-    elseif _pc == 25 then
-      do return end
-    elseif _pc == 26 then
-      do return end
-    end
-  end
-end
-
--- FUN_005db0b0 @ 005db0b0
-function F_5db0b0(TeamName)
-  KAS_Team = TeamName
-  local iVar1 = 0
-  KAS_ScopeKind = 2
-  KAS_Scope = KAS_TeamHash(TeamName)
-  iVar1 = KAS_GS("Mothership")
-  iVar1 = K_492d20(iVar1)  -- kasfShipsCount
-  if (iVar1 ~= 0) then
-    K_491cb0()  -- kasfMissionFailed
-    do return end
-  end
-  do return end
+  KAS_Unsupported("F_5da060", "call through kasfGetTraderPriceScale")
 end
 
 -- FUN_00652ef0 @ 00652ef0
@@ -1635,6 +1525,21 @@ function F_5da210(TeamName)
     -- kasJump(state 0x1f32b25)
     KASRule_Add(TeamName, "F_5da2c0", "F_5da210")
     F_613940(TeamName)
+    do return end
+  end
+  do return end
+end
+
+-- FUN_005db0b0 @ 005db0b0
+function F_5db0b0(TeamName)
+  KAS_Team = TeamName
+  local iVar1 = 0
+  KAS_ScopeKind = 2
+  KAS_Scope = KAS_TeamHash(TeamName)
+  iVar1 = KAS_GS("Mothership")
+  iVar1 = K_492d20(iVar1)  -- kasfShipsCount
+  if (iVar1 ~= 0) then
+    K_491cb0()  -- kasfMissionFailed
     do return end
   end
   do return end
@@ -2850,7 +2755,7 @@ function F_5d8130(TeamName)
   KAS_Team = TeamName
   KAS_ScopeKind = 1
   KAS_Scope = KAS_TeamHash(TeamName)
-  K_4984c0(TeamName, 1)  -- kasfSpeechEvent
+  K_496eb0(TeamName, 1)  -- kasfSpeechEvent
   K_498c70(TeamName)  -- kasfResetShipRenderFlags
   -- kasJump(state 0x569b0c5)
   KASRule_Add(TeamName, "F_5d8220", "F_5d8130")
@@ -2905,11 +2810,11 @@ function F_5d8220(TeamName)
     iVar2 = KAS_GS("gs_00005920")
     K_4985f0(iVar2, iVar1, p3)  -- kasfSpeechEventShips
     if (extraout_EAX ~= 0) then
-      K_4984c0(TeamName, 0)  -- kasfSpeechEvent
+      K_496eb0(TeamName, 0)  -- kasfSpeechEvent
       do return end
     end
   end
-  K_4984c0(TeamName, 1)  -- kasfSpeechEvent
+  K_496eb0(TeamName, 1)  -- kasfSpeechEvent
   do return end
 end
 
@@ -2921,7 +2826,7 @@ function F_5d82e0(TeamName)
   KAS_Scope = KAS_TeamHash(TeamName)
   K_493980(TeamName, 50)  -- kasfShipsSetDamageFactor
   K_493a10(TeamName, 0)
-  K_4984c0(TeamName, 0)  -- kasfSpeechEvent
+  K_496eb0(TeamName, 0)  -- kasfSpeechEvent
   p1 = "DestroyerPath"
   K_4929d0(p1)  -- kasfPatrolPath
   do return end
