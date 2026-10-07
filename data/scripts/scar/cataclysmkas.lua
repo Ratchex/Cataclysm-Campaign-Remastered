@@ -518,3 +518,19 @@ function K_497b80() end                                                         
 function KAS_TraceJump(team, from, to)
     if KAS_TraceMsgs == 1 then print("CKAS jump " .. team .. " : " .. from .. " -> " .. to) end
 end
+
+-- ------------------------------------------------------------------ player mothership
+-- exe 0x498790 (kasfGetPlayerMothership): empties the selection and adds the human player's mothership
+-- (FUN_0041b090 on the computer player returns the other player's mothership). Mission01 fails the mission when
+-- this selection is empty after G_ShipsHaveArrived, so every mothership type the port uses must be listed here.
+KAS_MothershipTypes = { "Kus_Mothership" }   -- add the Kuun-Lan core ship once it exists (Phase 0.3)
+
+function K_498790(sel)                                                                            -- kasfGetPlayerMothership
+    SobGroup_Clear(sel)
+    local i = 1
+    while i <= getn(KAS_MothershipTypes) do
+        Player_FillShipsByType(sel, 0, KAS_MothershipTypes[i])
+        if SobGroup_Count(sel) > 0 then return end
+        i = i + 1
+    end
+end
