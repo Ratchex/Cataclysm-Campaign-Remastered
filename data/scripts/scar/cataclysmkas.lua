@@ -114,6 +114,7 @@ function KAS_SetG(addr, v) KAS_Globals[addr] = v end
 function KAS_GS(name)
     local g = "GS_" .. name
     SobGroup_CreateIfNotExist(g)
+    SobGroup_SetSwitchOwnerFlag(g, 0)   -- HW1 behaviour: keep ships that change owner
     return g
 end
 
@@ -443,7 +444,17 @@ function K_495620(n, o) return KAS_SelectInto(n, o, KAS_FillShipsByNonCapital) e
 
 -- Cataclysm's kasfTeamSwitchPlayerOwner takes the new owner (HW1's had none): Mission01 hands allied Kushan teams
 -- to player 0 this way.
-function K_494160(player) SobGroup_SwitchOwner(KAS_Team, player) end                              -- kasfTeamSwitchPlayerOwner
+-- exe 0x493f80 toggles each ship: player-owned -> computer player, anything else -> human player. HWRM SobGroups
+-- drop ships that change owner unless their switch-owner flag is cleared (Gearbox's KASSobGroup_Create does this),
+-- which emptied the team and made e.g. the proximity array report itself destroyed.
+function K_494160(flag)                                                                              -- kasfTeamSwitchPlayerOwner
+    SobGroup_SetSwitchOwnerFlag(KAS_Team, 0)
+    if SobGroup_GetPlayerOwner(KAS_Team) == 0 then
+        SobGroup_SwitchOwner(KAS_Team, 1)
+    else
+        SobGroup_SwitchOwner(KAS_Team, 0)
+    end
+end
 
 -- kasfResetShipRenderFlags: clears per-ship "has been rendered" bits used by kasfRenderedShips; no HWRM state.
 function K_498c70(sel) end

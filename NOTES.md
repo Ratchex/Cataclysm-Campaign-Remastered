@@ -57,3 +57,5 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
 - Lua 4 has no block comments: `--[[note]]` comments out the rest of the line. Generated code puts notes only at
   line ends; `luacheck.py` rejects `--[[`. A syntax error makes `dofilepath` fail silently except in the log, and
   the mission then dies with "could not find OnInit" / FATAL EXIT.
+- SobGroups drop ships that change owner unless `SobGroup_SetSwitchOwnerFlag(group, 0)` (Gearbox does this in
+  KASSobGroup_Create). Without it a KAS team emptied itself after kasfTeamSwitchPlayerOwner.
