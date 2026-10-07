@@ -154,48 +154,64 @@ function K_491df0(h) local k = KAS_Key(h); KAS_Vars[k] = (KAS_Vars[k] or 0) - 1 
 function K_491e30(h) return KAS_Vars[KAS_Key(h)] or 0 end                                           -- kasfVarValueGet
 function K_491e70(h) KAS_Vars[KAS_Key(h)] = nil end                                                 -- kasfVarDestroy
 
+-- Timers follow HW1 Game/Timer.c exactly: a timer that exists but is not running has 0 remaining and therefore
+-- counts as EXPIRED (created-but-never-started, started with duration <= 0, or stopped). Non-existent timers are
+-- never expired. Stop stores the remaining time as the new duration.
 KAS_Timers = {}
 function KAS_Now() return Universe_GameTime() end
-function K_491ec0(h) KAS_Timers[KAS_Key(h)] = { dur = 0, start = 0, running = 0, left = 0 } end    -- kasfTimerCreate
-function K_491f00(h, d)                                                                             -- kasfTimerSet
+
+function KAS_TimerRemaining(t)
+    if t.running ~= 1 then return 0 end
+    local rem = floor(t.dur - (KAS_Now() - t.start))
+    if rem < 0 then rem = 0 end
+    return rem
+end
+
+function K_491ec0(h)                                                                                -- kasfTimerCreate
     local k = KAS_Key(h)
-    local t = KAS_Timers[k] or { dur = 0, start = 0, running = 0, left = 0 }
-    t.dur = d
-    t.left = d
-    KAS_Timers[k] = t
+    if KAS_Timers[k] == nil then KAS_Timers[k] = { dur = 0, start = 0, running = 0 } end
+end
+function K_491f00(h, d)                                                                             -- kasfTimerSet
+    local t = KAS_Timers[KAS_Key(h)]
+    if t then t.dur = d end
 end
 function K_491f50(h)                                                                                -- kasfTimerStart
     local t = KAS_Timers[KAS_Key(h)]
-    if t then t.start = KAS_Now() - (t.dur - t.left); t.running = 1 end
+    if t == nil then return end
+    if t.dur > 0 then
+        t.start = KAS_Now()
+        t.running = 1
+    else
+        t.running = 0
+    end
 end
 function K_491f90(h, d)                                                                             -- kasfTimerCreateSetStart
-    KAS_Timers[KAS_Key(h)] = { dur = d, start = KAS_Now(), running = 1, left = d }
-end
-function KAS_TimerLeft(t)
-    if t.running == 1 then
-        local left = t.dur - (KAS_Now() - t.start)
-        if left < 0 then left = 0 end
-        return left
-    end
-    return t.left
+    K_491ec0(h)
+    K_491f00(h, d)
+    K_491f50(h)
 end
 function K_491fe0(h)                                                                                -- kasfTimerStop
     local t = KAS_Timers[KAS_Key(h)]
-    if t then t.left = KAS_TimerLeft(t); t.running = 0 end
+    if t then t.dur = KAS_TimerRemaining(t); t.running = 0 end
 end
 function K_492020(h)                                                                                -- kasfTimerRemaining
     local t = KAS_Timers[KAS_Key(h)]
-    if t then return floor(KAS_TimerLeft(t)) end
+    if t then return KAS_TimerRemaining(t) end
     return 0
 end
 function K_492060(h)                                                                                -- kasfTimerExpired
     local t = KAS_Timers[KAS_Key(h)]
-    if t and t.running == 1 and KAS_TimerLeft(t) <= 0 then return 1 end
-    return 0
+    if t == nil then return 0 end
+    return KAS_B(KAS_TimerRemaining(t) == 0)
 end
 function K_4920a0(h)                                                                                -- kasfTimerExpiredDestroy
     local k = KAS_Key(h)
-    if K_492060(h) == 1 then KAS_Timers[k] = nil; return 1 end
+    local t = KAS_Timers[k]
+    if t == nil then return 0 end
+    if KAS_TimerRemaining(t) == 0 then
+        KAS_Timers[k] = nil
+        return 1
+    end
     return 0
 end
 function K_4920e0(h) KAS_Timers[KAS_Key(h)] = nil end                                               -- kasfTimerDestroy
