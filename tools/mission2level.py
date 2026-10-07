@@ -14,7 +14,10 @@ team -> computer player 1; CryoTray -> player 0. HW1's generic R1/R2 races take 
 Not converted yet (listed in the output's "unconverted" comment): Resources, Derelict, Mine, AIBox, lighting.
 
 Usage: mission2level.py <mission_dir> <out.level> [--shipmap shipmap.tsv] [--placeholder Kus_Scout]
-         [--player-race Kushan] [--enemy-race Taiidan]
+         [--player-race Kushan] [--enemy-race Taiidan] [--background ez01] [--player-start-ship Kus_Mothership]
+  --background         override the HW1/Cataclysm background name (Cataclysm's have no HWRM version yet)
+  --player-start-ship  stand-in for the player's fleet, placed at StartPointPlayer (Cataclysm missions don't
+                       place the player's fleet themselves)
 """
 import argparse
 import csv
@@ -159,7 +162,7 @@ def read_file(level, path, sphere_player, folder, seen):
             level.settings["Background"] = args.split(",")[0].strip()
 
 
-def convert(folder, out, shipmap, placeholder, races):
+def convert(folder, out, shipmap, placeholder, races, background=None, start_ship=None):
     level = Level(shipmap, placeholder, races)
     files = sorted(os.listdir(folder))
     mission = next(f for f in files if f.lower().endswith(".mission"))
@@ -169,6 +172,12 @@ def convert(folder, out, shipmap, placeholder, races):
         if "." not in f and f not in seen and os.path.isfile(os.path.join(folder, f)):
             seen.add(f)
             read_file(level, os.path.join(folder, f), 0, folder, seen)
+    if background:
+        level.settings["Background"] = background
+    if start_ship:
+        start = next((p for p in level.points if p[0].lower() == "startpointplayer"), None)
+        where, rot = (start[1], start[2]) if start else ((0, 0, 0), (0, 0, 0))
+        level.squadrons.insert(0, ("PlayerStartShip", start_ship, where, 0, rot, "stand-in player fleet"))
     level.write(out, os.path.basename(folder))
     return level
 
@@ -188,8 +197,11 @@ if __name__ == "__main__":
     ap.add_argument("--placeholder")
     ap.add_argument("--player-race", default="Kushan")
     ap.add_argument("--enemy-race", default="Taiidan")
+    ap.add_argument("--background")
+    ap.add_argument("--player-start-ship")
     a = ap.parse_args()
-    lv = convert(a.mission_dir, a.out, load_shipmap(a.shipmap), a.placeholder, {0: a.player_race, 1: a.enemy_race})
+    lv = convert(a.mission_dir, a.out, load_shipmap(a.shipmap), a.placeholder, {0: a.player_race, 1: a.enemy_race},
+                 a.background, a.player_start_ship)
     print(f"{a.out}: {len(lv.squadrons)} squadrons, {len(lv.groups)} groups, {len(lv.points)} points, "
           f"{len(lv.spheres)} spheres, {len(lv.paths)} paths; unmapped types {sum(lv.unmapped.values())}; "
           f"unconverted {dict(lv.unconverted)}")

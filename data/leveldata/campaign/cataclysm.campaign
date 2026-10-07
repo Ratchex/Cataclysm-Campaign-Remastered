@@ -27,3 +27,14 @@ Mission[1] =
     description = "Phase 0 smoke test mission.",
 }
 
+
+-- Phase 0.2 check: Cataclysm Mission01's converted layout (no mission logic; placeholder ships and background).
+Mission[2] =
+{
+    directory   = "m01_layout",
+    level       = "m01_layout.level",
+    postlevel   = function ( bWin ) postLevelComplete() end,
+
+    displayName = "Layout check: Mission 1",
+    description = "Converted Cataclysm Mission01 ship layout, no scripting.",
+}
