@@ -626,10 +626,15 @@ class Translator:
         m = re.match(r"FUN_([0-9a-f]{8})$", n)
         if m:
             return int(m.group(1), 16), n
+        # ApplyKasSignatures.java names every KAS API function K_<addr>: translate by address, never by name
+        m = re.match(r"K_([0-9a-f]{6})$", n)
+        if m:
+            a = int(m.group(1), 16)
+            return a, self.d.api.get(a, {}).get("name") or n
         for a, r in self.d.api.items():
-            if r["name"] == n:
+            if r["name"] == n and r["score"] == "helper":
                 return a, n
-        return None, n
+        raise Unsupported(f"call to unknown function {n}")
 
     def arg_values(self, args, ptypes=None):
         out = []
