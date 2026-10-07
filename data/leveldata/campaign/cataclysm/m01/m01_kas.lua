@@ -357,7 +357,7 @@ function F_5d7050(TeamName)
       _pc = 77
     elseif _pc == 80 then
       iVar1 = "TaiidanResourcers"
-      iVar1 = K_499570(iVar1)
+      iVar1 = K_499570(iVar1)  -- kasfHasShipBeenDiscovered
       if (iVar1 ~= 0) then _pc = 82 else _pc = 83 end
     elseif _pc == 81 then
       iVar1 = K_491e30(71552170)  -- kasfVarValueGet
@@ -2224,7 +2224,7 @@ function F_5d8010(TeamName)
   KAS_Scope = KAS_TeamHash(TeamName)
   iVar1 = K_491e30(71552178)  -- kasfVarValueGet
   if (iVar1 == 0) then
-    iVar1 = K_499570(TeamName)
+    iVar1 = K_499570(TeamName)  -- kasfHasShipBeenDiscovered
     if (iVar1 ~= 0) then
       K_491d30(71552178, 1)  -- kasfVarCreateSet
       K_495f00()  -- kasfHarvest

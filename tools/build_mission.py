@@ -34,6 +34,7 @@ end
 
 function OnInit()
     print("CATACLYSM Mission{nn}: OnInit")
+    KAS_StartEngine()
     KASRule_Add("Mission{nn}", "Watch_Mission{nn}", "OnInit")
     KAS_Team = "Mission{nn}"
     Init_Mission{nn}("Mission{nn}")

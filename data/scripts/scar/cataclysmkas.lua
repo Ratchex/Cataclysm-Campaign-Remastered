@@ -274,7 +274,7 @@ function K_495c40(a, b)                                                         
         return 0
     end
     SobGroup_CreateIfNotExist("KAS_Temp")
-    SobGroup_FillSubstract("KAS_Temp", a, b)
+    SobGroup_FillSubtract("KAS_Temp", a, b)
     SobGroup_Clear(a)
     SobGroup_SobGroupAdd(a, "KAS_Temp")
     return SobGroup_Count(a)
@@ -297,4 +297,117 @@ function K_494f60(label)                                                        
         Objective_SetState(KAS_Objectives[label], OS_Off)
         KAS_Objectives[label] = nil
     end
+end
+
+-- ------------------------------------------------------------------ visibility and volumes
+-- Discovery radius: Cataclysm's Recon fowRadius (16000) scaled to HWRM units (x0.35).
+KAS_DiscoverRadius = 5600
+
+-- 0x499570 (kasfHasShipBeenDiscovered?): 1 if any ship of the selection is visible to the player. The exe checks
+-- each ship's position against the fog-of-war map; here: any player ship within sensor range of it.
+function K_499570(sel)
+    if SobGroup_Count(sel) == 0 then return 0 end
+    SobGroup_CreateIfNotExist("KAS_Discover")
+    SobGroup_Clear("KAS_Discover")
+    Player_FillProximitySobGroup("KAS_Discover", 0, sel, KAS_DiscoverRadius)
+    return KAS_B(SobGroup_Count("KAS_Discover") > 0)
+end
+
+-- kasfFindShipsInside(volume, ships): every live ship of every player inside the volume
+function K_492db0(volume, sel)
+    SobGroup_Clear(sel)
+    SobGroup_CreateIfNotExist("KAS_InVolume")
+    local p = 0
+    while p < Universe_PlayerCount() do
+        SobGroup_Clear("KAS_InVolume")
+        Player_FillSobGroupInVolume("KAS_InVolume", p, volume)
+        SobGroup_SobGroupAdd(sel, "KAS_InVolume")
+        p = p + 1
+    end
+    return SobGroup_Count(sel)
+end
+
+-- kasfTutEnableFlags: tutorial UI enable flags; no HWRM equivalent needed outside the tutorial
+function K_496720(flags) end
+-- ------------------------------------------------------------------ single-player engine variables
+-- Cataclysm's SP code (exe FUN_005197d0) talks to missions through global KAS variables: a mission sets
+-- G_PlayNis / G_PlayNislet = N to request cutscene N; the engine sets G_Nis<N>Complete / G_Nislet<N>Complete
+-- (format strings in the exe) when it ends, and G_ShipsHaveArrived after the fleet hyperspaces in.
+-- Until NIS playback exists (Phase 0.5) KAS_EngineTick completes every requested cutscene at once.
+KAS_Key_PlayNis = "0:84324259"
+KAS_Key_PlayNislet = "0:184168644"
+KAS_Key_ShipsHaveArrived = "0:132054244"
+KAS_Key_NisComplete = {}
+KAS_Key_NisletComplete = {}
+KAS_Key_NisComplete[0] = "0:134957621"
+KAS_Key_NisletComplete[0] = "0:207887397"
+KAS_Key_NisComplete[1] = "0:134957877"
+KAS_Key_NisletComplete[1] = "0:207887653"
+KAS_Key_NisComplete[2] = "0:134957109"
+KAS_Key_NisletComplete[2] = "0:207887909"
+KAS_Key_NisComplete[3] = "0:134957365"
+KAS_Key_NisletComplete[3] = "0:207888165"
+KAS_Key_NisComplete[4] = "0:134956597"
+KAS_Key_NisletComplete[4] = "0:207884325"
+KAS_Key_NisComplete[5] = "0:134956853"
+KAS_Key_NisletComplete[5] = "0:207884581"
+KAS_Key_NisComplete[6] = "0:134956085"
+KAS_Key_NisletComplete[6] = "0:207884837"
+KAS_Key_NisComplete[7] = "0:134956341"
+KAS_Key_NisletComplete[7] = "0:207885093"
+KAS_Key_NisComplete[8] = "0:134955573"
+KAS_Key_NisletComplete[8] = "0:207885349"
+KAS_Key_NisComplete[9] = "0:134955829"
+KAS_Key_NisletComplete[9] = "0:207885605"
+KAS_Key_NisComplete[10] = "0:46228421"
+KAS_Key_NisletComplete[10] = "0:139854213"
+KAS_Key_NisComplete[11] = "0:46228165"
+KAS_Key_NisletComplete[11] = "0:139855493"
+KAS_Key_NisComplete[12] = "0:46227909"
+KAS_Key_NisletComplete[12] = "0:139854725"
+KAS_Key_NisComplete[13] = "0:46227653"
+KAS_Key_NisletComplete[13] = "0:139853957"
+KAS_Key_NisComplete[14] = "0:46231493"
+KAS_Key_NisletComplete[14] = "0:139857285"
+KAS_Key_NisComplete[15] = "0:46231237"
+KAS_Key_NisletComplete[15] = "0:139854469"
+KAS_Key_NisComplete[16] = "0:46230981"
+KAS_Key_NisletComplete[16] = "0:139857797"
+KAS_Key_NisComplete[17] = "0:46230725"
+KAS_Key_NisletComplete[17] = "0:139857029"
+KAS_Key_NisComplete[18] = "0:46230469"
+KAS_Key_NisletComplete[18] = "0:139856261"
+KAS_Key_NisComplete[19] = "0:46230213"
+KAS_Key_NisletComplete[19] = "0:139857541"
+KAS_Key_NisComplete[20] = "0:46232517"
+KAS_Key_NisletComplete[20] = "0:139858309"
+
+function KAS_EngineTick()
+    local n = KAS_Vars[KAS_Key_PlayNislet]
+    if n and n ~= 0 then
+        print("CKAS: nislet " .. n .. " requested (NIS playback not ported yet: marking complete)")
+        KAS_Vars[KAS_Key_PlayNislet] = 0
+        if KAS_Key_NisletComplete[n] then KAS_Vars[KAS_Key_NisletComplete[n]] = 1 end
+    end
+    n = KAS_Vars[KAS_Key_PlayNis]
+    if n and n ~= 0 then
+        print("CKAS: NIS " .. n .. " requested (NIS playback not ported yet: marking complete)")
+        KAS_Vars[KAS_Key_PlayNis] = 0
+        if KAS_Key_NisComplete[n] then KAS_Vars[KAS_Key_NisComplete[n]] = 1 end
+    end
+    if KAS_ShipsArriveAt and Universe_GameTime() >= KAS_ShipsArriveAt then
+        KAS_ShipsArriveAt = nil
+        KAS_Vars[KAS_Key_ShipsHaveArrived] = 1
+        print("CKAS: G_ShipsHaveArrived")
+    end
+end
+
+-- kasfStartLevelByHyperspacingShips: the engine hyperspaces the player's fleet in, then sets G_ShipsHaveArrived.
+-- The stand-in fleet is already placed by the level, so only the signal is needed (after a short delay).
+function K_498230()
+    KAS_ShipsArriveAt = Universe_GameTime() + 3
+end
+
+function KAS_StartEngine()
+    Rule_AddInterval("KAS_EngineTick", 0.5)
 end
