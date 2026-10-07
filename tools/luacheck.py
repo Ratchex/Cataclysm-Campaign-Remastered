@@ -22,6 +22,11 @@ def main():
     except Exception as e:  # noqa: BLE001 - report any parser failure with its position
         print(f"SYNTAX ERROR in {path}: {e}")
         sys.exit(1)
+    names = re.findall(r"^\s*function (\w+)\(", src, re.M)
+    dups = sorted({n for n in names if names.count(n) > 1})
+    if dups:
+        print(f"HWRM ERROR in {path}: functions defined twice (HWRM ignores the second): {', '.join(dups)}")
+        sys.exit(1)
     defined = set(re.findall(r"^function (\w+)\(", src, re.M))
     for r in runtimes:
         defined |= set(re.findall(r"^\s*function (\w+)\(", open(r, encoding="latin-1").read(), re.M))

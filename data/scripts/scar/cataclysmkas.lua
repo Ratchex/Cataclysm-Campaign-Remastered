@@ -203,7 +203,7 @@ function K_4920e0(h) KAS_Timers[KAS_Key(h)] = nil end                           
 -- Per-team queue of (message hash, sender). Reading message i removes it by swapping in the last one.
 KAS_Msgs = {}
 
-function KAS_MsgSendRaw(from, to, msg)
+function KAS_MsgSendRawUntraced(from, to, msg)
     local q = KAS_Msgs[to]
     if q == nil then q = {}; KAS_Msgs[to] = q end
     if getn(q) >= 64 then KAS_Msgs[to] = {}; q = KAS_Msgs[to] end   -- the exe resets the count at 64
@@ -434,3 +434,41 @@ function K_494160(player) SobGroup_SwitchOwner(KAS_Team, player) end            
 
 -- kasfResetShipRenderFlags: clears per-ship "has been rendered" bits used by kasfRenderedShips; no HWRM state.
 function K_498c70(sel) end
+
+-- ------------------------------------------------------------------ KAS.c helpers called with a run-time hash
+-- The translator turns constant-hash lookups into label strings; these handle hashes held in variables.
+KAS_LabelByHash = nil
+function KAS_HashLabel(h)
+    if KAS_LabelByHash == nil then
+        KAS_LabelByHash = {}
+        for label, hash in KAS_LabelHash do KAS_LabelByHash[hash] = label end
+    end
+    if h < 0 then h = h + 2147483648 end
+    return KAS_LabelByHash[h]
+end
+
+function K_4907a0(h) return KAS_HashLabel(h) or "" end                                             -- kasAITeamPtr
+function K_4907e0(h) return KAS_HashLabel(h) or "" end                                             -- kasAITeamShipsPtr
+function K_490a60(h) return KAS_HashLabel(h) or "" end                                             -- kasPathPtrNoErrorChecking
+function K_490aa0(h) return KAS_HashLabel(h) or "" end                                             -- kasPathPtr
+function K_490af0(h) return KAS_HashLabel(h) or "" end                                             -- kasVolumePtr
+function K_490b30(h) return KAS_Vector(KAS_HashLabel(h) or "") end                                 -- kasVectorPtr
+function K_490b70(h) return KAS_GS(KAS_HashLabel(h) or format("gs_%08x", h)) end                   -- kasGetGrowSelectionPtrIfExists
+function K_490bb0(h) return KAS_GS(KAS_HashLabel(h) or format("gs_%08x", h)) end                   -- kasGrowSelectionPtr
+function K_4908c0(h) return KAS_TeamVector(KAS_HashLabel(h) or "") end                             -- kasTeamsVectorPtr
+function K_490960(h) return KAS_VolumeVector(KAS_HashLabel(h) or "") end                           -- kasVolumeVectorPtr
+function K_490820(sel) return KAS_ShipsVector(sel) end                                             -- kasShipsVectorPtr
+function K_4909f0() return KAS_TeamVector(KAS_Team) end                                            -- kasThisTeamsVectorPtr
+
+-- message trace (set KAS_TraceMsgs = 0 to silence)
+KAS_TraceMsgs = 1
+function KAS_MsgSendRaw(from, to, msg)
+    if KAS_TraceMsgs == 1 then
+        print("CKAS msg " .. (from or "?") .. " -> " .. (to or "?") .. " : " .. msg)
+    end
+    if to == "" or to == 0 then
+        KAS_WarnOnce("lostmsg" .. msg, "message " .. msg .. " sent to an unknown team (lost)")
+        return
+    end
+    KAS_MsgSendRawUntraced(from, to, msg)
+end

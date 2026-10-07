@@ -755,7 +755,7 @@ function F_5da2c0(TeamName)
     elseif _pc == 3 then
       if (iVar1 < 0) then _pc = 6 else _pc = 7 end
     elseif _pc == 4 then
-      if (true ~= 0) then _pc = 3 else _pc = 5 end
+      if (1 ~= 0) then _pc = 3 else _pc = 5 end
     elseif _pc == 5 then
       do return end
     elseif _pc == 6 then

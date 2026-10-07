@@ -517,6 +517,8 @@ class Translator:
         raise Unsupported(f"expr {t}")
 
     def ident(self, name):
+        if name in ("true", "false"):  # Lua 4 has no booleans
+            return ("1" if name == "true" else "0"), "num"
         if name == TEAM:
             return "TeamName", "team"
         if name == SCOPE:
