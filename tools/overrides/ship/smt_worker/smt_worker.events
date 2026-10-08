@@ -1,0 +1,50 @@
+-- Somtaaw Worker effects (Cataclysm-HWRM; installed over Cataclysm Remastered's empty one by tools/install_cr.py).
+-- Started / ended from smt_worker.madstate. Effects: tools/make_worker_fx.py; markers: tools/build_ship.sh (geo2dae
+-- --marker). Layout as stock kus_resourcecollector / kus_repaircorvette.
+effects =
+{
+    animations =
+    {
+        animation1 =
+        {
+            name = "Resourcing",
+            length = 1,
+            loop = 1,
+            parent = "",
+            minimum = 0,
+            maximum = 0,
+            markers = {""}
+        },
+        animation2 =
+        {
+            name = "Repairing",
+            length = 5,
+            loop = 1,
+            parent = "",
+            minimum = 0,
+            maximum = 0,
+            markers = {""}
+        },
+    },
+    events =
+    {
+        harvestingbeam1 =
+        {
+            { "anim", "Resourcing" },
+            { "animtime", "-1" },
+            { "marker", "marker_beam" },
+            { "fx", "som_harvest_combo" },
+            { "sound", "SP_ELEMENTS/HGN_RESOURCECOLLECTOR_RESOURCING" },
+            { "fx_scale", "1" },
+        },
+        repairing1 =
+        {
+            { "anim", "Repairing" },
+            { "animtime", "-1" },
+            { "marker", "marker_repair" },
+            { "fx", "som_repair_cone" },
+            { "sound", "SP_ELEMENTS/HGN_RESOURCECOLLECTOR_REPAIRING" },
+            { "fx_scale", "1" },
+        },
+    },
+}

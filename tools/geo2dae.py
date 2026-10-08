@@ -6,7 +6,8 @@ Output: <out_dir>/<name>.dae, <name>_<tex>_DIFF.tga / _TEAM.tga next to it, and 
 
 Coordinates: HW1 models are X up, Y right, Z forward; HODOR wants Y up, Z forward. HWRM = 0.35 * (-y, x, z)
 (0.35 = the same factor Gearbox used for HW1 levels and ship sizes, see NOTES.md); a proper rotation, so winding
-is kept. Every object is baked into JNT[Root] for now (turret joints come later with weapons).
+is kept. Objects are baked into JNT[Root], except animated parts (--anim-joints: each under its own joint, driven
+by tools/mad2hwrm.py's converted .mad).
 Materials: MAT[<tex>]_SHD[ship] with image IMG[<name>_<tex>_DIFF] (id ...-image); HODOR picks up the _TEAM file next
 to the _DIFF one (SHADERS.MAP: $team R = 1 - team colour, G = 1 - stripe colour, B = 0).
 
@@ -96,9 +97,64 @@ def read_mex(path):
     return out
 
 
-def jnode(name, xyz, children=""):
-    return (f'<node name="{name}" id="{name}" sid="{name}E"><translate sid="translate">{fl(xyz)}</translate>'
+def jnode(name, xyz, children="", rot=None):
+    """Joint node; rot = (rx, ry, rz) degrees, composed Z * Y * X (HODOR's order, as the .mad rotate channels)."""
+    r = "" if rot is None else (f'<rotate sid="rotateZ">0 0 1 {rot[2]:.5f}</rotate><rotate sid="rotateY">0 1 0 '
+                                f'{rot[1]:.5f}</rotate><rotate sid="rotateX">1 0 0 {rot[0]:.5f}</rotate>')
+    return (f'<node name="{name}" id="{name}" sid="{name}E"><translate sid="translate">{fl(xyz)}</translate>{r}'
             f'{children}</node>')
+
+
+# Animated parts (Cataclysm .mad objects) become joints so tools/mad2hwrm.py can drive them: their meshes hang
+# under JNT[<object name without brackets>] in the object's own frame. HW1 -> HWRM axes: v' = C v (conv without
+# the scale), so a local matrix becomes C R C^T with translation C t * scale.
+C3 = ((0.0, -1.0, 0.0), (1.0, 0.0, 0.0), (0.0, 0.0, 1.0))
+
+
+def joint_name(obj):
+    return re.sub(r"[^A-Za-z0-9_]", "", obj)
+
+
+def rigid_inverse(m):
+    """Inverse of a column-major 4x4 rotation + translation."""
+    r = [[m[c * 4 + k] for c in range(3)] for k in range(3)]          # r[row][col]
+    t = m[12:15]
+    out = [0.0] * 16
+    for row in range(3):
+        for col in range(3):
+            out[col * 4 + row] = r[col][row]
+        out[12 + row] = -sum(r[k][row] * t[k] for k in range(3))
+    out[15] = 1.0
+    return out
+
+
+def hwrm_local(m, scale):
+    """Column-major HW1 local matrix -> (HWRM translation, row-major HWRM rotation)."""
+    r = [[m[c * 4 + k] for c in range(3)] for k in range(3)]
+    cr = [[sum(C3[i][k] * r[k][j] for k in range(3)) for j in range(3)] for i in range(3)]
+    rot = [[sum(cr[i][k] * C3[j][k] for k in range(3)) for j in range(3)] for i in range(3)]   # C R C^T
+    t = [sum(C3[i][k] * m[12 + k] for k in range(3)) * scale for i in range(3)]
+    return t, rot
+
+
+def euler_deg(rot):
+    from nis2hwrm import matrix_to_euler_xyz
+    return tuple(math.degrees(a) for a in matrix_to_euler_xyz(rot))
+
+
+def joint_frames(objs, names):
+    """For the objects named (animated parts): {object index: (joint parent index or None, local matrix)}, the local
+    matrix relative to the nearest animated ancestor (None: the model root, i.e. the object's world matrix)."""
+    cache = {}
+    idx = {i for i, o in enumerate(objs) if o["name"] in names}
+    out = {}
+    for i in idx:
+        p = objs[i]["parent"]
+        while p is not None and p not in idx:
+            p = objs[p]["parent"]
+        W = geo2obj.world(objs, i, cache)
+        out[i] = (p, W if p is None else geo2obj.matmul(rigid_inverse(geo2obj.world(objs, p, cache)), W))
+    return out
 
 
 # Dock paths built from Cataclysm dock points (distances in HW1 units, scaled with the model):
@@ -313,7 +369,14 @@ def main():
     ap.add_argument("--no-docks", action="store_true", help="no dock paths (module subsystems)")
     ap.add_argument("--merge", nargs="*", default=[],
                     help="more .geo files baked into the same mesh (Kuun-Lan modules share the core's frame)")
+    ap.add_argument("--anim-joints", default="",
+                    help="comma-separated objects that get their own joint (parts animated by tools/mad2hwrm.py)")
+    ap.add_argument("--marker", action="append", default=[],
+                    help="effect marker joint NAME@OBJECT@x,y,z[@rx,ry,rz] (HW1 units in that animated object's "
+                         "frame; pointing along its +Z, or turned by those HWRM degrees, Z*Y*X) or NAME@gun:LABEL "
+                         "(at that .mex gun point, pointing forward)")
     a = ap.parse_args()
+    anim_names = {n for n in a.anim_joints.split(",") if n}
     os.makedirs(a.out_dir, exist_ok=True)
     rel = os.path.relpath(os.path.dirname(a.geo), os.path.join(DECOMP, "extracted", "big"))
     s = a.scale
@@ -324,13 +387,28 @@ def main():
     groups = {}   # key -> {"mat", "png_dir", "tris": [(positions[3], normals[3], uvs[3])]}
     flipped = total = 0
     extent = 0.0   # largest |coordinate| of the hull (HW1 units), sizes the engine glow quads
-    for geo in [a.geo] + a.merge:
+    frames = {}   # animated object index (main .geo) -> (joint parent, local matrix)
+    for gn, geo in enumerate([a.geo] + a.merge):
         b, ver, mats, objs = geo2obj.parse(geo)
         png_dir = os.path.join(DECOMP, "extracted", "textures",
                                os.path.relpath(os.path.dirname(geo), os.path.join(DECOMP, "extracted", "big")))
         cache = {}
+        if gn == 0 and anim_names:
+            frames = joint_frames(objs, anim_names)
+            missing = anim_names - {objs[i]["name"] for i in frames}
+            if missing:
+                sys.exit(f"--anim-joints: no such objects {sorted(missing)}")
+            main_objs = objs
         for i, o in enumerate(objs):
             W = geo2obj.world(objs, i, cache)
+            owner = None
+            if gn == 0 and frames:
+                owner = i
+                while owner is not None and owner not in frames:
+                    owner = objs[owner]["parent"]
+            Wworld = W
+            if owner is not None:     # vertices in the owning joint's frame
+                W = geo2obj.matmul(rigid_inverse(geo2obj.world(objs, owner, cache)), W)
             f = struct.unpack_from(geo2obj.OBJ.format, b, 68 + i * geo2obj.OBJ.size)
             p_norm = f[10]
             verts = [struct.unpack_from("<fffi", b, o["pV"] + v * 16) for v in range(o["nV"])]
@@ -340,7 +418,7 @@ def main():
                 for vi in (i0, i1, i2):
                     x, y, z, ivn = verts[vi]
                     pos.append(geo2obj.xform(W, x, y, z))
-                    extent = max(extent, *map(abs, pos[-1]))
+                    extent = max(extent, *map(abs, geo2obj.xform(Wworld, x, y, z)))
                     nx, ny, nz = struct.unpack_from("<fff", b, p_norm + ivn * 16)
                     wx, wy, wz = (W[0] * nx + W[4] * ny + W[8] * nz, W[1] * nx + W[5] * ny + W[9] * nz,
                                   W[2] * nx + W[6] * ny + W[10] * nz)
@@ -358,22 +436,27 @@ def main():
                     pos, nrm, uv = pos[::-1], nrm[::-1], uv[::-1]
                 mat = mats[m] if m < len(mats) else {"texture": None, "diffuse": 0x808080}
                 key = (mat["texture"] or "").lower() or "col%06x" % (mat["diffuse"] & 0xFFFFFF)
-                groups.setdefault(key, {"mat": mat, "png_dir": png_dir, "tris": []})["tris"].append(
+                groups.setdefault((owner if owner is not None else -1, key),
+                                  {"mat": mat, "png_dir": png_dir, "tris": []})["tris"].append(
                     ([conv(*q) for q in pos], [convn(*q) for q in nrm], uv))
 
     images, materials, effects, geoms, nodes = [], [], [], [], []
-    for gi, (key, g) in enumerate(sorted(groups.items())):
+    joint_kids = {i: [] for i in frames}   # animated object -> its mesh / marker / child joint nodes
+    done_mats = set()
+    for gi, ((owner, key), g) in enumerate(sorted(groups.items())):
         d = g["mat"]["diffuse"]
         colour = (d & 0xFF, d >> 8 & 0xFF, d >> 16 & 0xFF)
         base = f"{a.name}_{key}"
-        tga = write_textures(g["png_dir"], g["mat"]["texture"], a.out_dir, base, colour)
         img = f"IMG[{base}_DIFF]"   # RODOH's layout: id IMG[x]-image, name IMG[x]_FMT[..]; HODOR crashes otherwise
         mname = f"MAT[{key}]_SHD[ship]"
-        images.append(f'<image id="{img}-image" name="{img}_FMT[DXT1]"><init_from>{tga}</init_from></image>')
-        materials.append(f'<material id="{mname}" name="{mname}"><instance_effect url="#{mname}-fx"/></material>')
-        effects.append(f'<effect id="{mname}-fx" name="{mname}"><profile_COMMON>'
-                       f'<technique sid="standard"><phong><diffuse><texture texture="{img}-image" texcoord="CHANNEL0"/>'
-                       f'</diffuse></phong></technique></profile_COMMON></effect>')
+        if key not in done_mats:   # one material per texture, shared by the root and the animated parts
+            done_mats.add(key)
+            tga = write_textures(g["png_dir"], g["mat"]["texture"], a.out_dir, base, colour)
+            images.append(f'<image id="{img}-image" name="{img}_FMT[DXT1]"><init_from>{tga}</init_from></image>')
+            materials.append(f'<material id="{mname}" name="{mname}"><instance_effect url="#{mname}-fx"/></material>')
+            effects.append(f'<effect id="{mname}-fx" name="{mname}"><profile_COMMON>'
+                           f'<technique sid="standard"><phong><diffuse><texture texture="{img}-image" '
+                           f'texcoord="CHANNEL0"/></diffuse></phong></technique></profile_COMMON></effect>')
         tris = g["tris"]
         n = len(tris) * 3
         P = [c for t in tris for q in t[0] for c in q]
@@ -396,7 +479,8 @@ def main():
             f'<input semantic="VERTEX" offset="0" source="#{gid}-v"/><input semantic="NORMAL" offset="0" source="#{gid}-nrm"/>'
             f'<input semantic="TEXCOORD" offset="0" set="0" source="#{gid}-uv0"/>'
             f'<p>{" ".join(map(str, range(n)))}</p></triangles></mesh></geometry>')
-        nodes.append(f'<node name="{gid}" id="{gid}" sid="{gid}E"><translate sid="translate">0 0 0</translate>'
+        (nodes if owner < 0 else joint_kids[owner]).append(
+                     f'<node name="{gid}" id="{gid}" sid="{gid}E"><translate sid="translate">0 0 0</translate>'
                      f'<instance_geometry url="#{gid}"><bind_material><technique_common>'
                      f'<instance_material symbol="{mname}" target="#{mname}"><bind_vertex_input semantic="CHANNEL0" '
                      f'input_semantic="TEXCOORD" input_set="0"/></instance_material>'
@@ -476,6 +560,32 @@ def main():
                 at = tuple(float(c) for c in o.split(","))
         weapons += jnode(f"JNT[{hp}_Position]", at, jnode(f"JNT[{hp}_Direction]", (0, 10, 0))
                          + jnode(f"JNT[{hp}_Rest]", rest))
+    # effect markers (.events "marker"): plain joints, the effect pointing along the joint's +Z
+    by_obj = {main_objs[i]["name"]: i for i in frames} if frames else {}
+    for spec in a.marker:
+        name, where, *at = spec.split("@")
+        if where.startswith("gun:"):
+            gun = [pt for pt in points if pt[0] == "Gun" and pt[1] == where[4:]]
+            if not gun:
+                sys.exit(f"--marker {spec}: no gun point {where[4:]}")
+            weapons += jnode(f"JNT[{name}]", conv(*gun[0][2]))
+        else:
+            if where not in by_obj or not at:
+                sys.exit(f"--marker {spec}: {where} is not an --anim-joints object (or no position)")
+            rot = tuple(float(c) for c in at[1].split(",")) if len(at) > 1 else None
+            joint_kids[by_obj[where]].append(jnode(f"JNT[{name}]", conv(*(float(c) for c in at[0].split(","))),
+                                                   rot=rot))
+
+    def joint_tree(parent):
+        out = ""
+        for i, (p, m) in sorted(frames.items()):
+            if p == parent:
+                t, rot = hwrm_local(m, s)
+                out += jnode(f"JNT[{joint_name(main_objs[i]['name'])}]", t,
+                             "".join(joint_kids[i]) + joint_tree(i), euler_deg(rot))
+        return out
+    if frames:
+        weapons += joint_tree(None)
 
     dae = os.path.join(a.out_dir, a.name + ".dae")
     with open(dae, "w", encoding="utf-8", newline="\n") as f:

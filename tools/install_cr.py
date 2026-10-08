@@ -62,8 +62,18 @@ def patch_race(text):
     return re.sub(r'^(Tags = "(?:(?!race_gbx_hwrmc)[^"])*)"', r'\1,race_gbx_hwrmc"', text, count=1, flags=re.M)
 
 
+def patch_worker(text):
+    """Cataclysm's Worker harvests from a distance with its cone (HW1 ResCollect.c) and repairs. Harvest's last
+    argument is the stand-off: theirs (300, HW2 collectors' value) latched onto the asteroid; stock HWRM's HW1
+    collectors hold 400 off, which the stock cone mesh (also ours, tools/make_worker_fx.py) is sized for. Their
+    RepairCommand was disabled."""
+    text = re.sub(r'(addAbility\(NewShipType,\s*"Harvest",\s*1,\s*[\d.]+,\s*[\d.]+,\s*)300\)', r'\g<1>400)', text)
+    return re.sub(r'(addAbility\(NewShipType,\s*"RepairCommand",\s*)0,', r'\g<1>1,', text)
+
+
 PATCHES = {
     "ship/smt_ms_sp/smt_ms_sp.ship": patch_ms_sp,
+    "ship/smt_worker/smt_worker.ship": patch_worker,
     "scripts/races/somtaaw/singleplayer/props/gbx.lua": patch_sp_props,
     "scripts/familylist.lua": patch_families,
     "scripts/races/somtaaw.lua": patch_race,
@@ -102,6 +112,10 @@ OUR_EVENTS = {
 }
 
 
+# Files of theirs replaced by ours (tracked here; data/ copies are git-ignored as theirs): tools/overrides/<data path>
+OVERRIDES = os.path.join(MOD, "tools", "overrides")
+
+
 def use_our_events(ship, src, names):
     text = open(src, encoding="latin-1").read()
     for theirs, mine in names.items():
@@ -113,6 +127,9 @@ def use_our_events(ship, src, names):
 def use_our_model(ship, ours, joints):
     folder = os.path.join(DATA, "ship", ship)
     shutil.copyfile(os.path.join(BUILD, ours, ours + ".hod"), os.path.join(folder, ship + ".hod"))
+    mad = os.path.join(BUILD, ours, ours + ".mad")   # converted Cataclysm animation (tools/mad2hwrm.py)
+    if os.path.exists(mad):
+        shutil.copyfile(mad, os.path.join(folder, ship + ".mad"))
     model = open(os.path.join(folder, ship + ".hod"), "rb").read()
     path = os.path.join(folder, ship + ".ship")
     text = open(path, encoding="latin-1").read()
@@ -199,6 +216,10 @@ def main():
         use_our_model(ship, ours, joints)
     for ship, (src, names) in OUR_EVENTS.items():
         use_our_events(ship, src, names)
+    for root, _, files in os.walk(OVERRIDES):   # our own versions of their files (.events / .madstate)
+        for fn in files:
+            rel = os.path.relpath(os.path.join(root, fn), OVERRIDES)
+            shutil.copyfile(os.path.join(root, fn), os.path.join(DATA, rel))
     for rel in copied:
         if rel.endswith(".events"):
             fix_event_markers(os.path.join(DATA, rel))

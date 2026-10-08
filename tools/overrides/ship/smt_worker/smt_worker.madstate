@@ -1,0 +1,90 @@
+-- Somtaaw Worker animation states (Cataclysm-HWRM; installed over Cataclysm Remastered's by tools/install_cr.py).
+-- Clips from Cataclysm's sworker.mad (tools/mad2hwrm.py): JackOut / JackClose swing the repair jack out and back,
+-- JackSpin holds it out, DockOpen / DockClose turn the four docking clamps, BladesSpin turns the three blades.
+-- Effects (.events): "Resourcing" = orange harvest cone at marker_beam, "Repairing" = green repair cone at
+-- marker_repair (the jackhammer tip). A clip paused at 1000 s holds its last frame (Cataclysm Remastered's pattern).
+
+-- start clip "to"; if its opposite "from" is still running, from the matching point so the part doesn't jump
+SMT_WORKER_Swap = function(ship, from, to)
+    if(isAnimRunning(ship, to) == 0) then
+        startTime = 0
+        if(isAnimRunning(ship, from) ~= 0) then
+            startTime = getAnimLength(ship, from) - getTime(ship, from)
+            if(startTime < 0) then
+                startTime = 0
+            end
+            stopAnim(ship, from)
+        end
+        startAnim(ship, to)
+        setTime(ship, to, startTime)
+        setPauseTime(ship, to, 1000)
+    end
+end
+
+-- DOCKING: clamps out while latched to the Kuun-Lan, stowed in flight -----------
+SMT_WORKER_Launched_OnSet = function(ship)
+    SMT_WORKER_Swap(ship, "DockOpen", "DockClose")
+end
+
+SMT_WORKER_Docked_OnSet = function(ship)
+    SMT_WORKER_Swap(ship, "DockClose", "DockOpen")
+end
+
+-- RESOURCE COLLECTION: harvest cone, blades turning ------------------------------
+SMT_WORKER_ResourceStart_OnSet = function(ship)
+    setState(ship, "ResourceStart", 0)
+    endEffect(ship, "Resourcing")
+end
+
+SMT_WORKER_ResourceStart_OnPause = function(ship)
+    setState(ship, "ResourceStart", 1)
+end
+
+SMT_WORKER_ResourceDo_OnSet = function(ship)
+    if(isAnimRunning(ship, "BladesSpin") == 0) then
+        startAnim(ship, "BladesSpin")
+    end
+    startEffect(ship, "Resourcing")
+    setState(ship, "ResourceDo", 1)
+end
+
+SMT_WORKER_ResourceEnd_OnSet = function(ship)
+    stopAnim(ship, "BladesSpin")
+    endEffect(ship, "Resourcing")
+    setState(ship, "ResourceEnd", 1)
+end
+
+-- REPAIRING: jack swings out, green cone from its tip, jack swings back -----------
+SMT_WORKER_RepairStart_OnSet = function(ship)
+    -- held until the jack is out (RepairStart_OnPause)
+    setState(ship, "RepairStart", 0)
+    endEffect(ship, "Repairing")
+    SMT_WORKER_Swap(ship, "JackClose", "JackOut")
+end
+
+SMT_WORKER_RepairStart_OnPause = function(ship)
+    setState(ship, "RepairStart", 1)
+end
+
+SMT_WORKER_RepairDo_OnSet = function(ship)
+    SMT_WORKER_Swap(ship, "JackClose", "JackOut")
+    startEffect(ship, "Repairing")
+    setState(ship, "RepairDo", 1)
+end
+
+SMT_WORKER_RepairEnd_OnSet = function(ship)
+    endEffect(ship, "Repairing")
+    SMT_WORKER_Swap(ship, "JackOut", "JackClose")
+    setState(ship, "RepairEnd", 1)
+end
+
+-- CAPTURING: the jack, as Cataclysm Remastered's extend / retract ----------------
+SMT_WORKER_CaptureActive_OnSet = function(ship)
+    setState(ship, "CaptureActive", 0)
+    SMT_WORKER_Swap(ship, "JackClose", "JackOut")
+end
+
+SMT_WORKER_CaptureInActive_OnSet = function(ship)
+    setState(ship, "CaptureActive", 1)
+    SMT_WORKER_Swap(ship, "JackOut", "JackClose")
+end
