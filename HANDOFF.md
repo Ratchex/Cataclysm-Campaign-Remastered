@@ -5,9 +5,9 @@ Last updated 2026-10-08. Read this first, then `C:\Modding\Cataclysm-decomp\PORT
 findings).
 
 ## RESUME HERE (session of 2026-10-08, last code commit 169f5ac)
-User's direction: set up each mission's units as we reach that mission. Current goal: the Kuun-Lan fully working
-(side docks + every module as an HW2 subsystem, Cataclysm Remastered's Kuun-Lan as the template), then the
-Worker's leg / resource-harvest animations and effects.
+User's direction: set up each mission's units as we reach that mission, and play each part against the original.
+Done so far: the Kuun-Lan (core + module subsystems), the Worker (animations, harvest / repair), Mission 1's
+opening (both cutscenes and the fleet's arrival). Current goal: the rest of Mission 1, as the user finds differences.
 
 **Pipeline now** (all in `C:\Modding\Cataclysm-HWRM`; anything that runs HODOR from Git Bash):
 1. `bash tools/build_kuunlan.sh` - core (`build/ships/som_mothership`, Command Center + Resource Processing merged in:
@@ -19,9 +19,13 @@ Worker's leg / resource-harvest animations and effects.
 3. `python tools/install_cr.py` - Cataclysm Remastered base layer (git-ignored) + patches + our models under their
    setups (OUR_MODELS/OUR_EVENTS) + module slots appended to their `smt_ms_sp.ship`.
 4. `python tools/make_race.py` - SP build/research lists (ships need the Hangar; techs need their module).
-5. `python tools/build_mission.py 01 --intro n01` (writes `KAS_StartModules` from the .mission IncludeShips) and
-   `python tools/nis2hwrm.py n01 --modules dockingbay,engineslower,enginesupper,lowerspine,orecanarmour`.
+5. `python tools/build_mission.py 01 --intro n01` (writes `KAS_StartModules` from the .mission IncludeShips, level
+   with the arrival camera) and the cutscenes: `python tools/nis2hwrm.py n01 --modules
+   dockingbay,engineslower,enginesupper,lowerspine,orecanarmour`, `python tools/nis2hwrm.py nislet01` (each also
+   writes `docs/nis/<name>.md`; `--audit-only` for ones not wired in yet; list them in cataclysmkas.lua
+   KAS_NisAvailable). Speech strings: `python tools/build_speech.py` (speech.dat, invisible subtitles).
 6. `powershell -File launch.ps1`; the user plays; read `HwRM.log` (strip NULs). Close the game before rebuilding music.
+   Don't pipe luacheck into `head` before `&& launch`: the pipe hides its failure.
 
 **Done this session:** fix 1 (64934fb, confirmed in game: all modules show; HwRM.log "7 modules", no create
 errors): every module is in sp_build.lua (else SobGroup_CreateSubSystem refuses it), the structural ones are
