@@ -689,9 +689,21 @@ function K_498230()
     print("CKAS: fleet hyperspacing in at StartPointPlayer")
 end
 
-function KAS_HangarUnghost()
-    Rule_Remove("KAS_HangarUnghost")
-    SobGroup_SetGhost("KAS_ArrivalHangar", 0)
+-- the Hangar Workers, a tick after spawning: ghosted (no collision), put in the Hangar, shown, flown out along the
+-- exit line; once clear, solid again and sent to their parade places like launched ships (Gearbox's hyperspace
+-- arrivals: SobGroup_ParadeSobGroup(..., mothership, 0); a plain move left them stopped at the exit point)
+function KAS_HangarLaunch()
+    KAS_HangarStep = KAS_HangarStep + 1
+    if KAS_HangarStep == 1 then
+        SobGroup_SetGhost("KAS_ArrivalHangar", 1)
+        SobGroup_SetPosition("KAS_ArrivalHangar", KAS_HangarInside)
+        SobGroup_SetHidden("KAS_ArrivalHangar", 0)
+        SobGroup_MoveToPoint(0, "KAS_ArrivalHangar", KAS_HangarOut)
+    elseif KAS_HangarStep >= 50 then          -- 5 s
+        Rule_Remove("KAS_HangarLaunch")
+        SobGroup_SetGhost("KAS_ArrivalHangar", 0)
+        SobGroup_ParadeSobGroup("KAS_ArrivalHangar", "KAS_ArrivalMS", 0)
+    end
 end
 
 -- out of hyperspace (the Kuun-Lan idle again, as Gearbox's singlePlayerWatchHyperspaceComplete): launch, arrived
@@ -709,18 +721,16 @@ function KAS_ArrivalWatch()
     Rule_Remove("KAS_ArrivalWatch")
     SobGroup_Launch("KAS_ArrivalDocked", "KAS_ArrivalMS")
     if SobGroup_Count("KAS_ArrivalHangar") > 0 then
-        -- a spawn inside the Kuun-Lan's collision box lands outside it (they appeared under the Hangar): ghosted
-        -- (no collision) and put in the Hangar, then flown out; solid again once clear (KAS_HangarUnghost)
+        -- a spawn inside the Kuun-Lan's collision box lands outside it (under the Hangar), and a SetPosition in
+        -- the same tick did not move them: spawned hidden here, placed and flown out by KAS_HangarLaunch
         local at = SobGroup_GetPosition("KAS_ArrivalMS")
-        local inside = { at[1] + KAS_HangarSpawn[1], at[2] + KAS_HangarSpawn[2], at[3] + KAS_HangarSpawn[3] }
-        Volume_AddSphere("KAS_HangarVol", inside, 40)
-        SobGroup_SetGhost("KAS_ArrivalHangar", 1)
+        KAS_HangarInside = { at[1] + KAS_HangarSpawn[1], at[2] + KAS_HangarSpawn[2], at[3] + KAS_HangarSpawn[3] }
+        KAS_HangarOut = { at[1] + KAS_HangarExit[1], at[2] + KAS_HangarExit[2], at[3] + KAS_HangarExit[3] }
+        Volume_AddSphere("KAS_HangarVol", KAS_HangarInside, 40)
+        SobGroup_SetHidden("KAS_ArrivalHangar", 1)
         SobGroup_Spawn("KAS_ArrivalHangar", "KAS_HangarVol")
-        SobGroup_SetGhost("KAS_ArrivalHangar", 1)
-        SobGroup_SetPosition("KAS_ArrivalHangar", inside)
-        SobGroup_MoveToPoint(0, "KAS_ArrivalHangar", { at[1] + KAS_HangarExit[1], at[2] + KAS_HangarExit[2],
-                                                       at[3] + KAS_HangarExit[3] })
-        Rule_AddInterval("KAS_HangarUnghost", 6)
+        KAS_HangarStep = 0
+        Rule_AddInterval("KAS_HangarLaunch", 0.1)
     end
     KAS_Vars[KAS_Key_ShipsHaveArrived] = 1
     print("CKAS: fleet out of hyperspace after " .. t .. "s; launching " .. SobGroup_Count("KAS_ArrivalDocked")
