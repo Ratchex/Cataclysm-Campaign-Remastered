@@ -89,3 +89,22 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
 - The Kuun-Lan core (smothership) is only the spine and 6 gimbals; its look comes from module ships stored in
   the core's frame (Mission01 includes Command, DockingBay, Engineering, EnginesLower/Upper, LowerSpine,
   OreCanArmour). For now they are baked into the hull; real modules need HWRM subsystems + hardpoint joints.
+
+## Cutscenes (Phase 0.5, confirmed in game with n01)
+- HWRM NIS = IFF `FORM NIS ` (layout in tools/nis2hwrm.py docstring). Played with `NISLoad("nis/cataclysm/n01")`
+  then `NISPlayFromCoordSys(path, pos, matrix)`; `NISShipStartPosition(path, shipType, -1)` finds the centre ship
+  by FOLW object *name* = ship type. Wait with `NISGetAnyPlayingHandle()` / `NISComplete(h)`.
+- Every camera eye needs a FOLW record of kind "camera" (else "setting a NULL camera" + access violation), and the
+  script must pick one (`cameraCut("Camera0")`).
+- CMRA lens: u32 0, doubles (0, vertical FOV deg, horizontal FOV deg, 24, near, far). Confirmed: field 1 is the
+  vertical FOV. HW1 FOV is vertical on 4:3 (NIS default 75); keep HW1's horizontal view on 16:9.
+- HWRM interpolates NIS keys at render rate and snaps them to whole frames: HW1 one-frame steps become slides.
+  Camera cuts -> one HWRM camera per shot + `cameraCut`; object repositions -> hide() for that frame.
+- Euler: rotate order XYZ (M = Rz Ry Rx), objects face +Z, cameras look down -Z. HW1 cameras rest at gimbal
+  lock (ry = -90): hold rz there or the angles flip (visible jiggle).
+- HW1 never uses the paths' timeOffset. Script object names differ in case from the NIS ones.
+- HW1 left the screen black at the end of an NIS and faded in itself; the converted script fades back in.
+- Speech actors: 16 Fleet Command, 17 Fleet Intel (logged from Actor_HW1_*).
+- Not converted yet: music (startMusic), subtitle text cards, lights/ambient, lens flares, the planet backdrop,
+  buoys, colour schemes, FOV changes inside a shot, mesh animations (Kuun-Lan DockOpen/DockClose: with real
+  modules), remainAtEnd (the real ships are hidden during the intro instead; Gearbox keeps the NIS ships).
