@@ -106,9 +106,9 @@ RACE_SECT	smimic	smt_mimic	Cataclysm Remastered
 RACE_SECT	smothership	smt_ms_sp	Cataclysm Remastered
 RACE_SECT	smothershiparmour	smt_kl_armour_dummy	our model as a loose module (tools/make_modules.py)
 RACE_SECT	smothershipbiggun	smt_kl_biggun_dummy	our model as a loose module (tools/make_modules.py)
-RACE_SECT	smothershipcommand	smt_kl_command_dummy	our model as a loose module (tools/make_modules.py)
+RACE_SECT	smothershipcommand		part of the Kuun-Lan core model (smt_ms_sp; make_modules.py CORE_PARTS)
 RACE_SECT	smothershipdockingbay	smt_kl_dockingbay_dummy	our model as a loose module (tools/make_modules.py)
-RACE_SECT	smothershipengineering	smt_kl_engineering_dummy	our model as a loose module (tools/make_modules.py)
+RACE_SECT	smothershipengineering		part of the Kuun-Lan core model (smt_ms_sp; make_modules.py CORE_PARTS)
 RACE_SECT	smothershipengineslower	smt_kl_engineslower_dummy	our model as a loose module (tools/make_modules.py)
 RACE_SECT	smothershipenginesupper	smt_kl_enginesupper_dummy	our model as a loose module (tools/make_modules.py)
 RACE_SECT	smothershiplowerspine	smt_kl_lowerspine_dummy	our model as a loose module (tools/make_modules.py)

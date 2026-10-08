@@ -8,9 +8,10 @@ Models: tools/build_kuunlan.sh (core + modules, HODOR) into build/ships/. All mo
 
 What each module does (Cataclysm english.script str*ModuleInfo): research modules list their techs (TECH_MODULE,
 used by make_race.py for RequiredSubSystems = the module's typeString); the Hangar is required to build ships;
-Resource Processing ("Engineering") is where Workers unload. Missions start with the modules their .mission
-includes (build_mission.py -> KAS_StartModules); none are innate, as the story removes some (Lower Spine,
-Ore Canister after Mission 3, Lower Engines after Mission 4).
+Command Center and Resource Processing are part of the core model (CORE_PARTS: on the Kuun-Lan in every mission;
+the core takes the Workers' drop-offs). Missions start with the modules their .mission includes
+(build_mission.py -> KAS_StartModules); none are innate, as the story removes some (Lower Spine and Ore Canister
+from Mission 4, Lower Engines from Mission 5).
 
 Usage: make_modules.py   (after tools/build_kuunlan.sh)
 """
@@ -26,8 +27,6 @@ HEALTH_SCALE = 5   # Cataclysm module hit points -> HWRM (Cataclysm Remastered's
 
 # key: (Cataclysm ship, displayed name, typeString, isResearch, buildable, required tech)
 MODULES = {
-    "command":      ("sMothershipCommand", "Command Center", "CommandCenter", 0, False, ""),
-    "engineering":  ("sMothershipEngineering", "Resource Processing", "Resourcing", 0, False, ""),
     "engineslower": ("sMothershipEnginesLower", "Lower Engines", "LowerEngines", 0, False, ""),
     "enginesupper": ("sMothershipEnginesUpper", "Upper Engines", "UpperEngines", 0, False, ""),
     "lowerspine":   ("sMothershipLowerSpine", "Lower Spine", "LowerSpine", 0, False, ""),
@@ -40,6 +39,10 @@ MODULES = {
     "support":      ("sMothershipSupport", "Support Module", "SupportModule", 0, True, "TECH_SUPPORT_SYSTEMS"),
     "biggun":       ("sMothershipBigGun", "Siege Cannon", "SiegeCannon", 0, True, "TECH_BIG_GUN"),
 }
+
+# Cataclysm sMothership<part> objects that are part of the core model, not modules (on the Kuun-Lan in every mission;
+# merged into its mesh by tools/build_kuunlan.sh). Resource Processing was where Workers unload: the core does that.
+CORE_PARTS = {"command": "sMothershipCommand", "engineering": "sMothershipEngineering"}
 
 # hardpoint joints on the core (geo2dae.py --hardpoint specs; the Support model sits on the port side of the
 # spine, its pair partner turned about Y)
@@ -264,6 +267,8 @@ if __name__ == "__main__":
     import sys
     if "--list-builds" in sys.argv:          # for tools/build_kuunlan.sh
         print(" ".join(f"{k}={v[0].lower()}" for k, v in MODULES.items()))
+    elif "--list-core" in sys.argv:          # core parts merged into the Kuun-Lan's mesh
+        print(" ".join(f"race_sect/{v.lower()}" for v in CORE_PARTS.values()))
     elif "--list-hardpoints" in sys.argv:
         print(" ".join(spec for k in MODULES for spec in HARDPOINTS[k]))
     else:

@@ -13,7 +13,7 @@ dofilepath("data:scripts/scar/cataclysmtech.lua")
 dofilepath("data:leveldata/campaign/cataclysm/m01/m01_kas.lua")
 
 -- Kuun-Lan modules at the start (the mission's IncludeShips sMothership<Module>; tools/make_modules.py)
-KAS_StartModules = { "smt_kl_command", "smt_kl_dockingbay", "smt_kl_engineering", "smt_kl_engineslower", "smt_kl_enginesupper", "smt_kl_lowerspine", "smt_kl_orecanarmour" }
+KAS_StartModules = { "smt_kl_dockingbay", "smt_kl_engineslower", "smt_kl_enginesupper", "smt_kl_lowerspine", "smt_kl_orecanarmour" }
 
 function OnStartOrLoad()
     print("CATACLYSM Mission01: OnStartOrLoad")
