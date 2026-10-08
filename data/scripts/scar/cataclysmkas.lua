@@ -794,8 +794,27 @@ function KAS_SelectInto(newShips, orig, fill)
     SobGroup_Clear(newShips)
     return fill(newShips, orig)
 end
-function K_495560(n, o) return KAS_SelectInto(n, o, KAS_FillShipsByCapital) end                  -- kasfShipsSelectCapital
-function K_495620(n, o) return KAS_SelectInto(n, o, KAS_FillShipsByNonCapital) end               -- kasfShipsSelectNonCapital
+-- kasfShipsSelectEnemy / kasfShipsSelectFriendly (exe 0x495560 / 0x495620: filter 0x495580 mode 0 / 1). Absolute
+-- sides, not relative to the team: "enemy" = ships of the human player (in Cataclysm the Kushan too, once switched
+-- to the human; here player 0 and the allied player 2), "friendly" = the computer's (player 1). Mission01 fills its
+-- Enemy / FRIENDLY selections with them; the Taiidan raiders look for kProximitySensor in Enemy (the picket). These
+-- were taken for "select capital / non-capital": the raiders found no sensors and went for capital ships, with the
+-- picket's interceptors chasing them.
+function KAS_FillByOwners(newShips, orig, owners)
+    SobGroup_CreateIfNotExist("KAS_OwnerTmp")
+    local i = 1
+    while i <= getn(owners) do
+        SobGroup_Clear("KAS_OwnerTmp")
+        SobGroup_FilterInclude("KAS_OwnerTmp", orig, "PlayerOwner", "" .. owners[i])
+        SobGroup_SobGroupAdd(newShips, "KAS_OwnerTmp")
+        i = i + 1
+    end
+    return SobGroup_Count(newShips)
+end
+function KAS_FillHumanSide(newShips, orig) return KAS_FillByOwners(newShips, orig, { 0, 2 }) end
+function KAS_FillComputerSide(newShips, orig) return KAS_FillByOwners(newShips, orig, { 1 }) end
+function K_495560(n, o) return KAS_SelectInto(n, o, KAS_FillHumanSide) end                         -- kasfShipsSelectEnemy
+function K_495620(n, o) return KAS_SelectInto(n, o, KAS_FillComputerSide) end                      -- kasfShipsSelectFriendly
 
 -- Cataclysm's kasfTeamSwitchPlayerOwner takes the new owner (HW1's had none): Mission01 hands allied Kushan teams
 -- to player 0 this way.
