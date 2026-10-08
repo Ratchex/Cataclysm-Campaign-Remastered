@@ -562,7 +562,24 @@ function KAS_StartEngine()
 end
 
 -- ------------------------------------------------------------------ orders and selections (Gearbox KASUtil helpers)
-function K_492190(targets) KAS_Attack(KAS_Team, targets) end                                      -- kasfAttack
+-- kasfAttack: HW1 passes the targets to its advanced attack AI, which only engages enemies; HWRM SobGroup_Attack
+-- attacks whatever it is given (Mission01's guards attack "every non-capital ship in BattleZone"). Keep only the
+-- ships of this team's enemies.
+function K_492190(targets)                                                                           -- kasfAttack
+    if SobGroup_Count(KAS_Team) == 0 then return end
+    SobGroup_CreateIfNotExist("KAS_AttackTargets")
+    SobGroup_CreateIfNotExist("KAS_AttackTmp")
+    SobGroup_Clear("KAS_AttackTargets")
+    local enemies = KAS_EnemyPlayers(SobGroup_GetPlayerOwner(KAS_Team))
+    local i = 1
+    while i <= getn(enemies) do
+        SobGroup_Clear("KAS_AttackTmp")
+        SobGroup_FilterInclude("KAS_AttackTmp", targets, "PlayerOwner", "" .. enemies[i])
+        SobGroup_SobGroupAdd("KAS_AttackTargets", "KAS_AttackTmp")
+        i = i + 1
+    end
+    if SobGroup_Count("KAS_AttackTargets") > 0 then KAS_Attack(KAS_Team, "KAS_AttackTargets") end
+end
 
 function KAS_SelectInto(newShips, orig, fill)
     if newShips == orig then
