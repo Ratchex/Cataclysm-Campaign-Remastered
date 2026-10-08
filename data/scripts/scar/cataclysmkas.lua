@@ -1149,10 +1149,24 @@ function K_496260(a) KAS_NoOp("496260", "kasfCameraSetDistance") end
 function K_49a2a0(vec) KAS_NoOp("49a2a0", "set focus point (sensors manager)") end
 function K_497580(frames) KAS_SetLetterboxState(1, frames / 30) end                              -- kasfWideScreenIn
 function K_497630(frames) KAS_SetLetterboxState(0, frames / 30) end                              -- kasfWideScreenOut
--- kasfUniversePause / kasfUniverseUnpause (exe 0x497a90 / 0x497aa0 set nisUniversePause): Gearbox's HW1 port
--- leaves these empty too (KASUtil.lua KAS_UniversePause: Universe_Pause would also stop timers and KAS).
-function K_497a90() end
-function K_497aa0() end
+-- kasfUniversePause / kasfUniverseUnpause (exe 0x497a90 / 0x497aa0 set nisUniversePause; HW1 NIS.c): every ship
+-- stops while KAS goes on (Mission01's Fleet Intel briefings). Gearbox's port left it empty (Universe_Pause would
+-- stop timers and KAS too); without it the battles played on through the briefings (user: at 1:28 the bombers had
+-- drifted into the main fight, in Cataclysm they had not moved). Ships are held with speed 0 and no attacks.
+function KAS_UniverseHold(on)
+    local speed, attack = 1, 1
+    if on ~= 0 then speed, attack = 0, 0 end
+    local p = 0
+    while p < Universe_PlayerCount() do
+        SobGroup_SetSpeed("Player_Ships" .. p, speed)
+        SobGroup_AbilityActivate("Player_Ships" .. p, AB_Attack, attack)
+        p = p + 1
+    end
+    KAS_UniverseHeld = on
+    print("CKAS: universe " .. (on ~= 0 and "paused" or "unpaused"))
+end
+function K_497a90() KAS_UniverseHold(1) end
+function K_497aa0() KAS_UniverseHold(0) end
 
 -- kasfOtherKASPause / kasfOtherKASUnpause (exe 0x497ad0 / 0x497af0, HW1 KASFunc.c): only the calling team's FSM
 -- keeps running; every other team's and the mission's watches stop (Gearbox's KASRules_PauseExceptFSM) and every
