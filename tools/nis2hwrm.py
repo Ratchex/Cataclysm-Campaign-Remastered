@@ -59,7 +59,8 @@ NOT_CONVERTED = {
     "lightDiffuse": "lighting comes from the level's background in HWRM",
     "numberLights": "lighting comes from the level's background in HWRM",
     "remainAtEnd": "the real ships are hidden during the intro instead (KAS_RunAfterIntro)",
-    "subtitle": "TODO: Cataclysm-only command (subtitle <n> <ms>); meaning not decoded (exe string 0x888e88)",
+    "subtitle": "Cataclysm-only (subtitle <n> <ms>); shows nothing in the original (n01 at 10 s / 16 s, checked "
+                "in Cataclysm by the user)",
     "attack": "TODO: NIS ships do not fight yet",
     "haltAttack": "TODO: NIS ships do not fight yet",
     "fire": "TODO: NIS ships do not fight yet",

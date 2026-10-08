@@ -139,7 +139,7 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
   (`data/nis/cataclysm/<name>_cues.lua`, cataclysmkas.lua KAS_NisCues: `Sound_MusicPlayType`, as kasfMusicPlay;
   0.1 s rule from the NIS start, cleared when it ends). Confirmed in game.
 - Speech events with no phrase in Cataclysm's tables (n01 event 347) were silent in Cataclysm too.
-- Cataclysm's `subtitle <n> <ms>` (12 uses) is not decoded yet (no string table found; exe string 0x888e88).
+- Cataclysm's `subtitle <n> <ms>` (12 uses) shows nothing in the original (n01, checked in Cataclysm): dropped.
 - HWRM NIS = IFF `FORM NIS ` (layout in tools/nis2hwrm.py docstring). Played with `NISLoad("nis/cataclysm/n01")`
   then `NISPlayFromCoordSys(path, pos, matrix)`; `NISShipStartPosition(path, shipType, -1)` finds the centre ship
   by FOLW object *name* = ship type. Wait with `NISGetAnyPlayingHandle()` / `NISComplete(h)`.
