@@ -567,6 +567,20 @@ function KAS_CreateStartModules()
         SobGroup_CreateSubSystem("KAS_KuunLan", KAS_StartModules[i])
         i = i + 1
     end
+    -- the structural modules have to be in the build list for SobGroup_CreateSubSystem to accept them; keep them
+    -- out of the player's reach once the starting ones exist (a tick later, so creation is not affected)
+    Rule_AddInterval("KAS_RestrictStructuralModules", 1)
+end
+
+function KAS_RestrictStructuralModules()
+    Rule_Remove("KAS_RestrictStructuralModules")
+    if KAS_StructuralModules == nil then return end
+    local i = 1
+    while i <= getn(KAS_StructuralModules) do
+        Player_RestrictBuildOption(0, KAS_StructuralModules[i])
+        i = i + 1
+    end
+    print("CKAS: structural modules restricted: " .. getn(KAS_StructuralModules))
 end
 
 function KAS_StartEngine()
