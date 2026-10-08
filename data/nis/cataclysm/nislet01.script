@@ -44,7 +44,6 @@ at frame 3149
 at frame 3209
     hideUniverse(0)
 at frame 3212
-    wideScreenOut(1)
     cameraBlendOut("Camera12", 1)
 with kus_carrier
 {
@@ -191,7 +190,9 @@ with kus_ioncannonfrigate5
     at frame 2900
         speechEventActor("$2207386", 16, 2)
     at frame 2910
+    at frame 2844
         attack("tai_ioncannonfrigate2")
+    at frame 2910
     at frame 2970
         haltAttack()
 }
@@ -386,7 +387,9 @@ with tai_ioncannonfrigate1
     at frame 1050
         show()
     at frame 1470
+    at frame 1404
         attack("kus_interceptor4")
+    at frame 1470
     at frame 1540
         haltAttack()
 }

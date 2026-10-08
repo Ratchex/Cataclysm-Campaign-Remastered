@@ -431,6 +431,16 @@ end
 
 function KAS_NisCuesStart(name)
     KAS_NisCueList = KAS_NisCues[name]
+    if KAS_NisBlackGap then
+        -- started in the black gap after an NIS: release the black once this one's own black opening is up
+        KAS_NisBlackGap = nil
+        local l, i = { { 0.2, "unblack", "" } }, 1
+        while KAS_NisCueList and i <= getn(KAS_NisCueList) do
+            tinsert(l, KAS_NisCueList[i])
+            i = i + 1
+        end
+        KAS_NisCueList = l
+    end
     KAS_NisCueNext = 1
     KAS_NisCueStart = Universe_GameTime()
     if KAS_NisCueList and getn(KAS_NisCueList) > 0 then
@@ -450,6 +460,11 @@ function KAS_NisCueTick()
         KAS_NisCueNext = KAS_NisCueNext + 1
         if c[2] == "music" then                        -- as kasfMusicPlay
             Sound_MusicPlayType(c[3], MUS_Ambient)
+        elseif c[2] == "black" then                    -- NIS ending on black: hold black, UI hidden, past its end
+            Universe_Fade(1, 0)
+            Camera_SetLetterboxStateNoUI(1, 0)
+        elseif c[2] == "unblack" then
+            Universe_Fade(0, 0)
         end
         print("CKAS: NIS cue " .. c[2] .. " " .. c[3] .. " at " .. t .. "s")
     end
@@ -491,7 +506,7 @@ function KAS_NisStart(name)
     end
     if KAS_FadeInAt then                  -- black between two NIS: the new one does its own fade in
         KAS_FadeInAt = nil
-        Universe_Fade(0, 0)
+        KAS_NisBlackGap = 1
     end
     NISPlayFromCoordSys(path, position, nisMatrix)
     KAS_NisCuesStart(name)
@@ -570,6 +585,7 @@ function KAS_EngineTick()
         KAS_NisCueList = nil              -- ended or skipped: no more cues
         if p.name and KAS_NisEndsBlack[p.name] then
             Universe_Fade(1, 0)
+            Camera_SetLetterboxStateNoUI(1, 0)
             KAS_FadeInAt = now + KAS_NisGapSeconds
         end
         if p.key then KAS_Vars[p.key] = 1 end
@@ -579,6 +595,7 @@ function KAS_EngineTick()
     if KAS_FadeInAt and KAS_NisPending == nil and now >= KAS_FadeInAt then
         KAS_FadeInAt = nil
         Universe_Fade(0, 1.5)
+        Camera_SetLetterboxStateNoUI(0, 1.5)
         print("CKAS: fade in after the cutscenes")
     end
     if KAS_ShipsArriveAt and now >= KAS_ShipsArriveAt then

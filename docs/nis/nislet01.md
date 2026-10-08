@@ -472,7 +472,7 @@ None.
 | 1400 | 46.7s | kus_destroyer1 | `health 0.2` | translated: health(0.2) |
 | 1400 | 46.7s | tai_destroyer | `show` | translated: show() |
 | 1420 | 47.3s | tai_carrier | `show` | translated: show() |
-| 1470 | 49.0s | tai_ioncannonfrigate1 | `attack RACE_KUSHAN\kHeavyInterceptor (4)` | translated: attack("kus_interceptor4") |
+| 1470 | 49.0s | tai_ioncannonfrigate1 | `attack RACE_KUSHAN\kHeavyInterceptor (4)` | translated: attack("kus_interceptor4") at frame 1404 (2.2s early: HWRM weapon charge time) |
 | 1500 | 50.0s | kus_interceptor4 | `deathDamage` | translated: death("deathCannon") |
 | 1525 | 50.8s | tai_assaultfrigate2 | `show` | translated: show() |
 | 1540 | 51.3s | tai_ioncannonfrigate1 | `haltAttack` | translated: haltAttack() |
@@ -562,7 +562,7 @@ None.
 | 2881 | 96.0s | tai_ioncannonfrigate2 | `show` | translated: show() |
 | 2900 | 96.7s | kus_ioncannonfrigate5 | `fleetSpeechEvent ( 713 + 4096 + 536870912 )` | speech $2207386 (Fleet Command, 2.5s, unsubtitled: invisible subtitle): speechEventActor |
 | 2900 | 96.7s | tai_missiledestroyer1 | `haltAttack` | translated: haltAttack() |
-| 2910 | 97.0s | kus_ioncannonfrigate5 | `attack RACE_TAIDAN\tIonCannonFrigate (2)` | translated: attack("tai_ioncannonfrigate2") |
+| 2910 | 97.0s | kus_ioncannonfrigate5 | `attack RACE_TAIDAN\tIonCannonFrigate (2)` | translated: attack("tai_ioncannonfrigate2") at frame 2844 (2.2s early: HWRM weapon charge time) |
 | 2970 | 99.0s | kus_ioncannonfrigate5 | `haltAttack` | translated: haltAttack() |
 | 3000 | 100.0s | kus_destroyer3 | `hide` | translated: hide() |
 | 3020 | 100.7s | tai_ioncannonfrigate2 | `deathDamage` | translated: death("deathCannon") |

@@ -76,6 +76,9 @@ TRANSLATED = ["fadeSet", "fadeTo", "wideScreenIn", "wideScreenOut", "musicVolume
               "attack", "haltAttack", "deathDamage", "deathProjectile", "deathBeam", "health"]
 # HW1 NIS death kinds (NIS.c nisDeath*Set) -> HWRM death() as Gearbox's HW1 conversions use them
 DEATHS = {"deathDamage": "deathCannon", "deathProjectile": "deathPlasma", "deathBeam": "deathBeam"}
+# NIS object type (substring) -> seconds its HWRM weapon charges before firing: attack() is ordered that much early.
+# Ion cannons: tai/kus_ioncannon.wepn beam anticipation 2 s (+ margin).
+ATTACK_LEAD = {"ioncannonfrigate": 2.2}
 COMMANDS = {c.lower(): c for c in TRANSLATED + list(NOT_CONVERTED)}   # spelling used below, by lower case
 HW1_NIS_FOV = 75.0          # NIS.h NIS_DefaultFOV: HW1 field of view is vertical (Camera.c), on a 4:3 screen
 SCREEN_ASPECT = 16 / 9
@@ -448,6 +451,14 @@ def translate_script(src, objects, nisname, speech, fps, end_frame, cam_events, 
             if target is None:
                 note(f"NOT CONVERTED: attack target {args!r} is not an NIS object with a model")
                 continue
+            lead = next((s_ for k_, s_ in ATTACK_LEAD.items() if k_ in cur_obj.lower()), 0)
+            if lead:
+                # HWRM charges this weapon before it fires (HW1 fired at once): order the attack that much earlier
+                # so the shot lands when HW1's did (nislet01: the ion frigate's beam before the interceptor dies)
+                frame = max(0, cur_time - round(lead * fps))
+                cur_list.extend([f"    at frame {frame}", f'        attack("{target}")', f"    at frame {cur_time}"])
+                note(f'translated: attack("{target}") at frame {frame} ({lead}s early: HWRM weapon charge time)')
+                continue
             emit(f'attack("{target}")')
         elif cmd == "haltAttack" and cur_obj:
             emit("haltAttack()")
@@ -511,14 +522,18 @@ def translate_script(src, objects, nisname, speech, fps, end_frame, cam_events, 
         out += [f"at frame {f}", f'    cameraCut("{cam}")']
     out += ["at frame 1", f'    cameraBlendOutOnSkip("{last}", 1)'] + out_global
     # HW1 faded the game back in after an NIS; HWRM keeps the NIS fade. A script that ends on black stays black:
-    # the runtime fades the game in unless another NIS follows (cues file KAS_NisEndsBlack; n01 -> nislet01 showed
-    # seconds of empty space). Otherwise end like Gearbox's scripts do.
+    # a "black" cue just before its end (still black) puts up the runtime's black screen and hides the UI, and the
+    # runtime fades the game in unless another NIS follows (KAS_NisEndsBlack; n01 -> nislet01 showed seconds of
+    # space and UI: the NIS fade and wideScreenOut end with the NIS). Otherwise end like Gearbox's scripts do.
     fades = [re.match(r"\s*fade(?:Set|To)\(([0-9.]+)", b) for b in out_global]
     fades = [float(m.group(1)) for m in fades if m]
     ends_black = bool(fades) and fades[-1] >= 1
-    out += [f"at frame {end_frame}", "    wideScreenOut(1)", f'    cameraBlendOut("{last}", 1)']
-    if not ends_black:
-        out.append("    fadeTo(0, 1)")
+    if ends_black:
+        out += [f"at frame {end_frame}", f'    cameraBlendOut("{last}", 1)']
+        # at the HW1 end: its fade to black is done, and the NIS still runs TAIL_FRAMES more
+        cues.append((end_frame, "black", ""))
+    else:
+        out += [f"at frame {end_frame}", "    wideScreenOut(1)", f'    cameraBlendOut("{last}", 1)', "    fadeTo(0, 1)"]
     for key, body in out_obj.items():
         if key == "#drop" or not any(not b.strip().startswith("at frame") for b in body):
             continue
