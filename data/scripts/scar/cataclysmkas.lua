@@ -689,6 +689,11 @@ function K_498230()
     print("CKAS: fleet hyperspacing in at StartPointPlayer")
 end
 
+function KAS_HangarUnghost()
+    Rule_Remove("KAS_HangarUnghost")
+    SobGroup_SetGhost("KAS_ArrivalHangar", 0)
+end
+
 -- out of hyperspace (the Kuun-Lan idle again, as Gearbox's singlePlayerWatchHyperspaceComplete): launch, arrived
 function KAS_ArrivalWatch()
     local t = Universe_GameTime() - KAS_ArrivalStarted
@@ -704,12 +709,18 @@ function KAS_ArrivalWatch()
     Rule_Remove("KAS_ArrivalWatch")
     SobGroup_Launch("KAS_ArrivalDocked", "KAS_ArrivalMS")
     if SobGroup_Count("KAS_ArrivalHangar") > 0 then
+        -- a spawn inside the Kuun-Lan's collision box lands outside it (they appeared under the Hangar): ghosted
+        -- (no collision) and put in the Hangar, then flown out; solid again once clear (KAS_HangarUnghost)
         local at = SobGroup_GetPosition("KAS_ArrivalMS")
-        Volume_AddSphere("KAS_HangarVol", { at[1] + KAS_HangarSpawn[1], at[2] + KAS_HangarSpawn[2],
-                                            at[3] + KAS_HangarSpawn[3] }, 40)
+        local inside = { at[1] + KAS_HangarSpawn[1], at[2] + KAS_HangarSpawn[2], at[3] + KAS_HangarSpawn[3] }
+        Volume_AddSphere("KAS_HangarVol", inside, 40)
+        SobGroup_SetGhost("KAS_ArrivalHangar", 1)
         SobGroup_Spawn("KAS_ArrivalHangar", "KAS_HangarVol")
+        SobGroup_SetGhost("KAS_ArrivalHangar", 1)
+        SobGroup_SetPosition("KAS_ArrivalHangar", inside)
         SobGroup_MoveToPoint(0, "KAS_ArrivalHangar", { at[1] + KAS_HangarExit[1], at[2] + KAS_HangarExit[2],
                                                        at[3] + KAS_HangarExit[3] })
+        Rule_AddInterval("KAS_HangarUnghost", 6)
     end
     KAS_Vars[KAS_Key_ShipsHaveArrived] = 1
     print("CKAS: fleet out of hyperspace after " .. t .. "s; launching " .. SobGroup_Count("KAS_ArrivalDocked")
