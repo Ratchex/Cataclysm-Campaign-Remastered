@@ -651,8 +651,8 @@ function KAS_FleetAwaitHyperspace()
     return 1
 end
 
--- camera distance from the Kuun-Lan's centre on arrival: KAS_ArrivalCamera's (mission2level ARRIVAL_*, 2x)
-KAS_ArrivalCameraDistance = 3700
+-- camera distance from the Kuun-Lan's centre on arrival: KAS_ArrivalCamera's (mission2level ARRIVAL_*, 1x; 3700 was too far)
+KAS_ArrivalCameraDistance = 2200
 
 function K_498230()
     if KAS_FleetWaiting == nil then           -- no Kuun-Lan held back: only the signal
