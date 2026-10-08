@@ -53,7 +53,6 @@ at frame 3259
 at frame 3321
     wideScreenOut(1)
     cameraBlendOut("Camera12", 1)
-    fadeTo(0, 1)
 with smt_ms_sp
 {
     at frame 0

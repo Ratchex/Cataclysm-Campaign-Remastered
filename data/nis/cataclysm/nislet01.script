@@ -46,7 +46,6 @@ at frame 3209
 at frame 3212
     wideScreenOut(1)
     cameraBlendOut("Camera12", 1)
-    fadeTo(0, 1)
 with kus_carrier
 {
     at frame 0

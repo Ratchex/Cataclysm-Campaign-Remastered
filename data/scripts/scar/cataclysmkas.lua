@@ -421,6 +421,10 @@ KAS_NisAvailable["nislet01"] = 1
 -- { seconds after the start, kind, argument }; generated next to each NIS by tools/nis2hwrm.py
 -- (data/nis/cataclysm/<name>_cues.lua, report in docs/nis/<name>.md).
 KAS_NisCues = {}
+KAS_NisEndsBlack = {}                 -- names of NIS that end on black (set by the cues files)
+-- After an NIS that ends on black the screen stays black: the next NIS (a mission often requests one at once:
+-- Mission01 n01 -> nislet01) plays from black, else the game fades in after this long.
+KAS_NisGapSeconds = 3
 for name, _ in KAS_NisAvailable do
     dofilepath("data:nis/cataclysm/" .. name .. "_cues.lua")
 end
@@ -485,6 +489,10 @@ function KAS_NisStart(name)
             print("CKAS: " .. path .. " has no " .. SobGroup_GetShipType("KAS_NisCentre") .. ": played at the origin")
         end
     end
+    if KAS_FadeInAt then                  -- black between two NIS: the new one does its own fade in
+        KAS_FadeInAt = nil
+        Universe_Fade(0, 0)
+    end
     NISPlayFromCoordSys(path, position, nisMatrix)
     KAS_NisCuesStart(name)
     print("CKAS: playing " .. path .. " at {" .. position[1] .. ", " .. position[2] .. ", " .. position[3] .. "}")
@@ -493,7 +501,7 @@ end
 
 -- Play a cutscene; when it ends set KAS variable `key` (may be nil) and call `after` (may be nil).
 function KAS_NisPlay(name, key, after)
-    KAS_NisPending = { key = key, after = after, playing = 1, started = Universe_GameTime() }
+    KAS_NisPending = { name = name, key = key, after = after, playing = 1, started = Universe_GameTime() }
     if KAS_NisStart(name) == nil then
         KAS_NisPending = { key = key, after = after, at = Universe_GameTime() }
     end
@@ -560,9 +568,18 @@ function KAS_EngineTick()
         local p = KAS_NisPending
         KAS_NisPending = nil
         KAS_NisCueList = nil              -- ended or skipped: no more cues
+        if p.name and KAS_NisEndsBlack[p.name] then
+            Universe_Fade(1, 0)
+            KAS_FadeInAt = now + KAS_NisGapSeconds
+        end
         if p.key then KAS_Vars[p.key] = 1 end
         print("CKAS: cutscene complete")
         if p.after then p.after() end
+    end
+    if KAS_FadeInAt and KAS_NisPending == nil and now >= KAS_FadeInAt then
+        KAS_FadeInAt = nil
+        Universe_Fade(0, 1.5)
+        print("CKAS: fade in after the cutscenes")
     end
     if KAS_ShipsArriveAt and now >= KAS_ShipsArriveAt then
         KAS_ShipsArriveAt = nil

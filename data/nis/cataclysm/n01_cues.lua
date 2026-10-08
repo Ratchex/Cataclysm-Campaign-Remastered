@@ -2,3 +2,4 @@
 KAS_NisCues["n01"] = {
     { 0.033, "music", "data:sound/music/cataclysm/music_25" },
 }
+KAS_NisEndsBlack["n01"] = 1   -- ends on black: the runtime fades the game in

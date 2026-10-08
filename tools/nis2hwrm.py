@@ -510,8 +510,15 @@ def translate_script(src, objects, nisname, speech, fps, end_frame, cam_events, 
     for f, cam in cam_events:
         out += [f"at frame {f}", f'    cameraCut("{cam}")']
     out += ["at frame 1", f'    cameraBlendOutOnSkip("{last}", 1)'] + out_global
-    # HW1 faded the game back in after an NIS; HWRM keeps the NIS fade, so end like Gearbox's scripts do.
-    out += [f"at frame {end_frame}", "    wideScreenOut(1)", f'    cameraBlendOut("{last}", 1)', "    fadeTo(0, 1)"]
+    # HW1 faded the game back in after an NIS; HWRM keeps the NIS fade. A script that ends on black stays black:
+    # the runtime fades the game in unless another NIS follows (cues file KAS_NisEndsBlack; n01 -> nislet01 showed
+    # seconds of empty space). Otherwise end like Gearbox's scripts do.
+    fades = [re.match(r"\s*fade(?:Set|To)\(([0-9.]+)", b) for b in out_global]
+    fades = [float(m.group(1)) for m in fades if m]
+    ends_black = bool(fades) and fades[-1] >= 1
+    out += [f"at frame {end_frame}", "    wideScreenOut(1)", f'    cameraBlendOut("{last}", 1)']
+    if not ends_black:
+        out.append("    fadeTo(0, 1)")
     for key, body in out_obj.items():
         if key == "#drop" or not any(not b.strip().startswith("at frame") for b in body):
             continue
@@ -522,7 +529,7 @@ def translate_script(src, objects, nisname, speech, fps, end_frame, cam_events, 
         else:
             body = ["    at frame 0", "        invincible()"] + body
         out += [f"with {key}", "{"] + body + ["}"]
-    return "\n".join(out) + "\n", used, cues, report
+    return "\n".join(out) + "\n", used, cues, report, ends_black
 
 
 # ----------------------------------------------------------------------------------------------- main
@@ -628,7 +635,7 @@ def main():
             + chunk(b"LEAD", LEAD)
             + chunk(b"FOLW", struct.pack("<I", len(folw)) + b"".join(folw))
             + chunk(b"CMRA", struct.pack("<I", len(cmra)) + b"".join(cmra)))
-    text, used, cues, report = translate_script(src + ".script", objects, a.name, speech_lookup(), fps, nframes + 2,
+    text, used, cues, report, ends_black = translate_script(src + ".script", objects, a.name, speech_lookup(), fps, nframes + 2,
                                                 cam_events, teleports)
     write_report(a.name, report, dropped, fps)
     if a.audit_only:
@@ -649,6 +656,8 @@ def main():
         for frame, kind, arg in sorted(cues):
             f.write(f'    {{ {frame / fps:.3f}, "{kind}", "{arg}" }},\n')
         f.write("}\n")
+        if ends_black:
+            f.write(f'KAS_NisEndsBlack["{a.name}"] = 1   -- ends on black: the runtime fades the game in\n')
     sp_dir = os.path.join(MOD, "data", "sound", "speech", "nis", a.name)
     os.makedirs(sp_dir, exist_ok=True)
     for sid in used:
