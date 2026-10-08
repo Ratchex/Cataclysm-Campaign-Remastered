@@ -26,6 +26,8 @@ DATA = os.path.join(MOD, "data")
 SKIP_PREFIX = ("leveldata/", "config_old.txt", "keeper.txt", "ui/", "scripts/scar/", "scripts/rules/",
                "scripts/startingfleets/", "ai/", "badges/", "locale/", "soundscripts/", "sound/music/",
                "sound/speech/")
+# ...except these, which their ships do use (TOIcon "Flagship" etc.: a missing icon is a fatal exit)
+KEEP_PREFIX = ("ui/tacticalicons/",)
 SKIP_SUFFIX = (".swp", ".bak")
 
 RESEARCH_HP = ('StartShipHardPointConfig(NewShipType,"Research Module","Hardpoint_GravGenerator","System","Innate",'
@@ -227,7 +229,7 @@ def main():
         for fn in files:
             rel = os.path.relpath(os.path.join(root, fn), SRC).replace("\\", "/")
             low = rel.lower()
-            if low.startswith(SKIP_PREFIX) or low.endswith(SKIP_SUFFIX):
+            if (low.startswith(SKIP_PREFIX) and not low.startswith(KEEP_PREFIX)) or low.endswith(SKIP_SUFFIX):
                 continue
             dst = os.path.join(DATA, rel)
             os.makedirs(os.path.dirname(dst), exist_ok=True)
