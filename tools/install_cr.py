@@ -63,11 +63,8 @@ def patch_race(text):
 
 
 def patch_worker(text):
-    """Cataclysm's Worker harvests from a distance with its cone (HW1 ResCollect.c) and repairs. Harvest's last
-    argument is the stand-off: theirs (300, HW2 collectors' value) latched onto the asteroid; stock HWRM's HW1
-    collectors hold 400 off, which the stock cone mesh (also ours, tools/make_worker_fx.py) is sized for. Their
-    RepairCommand was disabled."""
-    text = re.sub(r'(addAbility\(NewShipType,\s*"Harvest",\s*1,\s*[\d.]+,\s*[\d.]+,\s*)300\)', r'\g<1>400)', text)
+    """Cataclysm's Worker repairs; their RepairCommand was disabled. (How far off it harvests is set by the
+    model's LatchOrientation joint, not by the Harvest ability: tools/build_ship.sh --latch.)"""
     return re.sub(r'(addAbility\(NewShipType,\s*"RepairCommand",\s*)0,', r'\g<1>1,', text)
 
 

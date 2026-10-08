@@ -18,14 +18,15 @@ ANIM=""
 case "$NAME" in
   som_worker)
     ANIM="Jackbase,Jackhamr,Blade(1),Blade(2),Blade(3),DockClmp(1),DockClmp(2),DockClmp(3),DockClmp(4)"
-    # harvest cone from the resource nozzle (Cataclysm: the .mex GUN0 point), repair cone from the jackhammer tip,
+    # harvest beam from the resource nozzle (Cataclysm: the .mex GUN0 point), repair beam from the jackhammer tip,
     # turned so it points straight ahead once JackOut has swung the jack up 41 degrees (Cataclysm aims both beams
-    # at the target, which the Worker faces)
+    # at the target, which the Worker faces). The beams are stock HWRM effects (smt_worker.events).
     GEO2DAE_ARGS="$GEO2DAE_ARGS --anim-joints $ANIM --marker marker_beam@gun:GUN0"
     GEO2DAE_ARGS="$GEO2DAE_ARGS --marker marker_repair@Jackhamr@0,0,34.3@40.97,0,180"
-    # asteroid surface 140 ahead of the nozzle: Cataclysm harvests from 400 HW1 units off (ResCollect.c
-    # ASTEROID_HARVEST_RANGE, range to the asteroid's surface)
-    GEO2DAE_ARGS="$GEO2DAE_ARGS --latch 0,29.225,140"
+    # asteroid surface 35 ahead of the nozzle: the length of the stock harvest cone (harvesting_beam_kus at scale 1;
+    # stock kus_resourcecollector's beam marker to its LatchOrientation plane). Cataclysm held 400 HW1 units
+    # (140) off, which left the stock cone far short of the rock.
+    GEO2DAE_ARGS="$GEO2DAE_ARGS --latch 0,29.225,35.5"
     ;;
 esac
 rm -rf "$OUT"

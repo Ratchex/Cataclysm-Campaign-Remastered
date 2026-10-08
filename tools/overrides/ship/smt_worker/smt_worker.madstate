@@ -1,7 +1,7 @@
 -- Somtaaw Worker animation states (Cataclysm-HWRM; installed over Cataclysm Remastered's by tools/install_cr.py).
 -- Clips from Cataclysm's sworker.mad (tools/mad2hwrm.py): JackOut / JackClose swing the repair jack out and back,
 -- JackSpin holds it out, DockOpen / DockClose turn the four docking clamps, BladesSpin turns the three blades.
--- Effects (.events): "Resourcing" = orange harvest cone at marker_beam, "Repairing" = green repair cone at
+-- Effects (.events): "Resourcing" = stock HW1 harvest beam at marker_beam, "Repairing" = stock repair beam at
 -- marker_repair (the jackhammer tip). A clip paused at 1000 s holds its last frame (Cataclysm Remastered's pattern).
 
 -- start clip "to"; if its opposite "from" is still running, from the matching point so the part doesn't jump

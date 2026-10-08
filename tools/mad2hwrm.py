@@ -11,11 +11,11 @@ replacing the object's .geo matrix. Each clip is [startTime, endTime].
 HWRM .mad (IFF, chunk sizes big-endian, payload little-endian), as Cataclysm Remastered's and stock files:
   FORM "MAD " { NAME "Homeworld2 MAD File", VERS 04 01 00 00, INFO <5I: fps, clips, curves, joint refs, curve refs>,
                 STRI null-terminated strings, MARK clips, CURV curves }
-  MARK per clip: name, start, end, loop start, loop end (f32 frames), joint count, per joint: name, curve count,
+  MARK per clip: name, start, end, loop start, loop end (f32 seconds; stock clips run e.g. 0.0667-1.8), joint count, per joint: name, curve count,
        curve indices (6: translateX/Y/Z, rotateX/Y/Z; radians, composed Z * Y * X)
-  CURV per curve: name (<joint>_translateX ...), key count, keys <dd4f: frame, value, in tangent dx/dy, out
-       tangent dx/dy (unit vectors, value per frame)>, 8 zero bytes
-Times stay HW1's (seconds * 30 = frames); every clip gets its own curves, sampled each frame.
+  CURV per curve: name (<joint>_translateX ...), key count, keys <dd4f: time (s), value, in tangent dx/dy,
+       out tangent dx/dy (unit vectors, value per second)>, 8 zero bytes
+Times stay HW1's (seconds); every clip gets its own curves, sampled every 1/30 s.
 
 Usage: mad2hwrm.py <hw1.mad> <hw1.geo> <out.mad> --joints A,B,... [--scale 0.35] [--clips X,Y]
 """
@@ -89,7 +89,7 @@ def chunk(tag, data):
 
 
 def keys_blob(samples):
-    """samples: [(frame, value)]; constant curves get their two end keys. One-sided unit tangents."""
+    """samples: [(time, value)]; constant curves get their two end keys. One-sided unit tangents."""
     if max(v for _, v in samples) - min(v for _, v in samples) < 1e-6:
         samples = [samples[0], samples[-1]]
 
@@ -162,13 +162,13 @@ def main():
     wanted = [c for c in clips if not a.clips or c["name"] in a.clips.split(",")]
     curves, marks, njref, ncref = [], [], 0, 0
     for c in wanted:
-        f0, f1 = c["start"] * FPS, c["end"] * FPS
-        steps = max(1, int(math.ceil(f1 - f0 - 1e-6)))
-        fr = [min(f1, f0 + k) for k in range(steps + 1)]
+        t0, t1 = c["start"], c["end"]
+        steps = max(1, int(math.ceil((t1 - t0) * FPS - 1e-6)))
+        fr = [min(t1, t0 + k / FPS) for k in range(steps + 1)]
         joints = []
         for n in names:
             i = by_name[n]
-            poses = [hwrm_pose(i, f / FPS) for f in fr]
+            poses = [hwrm_pose(i, t) for t in fr]
             eul = continuous_euler([r for _, r in poses])
             # anchor the angles to the bind pose's (2 pi turns kept: a full spin stays a spin)
             b_eul = matrix_to_euler_xyz(bind[i][1])
@@ -188,13 +188,13 @@ def main():
         if not joints:
             print(f"  {c['name']}: no joint moves, skipped")
             continue
-        m = struct.pack("<I4fI", sid(c["name"]), f0, f1, f0, f1, len(joints))
+        m = struct.pack("<I4fI", sid(c["name"]), t0, t1, t0, t1, len(joints))
         for jn, idx in joints:
             m += struct.pack("<II", sid(jn), len(idx)) + struct.pack(f"<{len(idx)}I", *idx)
         marks.append(m)
         njref += len(joints)
         ncref += 6 * len(joints)
-        print(f"  {c['name']}: frames {f0:.0f}-{f1:.0f}, joints {', '.join(j for j, _ in joints)}")
+        print(f"  {c['name']}: {t0:.3f}-{t1:.3f} s, joints {', '.join(j for j, _ in joints)}")
     body = (b"MAD " + chunk(b"NAME", b"Homeworld2 MAD File") + chunk(b"VERS", bytes([4, 1, 0, 0]))
             + chunk(b"INFO", struct.pack("<5I", FPS, len(marks), len(curves), njref, ncref))
             + chunk(b"STRI", bytes(stri)) + chunk(b"MARK", b"".join(marks)) + chunk(b"CURV", b"".join(curves)))
