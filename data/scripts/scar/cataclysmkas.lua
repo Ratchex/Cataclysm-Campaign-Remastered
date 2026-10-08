@@ -541,15 +541,16 @@ function KAS_RunAfterIntro(name, start)
         -- The intro has its own copies of the player's ships (HW1 played it before the mission's ships existed):
         -- hide the real ones until it ends. (Gearbox keeps the NIS ships instead with remainAtEnd; later.)
         KAS_IntroStart = start
-        SobGroup_SetHidden("Player_Ships0", 1)
-        KAS_NisPlay(name, nil, KAS_IntroDone)
+        KAS_NisPlay(name, nil, KAS_IntroDone)  -- first: it centres on the Kuun-Lan, despawned just after
+        if KAS_FleetAwaitHyperspace() == nil then KAS_IntroHidden = 1 SobGroup_SetHidden("Player_Ships0", 1) end
     else
+        KAS_FleetAwaitHyperspace()
         start()
     end
 end
 
 function KAS_IntroDone()
-    SobGroup_SetHidden("Player_Ships0", 0)
+    if KAS_IntroHidden then KAS_IntroHidden = nil SobGroup_SetHidden("Player_Ships0", 0) end
     KAS_IntroStart()
 end
 
@@ -624,10 +625,48 @@ function KAS_EngineTick()
     end
 end
 
--- kasfStartLevelByHyperspacingShips: the engine hyperspaces the player's fleet in, then sets G_ShipsHaveArrived.
--- The stand-in fleet is already placed by the level, so only the signal is needed (after a short delay).
+-- kasfStartLevelByHyperspacingShips (every Cataclysm mission calls it): the SP flow (exe FUN_005197d0 state 9)
+-- hyperspaces the player's fleet in at StartPointPlayer, then sets G_ShipsHaveArrived. Here the Kuun-Lan arrives
+-- with the small ships docked and launches them once out of hyperspace (user: "warp in and undock"). Until then the
+-- fleet is out of the universe: docked and despawned at mission start (KAS_FleetAwaitHyperspace), as Gearbox's
+-- kasTeamHyperspaceOut does at frame 0, and brought in with SobGroup_HyperspaceTo as their kasTeamHyperspaceIn.
+function KAS_FleetAwaitHyperspace()
+    SobGroup_CreateIfNotExist("KAS_ArrivalMS")
+    K_498790("KAS_ArrivalMS")
+    if SobGroup_Count("KAS_ArrivalMS") == 0 then return nil end
+    SobGroup_CreateIfNotExist("KAS_ArrivalDocked")
+    SobGroup_Clear("KAS_ArrivalDocked")
+    SobGroup_FillSubtract("KAS_ArrivalDocked", "Player_Ships0", "KAS_ArrivalMS")
+    SobGroup_DockSobGroupInstant("KAS_ArrivalDocked", "KAS_ArrivalMS")
+    SobGroup_Despawn("KAS_ArrivalMS")
+    KAS_FleetWaiting = 1
+    print("CKAS: fleet waits in hyperspace (" .. SobGroup_Count("KAS_ArrivalDocked") .. " ships docked)")
+    return 1
+end
+
 function K_498230()
-    KAS_ShipsArriveAt = Universe_GameTime() + 3
+    if KAS_FleetWaiting == nil then           -- no Kuun-Lan held back: only the signal
+        KAS_ShipsArriveAt = Universe_GameTime() + 3
+        return
+    end
+    KAS_FleetWaiting = nil
+    SobGroup_HyperspaceTo("KAS_ArrivalMS", "StartPointPlayer")
+    SobGroup_SetHidden("KAS_ArrivalMS", 0)
+    Camera_FocusSobGroupWithBuffer("KAS_ArrivalMS", 1000, 10, 0)   -- Gearbox's hyperspace focus on the mothership
+    KAS_ArrivalStarted = Universe_GameTime()
+    Rule_AddInterval("KAS_ArrivalWatch", 0.5)
+    print("CKAS: fleet hyperspacing in at StartPointPlayer")
+end
+
+-- out of hyperspace (the Kuun-Lan idle again, as Gearbox's singlePlayerWatchHyperspaceComplete): launch, arrived
+function KAS_ArrivalWatch()
+    local t = Universe_GameTime() - KAS_ArrivalStarted
+    if t < 2 then return end
+    if SobGroup_GetCurrentOrder("KAS_ArrivalMS") ~= COMMAND_Idle and t < 30 then return end
+    Rule_Remove("KAS_ArrivalWatch")
+    SobGroup_Launch("KAS_ArrivalDocked", "KAS_ArrivalMS")
+    KAS_Vars[KAS_Key_ShipsHaveArrived] = 1
+    print("CKAS: fleet out of hyperspace after " .. t .. "s; launching; G_ShipsHaveArrived")
 end
 
 -- Player 2 (when the level has one) is the allied Kushan fleet. Applied at start and again on the first tick.
