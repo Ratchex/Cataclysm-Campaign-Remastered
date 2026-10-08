@@ -70,3 +70,22 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
 - Speech: `Sound_SpeechSubtitlePath("speech:missions/<folder>/")` + `Subtitle_AddSkippable(actor, "$<id>", secs)`
   plays `data/sound/speech/missions/<folder>/<id>.wav` (44.1 kHz mono 16-bit, as stock) and shows string <id> as the
   subtitle; it returns the line's real duration. Actors are engine globals (Actor_HW1_FleetIntel, ...).
+
+## Ships and HODOR (Phase 0.3, confirmed in game)
+- Pipeline: `tools/build_ship.sh` = `geo2dae.py` (Cataclysm .geo -> Collada + TGA) then HODOR (`.hod`) into
+  `data/ship/<name>/`. Intermediates in `build/ships/` (git-ignored).
+- HODOR: `HODOR.exe -action=convert -$CONVERT_IN=<dae> -$CONVERT_OUT=<hod> -$SHADER_MAP=<SHADERS.MAP>`.
+  - Must be started from Git Bash. Started from Python, PowerShell (or bash spawned by Python) it spins at 100%
+    CPU forever with no output; not the environment, stdio, cwd, console or error mode (all tested).
+  - Forward-slash paths only. Textures: square power of two, >= 64 px, or it loops forever building mips.
+  - Image id `IMG[<x>_DIFF]-image`, name `IMG[<x>_DIFF]_FMT[DXT1]`, effect `<diffuse><texture texture="IMG[..]-image">`;
+    other ids segfault it. A `<x>_TEAM.tga` next to `<x>_DIFF.tga` is picked up automatically (R = 1 - team
+    colour, G = 1 - stripe).
+  - RODOH only reads HW2 Classic HODs (does nothing on HWRM ones).
+- HW1 model space is X up, Y right, Z forward; HWRM = 0.35 * (-y, x, z) (proper rotation, winding kept: HW1
+  polygons are already counter-clockwise around their face normal). 0.35 matches Gearbox's Kus_Carrier size.
+- Stats: scale Cataclysm .shp values by Gearbox's ratios for the HW1 Kushan mothership (speed x0.96, health
+  x1.75, rotation x0.4) until a better mapping exists.
+- The Kuun-Lan core (smothership) is only the spine and 6 gimbals; its look comes from module ships stored in
+  the core's frame (Mission01 includes Command, DockingBay, Engineering, EnginesLower/Upper, LowerSpine,
+  OreCanArmour). For now they are baked into the hull; real modules need HWRM subsystems + hardpoint joints.
