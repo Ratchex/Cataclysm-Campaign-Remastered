@@ -58,3 +58,12 @@ findings).
    tutorial pointers; purchase/tech; ~15 unnamed ones) and check objectives complete as the original does.
 2. Then build Missions 02-17 with `build_mission.py` and fix what each one hits.
 3. Then the remaining level conversions, more Somtaaw/Beast ships, and the other cutscenes (nislet01 next).
+
+## Cataclysm Remastered (HWU-based workshop mod) as an asset source (user's idea, 2026-10-08)
+- Workshop 2195601016 "Homeworld: Cataclysm (Beast Update)" v2.1 (HWRM 2.0/2.1), extracted with
+  `Cataclysm-decomp/tools/hw2big.py` to `Cataclysm-decomp/reference/cr_beast` (not tracked). Older 2.0 beta: 416844570.
+- 33 Somtaaw ships (smt_*: ms/ms_sp Kuun-Lan, worker, scout=recon, acolyte, acv, mcv, mimic, rammingfrigate,
+  processor, hive/multibeam frigates, destroyer, carrier, dreadnought, sentinel, swarmer, drones...), 42 Beast (bst_*),
+  Kuun-Lan modules as subsystems (ksh_sec_ms_*), a started "beastwar" campaign (2 missions, Somtaaw build/research).
+- Models mostly from HWU (HW2 mod). Permission needed before any Workshop release (HWU in indefinite maintenance);
+  keep a list of every file used. Plan: their models/effects, our Cataclysm stats; our converter as fallback.
