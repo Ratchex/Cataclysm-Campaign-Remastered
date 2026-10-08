@@ -532,6 +532,11 @@ function K_498230()
 end
 
 function KAS_StartEngine()
+    -- Player 2 (when the level has one) is the allied Kushan fleet.
+    if Universe_PlayerCount() > 2 then
+        SetAlliance(0, 2)
+        SetAlliance(2, 0)
+    end
     Rule_AddInterval("KAS_EngineTick", 0.5)
 end
 
@@ -556,11 +561,16 @@ function K_495620(n, o) return KAS_SelectInto(n, o, KAS_FillShipsByNonCapital) e
 -- exe 0x493f80 toggles each ship: player-owned -> computer player, anything else -> human player. HWRM SobGroups
 -- drop ships that change owner unless their switch-owner flag is cleared (Gearbox's KASSobGroup_Create does this),
 -- which emptied the team and made e.g. the proximity array report itself destroyed.
+-- Teams keep their level owner (1 enemy, 2 allied Kushan: mission2level.py) to switch back to.
+KAS_TeamOwners = {}
 function K_494160(flag)                                                                              -- kasfTeamSwitchPlayerOwner
     SobGroup_SetSwitchOwnerFlag(KAS_Team, 0)
-    if SobGroup_GetPlayerOwner(KAS_Team) == 0 then
-        SobGroup_SwitchOwner(KAS_Team, 1)
+    if SobGroup_Count(KAS_Team) == 0 then return end
+    local owner = SobGroup_GetPlayerOwner(KAS_Team)
+    if owner == 0 then
+        SobGroup_SwitchOwner(KAS_Team, KAS_TeamOwners[KAS_Team] or 1)
     else
+        KAS_TeamOwners[KAS_Team] = owner
         SobGroup_SwitchOwner(KAS_Team, 0)
     end
 end

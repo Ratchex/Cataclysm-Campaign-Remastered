@@ -7,11 +7,11 @@ function DetermChunk()
     addSquadron("PlayerFleet3", "Kus_Scout", {-10470.37, 0, 5701.71}, 0, {0, -241, 0}, 0, 0) -- stand-in player fleet
     addSquadron("PlayerFleet4", "Kus_ResourceCollector", {-9870.37, 0, 5701.71}, 0, {0, -241, 0}, 0, 0) -- stand-in player fleet
     addSquadron("PlayerFleet5", "Kus_ResourceCollector", {-9270.37, 0, 5701.71}, 0, {0, -241, 0}, 0, 0) -- stand-in player fleet
-    addSquadron("KushanFlankFrigates0", "kus_ioncannonfrigate", {-8657.18, 0, 22659.245}, 1, {0, -7, 0}, 0, 0) -- RACE_KUSHAN kIonCannonFrigate
-    addSquadron("KushanFlankFrigates1", "kus_ioncannonfrigate", {-8657.18, 0, 22659.245}, 1, {0, -7, 0}, 0, 0) -- RACE_KUSHAN kIonCannonFrigate
-    addSquadron("KushanFlankFrigates2", "kus_ioncannonfrigate", {-8657.18, 0, 22659.245}, 1, {0, -7, 0}, 0, 0) -- RACE_KUSHAN kIonCannonFrigate
-    addSquadron("KushanFlankFrigates3", "kus_ioncannonfrigate", {-8657.18, 0, 22659.245}, 1, {0, -7, 0}, 0, 0) -- RACE_KUSHAN kIonCannonFrigate
-    addSquadron("KushanFlankFrigates4", "kus_ioncannonfrigate", {-8657.18, 0, 22659.245}, 1, {0, -7, 0}, 0, 0) -- RACE_KUSHAN kIonCannonFrigate
+    addSquadron("KushanFlankFrigates0", "kus_ioncannonfrigate", {-8657.18, 0, 22659.245}, 2, {0, -7, 0}, 0, 0) -- RACE_KUSHAN kIonCannonFrigate
+    addSquadron("KushanFlankFrigates1", "kus_ioncannonfrigate", {-8657.18, 0, 22659.245}, 2, {0, -7, 0}, 0, 0) -- RACE_KUSHAN kIonCannonFrigate
+    addSquadron("KushanFlankFrigates2", "kus_ioncannonfrigate", {-8657.18, 0, 22659.245}, 2, {0, -7, 0}, 0, 0) -- RACE_KUSHAN kIonCannonFrigate
+    addSquadron("KushanFlankFrigates3", "kus_ioncannonfrigate", {-8657.18, 0, 22659.245}, 2, {0, -7, 0}, 0, 0) -- RACE_KUSHAN kIonCannonFrigate
+    addSquadron("KushanFlankFrigates4", "kus_ioncannonfrigate", {-8657.18, 0, 22659.245}, 2, {0, -7, 0}, 0, 0) -- RACE_KUSHAN kIonCannonFrigate
     addSquadron("TaiidanBombers0", "tai_attackbomber", {-8442.07, 0, 22300.67}, 1, {0, -120, 0}, 0, 0) -- RACE_TAIDAN tAttackBomber
     addSquadron("TaiidanBombers1", "tai_attackbomber", {-8442.07, 0, 22300.67}, 1, {0, -120, 0}, 0, 0) -- RACE_TAIDAN tAttackBomber
     addSquadron("TaiidanBombers2", "tai_attackbomber", {-8442.07, 0, 22300.67}, 1, {0, -120, 0}, 0, 0) -- RACE_TAIDAN tAttackBomber
@@ -36,32 +36,32 @@ function DetermChunk()
     addSquadron("TaiidanResourcerDefense0", "tai_defender", {10040.695, -4673.69, -16036.86}, 1, {0, -258, 0}, 0, 0) -- RACE_TAIDAN tHeavyDefender
     addSquadron("TaiidanResourcerDefense1", "tai_defender", {10040.695, -4673.69, -16036.86}, 1, {0, -258, 0}, 0, 0) -- RACE_TAIDAN tHeavyDefender
     addSquadron("TaiidanResourcerDefense2", "tai_defender", {10040.695, -4673.69, -16036.86}, 1, {0, -258, 0}, 0, 0) -- RACE_TAIDAN tHeavyDefender
-    addSquadron("KushanMainGuardFrigates0", "kus_ioncannonfrigate", {9354.275, -819.07, 9560.32}, 1, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kIonCannonFrigate
-    addSquadron("KushanMainGuardFrigates1", "kus_ioncannonfrigate", {9354.275, -819.07, 9560.32}, 1, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kIonCannonFrigate
-    addSquadron("KushanMainGuardFrigates2", "kus_ioncannonfrigate", {9354.275, -819.07, 9560.32}, 1, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kIonCannonFrigate
-    addSquadron("KushanMainGuardFrigates3", "kus_ioncannonfrigate", {9354.275, -819.07, 9560.32}, 1, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kIonCannonFrigate
-    addSquadron("KushanMainGuardCorvettes0", "kus_multiguncorvette", {6965.105, 0, 9082.92}, 1, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kMultiGunCorvette
-    addSquadron("KushanMainGuardCorvettes1", "kus_multiguncorvette", {6965.105, 0, 9082.92}, 1, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kMultiGunCorvette
-    addSquadron("KushanMainGuardCorvettes2", "kus_multiguncorvette", {6965.105, 0, 9082.92}, 1, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kMultiGunCorvette
-    addSquadron("KushanMainGuardCorvettes3", "kus_multiguncorvette", {6965.105, 0, 9082.92}, 1, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kMultiGunCorvette
+    addSquadron("KushanMainGuardFrigates0", "kus_ioncannonfrigate", {9354.275, -819.07, 9560.32}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kIonCannonFrigate
+    addSquadron("KushanMainGuardFrigates1", "kus_ioncannonfrigate", {9354.275, -819.07, 9560.32}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kIonCannonFrigate
+    addSquadron("KushanMainGuardFrigates2", "kus_ioncannonfrigate", {9354.275, -819.07, 9560.32}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kIonCannonFrigate
+    addSquadron("KushanMainGuardFrigates3", "kus_ioncannonfrigate", {9354.275, -819.07, 9560.32}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kIonCannonFrigate
+    addSquadron("KushanMainGuardCorvettes0", "kus_multiguncorvette", {6965.105, 0, 9082.92}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kMultiGunCorvette
+    addSquadron("KushanMainGuardCorvettes1", "kus_multiguncorvette", {6965.105, 0, 9082.92}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kMultiGunCorvette
+    addSquadron("KushanMainGuardCorvettes2", "kus_multiguncorvette", {6965.105, 0, 9082.92}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kMultiGunCorvette
+    addSquadron("KushanMainGuardCorvettes3", "kus_multiguncorvette", {6965.105, 0, 9082.92}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kMultiGunCorvette
     addSquadron("TaiHInt10", "tai_interceptor", {6940.71, 1664.915, 18757.41}, 1, {0, -264, 0}, 0, 0) -- RACE_TAIDAN tHeavyInterceptor
     addSquadron("TaiHInt11", "tai_interceptor", {6940.71, 1664.915, 18757.41}, 1, {0, -264, 0}, 0, 0) -- RACE_TAIDAN tHeavyInterceptor
     addSquadron("TaiHInt12", "tai_interceptor", {6940.71, 1664.915, 18757.41}, 1, {0, -264, 0}, 0, 0) -- RACE_TAIDAN tHeavyInterceptor
     addSquadron("TaiHInt13", "tai_interceptor", {6940.71, 1664.915, 18757.41}, 1, {0, -264, 0}, 0, 0) -- RACE_TAIDAN tHeavyInterceptor
     addSquadron("TaiHInt14", "tai_interceptor", {6940.71, 1664.915, 18757.41}, 1, {0, -264, 0}, 0, 0) -- RACE_TAIDAN tHeavyInterceptor
     addSquadron("TaiHInt15", "tai_interceptor", {6940.71, 1664.915, 18757.41}, 1, {0, -264, 0}, 0, 0) -- RACE_TAIDAN tHeavyInterceptor
-    addSquadron("KushanCarriers0", "kus_carrier", {6429.64, 0, 8938.965}, 1, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kCarrier
+    addSquadron("KushanCarriers0", "kus_carrier", {6429.64, 0, 8938.965}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kCarrier
     addSquadron("TaiidanMainCarrier0", "tai_carrier", {7167.405, 1669.325, 18782.365}, 1, {0, -167, 0}, 0, 0) -- RACE_TAIDAN tCarrier
     addSquadron("TaiidanMissileDestroyers0", "tai_destroyer", {8800.82, 1669.5, 16448.215}, 1, {0, -168, 0}, 0, 0) -- RACE_TAIDAN tStandardDestroyer
-    addSquadron("KushanMainGuardDestroyers0", "kus_destroyer", {6440.35, -417.655, 8786.4}, 1, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kStandardDestroyer
-    addSquadron("KushanMainGuardDestroyers1", "kus_destroyer", {6440.35, -417.655, 8786.4}, 1, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kStandardDestroyer
-    addSquadron("KushanMainGuardFighters10", "kus_interceptor", {6795.425, 0, 7385.455}, 1, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
-    addSquadron("KushanMainGuardFighters11", "kus_interceptor", {6795.425, 0, 7385.455}, 1, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
-    addSquadron("KushanMainGuardFighters12", "kus_interceptor", {6795.425, 0, 7385.455}, 1, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
-    addSquadron("KushanMainGuardFighters13", "kus_interceptor", {6795.425, 0, 7385.455}, 1, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
-    addSquadron("KushanMainGuardFighters14", "kus_interceptor", {6795.425, 0, 7385.455}, 1, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
-    addSquadron("KushanMainGuardFighters15", "kus_interceptor", {6795.425, 0, 7385.455}, 1, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
-    addSquadron("KushanMainGuardFighters16", "kus_interceptor", {6795.425, 0, 7385.455}, 1, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
+    addSquadron("KushanMainGuardDestroyers0", "kus_destroyer", {6440.35, -417.655, 8786.4}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kStandardDestroyer
+    addSquadron("KushanMainGuardDestroyers1", "kus_destroyer", {6440.35, -417.655, 8786.4}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kStandardDestroyer
+    addSquadron("KushanMainGuardFighters10", "kus_interceptor", {6795.425, 0, 7385.455}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
+    addSquadron("KushanMainGuardFighters11", "kus_interceptor", {6795.425, 0, 7385.455}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
+    addSquadron("KushanMainGuardFighters12", "kus_interceptor", {6795.425, 0, 7385.455}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
+    addSquadron("KushanMainGuardFighters13", "kus_interceptor", {6795.425, 0, 7385.455}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
+    addSquadron("KushanMainGuardFighters14", "kus_interceptor", {6795.425, 0, 7385.455}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
+    addSquadron("KushanMainGuardFighters15", "kus_interceptor", {6795.425, 0, 7385.455}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
+    addSquadron("KushanMainGuardFighters16", "kus_interceptor", {6795.425, 0, 7385.455}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
     addSquadron("TaiidanDestroyer0", "tai_heavycruiser", {7131.11, 1669.325, 18068.05}, 1, {0, -167, 0}, 0, 0) -- RACE_TAIDAN tHeavyCruiser
     addSquadron("TaiidanCarrier20", "tai_carrier", {-7384.16, 3431.47, 31136.21}, 1, {0, -241, 0}, 0, 0) -- RACE_TAIDAN tCarrier
     addSquadron("TaiidanC2Interceptor10", "tai_interceptor", {-6217.75, 2124.15, 31810.52}, 1, {0, -120, 0}, 0, 0) -- RACE_TAIDAN tHeavyInterceptor
@@ -104,17 +104,17 @@ function DetermChunk()
     addSquadron("TaiICFrig12", "tai_ioncannonfrigate", {6192.83, 1741.53, 17350.725}, 1, {0, -167, 0}, 0, 0) -- RACE_TAIDAN tIonCannonFrigate
     addSquadron("TaiidanProxAttackMGCorv10", "tai_multiguncorvette", {-31666.985, 8282.26, -25531.065}, 1, {0, -106, 0}, 0, 0) -- RACE_TAIDAN tMultiGunCorvette
     addSquadron("TaiidanProxAttackMGCorv11", "tai_multiguncorvette", {-31666.985, 8282.26, -25531.065}, 1, {0, -106, 0}, 0, 0) -- RACE_TAIDAN tMultiGunCorvette
-    addSquadron("KushanProxDefend10", "kus_interceptor", {-24294.795, -105.35, -6395.27}, 1, {0, -92, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
-    addSquadron("KushanProxDefend11", "kus_interceptor", {-24294.795, -105.35, -6395.27}, 1, {0, -92, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
-    addSquadron("KushanProxDefend12", "kus_interceptor", {-24294.795, -105.35, -6395.27}, 1, {0, -92, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
-    addSquadron("KushanProxDefend13", "kus_interceptor", {-24294.795, -105.35, -6395.27}, 1, {0, -92, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
-    addSquadron("KushanProxDefend14", "kus_interceptor", {-24294.795, -105.35, -6395.27}, 1, {0, -92, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
-    addSquadron("KushanProxDefend20", "kus_interceptor", {-24523.415, -105.35, -5153.68}, 1, {0, -92, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
-    addSquadron("KushanProxDefend21", "kus_interceptor", {-24523.415, -105.35, -5153.68}, 1, {0, -92, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
-    addSquadron("KushanProxDefend22", "kus_interceptor", {-24523.415, -105.35, -5153.68}, 1, {0, -92, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
-    addSquadron("KushanProxDefend23", "kus_interceptor", {-24523.415, -105.35, -5153.68}, 1, {0, -92, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
-    addSquadron("KushanProxDefend24", "kus_interceptor", {-24523.415, -105.35, -5153.68}, 1, {0, -92, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
-    addSquadron("KushanProxDefend25", "kus_interceptor", {-24523.415, -105.35, -5153.68}, 1, {0, -92, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
+    addSquadron("KushanProxDefend10", "kus_interceptor", {-24294.795, -105.35, -6395.27}, 2, {0, -92, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
+    addSquadron("KushanProxDefend11", "kus_interceptor", {-24294.795, -105.35, -6395.27}, 2, {0, -92, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
+    addSquadron("KushanProxDefend12", "kus_interceptor", {-24294.795, -105.35, -6395.27}, 2, {0, -92, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
+    addSquadron("KushanProxDefend13", "kus_interceptor", {-24294.795, -105.35, -6395.27}, 2, {0, -92, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
+    addSquadron("KushanProxDefend14", "kus_interceptor", {-24294.795, -105.35, -6395.27}, 2, {0, -92, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
+    addSquadron("KushanProxDefend20", "kus_interceptor", {-24523.415, -105.35, -5153.68}, 2, {0, -92, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
+    addSquadron("KushanProxDefend21", "kus_interceptor", {-24523.415, -105.35, -5153.68}, 2, {0, -92, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
+    addSquadron("KushanProxDefend22", "kus_interceptor", {-24523.415, -105.35, -5153.68}, 2, {0, -92, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
+    addSquadron("KushanProxDefend23", "kus_interceptor", {-24523.415, -105.35, -5153.68}, 2, {0, -92, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
+    addSquadron("KushanProxDefend24", "kus_interceptor", {-24523.415, -105.35, -5153.68}, 2, {0, -92, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
+    addSquadron("KushanProxDefend25", "kus_interceptor", {-24523.415, -105.35, -5153.68}, 2, {0, -92, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
     addSquadron("PesterHInt10", "tai_interceptor", {5960.71, 1403.71, 20730.045}, 1, {0, -264, 0}, 0, 0) -- RACE_TAIDAN tHeavyInterceptor
     addSquadron("PesterHInt11", "tai_interceptor", {5960.71, 1403.71, 20730.045}, 1, {0, -264, 0}, 0, 0) -- RACE_TAIDAN tHeavyInterceptor
     addSquadron("PesterHInt12", "tai_interceptor", {5960.71, 1403.71, 20730.045}, 1, {0, -264, 0}, 0, 0) -- RACE_TAIDAN tHeavyInterceptor
@@ -128,39 +128,39 @@ function DetermChunk()
     addSquadron("TaiidanBombers11", "tai_interceptor", {-8370.145, 0, 22912.575}, 1, {0, -120, 0}, 0, 0) -- RACE_TAIDAN tHeavyInterceptor
     addSquadron("TaiidanBombers12", "tai_interceptor", {-8370.145, 0, 22912.575}, 1, {0, -120, 0}, 0, 0) -- RACE_TAIDAN tHeavyInterceptor
     addSquadron("TaiidanBombers13", "tai_interceptor", {-8370.145, 0, 22912.575}, 1, {0, -120, 0}, 0, 0) -- RACE_TAIDAN tHeavyInterceptor
-    addSquadron("KushanProximityArray0", "kus_proximitysensor", {-27815.62, 0, -19979.26}, 1, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
-    addSquadron("KushanProximityArray1", "kus_proximitysensor", {-27709.15, 6944.945, -20105.925}, 1, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
-    addSquadron("KushanProximityArray2", "kus_proximitysensor", {-27950.51, -7222.845, -19996.095}, 1, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
-    addSquadron("KushanProximityArray3", "kus_proximitysensor", {-25585.07, 0, -15893.43}, 1, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
-    addSquadron("KushanProximityArray4", "kus_proximitysensor", {-25478.775, 6944.945, -16020.13}, 1, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
-    addSquadron("KushanProximityArray5", "kus_proximitysensor", {-25720.17, -7222.845, -15910.3}, 1, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
-    addSquadron("KushanProximityArray6", "kus_proximitysensor", {-24370.325, 0, -11183.655}, 1, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
-    addSquadron("KushanProximityArray7", "kus_proximitysensor", {-24582.88, 6779.605, -10930.29}, 1, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
-    addSquadron("KushanProximityArray8", "kus_proximitysensor", {-24824.275, -7388.185, -10820.46}, 1, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
-    addSquadron("KushanProximityArray9", "kus_proximitysensor", {-23132.375, 0, -6208.37}, 1, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
-    addSquadron("KushanProximityArray10", "kus_proximitysensor", {-23238.67, 6779.605, -6081.705}, 1, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
-    addSquadron("KushanProximityArray11", "kus_proximitysensor", {-23480.03, -7388.185, -5971.84}, 1, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
-    addSquadron("KushanProximityArray12", "kus_proximitysensor", {-22690.99, 0, -1163.365}, 1, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
-    addSquadron("KushanProximityArray13", "kus_proximitysensor", {-22690.99, 6779.605, -1163.365}, 1, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
-    addSquadron("KushanProximityArray14", "kus_proximitysensor", {-22932.35, -7388.185, -1053.535}, 1, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
-    addSquadron("KushanProximityArray15", "kus_proximitysensor", {-22105.23, 0, 4002.775}, 1, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
-    addSquadron("KushanProximityArray16", "kus_proximitysensor", {-21998.935, 6779.605, 3876.11}, 1, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
-    addSquadron("KushanProximityArray17", "kus_proximitysensor", {-22240.295, -7388.185, 3985.94}, 1, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
-    addSquadron("KushanProximityArray18", "kus_proximitysensor", {-22893.57, 0, 8754.025}, 1, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
-    addSquadron("KushanProximityArray19", "kus_proximitysensor", {-22680.98, 6944.945, 8500.695}, 1, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
-    addSquadron("KushanProximityArray20", "kus_proximitysensor", {-22922.375, -7222.845, 8610.525}, 1, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
-    addSquadron("KushanProximityArray21", "kus_proximitysensor", {-23826.25, 0, 13384.105}, 1, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
-    addSquadron("KushanProximityArray22", "kus_proximitysensor", {-23613.695, 6944.945, 13130.775}, 1, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
-    addSquadron("KushanProximityArray23", "kus_proximitysensor", {-23855.055, -7222.845, 13240.605}, 1, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
-    addSquadron("KushanProximityArray24", "kus_proximitysensor", {-25024.51, 0, 18037.425}, 1, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
-    addSquadron("KushanProximityArray25", "kus_proximitysensor", {-24918.215, 6944.945, 17910.76}, 1, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
-    addSquadron("KushanProximityArray26", "kus_proximitysensor", {-25159.575, -7222.845, 18020.59}, 1, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
-    addSquadron("KushanProximityArray27", "kus_proximitysensor", {-27019.3, 0, 22760.465}, 1, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
-    addSquadron("KushanProximityArray28", "kus_proximitysensor", {-26806.745, 6944.945, 22507.135}, 1, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
-    addSquadron("KushanProximityArray29", "kus_proximitysensor", {-27048.105, -7222.845, 22616.965}, 1, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
-    addSquadron("KushanProximityArray30", "kus_proximitysensor", {-29326.115, 0, 26975.62}, 1, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
-    addSquadron("KushanProximityArray31", "kus_proximitysensor", {-29219.82, 6944.945, 26848.99}, 1, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
-    addSquadron("KushanProximityArray32", "kus_proximitysensor", {-29461.18, -7222.845, 26958.785}, 1, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
+    addSquadron("KushanProximityArray0", "kus_proximitysensor", {-27815.62, 0, -19979.26}, 2, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
+    addSquadron("KushanProximityArray1", "kus_proximitysensor", {-27709.15, 6944.945, -20105.925}, 2, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
+    addSquadron("KushanProximityArray2", "kus_proximitysensor", {-27950.51, -7222.845, -19996.095}, 2, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
+    addSquadron("KushanProximityArray3", "kus_proximitysensor", {-25585.07, 0, -15893.43}, 2, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
+    addSquadron("KushanProximityArray4", "kus_proximitysensor", {-25478.775, 6944.945, -16020.13}, 2, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
+    addSquadron("KushanProximityArray5", "kus_proximitysensor", {-25720.17, -7222.845, -15910.3}, 2, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
+    addSquadron("KushanProximityArray6", "kus_proximitysensor", {-24370.325, 0, -11183.655}, 2, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
+    addSquadron("KushanProximityArray7", "kus_proximitysensor", {-24582.88, 6779.605, -10930.29}, 2, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
+    addSquadron("KushanProximityArray8", "kus_proximitysensor", {-24824.275, -7388.185, -10820.46}, 2, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
+    addSquadron("KushanProximityArray9", "kus_proximitysensor", {-23132.375, 0, -6208.37}, 2, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
+    addSquadron("KushanProximityArray10", "kus_proximitysensor", {-23238.67, 6779.605, -6081.705}, 2, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
+    addSquadron("KushanProximityArray11", "kus_proximitysensor", {-23480.03, -7388.185, -5971.84}, 2, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
+    addSquadron("KushanProximityArray12", "kus_proximitysensor", {-22690.99, 0, -1163.365}, 2, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
+    addSquadron("KushanProximityArray13", "kus_proximitysensor", {-22690.99, 6779.605, -1163.365}, 2, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
+    addSquadron("KushanProximityArray14", "kus_proximitysensor", {-22932.35, -7388.185, -1053.535}, 2, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
+    addSquadron("KushanProximityArray15", "kus_proximitysensor", {-22105.23, 0, 4002.775}, 2, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
+    addSquadron("KushanProximityArray16", "kus_proximitysensor", {-21998.935, 6779.605, 3876.11}, 2, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
+    addSquadron("KushanProximityArray17", "kus_proximitysensor", {-22240.295, -7388.185, 3985.94}, 2, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
+    addSquadron("KushanProximityArray18", "kus_proximitysensor", {-22893.57, 0, 8754.025}, 2, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
+    addSquadron("KushanProximityArray19", "kus_proximitysensor", {-22680.98, 6944.945, 8500.695}, 2, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
+    addSquadron("KushanProximityArray20", "kus_proximitysensor", {-22922.375, -7222.845, 8610.525}, 2, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
+    addSquadron("KushanProximityArray21", "kus_proximitysensor", {-23826.25, 0, 13384.105}, 2, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
+    addSquadron("KushanProximityArray22", "kus_proximitysensor", {-23613.695, 6944.945, 13130.775}, 2, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
+    addSquadron("KushanProximityArray23", "kus_proximitysensor", {-23855.055, -7222.845, 13240.605}, 2, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
+    addSquadron("KushanProximityArray24", "kus_proximitysensor", {-25024.51, 0, 18037.425}, 2, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
+    addSquadron("KushanProximityArray25", "kus_proximitysensor", {-24918.215, 6944.945, 17910.76}, 2, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
+    addSquadron("KushanProximityArray26", "kus_proximitysensor", {-25159.575, -7222.845, 18020.59}, 2, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
+    addSquadron("KushanProximityArray27", "kus_proximitysensor", {-27019.3, 0, 22760.465}, 2, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
+    addSquadron("KushanProximityArray28", "kus_proximitysensor", {-26806.745, 6944.945, 22507.135}, 2, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
+    addSquadron("KushanProximityArray29", "kus_proximitysensor", {-27048.105, -7222.845, 22616.965}, 2, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
+    addSquadron("KushanProximityArray30", "kus_proximitysensor", {-29326.115, 0, 26975.62}, 2, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
+    addSquadron("KushanProximityArray31", "kus_proximitysensor", {-29219.82, 6944.945, 26848.99}, 2, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
+    addSquadron("KushanProximityArray32", "kus_proximitysensor", {-29461.18, -7222.845, 26958.785}, 2, {0, -227, 0}, 0, 0) -- RACE_KUSHAN kProximitySensor
 
     createSOBGroup("FleetIntel")
     createSOBGroup("Objectives")
@@ -353,6 +353,22 @@ function DetermChunk()
     addToSOBGroup("KushanProximityArray31", "KushanProximityArray")
     addToSOBGroup("KushanProximityArray32", "KushanProximityArray")
 
+    addAsteroid("Asteroid2", {6385.696, -4106.271, -17870.463}, 100, 159.512, 348.83, 197.356, 0)
+    addAsteroid("Asteroid2", {8047.287, -5756.102, -17133.543}, 100, 3.501, 93.841, 220.057, 0)
+    addAsteroid("Asteroid2", {7236.385, -4557.354, -18142.699}, 100, 61.035, 97.739, 6.025, 0)
+    addAsteroid("Asteroid2", {9030.459, -5137.14, -17377.837}, 100, 94.623, 248.721, 320.456, 0)
+    addAsteroid("Asteroid3", {-10111.368, -1429.378, 3813.289}, 100, 283.214, 21.334, 269.035, 0)
+    addAsteroid("Asteroid1", {6197.465, -3643.863, -17461.888}, 100, 53.257, 215.107, 208.196, 0)
+    addAsteroid("Asteroid1", {8316.124, -5652.427, -17729.495}, 100, 239.426, 283.971, 275.702, 0)
+    addAsteroid("Asteroid1", {8040.025, -3373.308, -17142.055}, 100, 47.252, 34.434, 306.711, 0)
+    addAsteroid("Asteroid1", {7686.706, -6058.661, -17973.862}, 100, 341.06, 358.276, 170.419, 0)
+    addAsteroid("Asteroid1", {8151.505, -3398.317, -17479.632}, 100, 123.546, 7.464, 330.246, 0)
+    addAsteroid("Asteroid1", {6902.895, -5512.833, -18350.15}, 100, 275.711, 267.154, 137.534, 0)
+    addAsteroid("Asteroid1", {8517.267, -4989.42, -16692.491}, 100, 250.01, 24.441, 308.516, 0)
+    addAsteroid("Asteroid1", {8838.972, -5085.792, -16457.811}, 100, 265.592, 148.957, 305.664, 0)
+    addAsteroid("Asteroid2", {-9285.302, 1138.293, 2413.21}, 100, 81.501, 282.87, 147.952, 0)
+    addAsteroid("Asteroid2", {-9712.651, 239.892, 3066.585}, 100, 291.913, 124.795, 78.766, 0)
+    addAsteroid("Asteroid2", {-8152.777, -766.271, 2283.146}, 100, 320.748, 265.633, 343.694, 0)
     addSphere("Unexplored", {7500.85, -4617.55, -17310.58}, 7350)
     addAxisAlignBox("Everything", {-2105.18, 0, 2368.345}, 175000)
     addAxisAlignBox("BattleZone", {6664.525, 355.25, 13835.045}, 12250)
@@ -379,11 +395,12 @@ function NonDetermChunk()
     setSensorsManagerCameraDistances(10500, 87500)
 end
 
-maxPlayers = 2
+maxPlayers = 3
 
 player = {}
 player[0] = { id = 0, name = "Kushan", resources = 0, raceName = "Kushan", startPos = 0 }
 player[1] = { id = 1, name = "Taiidan", resources = 0, raceName = "Taiidan", startPos = 0 }
+player[2] = { id = 2, name = "Kushan", resources = 0, raceName = "Kushan", startPos = 0 }
 
--- unconverted MissionMan lines: Derelict x2, Resources x4
+-- unconverted MissionMan lines: Derelict x2
 -- unmapped ship types (placeholder used): 
