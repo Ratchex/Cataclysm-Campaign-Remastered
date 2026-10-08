@@ -61,11 +61,7 @@ NOT_CONVERTED = {
     "remainAtEnd": "the real ships are hidden during the intro instead (KAS_RunAfterIntro)",
     "subtitle": "Cataclysm-only (subtitle <n> <ms>); shows nothing in the original (n01 at 10 s / 16 s, checked "
                 "in Cataclysm by the user)",
-    "attack": "TODO: NIS ships do not fight yet",
-    "haltAttack": "TODO: NIS ships do not fight yet",
-    "fire": "TODO: NIS ships do not fight yet",
-    "deathDamage": "TODO: NIS ship deaths not converted",
-    "health": "TODO: NIS ship health not converted",
+    "fire": "Gearbox's HW1 NIS conversions drop it too (the attack() before it does the shooting)",
     "fog": "TODO: NIS fog not converted",
     "mimic": "TODO: mimic not converted",
     "ebolts": "TODO: effect not converted",
@@ -76,7 +72,10 @@ NOT_CONVERTED = {
     "beastEffect": "TODO: effect not converted",
 }
 TRANSLATED = ["fadeSet", "fadeTo", "wideScreenIn", "wideScreenOut", "musicVolume", "speechVolume", "SFXVolume",
-              "hideUniverseToggle", "hide", "show", "meshAnimStart", "startMusic", "fleetSpeechEvent", "speechEvent"]
+              "hideUniverseToggle", "hide", "show", "meshAnimStart", "startMusic", "fleetSpeechEvent", "speechEvent",
+              "attack", "haltAttack", "deathDamage", "deathProjectile", "deathBeam", "health"]
+# HW1 NIS death kinds (NIS.c nisDeath*Set) -> HWRM death() as Gearbox's HW1 conversions use them
+DEATHS = {"deathDamage": "deathCannon", "deathProjectile": "deathPlasma", "deathBeam": "deathBeam"}
 COMMANDS = {c.lower(): c for c in TRANSLATED + list(NOT_CONVERTED)}   # spelling used below, by lower case
 HW1_NIS_FOV = 75.0          # NIS.h NIS_DefaultFOV: HW1 field of view is vertical (Camera.c), on a 4:3 screen
 SCREEN_ASPECT = 16 / 9
@@ -445,6 +444,18 @@ def translate_script(src, objects, nisname, speech, fps, end_frame, cam_events, 
             else:
                 note("NOT CONVERTED: no NIS_STATES entry for this clip")
                 continue
+        elif cmd == "attack" and cur_obj:
+            target = objects.get(object_key(args))
+            if target is None:
+                note(f"NOT CONVERTED: attack target {args!r} is not an NIS object with a model")
+                continue
+            emit(f'attack("{target}")')
+        elif cmd == "haltAttack" and cur_obj:
+            emit("haltAttack()")
+        elif cmd in DEATHS and cur_obj:
+            emit(f'death("{DEATHS[cmd]}")')
+        elif cmd == "health" and cur_obj:
+            emit(f"health({float(args):g})")
         elif cmd == "startMusic":
             # Cataclysm stream n (tools/build_music.py): the NIS script's musicStart("cataclysm/music_nn") stayed
             # silent in game; the runtime's Sound_MusicPlayType (as kasfMusicPlay) plays it
@@ -459,7 +470,7 @@ def translate_script(src, objects, nisname, speech, fps, end_frame, cam_events, 
                 continue
             sid, secs, text, tagged = line
             used.append(sid)
-            speaker = SPEAKERS.get(ev & 0x3FC00, f"actor bits {ev & 0x3FC00:#x}")
+            speaker = SPEAKERS.get(ev & 0x3FFC00, f"actor bits {ev & 0x3FFC00:#x}")
             if not text:
                 raise SystemExit(f"{src}: speech ${sid} has no subtitle and no speaker tag (it would play nothing): "
                                  f"rerun tools/build_speech.py")
@@ -505,6 +516,12 @@ def translate_script(src, objects, nisname, speech, fps, end_frame, cam_events, 
     for key, body in out_obj.items():
         if key == "#drop" or not any(not b.strip().startswith("at frame") for b in body):
             continue
+        # every NIS ship invincible (Gearbox's HW1 conversions): attack() fires real weapons, deaths are scripted
+        # and death() still kills an invincible ship (their n07 Tai_AssaultFrigate3)
+        if body and body[0].strip() == "at frame 0":
+            body = body[:1] + ["        invincible()"] + body[1:]
+        else:
+            body = ["    at frame 0", "        invincible()"] + body
         out += [f"with {key}", "{"] + body + ["}"]
     return "\n".join(out) + "\n", used, cues, report
 

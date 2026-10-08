@@ -57,11 +57,13 @@ at frame 3321
 with smt_ms_sp
 {
     at frame 0
+        invincible()
         show()
 }
 with smt_scout1
 {
     at frame 0
+        invincible()
         hide()
     at frame 170
         speechEventActor("$2207021", 17, 2)
@@ -82,6 +84,7 @@ with smt_scout1
 with smt_scout2
 {
     at frame 0
+        invincible()
         hide()
     at frame 950
         show()
@@ -89,6 +92,7 @@ with smt_scout2
 with smt_scout3
 {
     at frame 0
+        invincible()
         hide()
     at frame 950
         show()
@@ -96,6 +100,7 @@ with smt_scout3
 with smt_worker1
 {
     at frame 0
+        invincible()
         show()
     at frame 720
         setMADState("NIS00")
@@ -113,6 +118,7 @@ with smt_worker1
 with smt_worker2
 {
     at frame 0
+        invincible()
         show()
     at frame 5
         setMADState("NIS00")
@@ -130,110 +136,132 @@ with smt_worker2
 with Asteroid11
 {
     at frame 0
+        invincible()
         show()
 }
 with Asteroid12
 {
     at frame 0
+        invincible()
         show()
 }
 with Asteroid13
 {
     at frame 0
+        invincible()
         show()
 }
 with Asteroid14
 {
     at frame 0
+        invincible()
         show()
 }
 with Asteroid21
 {
     at frame 0
+        invincible()
         show()
 }
 with Asteroid22
 {
     at frame 0
+        invincible()
         show()
 }
 with Asteroid23
 {
     at frame 0
+        invincible()
         show()
 }
 with Asteroid24
 {
     at frame 0
+        invincible()
         show()
 }
 with Asteroid25
 {
     at frame 0
+        invincible()
         show()
 }
 with Asteroid26
 {
     at frame 0
+        invincible()
         show()
 }
 with Asteroid27
 {
     at frame 0
+        invincible()
         show()
 }
 with Asteroid28
 {
     at frame 0
+        invincible()
         show()
 }
 with Asteroid29
 {
     at frame 0
+        invincible()
         show()
 }
 with Asteroid210
 {
     at frame 0
+        invincible()
         show()
 }
 with Asteroid211
 {
     at frame 0
+        invincible()
         show()
 }
 with Asteroid31
 {
     at frame 0
+        invincible()
         show()
 }
 with Asteroid32
 {
     at frame 0
+        invincible()
         show()
 }
 with Asteroid33
 {
     at frame 0
+        invincible()
         show()
 }
 with Asteroid34
 {
     at frame 0
+        invincible()
         show()
 }
 with Asteroid35
 {
     at frame 0
+        invincible()
         show()
 }
 with Asteroid36
 {
     at frame 0
+        invincible()
         show()
 }
 with Asteroid37
 {
     at frame 0
+        invincible()
         show()
 }

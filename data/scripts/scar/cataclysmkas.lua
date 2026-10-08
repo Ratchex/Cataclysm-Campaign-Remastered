@@ -415,6 +415,7 @@ KAS_NisPending = nil
 KAS_NisPath = "nis/cataclysm/"
 KAS_NisAvailable = {}                 -- names converted so far
 KAS_NisAvailable["n01"] = 1
+KAS_NisAvailable["nislet01"] = 1
 
 -- Cues: what a converted cutscene's HWRM script can't play (music: its musicStart stayed silent), as
 -- { seconds after the start, kind, argument }; generated next to each NIS by tools/nis2hwrm.py
@@ -479,8 +480,9 @@ function KAS_NisStart(name)
             position = Vector3_Subtract(SobGroup_GetPosition("KAS_NisCentre"),
                                         Matrix3_MultiplyVector3ByMatrix(motherVector, nisMatrix))
         else
-            print("CKAS: " .. path .. " has no " .. SobGroup_GetShipType("KAS_NisCentre") .. " to centre on - skipped")
-            return nil
+            -- HW1 SinglePlayer.c: no centre ship in the NIS -> played about the world origin, unrotated (nislet01's
+            -- battle is in the level's own coordinates; nis2hwrm and mission2level map positions the same way)
+            print("CKAS: " .. path .. " has no " .. SobGroup_GetShipType("KAS_NisCentre") .. ": played at the origin")
         end
     end
     NISPlayFromCoordSys(path, position, nisMatrix)

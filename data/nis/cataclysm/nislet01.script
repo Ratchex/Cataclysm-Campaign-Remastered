@@ -1,0 +1,1635 @@
+speechSetDir("nislet01")
+at frame 0
+    cameraCut("Camera0")
+at frame 1381
+    cameraCut("Camera1")
+at frame 1591
+    cameraCut("Camera2")
+at frame 1711
+    cameraCut("Camera3")
+at frame 1831
+    cameraCut("Camera4")
+at frame 1951
+    cameraCut("Camera5")
+at frame 2101
+    cameraCut("Camera6")
+at frame 2221
+    cameraCut("Camera7")
+at frame 2311
+    cameraCut("Camera8")
+at frame 2551
+    cameraCut("Camera9")
+at frame 2761
+    cameraCut("Camera10")
+at frame 2881
+    cameraCut("Camera11")
+at frame 3091
+    cameraCut("Camera12")
+at frame 1
+    cameraBlendOutOnSkip("Camera12", 1)
+at frame 0
+    wideScreenIn(0.0333333)
+    fadeSet(1)
+    hideUniverse(1)
+at frame 1
+    fadeTo(0, 2)
+    musicVolume(0.6)
+    speechVolume(0.35)
+    SFXVolume(0.6)
+at frame 720
+at frame 3148
+    fadeSet(0)
+at frame 3149
+    fadeTo(1, 2)
+at frame 3209
+    hideUniverse(0)
+at frame 3212
+    wideScreenOut(1)
+    cameraBlendOut("Camera12", 1)
+    fadeTo(0, 1)
+with kus_carrier
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 1050
+        show()
+    at frame 1320
+        hide()
+    at frame 2210
+        show()
+    at frame 2330
+        hide()
+}
+with kus_destroyer1
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 1050
+        show()
+    at frame 1400
+        health(0.2)
+    at frame 2200
+        speechEventActor("$2207375", 16, 2)
+    at frame 2550
+        speechEventActor("$2207378", 16, 2)
+    at frame 2580
+        attack("tai_missiledestroyer1")
+    at frame 2750
+        haltAttack()
+    at frame 2820
+        death("deathCannon")
+}
+with kus_destroyer2
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 1050
+        show()
+    at frame 1300
+        hide()
+    at frame 2200
+        show()
+}
+with kus_destroyer3
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 2200
+        show()
+    at frame 3000
+        hide()
+}
+with kus_ioncannonfrigate2
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 1050
+        show()
+}
+with kus_heavycorvette1
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 1050
+        show()
+    at frame 1090
+        attack("tai_interceptor1")
+    at frame 1150
+        haltAttack()
+    at frame 1750
+        hide()
+}
+with kus_heavycorvette2
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 1050
+        show()
+    at frame 1740
+        hide()
+}
+with kus_heavycorvette3
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 1050
+        show()
+}
+with kus_ioncannonfrigate1
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 1050
+        show()
+    at frame 1330
+        hide()
+    at frame 2355
+        show()
+    at frame 2700
+        hide()
+}
+with kus_ioncannonfrigate3
+{
+    at frame 0
+        invincible()
+        health(0.05)
+        show()
+    at frame 975
+        speechEventActor("$2207382", 16, 2)
+    at frame 1030
+        death("deathCannon")
+}
+with kus_ioncannonfrigate4
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 2000
+        show()
+    at frame 2311
+        hide()
+}
+with kus_ioncannonfrigate5
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 2000
+        show()
+    at frame 2365
+        hide()
+    at frame 2880
+        show()
+    at frame 2900
+        speechEventActor("$2207386", 16, 2)
+    at frame 2910
+        attack("tai_ioncannonfrigate2")
+    at frame 2970
+        haltAttack()
+}
+with kus_interceptor1
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 1050
+        show()
+    at frame 1550
+        attack("tai_ioncannonfrigate4")
+    at frame 1590
+        haltAttack()
+    at frame 1831
+        hide()
+}
+with kus_interceptor2
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 1050
+        show()
+    at frame 1550
+        attack("tai_ioncannonfrigate4")
+    at frame 1590
+        haltAttack()
+    at frame 1831
+        hide()
+}
+with kus_interceptor3
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 1050
+        show()
+    at frame 1550
+        attack("tai_ioncannonfrigate4")
+    at frame 1590
+        haltAttack()
+    at frame 1740
+        death("deathCannon")
+}
+with kus_interceptor4
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 1050
+        show()
+    at frame 1500
+        death("deathCannon")
+}
+with kus_interceptor5
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 1050
+        show()
+    at frame 1300
+        death("deathCannon")
+}
+with kus_interceptor6
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 1980
+        show()
+    at frame 2060
+        death("deathCannon")
+}
+with kus_interceptor7
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 2880
+        show()
+    at frame 3060
+        attack("tai_missiledestroyer1")
+    at frame 3100
+        haltAttack()
+}
+with kus_interceptor8
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 2880
+        show()
+    at frame 3060
+        attack("tai_missiledestroyer1")
+    at frame 3100
+        haltAttack()
+}
+with kus_interceptor9
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 2880
+        show()
+    at frame 3060
+        attack("tai_missiledestroyer1")
+    at frame 3100
+        haltAttack()
+}
+with kus_interceptor10
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 2880
+        show()
+    at frame 3060
+        attack("tai_missiledestroyer1")
+    at frame 3100
+        haltAttack()
+}
+with kus_interceptor11
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 2880
+        show()
+    at frame 3060
+        attack("tai_missiledestroyer1")
+    at frame 3100
+        haltAttack()
+}
+with tai_carrier
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 1420
+        show()
+    at frame 2250
+        hide()
+    at frame 2290
+        show()
+}
+with tai_destroyer
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 1400
+        show()
+    at frame 2000
+        hide()
+}
+with tai_ioncannonfrigate2
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 2000
+        show()
+    at frame 2120
+        hide()
+    at frame 2881
+        show()
+    at frame 3020
+        death("deathCannon")
+    at frame 2880
+        hide()
+    at frame 2881
+        show()
+}
+with tai_ioncannonfrigate4
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 1050
+        show()
+        health(0.2)
+    at frame 1650
+        death("deathCannon")
+}
+with tai_ioncannonfrigate1
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 1050
+        show()
+    at frame 1470
+        attack("kus_interceptor4")
+    at frame 1540
+        haltAttack()
+}
+with tai_ioncannonfrigate3
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 1050
+        show()
+    at frame 2300
+        hide()
+}
+with tai_assaultfrigate1
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 1050
+        show()
+    at frame 1750
+        hide()
+}
+with tai_assaultfrigate2
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 1525
+        show()
+    at frame 1720
+        attack("kus_interceptor3")
+    at frame 1760
+        haltAttack()
+    at frame 3050
+        hide()
+}
+with tai_assaultfrigate3
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 1700
+        show()
+    at frame 2250
+        hide()
+}
+with tai_interceptor1
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 1000
+        show()
+    at frame 1090
+        death("deathCannon")
+}
+with tai_interceptor2
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 1000
+        show()
+    at frame 1080
+        death("deathCannon")
+}
+with tai_interceptor3
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 1000
+        show()
+    at frame 1110
+        death("deathCannon")
+}
+with tai_interceptor4
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 1000
+        show()
+}
+with tai_interceptor5
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 1000
+        show()
+    at frame 1270
+        attack("kus_interceptor5")
+    at frame 1350
+        haltAttack()
+}
+with tai_interceptor6
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 1000
+        show()
+}
+with tai_interceptor7
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 1770
+        show()
+    at frame 1951
+        hide()
+}
+with tai_interceptor8
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 1920
+        show()
+    at frame 2360
+        speechEventActor("$2207379", 16, 2)
+    at frame 2761
+        hide()
+}
+with tai_interceptor9
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 1770
+        show()
+    at frame 1951
+        hide()
+}
+with tai_interceptor10
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 1770
+        show()
+    at frame 1951
+        hide()
+}
+with tai_interceptor11
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 1770
+        show()
+    at frame 1951
+        hide()
+}
+with tai_interceptor12
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 1980
+        show()
+    at frame 2430
+        attack("kus_destroyer1")
+    at frame 2520
+        haltAttack()
+    at frame 2761
+        hide()
+}
+with tai_interceptor13
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 1980
+        show()
+    at frame 2430
+        attack("kus_destroyer1")
+    at frame 2550
+        haltAttack()
+    at frame 2761
+        hide()
+}
+with tai_interceptor14
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 1980
+        show()
+    at frame 1990
+        speechEventActor("$2207380", 16, 2)
+    at frame 2520
+        attack("kus_destroyer1")
+    at frame 2580
+        haltAttack()
+    at frame 2761
+        hide()
+}
+with tai_interceptor15
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 500
+        speechEventActor("$2207384", 16, 2)
+    at frame 800
+        attack("kus_ioncannonfrigate3")
+    at frame 930
+        haltAttack()
+    at frame 1050
+        hide()
+}
+with tai_interceptor16
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 800
+        attack("kus_ioncannonfrigate3")
+    at frame 620
+        speechEventActor("$2207385", 16, 2)
+    at frame 820
+    at frame 840
+    at frame 930
+        haltAttack()
+    at frame 1050
+        hide()
+}
+with tai_attackbomber1
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 1830
+        show()
+    at frame 2000
+        hide()
+}
+with tai_attackbomber2
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 1830
+        show()
+    at frame 1900
+        speechEventActor("$2207381", 16, 2)
+    at frame 2000
+        hide()
+}
+with tai_missiledestroyer1
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 1700
+        show()
+    at frame 2710
+        attack("kus_destroyer1")
+    at frame 2750
+        health(0.1)
+    at frame 2900
+        haltAttack()
+    at frame 3100
+    at frame 3120
+        death("deathCannon")
+}
+with tai_missiledestroyer2
+{
+    at frame 0
+        invincible()
+        hide()
+    at frame 2000
+        show()
+        health(0.4)
+    at frame 2090
+        speechEventActor("$2207376", 16, 2)
+    at frame 2300
+        hide()
+    at frame 2620
+        speechEventActor("$2207377", 16, 2)
+}
+with Asteroid11
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid12
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid13
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid14
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid15
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid16
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid17
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid18
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid19
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid110
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid111
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid112
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid113
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid114
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid115
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid116
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid117
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid118
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid119
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid120
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid121
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid122
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid123
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid124
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid125
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid126
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid127
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid128
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid129
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid130
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid131
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid21
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid22
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid23
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid24
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid25
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid26
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid27
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid28
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid29
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid210
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid211
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid212
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid213
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid214
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid215
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid216
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid217
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid218
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid219
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid220
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid221
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid222
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid223
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid224
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid225
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid226
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid227
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid228
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid229
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid230
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid231
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid232
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid233
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid234
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid235
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid236
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid237
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid238
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid239
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid240
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid241
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid242
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid243
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid31
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid32
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid33
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid34
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid35
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid311
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid312
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid313
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid314
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid315
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid316
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid317
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid318
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid319
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid320
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid326
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid327
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid328
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid329
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid330
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid331
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid332
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid335
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid336
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid337
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid338
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid339
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid340
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid342
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid343
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid344
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid345
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid346
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid36
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid37
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid38
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid39
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid310
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid321
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid322
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid323
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid324
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid325
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid333
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid334
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}
+with Asteroid341
+{
+    at frame 0
+        invincible()
+        show()
+    at frame 1140
+        hide()
+}

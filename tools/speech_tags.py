@@ -16,7 +16,7 @@ MOD = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SPEAKERS_TSV = os.path.join(MOD, "tools", "speech_speakers.tsv")
 TAG_BY_BITS = {0x800: "(Pilot)", 0x1000: "(Fleet Command)", 0x2000: "(Tactical Officer)"}
 DEFAULT_TAG = "(Comms)"
-ACTOR_MASK = 0x3FC00
+ACTOR_MASK = 0x3FFC00   # HW1 SpeechEvent.h SPEECH_ACTOR_MASK
 
 
 def call_site_bits():
