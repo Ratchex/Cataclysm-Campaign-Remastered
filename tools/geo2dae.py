@@ -131,11 +131,14 @@ def dock_nodes(points, conv):
             ex_name = name + "Ex"
             entry = (seg(0, along(pos, nrm, far), 60, 250, "Queue") + seg(1, along(pos, nrm, near), 30, 120, "")
                      + seg(2, conv(*pos), 10, 60, "Close"))
-            paths.append(jnode(f"DOCK[{name}]_Fam[{fam}]_Link[{ex_name}]_Flags[{flags}]_MAD[-1]", (0, 0, 0), entry))
+            # Stock HW1 Kushan paths (kus_mothership.hod): MAD 0 (an invalid -1 crashed the level load), empty links,
+            # Exit on the way out, Latch on both ways for collectors.
+            paths.append(jnode(f"DOCK[{name}]_Fam[{fam}]_Link[]_Flags[{flags}]_MAD[0]", (0, 0, 0), entry))
             epos, enrm = docks[exit_lbl] if exit_lbl else (pos, nrm)
             exitp = (seg(0, conv(*epos), 10, 60, "") + seg(1, along(epos, enrm, near), 30, 150, "")
                      + seg(2, along(epos, enrm, far), 60, 300, "Unfocus"))
-            paths.append(jnode(f"DOCK[{ex_name}]_Fam[{fam}]_Link[]_Flags[Exit]_MAD[-1]", (0, 0, 0), exitp))
+            paths.append(jnode(f"DOCK[{ex_name}]_Fam[{fam}]_Link[]_Flags[{(flags + ' Exit').strip()}]_MAD[0]",
+                               (0, 0, 0), exitp))
     if not paths:
         return "", 0
     return jnode("HOLD_DOCK", (0, 0, 0), "".join(paths)), len(paths) // 2
