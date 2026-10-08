@@ -121,6 +121,19 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
   nozzles = .mex Gun "GUN0" (resources) / "Rep0" (repair), HW1 ResCollect.c ASTEROID_HARVEST_RANGE 400.
 
 ## Cutscenes (Phase 0.5, confirmed in game with n01)
+**Checklist for every cutscene** (after n01 lost its unsubtitled chatter and music):
+1. `python tools/nis2hwrm.py <name>` (or `--audit-only` before it is wired in) writes `docs/nis/<name>.md`: every
+   HW1 script event and what became of it (translated / cued / not converted with the reason / no line). Every
+   command must be in nis2hwrm's TRANSLATED or NOT_CONVERTED tables: an unknown one stops the conversion.
+2. Read the report's audio table: every speech line, its speaker, subtitle or not, and the music.
+3. Play the original cutscene (Cataclysm) and the converted one; every line heard in the original must be in the
+   table and heard in game. Anything missing that the report does not list is a converter bug: fix the tables.
+- Unsubtitled speech (blank speech.dat string, 4762 of 5390 Cataclysm phrases) is silent through
+  `speechEventActor` (n01: 4 pilot lines). Those go to `data/nis/cataclysm/<name>_cues.lua` and the runtime plays
+  them with `Sound_SpeechPlay` at their time (cataclysmkas.lua KAS_NisCues, 0.1 s rule; cleared when the NIS ends).
+- `startMusic n` -> `musicStart("cataclysm/music_nn")` (path under data:sound/music/).
+- Speech events with no phrase in Cataclysm's tables (n01 event 347) were silent in Cataclysm too.
+- Cataclysm's `subtitle <n> <ms>` (12 uses) is not decoded yet (no string table found; exe string 0x888e88).
 - HWRM NIS = IFF `FORM NIS ` (layout in tools/nis2hwrm.py docstring). Played with `NISLoad("nis/cataclysm/n01")`
   then `NISPlayFromCoordSys(path, pos, matrix)`; `NISShipStartPosition(path, shipType, -1)` finds the centre ship
   by FOLW object *name* = ship type. Wait with `NISGetAnyPlayingHandle()` / `NISComplete(h)`.

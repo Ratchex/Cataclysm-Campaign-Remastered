@@ -41,7 +41,42 @@ TAIL_FRAMES = 45   # extra time after the HW1 NIS ends, for the fade back in (HW
 NIS_SPEECH_FLAG = 0x20000000
 # HW1 "meshAnimStart <clip>" -> numbered .madstate state (handled in tools/overrides/ship/*/*.madstate)
 NIS_STATES = {"DockOpen": "NIS00", "DockClose": "NIS01"}
+# Cataclysm speech actor bits (NOTES.md; 0x800 = the NIS pilots' chatter, e.g. n01's Workers / Recon)
+SPEAKERS = {0x800: "pilots", 0x1000: "Fleet Command", 0x2000: "Tactical Officer", 0x8000: "other fleets"}
 NIS_STATE_FIRST_FRAME = 5   # earlier state changes are moved here (frame 0 ones were ignored)
+
+# Every HW1 NIS script command is accounted for (docs/nis/<name>.md lists each event and what became of it):
+# translated into the HWRM script, cued (played by the mission runtime at its time, cataclysmkas.lua KAS_NisCues:
+# what HWRM NIS scripts can't do), or listed here with the reason it is not converted. A command in none of these
+# stops the conversion, so nothing is lost without a line in the report.
+NOT_CONVERTED = {
+    "colorScheme": "HWRM ships use their player's team colours",
+    "minimumLODSet": "HWRM picks LODs itself",
+    "motionCueScale": "HW1 camera motion-cue tuning; no HWRM equivalent",
+    "cameraFOV": "converted into each camera's lens (fov_events), not a script command",
+    "globalAmbient": "lighting comes from the level's background in HWRM",
+    "lightAmbient": "lighting comes from the level's background in HWRM",
+    "lightDiffuse": "lighting comes from the level's background in HWRM",
+    "numberLights": "lighting comes from the level's background in HWRM",
+    "remainAtEnd": "the real ships are hidden during the intro instead (KAS_RunAfterIntro)",
+    "subtitle": "TODO: Cataclysm-only command (subtitle <n> <ms>); meaning not decoded (exe string 0x888e88)",
+    "attack": "TODO: NIS ships do not fight yet",
+    "haltAttack": "TODO: NIS ships do not fight yet",
+    "fire": "TODO: NIS ships do not fight yet",
+    "deathDamage": "TODO: NIS ship deaths not converted",
+    "health": "TODO: NIS ship health not converted",
+    "fog": "TODO: NIS fog not converted",
+    "mimic": "TODO: mimic not converted",
+    "ebolts": "TODO: effect not converted",
+    "stretch": "TODO: effect not converted",
+    "repair": "TODO: NIS repair not converted",
+    "openSlipgate": "TODO: slipgate effect not converted",
+    "closeslipgate": "TODO: slipgate effect not converted",
+    "beastEffect": "TODO: effect not converted",
+}
+TRANSLATED = ["fadeSet", "fadeTo", "wideScreenIn", "wideScreenOut", "musicVolume", "speechVolume", "SFXVolume",
+              "hideUniverseToggle", "hide", "show", "meshAnimStart", "startMusic", "fleetSpeechEvent", "speechEvent"]
+COMMANDS = {c.lower(): c for c in TRANSLATED + list(NOT_CONVERTED)}   # spelling used below, by lower case
 HW1_NIS_FOV = 75.0          # NIS.h NIS_DefaultFOV: HW1 field of view is vertical (Camera.c), on a 4:3 screen
 SCREEN_ASPECT = 16 / 9
 
@@ -320,22 +355,24 @@ def object_key(name):
 
 # ----------------------------------------------------------------------------------------------- script
 def speech_lookup():
-    sys.path.insert(0, os.path.join(MOD, "data", "scripts", "scar"))
+    """Speech event -> (string / wav id, duration s, subtitle text) of its first phrase (NIS events have one),
+    from Cataclysm-decomp/out/speech_events_sect.tsv (tools/speechmap.py) as tools/build_speech.py numbers them."""
     events = {}
     base_id = 2200000
-    with open(os.path.join(MOD, "data", "scripts", "scar", "cataclysmspeech.lua"), encoding="latin-1") as f:
-        for line in f:
-            m = re.match(r'KAS_SpeechEvents\["sect(\d+)"\] = \{ (\d+), (\d+), (\d+) \}', line)
-            if m:
-                events[int(m.group(1))] = base_id + int(m.group(4))
+    with open(os.path.join(DECOMP, "out", "speech_events_sect.tsv"), encoding="utf-8") as f:
+        for r in csv.DictReader(f, delimiter="\t", quoting=csv.QUOTE_NONE):
+            ev = int(r["event"])
+            if ev not in events:
+                events[ev] = (base_id + int(r["phrase"]), int(r["duration_ms"]) / 1000, r["subtitle"].strip())
     return events
 
 
 def translate_script(src, objects, nisname, speech, fps, end_frame, cam_events, teleports):
-    """HW1 NIS script -> HWRM NIS script. Returns (text, speech ids used, notes)."""
+    """HW1 NIS script -> HWRM NIS script. Returns (text, speech ids used, runtime cues, report rows).
+    Report rows: (frame, object, HW1 command, what became of it)."""
     lines = [l.split(";")[0].split("//")[0].rstrip() for l in open(src, encoding="latin-1").read().splitlines()]
     lines = [l for l in lines if l.strip() and not l.lstrip().startswith("#")]
-    out_global, out_obj, used, skipped = [], {}, [], {}
+    out_global, out_obj, used, cues, report = [], {}, [], [], []
     cur_obj, cur_time, cur_list = None, None, out_global
     hidden_universe = False
 
@@ -362,6 +399,11 @@ def translate_script(src, objects, nisname, speech, fps, end_frame, cam_events, 
             continue
         m = re.match(r"(\w+)\s*(.*)$", l)
         cmd, args = m.group(1), m.group(2).strip()
+        cmd = COMMANDS.get(cmd.lower(), cmd)               # HW1 matches commands without case (nislet02 "widescreenOut")
+        n_before = len(cur_list)
+
+        def note(what):
+            report.append((cur_time, cur_obj or "", f"{cmd} {args}".strip(), what))
         if cmd == "fadeSet":
             emit(f"fadeSet({float(args.split('%')[0]) / 100:g})")
         elif cmd == "fadeTo":
@@ -395,18 +437,37 @@ def translate_script(src, objects, nisname, speech, fps, end_frame, cam_events, 
             elif clip in NIS_STATES:
                 emit(f'setMADState("{NIS_STATES[clip]}")')
             else:
-                skipped[f"meshAnimStart {clip}"] = skipped.get(f"meshAnimStart {clip}", 0) + 1
-        elif cmd == "fleetSpeechEvent":
-            ev = eval(re.sub(r"[^0-9+ ]", "", args))      # "(343 + 2048 + 536870912)"
-            sid = speech.get(ev & 0x3FF)
-            if sid is None:
-                skipped["fleetSpeechEvent (no line)"] = skipped.get("fleetSpeechEvent (no line)", 0) + 1
+                note("NOT CONVERTED: no NIS_STATES entry for this clip")
                 continue
+        elif cmd == "startMusic":
+            # Cataclysm stream n (tools/build_music.py: data/sound/music/cataclysm/music_nn)
+            emit(f'musicStart("cataclysm/music_{int(args):02d}")')
+        elif cmd in ("fleetSpeechEvent", "speechEvent"):
+            ev = eval(re.sub(r"[^0-9+ ]", "", args))      # "(343 + 2048 + 536870912)"
+            line = speech.get(ev & 0x3FF)
+            if line is None:
+                note(f"NO LINE: Cataclysm's speech tables have no phrase for event {ev & 0x3FF} (silent there too)")
+                continue
+            sid, secs, text = line
             used.append(sid)
-            # HWRM actors (logged in game): 16 Fleet Command, 17 Fleet Intel. Cataclysm 0x1000 = Fleet Command.
-            emit(f'speechEventActor("${sid}", {16 if ev & 0x1000 else 17}, 2)')
+            speaker = SPEAKERS.get(ev & 0x3FC00, f"actor bits {ev & 0x3FC00:#x}")
+            if text:
+                # HWRM actors (logged in game): 16 Fleet Command, 17 Fleet Intel. Cataclysm 0x1000 = Fleet Command.
+                emit(f'speechEventActor("${sid}", {16 if ev & 0x1000 else 17}, 2)')
+                note(f"speech ${sid} ({speaker}, {secs:.1f}s, subtitled): speechEventActor - \"{text[:60]}\"")
+            else:
+                # unsubtitled lines never played through speechEventActor (blank speech.dat string; n01's pilot
+                # chatter): the runtime plays them with Sound_SpeechPlay at this time
+                cues.append((cur_time, "speech", f"data:sound/speech/nis/{nisname}/{sid}"))
+                note(f"speech ${sid} ({speaker}, {secs:.1f}s, no subtitle): CUED Sound_SpeechPlay")
+            continue
+        elif cmd in NOT_CONVERTED:
+            note(("NOT CONVERTED: " if NOT_CONVERTED[cmd].startswith("TODO") else "dropped: ") + NOT_CONVERTED[cmd])
+            continue
         else:
-            skipped[cmd] = skipped.get(cmd, 0) + 1
+            raise SystemExit(f"{src}: unknown NIS command {cmd!r} at frame {cur_time} ({l!r}): add a translation, "
+                             f"a cue or a NOT_CONVERTED reason")
+        note("translated: " + "; ".join(x.strip() for x in cur_list[n_before:]))
     # HWRM interpolates keys at the render frame rate (and snaps them to whole frames), so a one-frame HW1
     # reposition shows as a slide: hide the object for that frame unless the script already hides it.
     for key, jumps in teleports.items():
@@ -436,7 +497,7 @@ def translate_script(src, objects, nisname, speech, fps, end_frame, cam_events, 
         if key == "#drop" or not any(not b.strip().startswith("at frame") for b in body):
             continue
         out += [f"with {key}", "{"] + body + ["}"]
-    return "\n".join(out) + "\n", used, skipped
+    return "\n".join(out) + "\n", used, cues, report
 
 
 # ----------------------------------------------------------------------------------------------- main
@@ -447,6 +508,8 @@ def main():
     ap.add_argument("--placeholder", default="Kus_Scout")
     ap.add_argument("--modules", default="", help="Kuun-Lan modules shown on it (make_modules.py keys, comma "
                                                   "separated: the mission's starting modules)")
+    ap.add_argument("--audit-only", action="store_true",
+                    help="only write docs/nis/<name>.md (cutscenes not converted yet; nothing in data/)")
     a = ap.parse_args()
     src = os.path.join(DECOMP, "extracted", "big", "nis", a.name)
     nis = nisread.read(src + ".nis")
@@ -540,14 +603,27 @@ def main():
             + chunk(b"LEAD", LEAD)
             + chunk(b"FOLW", struct.pack("<I", len(folw)) + b"".join(folw))
             + chunk(b"CMRA", struct.pack("<I", len(cmra)) + b"".join(cmra)))
+    text, used, cues, report = translate_script(src + ".script", objects, a.name, speech_lookup(), fps, nframes + 2,
+                                                cam_events, teleports)
+    write_report(a.name, report, dropped, fps)
+    if a.audit_only:
+        todo = [r for r in report if r[3].startswith(("NOT CONVERTED", "NO LINE"))]
+        print(f"{a.name}: audit only, {len(used)} speech lines ({len(cues)} would be cued), {len(todo)} events not "
+              f"converted: docs/nis/{a.name}.md")
+        return
     out_dir = os.path.join(MOD, "data", "nis", "cataclysm")
     os.makedirs(out_dir, exist_ok=True)
     with open(os.path.join(out_dir, a.name + ".nis"), "wb") as f:
         f.write(b"FORM" + struct.pack(">I", len(body) + 4) + b"NIS " + body)
-
-    text, used, skipped = translate_script(src + ".script", objects, a.name, speech_lookup(), fps, nframes + 2, cam_events, teleports)
     with open(os.path.join(out_dir, a.name + ".script"), "w", encoding="latin-1", newline="\n") as f:
         f.write(text)
+    # runtime cues (cataclysmkas.lua KAS_NisStart loads them): seconds after the NIS starts
+    with open(os.path.join(out_dir, a.name + "_cues.lua"), "w", encoding="latin-1", newline="\n") as f:
+        f.write(f"-- Generated by tools/nis2hwrm.py: what {a.name}'s HWRM script can't play, by the mission runtime\n"
+                f'KAS_NisCues["{a.name}"] = {{\n')
+        for frame, kind, arg in sorted(cues):
+            f.write(f'    {{ {frame / fps:.3f}, "{kind}", "{arg}" }},\n')
+        f.write("}\n")
     sp_dir = os.path.join(MOD, "data", "sound", "speech", "nis", a.name)
     os.makedirs(sp_dir, exist_ok=True)
     for sid in used:
@@ -556,7 +632,32 @@ def main():
             shutil.copyfile(s, os.path.join(sp_dir, f"{sid}.wav"))
     print(f"{a.name}: {nis['length']:.1f}s ({nframes} frames), {len(objects)} objects, {len(cmra)} cameras, "
           f"{len(anim)} channels; dropped {len(dropped)}: {', '.join(sorted(set(re.sub(r'[(][0-9]+[)]', '', d) for d in dropped)))}")
-    print(f"script: {len(used)} speech lines; not translated: {skipped}")
+    todo = [r for r in report if r[3].startswith(("NOT CONVERTED", "NO LINE"))]
+    print(f"script: {len(used)} speech lines ({len(cues)} cued), {len(todo)} events not converted: "
+          f"docs/nis/{a.name}.md")
+
+
+def write_report(name, report, dropped, fps):
+    """docs/nis/<name>.md: every HW1 script event and what became of it, audio first (the checklist to compare
+    against the original cutscene)."""
+    path = os.path.join(MOD, "docs", "nis", name + ".md")
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    audio = [r for r in report if r[2].startswith(("fleetSpeechEvent", "speechEvent", "startMusic", "musicVolume",
+                                                     "speechVolume", "SFXVolume", "subtitle"))]
+    todo = [r for r in report if r[3].startswith(("NOT CONVERTED", "NO LINE"))]
+
+    def table(rows):
+        out = ["| frame | time | object | HW1 | result |", "|---|---|---|---|---|"]
+        for f, obj, cmd, what in sorted(rows, key=lambda r: (r[0] or 0)):
+            out.append(f"| {f} | {(f or 0) / fps:.1f}s | {obj} | `{cmd}` | {what} |")
+        return "\n".join(out)
+    with open(path, "w", encoding="utf-8", newline="\n") as f:
+        f.write(f"# {name}: conversion audit\n\nGenerated by tools/nis2hwrm.py. Check the audio table against the "
+                f"original cutscene (every line heard there must be here and play in game).\n\n"
+                f"## Audio (speech, music, volumes, subtitle cards)\n\n{table(audio)}\n\n"
+                f"## Not converted ({len(todo)})\n\n{table(todo) if todo else 'None.'}\n\n"
+                f"## NIS objects without an HWRM model ({len(dropped)})\n\n"
+                f"{', '.join(sorted(set(dropped))) or 'None.'}\n\n## Every event\n\n{table(report)}\n")
 
 
 if __name__ == "__main__":

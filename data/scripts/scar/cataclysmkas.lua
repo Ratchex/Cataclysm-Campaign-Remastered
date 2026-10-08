@@ -416,6 +416,44 @@ KAS_NisPath = "nis/cataclysm/"
 KAS_NisAvailable = {}                 -- names converted so far
 KAS_NisAvailable["n01"] = 1
 
+-- Cues: what a converted cutscene's HWRM script can't play (unsubtitled speech: speechEventActor stays silent
+-- for a blank subtitle), as { seconds after the start, kind, argument }; generated next to each NIS by
+-- tools/nis2hwrm.py (data/nis/cataclysm/<name>_cues.lua, report in docs/nis/<name>.md).
+KAS_NisCues = {}
+for name, _ in KAS_NisAvailable do
+    dofilepath("data:nis/cataclysm/" .. name .. "_cues.lua")
+end
+
+function KAS_NisCuesStart(name)
+    KAS_NisCueList = KAS_NisCues[name]
+    KAS_NisCueNext = 1
+    KAS_NisCueStart = Universe_GameTime()
+    if KAS_NisCueList and getn(KAS_NisCueList) > 0 then
+        Rule_AddInterval("KAS_NisCueTick", 0.1)
+    end
+end
+
+function KAS_NisCueTick()
+    local l = KAS_NisCueList
+    if l == nil then
+        Rule_Remove("KAS_NisCueTick")
+        return
+    end
+    local t = Universe_GameTime() - KAS_NisCueStart
+    while KAS_NisCueNext <= getn(l) and l[KAS_NisCueNext][1] <= t do
+        local c = l[KAS_NisCueNext]
+        KAS_NisCueNext = KAS_NisCueNext + 1
+        if c[2] == "speech" then
+            Sound_SpeechPlay(c[3])
+        end
+        print("CKAS: NIS cue " .. c[2] .. " " .. c[3] .. " at " .. t .. "s")
+    end
+    if KAS_NisCueNext > getn(l) then
+        KAS_NisCueList = nil
+        Rule_Remove("KAS_NisCueTick")
+    end
+end
+
 function KAS_NisName(number, nislet)
     if nislet then
         if number < 10 then return "nislet0" .. number end
@@ -446,6 +484,7 @@ function KAS_NisStart(name)
         end
     end
     NISPlayFromCoordSys(path, position, nisMatrix)
+    KAS_NisCuesStart(name)
     print("CKAS: playing " .. path .. " at {" .. position[1] .. ", " .. position[2] .. ", " .. position[3] .. "}")
     return 1
 end
@@ -518,6 +557,7 @@ function KAS_EngineTick()
     elseif KAS_NisFinished() then
         local p = KAS_NisPending
         KAS_NisPending = nil
+        KAS_NisCueList = nil              -- ended or skipped: no more cues
         if p.key then KAS_Vars[p.key] = 1 end
         print("CKAS: cutscene complete")
         if p.after then p.after() end
