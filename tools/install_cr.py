@@ -121,6 +121,30 @@ def use_our_events(ship, src, names):
         f.write(text)
 
 
+# Speeds: Cataclysm's .shp maxvelocity converted the way Gearbox converted the matching HW1 class for HWRM (their
+# HWRM mainEngineMaxSpeed / HW1 maxvelocity: kus_scout 490/1000, kus_interceptor 487/875, kus_resourcecollector
+# 110/325). Their setups ran 1.3-1.9x Cataclysm's pace for some ships (user: distances felt shorter than the
+# original). Thrusters keep their ratio to the main engine. Not the Kuun-Lan: it is more agile than HW1's
+# Mothership (user), so it keeps their speed.
+SPEED_CLASS = {"scout": 490 / 1000, "interceptor": 487 / 875, "collector": 110 / 325}
+SPEEDS = {"smt_scout": ("srecon", "scout"), "smt_acolyte": ("sacolyte", "interceptor"),
+          "smt_worker": ("sworker", "collector")}
+
+
+def set_speed(ship, cat, cls):
+    shp = os.path.join(r"C:\Modding\Cataclysm-decomp\extracted\big\race_sect", cat + ".shp")
+    v = next(float(l.split()[1]) for l in open(shp, encoding="latin-1") if l.lower().startswith("maxvelocity"))
+    main = round(v * SPEED_CLASS[cls])
+    path = os.path.join(DATA, "ship", ship, ship + ".ship")
+    text = open(path, encoding="latin-1").read()
+    num = lambda key: eval(re.search(r"NewShipType\.%s\s*=\s*([\d.*]+)" % key, text).group(1))  # e.g. 350*1.4
+    thr = round(main * num("thrusterMaxSpeed") / num("mainEngineMaxSpeed"))
+    text = re.sub(r"(NewShipType\.mainEngineMaxSpeed\s*=\s*)[\d.*]+", r"\g<1>%d" % main, text, count=1)
+    text = re.sub(r"(NewShipType\.thrusterMaxSpeed\s*=\s*)[\d.*]+", r"\g<1>%d" % thr, text, count=1)
+    open(path, "w", encoding="latin-1", newline="").write(text)
+    print(f"  {ship}: speed {main} (thrusters {thr}) from Cataclysm {cat} {v:g}")
+
+
 def use_our_model(ship, ours, joints):
     folder = os.path.join(DATA, "ship", ship)
     shutil.copyfile(os.path.join(BUILD, ours, ours + ".hod"), os.path.join(folder, ship + ".hod"))
@@ -213,6 +237,8 @@ def main():
         use_our_model(ship, ours, joints)
     for ship, (src, names) in OUR_EVENTS.items():
         use_our_events(ship, src, names)
+    for ship, (cat, cls) in SPEEDS.items():
+        set_speed(ship, cat, cls)
     for root, _, files in os.walk(OVERRIDES):   # our own versions of their files (.events / .madstate)
         for fn in files:
             rel = os.path.relpath(os.path.join(root, fn), OVERRIDES)
