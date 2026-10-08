@@ -186,7 +186,7 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
 
 ## Debugging crashes (Phase 1)
 - **Crash on exit with no ErrorLog** = heap corruption (Windows Application log: ntdll, 0xc0000374). HWRM's own
-  handler doesn't catch it. Catch it with Sysinternals ProcDump (`C:\Modding	ools\procdump`): launch, then
+  handler doesn't catch it. Catch it with Sysinternals ProcDump (`C:\Modding\tools\procdump`): launch, then
   `procdump.exe -accepteula -ma -e 1 -f C0000374 <pid> <dir>`; read the stack from the dump (thread context + exe return
   addresses) and decompile them in project_hwrm. Under a debugger the heap is checked harder, so it may trip earlier.
 - **Never let two NIS objects share animation channels** (FOLW channel names): HWRM frees each object's channels at
