@@ -585,6 +585,7 @@ function KAS_EngineTick()
     if KAS_AlliancesDone == nil then
         KAS_AlliancesDone = 1
         KAS_ApplyAlliances()
+        KAS_FreezeSensorArrays()
     end
     if KAS_NisPending == nil then
         local n = KAS_Vars[KAS_Key_PlayNislet]
@@ -734,6 +735,27 @@ function KAS_RestrictStructuralModules()
         i = i + 1
     end
     print("CKAS: structural modules restricted: " .. getn(KAS_StructuralModules))
+end
+
+-- Cataclysm's proximity sensor arrays (Mission01's Kushan picket) are never ordered anywhere and hold position; in
+-- HWRM the stock kus_proximitysensor drifted off with no order given, so non-player sensors lose their engines.
+KAS_SensorTypes = { "kus_proximitysensor", "tai_proximitysensor" }
+function KAS_FreezeSensorArrays()
+    SobGroup_CreateIfNotExist("KAS_Sensors")
+    local p = 1
+    while p < Universe_PlayerCount() do
+        local i = 1
+        while i <= getn(KAS_SensorTypes) do
+            SobGroup_Clear("KAS_Sensors")
+            SobGroup_FilterInclude("KAS_Sensors", "Player_Ships" .. p, "ShipType", KAS_SensorTypes[i])
+            if SobGroup_Count("KAS_Sensors") > 0 then
+                SobGroup_AbilityActivate("KAS_Sensors", AB_Move, 0)
+                print("CKAS: " .. SobGroup_Count("KAS_Sensors") .. " " .. KAS_SensorTypes[i] .. " of player " .. p .. " hold position")
+            end
+            i = i + 1
+        end
+        p = p + 1
+    end
 end
 
 function KAS_StartEngine()
