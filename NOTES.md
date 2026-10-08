@@ -138,6 +138,18 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
 - `tools/speech_speakers.tsv`: known speakers (from the original) pick the portrait where the actor bits mislead
   (n01's Fleet Command line has the pilots' 0x800). Speaker bits: 0x800 pilots (and that line), 0x1000 Fleet
   Command, 0x2000 Tactical Officer, 0x200000 n02's research module, others allied / alien fleets.
+- **NIS endings** (confirmed in game, n01 -> nislet01 -> Mission01): an NIS needs `wideScreenOut` at its end or it
+  never completes (frozen last frame; Gearbox's all end `wideScreenOut(2)`, none fades in). The NIS fade and
+  `Universe_Fade` are one fade, and the NIS drops it when it ends. So an NIS that ends on black (KAS_NisEndsBlack)
+  ends without a fade-in; cues hide the HUD (`UI_SetScreenVisible("NewTaskbar", 0)` before its wideScreenOut,
+  `Camera_SetLetterboxStateNoUI(1, 0)` after), a per-tick rule re-blacks the moment it completes, and the runtime
+  fades the game (and HUD) in 3 s later unless another NIS starts. One frame of space + HUD still shows at each NIS
+  end; `newNIS("nis/...")` (Gearbox's n08 chain) would avoid it where the next NIS is known.
+- HWRM beams stop when their target dies: a target killed while a beam ship (nis2hwrm HALT_DELAY) still fires at
+  it becomes hide() + a `death_generic_fighter` effect object on its path (FOLW kind "effect", `triggerEffect`).
+  Ion cannons charge 2 s before firing (wepn beam anticipation): attacks ordered 2.2 s early, halted 0.25 s late.
+- NIS battle commands as Gearbox's: `attack("obj")`, `haltAttack()`, `death("deathCannon")` (HW1 deathDamage),
+  `health(x)`; every NIS ship `invincible()` (death() still kills it); HW1 `fire` dropped.
 - `startMusic n`: the NIS script's `musicStart("cataclysm/music_nn")` stayed silent; it is a runtime cue
   (`data/nis/cataclysm/<name>_cues.lua`, cataclysmkas.lua KAS_NisCues: `Sound_MusicPlayType`, as kasfMusicPlay;
   0.1 s rule from the NIS start, cleared when it ends). Confirmed in game.
