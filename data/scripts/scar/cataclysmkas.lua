@@ -587,6 +587,10 @@ function KAS_EngineTick()
         KAS_ApplyAlliances()
         KAS_FreezeSensorArrays()
     end
+    if KAS_ROEAt == nil or now >= KAS_ROEAt then
+        KAS_ROEAt = now + 5
+        KAS_TeamsDefensive()
+    end
     if KAS_NisPending == nil then
         local n = KAS_Vars[KAS_Key_PlayNislet]
         if n and n ~= 0 then
@@ -754,6 +758,18 @@ function KAS_FreezeSensorArrays()
             end
             i = i + 1
         end
+        p = p + 1
+    end
+end
+
+-- Ships of KAS teams (the computer, player 1, and the allies, player 2) attack what the mission orders and defend
+-- themselves; HWRM's default offensive ROE sent them after anything they saw (the picket's interceptors and the
+-- flank bombers / ion frigates ended up in the capital ship battle, which Mission01's dialogue keeps apart).
+-- Defensive ROE (1) on every non-player ship, again every 5 s for ships that arrive later.
+function KAS_TeamsDefensive()
+    local p = 1
+    while p < Universe_PlayerCount() do
+        SobGroup_SetROE("Player_Ships" .. p, 1)
         p = p + 1
     end
 end
