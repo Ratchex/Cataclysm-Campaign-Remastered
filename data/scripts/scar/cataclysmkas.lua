@@ -587,10 +587,6 @@ function KAS_EngineTick()
         KAS_ApplyAlliances()
         KAS_FreezeSensorArrays()
     end
-    if KAS_WatchTeams and (KAS_WatchAt == nil or now >= KAS_WatchAt) then
-        KAS_WatchAt = now + 10
-        KAS_LogTeams()
-    end
     KAS_PatrolTick()
     if KAS_ROEAt == nil or now >= KAS_ROEAt then
         KAS_ROEAt = now + 5
@@ -771,22 +767,6 @@ end
 -- themselves; HWRM's default offensive ROE sent them after anything they saw (the picket's interceptors and the
 -- flank bombers / ion frigates ended up in the capital ship battle, which Mission01's dialogue keeps apart).
 -- Defensive ROE (1) on every non-player ship, again every 5 s for ships that arrive later.
--- Debug trace: position, order and distance to a point of chosen teams every 10 s (KAS_WatchTeams = { {team, point}, ... })
-KAS_WatchTeams = { { "KushanProxDefend1", { -24568, -2087, -7384 } }, { "KushanProxDefend2", { -24568, -2087, -7384 } } }   -- ProxPatrol_0
-function KAS_LogTeams()
-    local i = 1
-    while i <= getn(KAS_WatchTeams) do
-        local t, pt = KAS_WatchTeams[i][1], KAS_WatchTeams[i][2]
-        if SobGroup_Count(t) > 0 then
-            local a, b = SobGroup_GetPosition(t), pt
-            local d = floor(sqrt((a[1]-b[1])*(a[1]-b[1]) + (a[2]-b[2])*(a[2]-b[2]) + (a[3]-b[3])*(a[3]-b[3])))
-            print(format("CKAS watch %s: %d ships at %d %d %d, order %d, %d from %s", t, SobGroup_Count(t),
-                floor(a[1]), floor(a[2]), floor(a[3]), SobGroup_GetCurrentOrder(t), d, "ProxPatrol_0"))
-        end
-        i = i + 1
-    end
-end
-
 function KAS_TeamsDefensive()
     local p = 1
     while p < Universe_PlayerCount() do

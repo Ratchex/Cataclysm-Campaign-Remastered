@@ -57,6 +57,14 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
   `usedefaultpersist`. To find in the decompile (Phase 0.6/0.7).
 
 ## HWRM Lua (learned in Phase 0.7)
+- **Switch the skirmish AI off for every computer player** (`CPU_Enable(p, 0)`, as Gearbox's KAS_CPUPlayerInit):
+  left on, it commands the KAS teams' ships too (unscripted attack-moves: Mission01's picket wings crossed the map,
+  flank fights drifted into the main battle). The runtime does it in KAS_StartEngine. Confirmed in game.
+- `SobGroup_FollowPath` is an attack-move (`COMMAND_AttackMove` = 20; `COMMAND_Attack` = 2): kasfPatrolPath is plain
+  point-to-point moves on the level path instead (mission2level writes `m<NN>_paths.lua`).
+- Cataclysm's kasfTeamSwitchPlayerOwner hands Kushan teams to the human; here they stay on allied player 2
+  (out of the player's control). 0x495560/0x495620 = kasfShipsSelectEnemy/Friendly (human side / computer).
+  kasfUniversePause freezes every ship (speed 0, no attacks) while KAS runs on (Fleet Intel briefings).
 - HWRM refuses to redefine a global function ("Cannot overwrite function X"); the later definition is ignored.
   So generated stubs must not define what `cataclysmkas.lua` implements (`make_kas_stubs.py` skips them).
 - Lua 4 has no block comments: `--[[note]]` comments out the rest of the line. Generated code puts notes only at
