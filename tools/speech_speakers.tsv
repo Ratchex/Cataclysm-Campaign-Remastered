@@ -1,5 +1,5 @@
-id	tag	heard
-2207021	(Worker)	n01 5.7 s (user, from the original)
-2207022	(Fleet Command)	n01 28.7 s (user, from the original)
-2207023	(Worker)	n01 30.3 s (user, from the original)
-2207374	(Recon)	n01 41 s (user, from the original)
+id	speaker	heard
+2207021	Worker	n01 5.7 s (user, from the original)
+2207022	Worker	n01 28.7 s (user, from the original)
+2207023	Fleet Command	n01 30.3 s (user, from the original)
+2207374	Recon	n01 41 s (user, from the original)

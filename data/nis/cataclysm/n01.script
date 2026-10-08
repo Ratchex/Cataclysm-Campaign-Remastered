@@ -68,9 +68,9 @@ with smt_scout1
     at frame 170
         speechEventActor("$2207021", 17, 2)
     at frame 860
-        speechEventActor("$2207022", 16, 2)
+        speechEventActor("$2207022", 17, 2)
     at frame 910
-        speechEventActor("$2207023", 17, 2)
+        speechEventActor("$2207023", 16, 2)
     at frame 950
         show()
     at frame 1230

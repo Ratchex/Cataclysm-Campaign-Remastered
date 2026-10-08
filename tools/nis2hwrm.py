@@ -355,11 +355,11 @@ def object_key(name):
 
 # ----------------------------------------------------------------------------------------------- script
 def speech_lookup():
-    """Speech event -> (string / wav id, duration s, subtitle, tagged) of its first phrase (NIS events have one),
+    """Speech event -> (string / wav id, duration s, subtitle, speaker) of its first phrase (NIS events have one),
     from Cataclysm-decomp/out/speech_events_sect.tsv (tools/speechmap.py) as tools/build_speech.py numbers them;
-    unsubtitled lines carry their speaker tag (tools/speech_tags.py, also in speech.dat)."""
+    speaker = tools/speech_speakers.tsv's, else None. Unsubtitled lines have speech_tags.INVISIBLE in speech.dat."""
     import speech_tags
-    tagger = speech_tags.Tagger()
+    speakers = speech_tags.known_speakers()
     events = {}
     base_id = 2200000
     with open(os.path.join(DECOMP, "out", "speech_events_sect.tsv"), encoding="utf-8") as f:
@@ -367,8 +367,7 @@ def speech_lookup():
             ev = int(r["event"])
             if ev not in events:
                 sid, text = base_id + int(r["phrase"]), r["subtitle"].strip()
-                tag = None if text else tagger.tag(ev, sid)
-                events[ev] = (sid, int(r["duration_ms"]) / 1000, text or tag or "", tag is not None)
+                events[ev] = (sid, int(r["duration_ms"]) / 1000, text, speakers.get(sid))
     return events
 
 
@@ -468,18 +467,18 @@ def translate_script(src, objects, nisname, speech, fps, end_frame, cam_events, 
             if line is None:
                 note(f"NO LINE: Cataclysm's speech tables have no phrase for event {ev & 0x3FF} (silent there too)")
                 continue
-            sid, secs, text, tagged = line
+            sid, secs, text, known = line
             used.append(sid)
             speaker = SPEAKERS.get(ev & 0x3FFC00, f"actor bits {ev & 0x3FFC00:#x}")
-            if not text:
-                raise SystemExit(f"{src}: speech ${sid} has no subtitle and no speaker tag (it would play nothing): "
-                                 f"rerun tools/build_speech.py")
             # HWRM actors (logged in game): 16 Fleet Command, 17 Fleet Intel. Cataclysm 0x1000 = Fleet Command; a
             # known speaker (tools/speech_speakers.tsv) overrides the bits (n01's Fleet Command line has 0x800)
-            fc = text == "(Fleet Command)" if tagged else ev & 0x1000
+            fc = known == "Fleet Command" if known else ev & 0x1000
             emit(f'speechEventActor("${sid}", {16 if fc else 17}, 2)')
-            kind = "unsubtitled in Cataclysm, speaker tag" if tagged else "subtitled"
-            note(f"speech ${sid} ({speaker}, {secs:.1f}s, {kind}): speechEventActor - \"{text[:60]}\"")
+            who = f", {known}" if known else ""
+            if text:
+                note(f"speech ${sid} ({speaker}{who}, {secs:.1f}s, subtitled): speechEventActor - \"{text[:60]}\"")
+            else:
+                note(f"speech ${sid} ({speaker}{who}, {secs:.1f}s, unsubtitled: invisible subtitle): speechEventActor")
             continue
         elif cmd in NOT_CONVERTED:
             note(("NOT CONVERTED: " if NOT_CONVERTED[cmd].startswith("TODO") else "dropped: ") + NOT_CONVERTED[cmd])

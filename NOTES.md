@@ -130,11 +130,14 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
    table and heard in game. Anything missing that the report does not list is a converter bug: fix the tables.
 - **A speech line with a blank subtitle plays nothing** (confirmed in game: `speechEventActor` in NIS, and
   `Subtitle_AddSkippable` in missions returns 0). `Sound_SpeechPlay` stayed silent too, in every path form tried
-  ("speech:" is not an alias for it). Fix: speech.dat gets a speaker tag for every unsubtitled line a mission or
-  cutscene plays (tools/speech_tags.py; tools/build_speech.py writes it): `tools/speech_speakers.tsv` for known
-  speakers ("(Recon)"), else from the actor bits it is played with: 0x800 "(Pilot)", 0x1000 "(Fleet Command)",
-  0x2000 "(Tactical Officer)", others "(Comms)". 314 phrases; the user chose visible tags. A Latin-1 no-break
-  space shows as "?". nis2hwrm stops if a line it emits would still be blank.
+  ("speech:" is not an alias for it). Fix: every unsubtitled phrase (4762) gets the subtitle `<c=ffffff></c>`
+  (tools/speech_tags.py INVISIBLE, written by tools/build_speech.py): empty colour tags count as text but draw
+  nothing, so the line plays with the speaker's portrait and no subtitle, as in Cataclysm. Tested in game on
+  nislet01's 11 lines: `<c=000000> </c>` works too; a Latin-1 or UTF-8 no-break space, soft hyphen, zero-width
+  space, DEL, `\n`, two spaces and a black "." all show something.
+- `tools/speech_speakers.tsv`: known speakers (from the original) pick the portrait where the actor bits mislead
+  (n01's Fleet Command line has the pilots' 0x800). Speaker bits: 0x800 pilots (and that line), 0x1000 Fleet
+  Command, 0x2000 Tactical Officer, 0x200000 n02's research module, others allied / alien fleets.
 - `startMusic n`: the NIS script's `musicStart("cataclysm/music_nn")` stayed silent; it is a runtime cue
   (`data/nis/cataclysm/<name>_cues.lua`, cataclysmkas.lua KAS_NisCues: `Sound_MusicPlayType`, as kasfMusicPlay;
   0.1 s rule from the NIS start, cleared when it ends). Confirmed in game.
