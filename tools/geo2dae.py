@@ -69,57 +69,60 @@ def main():
     ap.add_argument("name")
     ap.add_argument("--scale", type=float, default=0.35)
     ap.add_argument("--no-hodor", action="store_true")
+    ap.add_argument("--merge", nargs="*", default=[],
+                    help="more .geo files baked into the same mesh (Kuun-Lan modules share the core's frame)")
     a = ap.parse_args()
     os.makedirs(a.out_dir, exist_ok=True)
     rel = os.path.relpath(os.path.dirname(a.geo), os.path.join(DECOMP, "extracted", "big"))
-    png_dir = os.path.join(DECOMP, "extracted", "textures", rel)
-
-    b, ver, mats, objs = geo2obj.parse(a.geo)
     s = a.scale
     conv = lambda x, y, z: (-y * s, x * s, z * s)
     convn = lambda x, y, z: (-y, x, z)
 
     # Group triangles by texture (materials sharing a texture share one HWRM material).
-    groups = {}   # key -> list of (positions[3], normals[3], uvs[3])
+    groups = {}   # key -> {"mat", "png_dir", "tris": [(positions[3], normals[3], uvs[3])]}
     flipped = total = 0
-    cache = {}
-    for i, o in enumerate(objs):
-        W = geo2obj.world(objs, i, cache)
-        f = struct.unpack_from(geo2obj.OBJ.format, b, 68 + i * geo2obj.OBJ.size)
-        p_norm = f[10]
-        verts = [struct.unpack_from("<fffi", b, o["pV"] + v * 16) for v in range(o["nV"])]
-        for p in range(o["nP"]):
-            ifn, i0, i1, i2, m, s0, t0, s1, t1, s2, t2, _ = geo2obj.POLY.unpack_from(b, o["pP"] + p * geo2obj.POLY.size)
-            pos, nrm = [], []
-            for vi in (i0, i1, i2):
-                x, y, z, ivn = verts[vi]
-                pos.append(geo2obj.xform(W, x, y, z))
-                nx, ny, nz = struct.unpack_from("<fff", b, p_norm + ivn * 16)
-                wx, wy, wz = (W[0] * nx + W[4] * ny + W[8] * nz, W[1] * nx + W[5] * ny + W[9] * nz,
-                              W[2] * nx + W[6] * ny + W[10] * nz)
-                nrm.append((wx, wy, wz))
-            uv = [(s0, 1 - t0), (s1, 1 - t1), (s2, 1 - t2)]
-            # Make the winding counter-clockwise around the stored face normal (Collada front faces).
-            fx, fy, fz = struct.unpack_from("<fff", b, p_norm + ifn * 16)
-            fw = (W[0] * fx + W[4] * fy + W[8] * fz, W[1] * fx + W[5] * fy + W[9] * fz, W[2] * fx + W[6] * fy + W[10] * fz)
-            e1 = [pos[1][k] - pos[0][k] for k in range(3)]
-            e2 = [pos[2][k] - pos[0][k] for k in range(3)]
-            cr = (e1[1] * e2[2] - e1[2] * e2[1], e1[2] * e2[0] - e1[0] * e2[2], e1[0] * e2[1] - e1[1] * e2[0])
-            total += 1
-            if sum(cr[k] * fw[k] for k in range(3)) < 0:
-                flipped += 1
-                pos, nrm, uv = pos[::-1], nrm[::-1], uv[::-1]
-            mat = mats[m] if m < len(mats) else {"texture": None, "diffuse": 0x808080}
-            key = (mat["texture"] or "").lower() or "col%06x" % (mat["diffuse"] & 0xFFFFFF)
-            groups.setdefault(key, {"mat": mat, "tris": []})["tris"].append(
-                ([conv(*q) for q in pos], [convn(*q) for q in nrm], uv))
+    for geo in [a.geo] + a.merge:
+        b, ver, mats, objs = geo2obj.parse(geo)
+        png_dir = os.path.join(DECOMP, "extracted", "textures",
+                               os.path.relpath(os.path.dirname(geo), os.path.join(DECOMP, "extracted", "big")))
+        cache = {}
+        for i, o in enumerate(objs):
+            W = geo2obj.world(objs, i, cache)
+            f = struct.unpack_from(geo2obj.OBJ.format, b, 68 + i * geo2obj.OBJ.size)
+            p_norm = f[10]
+            verts = [struct.unpack_from("<fffi", b, o["pV"] + v * 16) for v in range(o["nV"])]
+            for p in range(o["nP"]):
+                ifn, i0, i1, i2, m, s0, t0, s1, t1, s2, t2, _ = geo2obj.POLY.unpack_from(b, o["pP"] + p * geo2obj.POLY.size)
+                pos, nrm = [], []
+                for vi in (i0, i1, i2):
+                    x, y, z, ivn = verts[vi]
+                    pos.append(geo2obj.xform(W, x, y, z))
+                    nx, ny, nz = struct.unpack_from("<fff", b, p_norm + ivn * 16)
+                    wx, wy, wz = (W[0] * nx + W[4] * ny + W[8] * nz, W[1] * nx + W[5] * ny + W[9] * nz,
+                                  W[2] * nx + W[6] * ny + W[10] * nz)
+                    nrm.append((wx, wy, wz))
+                uv = [(s0, 1 - t0), (s1, 1 - t1), (s2, 1 - t2)]
+                # Make the winding counter-clockwise around the stored face normal (Collada front faces).
+                fx, fy, fz = struct.unpack_from("<fff", b, p_norm + ifn * 16)
+                fw = (W[0] * fx + W[4] * fy + W[8] * fz, W[1] * fx + W[5] * fy + W[9] * fz, W[2] * fx + W[6] * fy + W[10] * fz)
+                e1 = [pos[1][k] - pos[0][k] for k in range(3)]
+                e2 = [pos[2][k] - pos[0][k] for k in range(3)]
+                cr = (e1[1] * e2[2] - e1[2] * e2[1], e1[2] * e2[0] - e1[0] * e2[2], e1[0] * e2[1] - e1[1] * e2[0])
+                total += 1
+                if sum(cr[k] * fw[k] for k in range(3)) < 0:
+                    flipped += 1
+                    pos, nrm, uv = pos[::-1], nrm[::-1], uv[::-1]
+                mat = mats[m] if m < len(mats) else {"texture": None, "diffuse": 0x808080}
+                key = (mat["texture"] or "").lower() or "col%06x" % (mat["diffuse"] & 0xFFFFFF)
+                groups.setdefault(key, {"mat": mat, "png_dir": png_dir, "tris": []})["tris"].append(
+                    ([conv(*q) for q in pos], [convn(*q) for q in nrm], uv))
 
     images, materials, effects, geoms, nodes = [], [], [], [], []
     for gi, (key, g) in enumerate(sorted(groups.items())):
         d = g["mat"]["diffuse"]
         colour = (d & 0xFF, d >> 8 & 0xFF, d >> 16 & 0xFF)
         base = f"{a.name}_{key}"
-        tga = write_textures(png_dir, g["mat"]["texture"], a.out_dir, base, colour)
+        tga = write_textures(g["png_dir"], g["mat"]["texture"], a.out_dir, base, colour)
         img = f"IMG[{base}_DIFF]"   # RODOH's layout: id IMG[x]-image, name IMG[x]_FMT[..]; HODOR crashes otherwise
         mname = f"MAT[{key}]_SHD[ship]"
         images.append(f'<image id="{img}-image" name="{img}_FMT[DXT1]"><init_from>{tga}</init_from></image>')
