@@ -4,7 +4,7 @@ Last updated 2026-10-08. Read this first, then `C:\Modding\Cataclysm-decomp\PORT
 `NOTES.md` (HWRM engine rules learned in game) and `C:\Modding\Cataclysm-decomp\MODLOG.md` (reverse-engineering
 findings).
 
-## RESUME HERE (session of 2026-10-08, last code commit c2b2041)
+## RESUME HERE (session of 2026-10-08, last code commit 9dbac5c)
 User's direction: set up each mission's units as we reach that mission. Current goal: the Kuun-Lan fully working
 (side docks + every module as an HW2 subsystem, Cataclysm Remastered's Kuun-Lan as the template), then the
 Worker's leg / resource-harvest animations and effects.
@@ -29,15 +29,14 @@ restricted 1 s after the starting modules exist (KAS_StructuralModules). Then, b
 not yet tested in game): Command Center and Resource Processing are part of the core model, not modules (on the
 Kuun-Lan in every mission; their Cataclysm types map to nothing in shipmap.tsv); Lower Engines and Lower Spine
 stay separate modules (the user chose not to merge them: Cataclysm loses the spine at Mission 4, the engines at 5).
-To check next test: the core shows the Command Center and Resource Processing; Mission 1 starts with 5 modules;
-Workers still unload at the core.
+Confirmed in game: the core shows them, Mission 1 starts with 5 modules (HwRM.log "5 modules", 4 restricted), Workers
+unload at the core. Then (9dbac5c, confirmed in game: Acolytes dock / launch without passing through the Hangar,
+Workers unaffected): the Hangar is a ~480-unit box under the core with the DB points inside, and the paths' first
+waypoint (~315 out) was at its corner, so ships flew through it; fighter / corvette paths now start from an outer
+waypoint (geo2dae.py OUTER_APPROACH: 2400 / 2800 HW1 units out) and launches leave all the way out.
 
 To fix next, in order:
-1. **Acolytes dock/undock through the side of the Hangar.** The docking-bay paths (DBSMALLIN*/OUT*, DBMEDIN*/OUT*)
-   are still geo2dae's straight stock-style paths. Do as for Workers: borrow Cataclysm Remastered's fighter/corvette
-   paths (their smt_ms.hod: path1/path2 fighter, path10/path11 corvette, path7 frigate; read with
-   `geo2dae.read_hod_docks`) and anchor them on our DB points (generalise `borrowed_dock_nodes` beyond "Utility").
-2. Then the Worker's leg / harvest animations and effects (Cataclysm sworker objects Jackbase, Jackhamr, Blade(1-3),
+1. The Worker's leg / harvest animations and effects (Cataclysm sworker objects Jackbase, Jackhamr, Blade(1-3),
    DockClmp(1-4); their smt_worker has .mad/.madstate to borrow from).
 Open, lower priority: Support units (SU); Siege Cannon weapon; how many Support modules each mission starts with
 (1 for now); losing engine modules should slow the Kuun-Lan; n01 `startMusic` cue; hyperspace exit (`K_497290`).
