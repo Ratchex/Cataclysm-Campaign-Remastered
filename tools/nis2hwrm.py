@@ -41,6 +41,7 @@ TAIL_FRAMES = 45   # extra time after the HW1 NIS ends, for the fade back in (HW
 NIS_SPEECH_FLAG = 0x20000000
 # HW1 "meshAnimStart <clip>" -> numbered .madstate state (handled in tools/overrides/ship/*/*.madstate)
 NIS_STATES = {"DockOpen": "NIS00", "DockClose": "NIS01"}
+NIS_STATE_FIRST_FRAME = 5   # earlier state changes are moved here (frame 0 ones were ignored)
 HW1_NIS_FOV = 75.0          # NIS.h NIS_DefaultFOV: HW1 field of view is vertical (Camera.c), on a 4:3 screen
 SCREEN_ASPECT = 16 / 9
 
@@ -385,7 +386,13 @@ def translate_script(src, objects, nisname, speech, fps, end_frame, cam_events, 
             # as in mods' madstates; "NIS_DockOpen" did nothing in game): NIS_STATES maps the clip to one, whose
             # <SHIP>_NISnn_OnSet (our .madstate overrides, tools/overrides) starts the converted clip (mad2hwrm.py)
             clip = args.strip()
-            if clip in NIS_STATES:
+            if clip in NIS_STATES and cur_time < NIS_STATE_FIRST_FRAME:
+                # set at frame 0 it did nothing in game (n01 Worker 2): a few frames in (later commands of this
+                # key follow it there)
+                cur_time = NIS_STATE_FIRST_FRAME
+                cur_list.append(f"    at frame {cur_time}")
+                emit(f'setMADState("{NIS_STATES[clip]}")')
+            elif clip in NIS_STATES:
                 emit(f'setMADState("{NIS_STATES[clip]}")')
             else:
                 skipped[f"meshAnimStart {clip}"] = skipped.get(f"meshAnimStart {clip}", 0) + 1

@@ -114,6 +114,7 @@ with smt_worker2
 {
     at frame 0
         show()
+    at frame 5
         setMADState("NIS00")
     at frame 960
         setMADState("NIS01")
