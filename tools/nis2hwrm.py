@@ -35,9 +35,35 @@ import nisread  # noqa: E402
 SCALE = 0.35
 TAIL_FRAMES = 45   # extra time after the HW1 NIS ends, for the fade back in (HW1's engine did that itself)
 NIS_SPEECH_FLAG = 0x20000000
-# Lens record Gearbox writes for every camera (52 bytes after the eye name; 21.8 / 31.9 / 24 / near 3 / far 50000).
-CAMERA_LENS = bytes.fromhex("000000000000000000000000000000c0cccc354080b8ab5791ed3f40000000000000384000000000000008"
-                            "4000000000006ae840")
+HW1_NIS_FOV = 75.0          # NIS.h NIS_DefaultFOV: HW1 field of view is vertical (Camera.c), on a 4:3 screen
+SCREEN_ASPECT = 16 / 9
+
+
+def camera_lens(hw1_fov):
+    """CMRA lens record after the eye name: u32 0, then doubles (0, 21.8, 31.928, 24, near 3, far 50000) in
+    Gearbox's files. Experiment (Phase 0.5): fields 1/2 taken as vertical/horizontal FOV in degrees, set so the
+    horizontal view matches HW1's 4:3 one on a 16:9 screen."""
+    h = 2 * math.degrees(math.atan(math.tan(math.radians(hw1_fov / 2)) * 4 / 3))
+    v = 2 * math.degrees(math.atan(math.tan(math.radians(h / 2)) / SCREEN_ASPECT))
+    return struct.pack("<I6d", 0, 0.0, v, h, 24.0, 3.0, 50000.0)
+
+
+def fov_events(script):
+    """[(frame, fov)] from the HW1 script's global cameraFOV commands."""
+    ev, frame, in_obj = [(0, HW1_NIS_FOV)], 0, False
+    for l in open(script, encoding="latin-1").read().splitlines():
+        l = l.split(";")[0].strip()
+        if l.startswith("with "):
+            in_obj = True
+        elif l == "}":
+            in_obj = False
+        m = re.match(r"at\s+frame\s+(\d+)", l)
+        if m:
+            frame = int(m.group(1))
+        m = re.match(r"cameraFOV\s+([\d.]+)", l)
+        if m and not in_obj:
+            ev.append((frame, float(m.group(1))))
+    return ev
 LEAD = struct.pack("<II", 1, 3) + b"HW1" + bytes(76) + b" ZYX"
 
 
@@ -407,6 +433,7 @@ def main():
     # One HWRM camera per HW1 shot, switched with cameraCut() like Gearbox's scripts: HWRM interpolates camera
     # keys at the render frame rate, so a cut inside one camera path shows in-between frames.
     cmra, cam_events = [], []
+    fovs = fov_events(src + ".script")
     order = ("translateX", "translateY", "translateZ", "rotateX", "rotateY", "rotateZ")
     for c in nis["cameras"]:
         bounds = [0.0] + [t for t in camera_cuts(c) if t < nis["length"]] + [nis["length"] + TAIL_FRAMES / fps]
@@ -426,7 +453,10 @@ def main():
             # The eye is also a FOLW object of kind "camera" (Gearbox); without it the engine has a NULL camera.
             folw.append(lstr(eye) + lstr("HW1") + lstr("camera") + lstr("") + b"".join(lstr(f"{eye}_{c_}") for c_ in order)
                         + struct.pack("<6d", *(chans[c_][0] for c_ in order)) + b" ZYX")
-            cmra.append(lstr(cam) + lstr(eye) + CAMERA_LENS)
+            fov = [v for f, v in fovs if f <= f0][-1]
+            cmra.append(lstr(cam) + lstr(eye) + camera_lens(fov))
+            if fov != HW1_NIS_FOV:
+                print(f"  {cam} (frame {f0}): HW1 FOV {fov}")
             cam_events.append((f0, cam))
         break                                              # HW1 NIS files have one camera path
     print(f"  cameras: {len(cmra)} shots")
