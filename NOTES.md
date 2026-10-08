@@ -185,6 +185,14 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
   buoys, colour schemes, FOV changes inside a shot, Kuun-Lan mesh animations (DockOpen/DockClose; Worker ones are), remainAtEnd (the real ships are hidden during the intro instead; Gearbox keeps the NIS ships).
 
 ## Debugging crashes (Phase 1)
+- **Crash on exit with no ErrorLog** = heap corruption (Windows Application log: ntdll, 0xc0000374). HWRM's own
+  handler doesn't catch it. Catch it with Sysinternals ProcDump (`C:\Modding	ools\procdump`): launch, then
+  `procdump.exe -accepteula -ma -e 1 -f C0000374 <pid> <dir>`; read the stack from the dump (thread context + exe return
+  addresses) and decompile them in project_hwrm. Under a debugger the heap is checked harder, so it may trip earlier.
+- **Never let two NIS objects share animation channels** (FOLW channel names): HWRM frees each object's channels at
+  NIS end (MotionNode / MotionFollower) -> double free -> every exit to the menu crashed. nis2hwrm.py gives every
+  object its own copies (own_channels).
+- Ship .mad files must drive the model's own joints: Cataclysm Remastered's .mad on our models is not installed.
 - Every crash writes `Bin/Release/<date>_ErrorLog.txt` (+ minidumps): faulting address and stack. The exe is loaded
   at 0x00da0000 here; its Ghidra image base is 0x400000 (project `Cataclysm-decomp/project_hwrm`, copy of the exe;
   `scripts/DecompileAt.java`). Source file/line strings in the exe name the subsystem (e.g. sctobjectload.cpp).
