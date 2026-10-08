@@ -33,6 +33,22 @@ from collections import Counter, OrderedDict
 SCALE, RADIUS_SCALE, OUTER = 0.35, 0.175, 1.2
 
 
+# Camera on the player's hyperspace arrival (cataclysmkas.lua K_498230, Camera_UseCameraPoint): in the frame of the
+# ship at StartPointPlayer (HWRM: +Z forward, +X port, +Y up; the Kuun-Lan core runs z -434..697), below and off
+# its port bow, looking up at the bow (user's request). Level addCamera(name, target, eye).
+ARRIVAL_TARGET = (80.0, 0.0, 500.0)
+ARRIVAL_EYE = (800.0, -550.0, 1300.0)
+
+
+def arrival_camera(p, rot):
+    import math
+    t = math.radians(rot[1])                      # yaw about Y (level rotation in degrees)
+    def world(v):
+        x, y, z = v
+        return (p[0] + x * math.cos(t) + z * math.sin(t), p[1] + y, p[2] - x * math.sin(t) + z * math.cos(t))
+    return world(ARRIVAL_TARGET), world(ARRIVAL_EYE)
+
+
 def pos(x, y, z):
     return (-SCALE * x, SCALE * z, SCALE * y)
 
@@ -157,6 +173,9 @@ class Level:
             L.append(f'    addAxisAlignBox("{name}", {vec(p)}, {fmt(size)})')
         for name, p, rot in self.points:
             L.append(f'    addPoint("{name}", {vec(p)}, {vec(rot)})')
+            if name == "StartPointPlayer":
+                target, eye = arrival_camera(p, rot)
+                L.append(f'    addCamera("KAS_ArrivalCamera", {vec(target)}, {vec(eye)})')
         for name, pts in self.paths.items():
             pts.sort()
             for i, p, _ in pts:

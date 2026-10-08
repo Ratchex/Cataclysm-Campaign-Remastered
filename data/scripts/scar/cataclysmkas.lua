@@ -541,9 +541,11 @@ function KAS_RunAfterIntro(name, start)
         -- The intro has its own copies of the player's ships (HW1 played it before the mission's ships existed):
         -- hide the real ones until it ends. (Gearbox keeps the NIS ships instead with remainAtEnd; later.)
         KAS_IntroStart = start
+        KAS_FleetCapture()
         KAS_NisPlay(name, nil, KAS_IntroDone)  -- first: it centres on the Kuun-Lan, despawned just after
         if KAS_FleetAwaitHyperspace() == nil then KAS_IntroHidden = 1 SobGroup_SetHidden("Player_Ships0", 1) end
     else
+        KAS_FleetCapture()
         KAS_FleetAwaitHyperspace()
         start()
     end
@@ -630,13 +632,18 @@ end
 -- with the small ships docked and launches them once out of hyperspace (user: "warp in and undock"). Until then the
 -- fleet is out of the universe: docked and despawned at mission start (KAS_FleetAwaitHyperspace), as Gearbox's
 -- kasTeamHyperspaceOut does at frame 0, and brought in with SobGroup_HyperspaceTo as their kasTeamHyperspaceIn.
-function KAS_FleetAwaitHyperspace()
+-- The player's real fleet, taken before any NIS starts: an NIS's ships belong to the player too (n01's Kuun-Lan
+-- copy was despawned and its Recon / Workers docked away when this ran after it started)
+function KAS_FleetCapture()
     SobGroup_CreateIfNotExist("KAS_ArrivalMS")
     K_498790("KAS_ArrivalMS")
-    if SobGroup_Count("KAS_ArrivalMS") == 0 then return nil end
     SobGroup_CreateIfNotExist("KAS_ArrivalDocked")
     SobGroup_Clear("KAS_ArrivalDocked")
     SobGroup_FillSubtract("KAS_ArrivalDocked", "Player_Ships0", "KAS_ArrivalMS")
+end
+
+function KAS_FleetAwaitHyperspace()
+    if SobGroup_Count("KAS_ArrivalMS") == 0 then return nil end
     SobGroup_DockSobGroupInstant("KAS_ArrivalDocked", "KAS_ArrivalMS")
     SobGroup_Despawn("KAS_ArrivalMS")
     KAS_FleetWaiting = 1
@@ -652,7 +659,7 @@ function K_498230()
     KAS_FleetWaiting = nil
     SobGroup_HyperspaceTo("KAS_ArrivalMS", "StartPointPlayer")
     SobGroup_SetHidden("KAS_ArrivalMS", 0)
-    Camera_FocusSobGroupWithBuffer("KAS_ArrivalMS", 1000, 10, 0)   -- Gearbox's hyperspace focus on the mothership
+    Camera_UseCameraPoint("KAS_ArrivalCamera")    -- mission2level.py: below the port bow, looking up
     KAS_ArrivalStarted = Universe_GameTime()
     Rule_AddInterval("KAS_ArrivalWatch", 0.5)
     print("CKAS: fleet hyperspacing in at StartPointPlayer")
@@ -666,7 +673,8 @@ function KAS_ArrivalWatch()
     Rule_Remove("KAS_ArrivalWatch")
     SobGroup_Launch("KAS_ArrivalDocked", "KAS_ArrivalMS")
     KAS_Vars[KAS_Key_ShipsHaveArrived] = 1
-    print("CKAS: fleet out of hyperspace after " .. t .. "s; launching; G_ShipsHaveArrived")
+    print("CKAS: fleet out of hyperspace after " .. t .. "s; launching " .. SobGroup_Count("KAS_ArrivalDocked")
+          .. " ships; G_ShipsHaveArrived")
 end
 
 -- Player 2 (when the level has one) is the allied Kushan fleet. Applied at start and again on the first tick.
