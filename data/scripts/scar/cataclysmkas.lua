@@ -400,10 +400,83 @@ KAS_Key_NisletComplete[19] = "0:139857541"
 KAS_Key_NisComplete[20] = "0:46232517"
 KAS_Key_NisletComplete[20] = "0:139858309"
 
--- A requested cutscene "plays" for KAS_NisSeconds before it is marked complete. Completing it at once also
--- started every team before the level's ships were in their SobGroups (team counts of 0 -> instant failure).
+-- Cutscenes (Phase 0.5). Converted ones (tools/nis2hwrm.py -> data/nis/cataclysm/<name>.nis) play relative to the
+-- player's mothership like singlePlayerStartNis does; the rest still "play" for KAS_NisSeconds. Completing a missing
+-- one at once started every team before the level's ships were in their SobGroups (instant mission failure).
 KAS_NisSeconds = 5
 KAS_NisPending = nil
+KAS_NisPath = "nis/cataclysm/"
+KAS_NisAvailable = {}                 -- names converted so far
+KAS_NisAvailable["n01"] = 1
+
+function KAS_NisName(number, nislet)
+    if nislet then
+        if number < 10 then return "nislet0" .. number end
+        return "nislet" .. number
+    end
+    if number < 10 then return "n0" .. number end
+    return "n" .. number
+end
+
+function KAS_NisStart(name)
+    local path = KAS_NisPath .. name
+    NISLoad(path)
+    SobGroup_CreateIfNotExist("KAS_NisCentre")
+    K_498790("KAS_NisCentre")
+    local position = { 0, 0, 0 }
+    local nisMatrix = Matrix3_Identity()
+    if SobGroup_Count("KAS_NisCentre") > 0 then
+        local info = NISShipStartPosition(path, SobGroup_GetShipType("KAS_NisCentre"), -1)
+        if info[1] == 1 then
+            local motherVector = { info[2], info[3], info[4] }
+            local motherMatrix = { info[5], info[6], info[7], info[8], info[9], info[10], info[11], info[12], info[13] }
+            nisMatrix = Matrix3_MultiplyByMatrix3(SobGroup_GetCoordSys("KAS_NisCentre"), Matrix3_Transpose(motherMatrix))
+            position = Vector3_Subtract(SobGroup_GetPosition("KAS_NisCentre"),
+                                        Matrix3_MultiplyVector3ByMatrix(motherVector, nisMatrix))
+        else
+            print("CKAS: " .. path .. " has no " .. SobGroup_GetShipType("KAS_NisCentre") .. " to centre on")
+        end
+    end
+    NISPlayFromCoordSys(path, position, nisMatrix)
+    print("CKAS: playing " .. path .. " at {" .. position[1] .. ", " .. position[2] .. ", " .. position[3] .. "}")
+end
+
+-- Play a cutscene; when it ends set KAS variable `key` (may be nil) and call `after` (may be nil).
+function KAS_NisPlay(name, key, after)
+    KAS_NisPending = { key = key, after = after, playing = 1, started = Universe_GameTime() }
+    KAS_NisStart(name)
+end
+
+function KAS_NisRequest(number, nislet, key)
+    local name = KAS_NisName(number, nislet)
+    if KAS_NisAvailable[name] then
+        KAS_NisPlay(name, key, nil)
+    else
+        KAS_NisPending = { key = key, at = Universe_GameTime() + KAS_NisSeconds }
+        print("CKAS: " .. name .. " requested (not converted yet: completes in " .. KAS_NisSeconds .. "s)")
+    end
+end
+
+-- Mission start: play the intro cutscene (if any), then start the mission's KAS code.
+function KAS_RunAfterIntro(name, start)
+    print("CKAS: actors FleetCommand=" .. Actor_HW1_FleetCommand .. " FleetIntel=" .. Actor_HW1_FleetIntel)
+    if name ~= "" and KAS_NisAvailable[name] then
+        KAS_NisPlay(name, nil, start)
+    else
+        start()
+    end
+end
+
+function KAS_NisFinished()
+    local p = KAS_NisPending
+    local now = Universe_GameTime()
+    if p.playing == nil then return now >= p.at end
+    if now - p.started < 2 then return nil end
+    local h = NISGetAnyPlayingHandle()
+    if h == NISHandle_Invalid then return 1 end
+    if NISComplete(h) == 1 then return 1 end
+    return now - p.started > 600
+end
 
 function KAS_EngineTick()
     local now = Universe_GameTime()
@@ -411,19 +484,19 @@ function KAS_EngineTick()
         local n = KAS_Vars[KAS_Key_PlayNislet]
         if n and n ~= 0 then
             KAS_Vars[KAS_Key_PlayNislet] = 0
-            KAS_NisPending = { key = KAS_Key_NisletComplete[n], at = now + KAS_NisSeconds }
-            print("CKAS: nislet " .. n .. " requested (NIS playback not ported yet: completes in " .. KAS_NisSeconds .. "s)")
+            KAS_NisRequest(n, 1, KAS_Key_NisletComplete[n])
         end
         n = KAS_Vars[KAS_Key_PlayNis]
-        if n and n ~= 0 then
+        if KAS_NisPending == nil and n and n ~= 0 then
             KAS_Vars[KAS_Key_PlayNis] = 0
-            KAS_NisPending = { key = KAS_Key_NisComplete[n], at = now + KAS_NisSeconds }
-            print("CKAS: NIS " .. n .. " requested (NIS playback not ported yet: completes in " .. KAS_NisSeconds .. "s)")
+            KAS_NisRequest(n, nil, KAS_Key_NisComplete[n])
         end
-    elseif now >= KAS_NisPending.at then
-        if KAS_NisPending.key then KAS_Vars[KAS_NisPending.key] = 1 end
+    elseif KAS_NisFinished() then
+        local p = KAS_NisPending
         KAS_NisPending = nil
+        if p.key then KAS_Vars[p.key] = 1 end
         print("CKAS: cutscene complete")
+        if p.after then p.after() end
     end
     if KAS_ShipsArriveAt and now >= KAS_ShipsArriveAt then
         KAS_ShipsArriveAt = nil

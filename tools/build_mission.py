@@ -5,7 +5,7 @@
   datfiles.lua, teamcolour.lua, and ui/mapthumbnails/campaign/cataclysm/m<NN>.dds (from the loading screen)
 Then regenerates the runtime stubs.
 
-Usage: build_mission.py <NN> [--fleet "Kus_Mothership,Kus_Scout*3,Kus_ResourceCollector*2"] [--background ez01]
+Usage: build_mission.py <NN> [--fleet "Som_Mothership,Kus_Scout*3,Kus_ResourceCollector*2"] [--background ez01] [--intro n01]
 """
 import argparse
 import os
@@ -37,6 +37,10 @@ end
 function OnInit()
     print("CATACLYSM Mission{nn}: OnInit")
     KAS_StartEngine()
+    KAS_RunAfterIntro("{intro}", Mission{nn}_Start)
+end
+
+function Mission{nn}_Start()
     KASRule_Add("Mission{nn}", "Watch_Mission{nn}", "OnInit")
     KAS_Team = "Mission{nn}"
     Init_Mission{nn}("Mission{nn}")
@@ -65,6 +69,7 @@ def main():
     ap.add_argument("nn")
     ap.add_argument("--fleet", default="")
     ap.add_argument("--background", default="ez01")
+    ap.add_argument("--intro", default="", help="cutscene played before the mission starts (e.g. n01)")
     a = ap.parse_args()
     nn = a.nn.zfill(2)
     src = os.path.join(DECOMP, "extracted", "big", "singleplayer", f"mission{nn}")
@@ -76,7 +81,7 @@ def main():
     run(os.path.join(HERE, "mission2level.py"), src, os.path.join(out, f"m{nn}.level"), *lvl)
     run(os.path.join(HERE, "kas2lua.py"), DECOMP, f"Mission{nn}", src, os.path.join(out, f"m{nn}_kas.lua"))
     with open(os.path.join(out, f"m{nn}.lua"), "w", newline="\n") as f:
-        f.write(WRAPPER.format(nn=nn))
+        f.write(WRAPPER.format(nn=nn, intro=a.intro))
     test = os.path.join(MOD, "data", "leveldata", "campaign", "cataclysm", "m00_test")
     shutil.copyfile(os.path.join(test, "teamcolour.lua"), os.path.join(out, "teamcolour.lua"))
     with open(os.path.join(out, "datfiles.lua"), "w", newline="\n") as f:
