@@ -336,10 +336,16 @@ def main():
     for i, c in enumerate(nis["cameras"]):
         cam, eye = f"Camera{i}", f"Camera{i}_Eye"
         poses = [pose(c, t, True) for t in times]
+        chans = {}
         for j, ax in enumerate("XYZ"):
-            anim.append(channel(f"{eye}_translate{ax}", list(zip(times, [p[0][j] for p in poses])), fps))
-        for j, ax in enumerate("XYZ"):
-            anim.append(channel(f"{eye}_rotate{ax}", list(zip(times, unwrap([p[1][j] for p in poses]))), fps))
+            chans["translate" + ax] = [p[0][j] for p in poses]
+            chans["rotate" + ax] = unwrap([p[1][j] for p in poses])
+        order = ("translateX", "translateY", "translateZ", "rotateX", "rotateY", "rotateZ")
+        for c_ in order:
+            anim.append(channel(f"{eye}_{c_}", list(zip(times, chans[c_])), fps))
+        # The eye is also a FOLW object of kind "camera" (Gearbox); without it the engine has a NULL camera.
+        folw.append(lstr(eye) + lstr("HW1") + lstr("camera") + lstr("") + b"".join(lstr(f"{eye}_{c_}") for c_ in order)
+                    + struct.pack("<6d", *(chans[c_][0] for c_ in order)) + b" ZYX")
         cmra.append(lstr(cam) + lstr(eye) + CAMERA_LENS)
 
     body = (chunk(b"NAME", b"Homeworld2 NIS File") + chunk(b"VERS", struct.pack("<I", 0x100))
