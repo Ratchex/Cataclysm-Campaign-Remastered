@@ -374,7 +374,8 @@ def main():
     ap.add_argument("--marker", action="append", default=[],
                     help="effect marker joint NAME@OBJECT@x,y,z[@rx,ry,rz] (HW1 units in that animated object's "
                          "frame; pointing along its +Z, or turned by those HWRM degrees, Z*Y*X) or NAME@gun:LABEL "
-                         "(at that .mex gun point, pointing forward)")
+                         "(at that .mex gun point, pointing forward) or NAME@x,y,z (fixed, HWRM units, pointing "
+                         "forward)")
     ap.add_argument("--latch", help="LatchOrientation joint at x,y,z (HWRM units): the point a collector puts on "
                                     "the asteroid's surface while harvesting")
     a = ap.parse_args()
@@ -566,7 +567,9 @@ def main():
     by_obj = {main_objs[i]["name"]: i for i in frames} if frames else {}
     for spec in a.marker:
         name, where, *at = spec.split("@")
-        if where.startswith("gun:"):
+        if re.match(r"^-?[\d.]+,-?[\d.]+,-?[\d.]+$", where):
+            weapons += jnode(f"JNT[{name}]", tuple(float(c) for c in where.split(",")))
+        elif where.startswith("gun:"):
             gun = [pt for pt in points if pt[0] == "Gun" and pt[1] == where[4:]]
             if not gun:
                 sys.exit(f"--marker {spec}: no gun point {where[4:]}")

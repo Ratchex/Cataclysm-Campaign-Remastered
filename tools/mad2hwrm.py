@@ -17,7 +17,7 @@ HWRM .mad (IFF, chunk sizes big-endian, payload little-endian), as Cataclysm Rem
        out tangent dx/dy (unit vectors, value per second)>, 8 zero bytes
 Times stay HW1's (seconds); every clip gets its own curves, sampled every 1/30 s.
 
-Usage: mad2hwrm.py <hw1.mad> <hw1.geo> <out.mad> --joints A,B,... [--scale 0.35] [--clips X,Y]
+Usage: mad2hwrm.py <hw1.mad> <hw1.geo> <out.mad> --joints A,B,... [--scale 0.35] [--clips X,Y] [--trim OBJECT=DEG]
 """
 import argparse
 import math
@@ -71,9 +71,17 @@ def euler_to_matrix(h, p, b):
     return m
 
 
-def local_matrix(path, t):
-    """Object's HW1 local matrix at time t, column-major 4x4."""
-    c0, c1, c2, h, p, b = (spline_eval(path["times"], cv, path["tcb"], t) for cv in path["curves"])
+def angles(path, t):
+    return [spline_eval(path["times"], cv, path["tcb"], t) for cv in path["curves"]]
+
+
+def local_matrix(path, t, trim=None):
+    """Object's HW1 local matrix at time t, column-major 4x4. trim = (rest hpb, k): the angles' swing away from
+    rest scaled by k (--trim)."""
+    c0, c1, c2, h, p, b = angles(path, t)
+    if trim:
+        rest, k = trim
+        h, p, b = (rest[j] + ([h, p, b][j] - rest[j]) * k for j in range(3))
     r = euler_to_matrix(h, p, b)
     m = [0.0] * 16
     for row in range(3):
@@ -114,6 +122,9 @@ def main():
     ap.add_argument("--joints", required=True)
     ap.add_argument("--scale", type=float, default=0.35)
     ap.add_argument("--clips", default="", help="only these clips (default: all)")
+    ap.add_argument("--trim", action="append", default=[],
+                    help="OBJECT=DEGREES: the object turns that much less at its furthest from rest (over the clips "
+                         "converted), every angle's swing scaled by the same factor")
     a = ap.parse_args()
     names = [n for n in a.joints.split(",") if n]
     _, clips, paths = read_mellonn(a.mad)
@@ -144,8 +155,18 @@ def main():
         worst = max(worst, max(abs(x - y) for x, y in zip(m0[:15], objs[i]["matrix"][:15])))
     print(f"pose at t=0 vs .geo matrices: max difference {worst:.4f}")
 
+    wanted = [c for c in clips if not a.clips or c["name"] in a.clips.split(",")]
+    trims = {}
+    for spec in a.trim:
+        n, deg = spec.split("=")
+        rest = angles(paths[n], 0.0)[3:]
+        swing = max(abs(angles(paths[n], c["start"] + (c["end"] - c["start"]) * k / 60)[3 + j] - rest[j])
+                    for c in wanted for k in range(61) for j in range(3))
+        trims[n] = (rest, (swing - math.radians(float(deg))) / swing)
+        print(f"  {n}: swing {math.degrees(swing):.1f} deg -> {math.degrees(swing) - float(deg):.1f}")
+
     def hwrm_pose(i, t):
-        m = local_matrix(paths[objs[i]["name"]], t)
+        m = local_matrix(paths[objs[i]["name"]], t, trims.get(objs[i]["name"]))
         if prefix[i] is not None:
             m = geo2obj.matmul(prefix[i], m)
         return hwrm_local(m, a.scale)
@@ -159,7 +180,6 @@ def main():
             stri.extend(s.encode("latin-1") + b"\0")
         return strings[s]
 
-    wanted = [c for c in clips if not a.clips or c["name"] in a.clips.split(",")]
     curves, marks, njref, ncref = [], [], 0, 0
     for c in wanted:
         t0, t1 = c["start"], c["end"]
