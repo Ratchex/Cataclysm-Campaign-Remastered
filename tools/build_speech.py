@@ -37,7 +37,7 @@ def join_wavs(paths, out, rate):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--rate", type=int, default=44100)
-    ap.add_argument("--banks", default="sect")
+    ap.add_argument("--banks", default="sect,beast")
     a = ap.parse_args()
     wav_dir = os.path.join(MOD, "data", "sound", "speech", "missions", "cataclysm")
     dat_dir = os.path.join(MOD, "data", "locale", "english", "leveldata", "campaign", "cataclysm")

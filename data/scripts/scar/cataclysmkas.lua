@@ -561,7 +561,7 @@ end
 -- exe 0x498790 (kasfGetPlayerMothership): empties the selection and adds the human player's mothership
 -- (FUN_0041b090 on the computer player returns the other player's mothership). Mission01 fails the mission when
 -- this selection is empty after G_ShipsHaveArrived, so every mothership type the port uses must be listed here.
-KAS_MothershipTypes = { "Kus_Mothership" }   -- add the Kuun-Lan core ship once it exists (Phase 0.3)
+KAS_MothershipTypes = { "Som_Mothership", "Kus_Mothership" }   -- Kuun-Lan core ship (Phase 0.3), Kushan stand-in
 
 function K_498790(sel)                                                                            -- kasfGetPlayerMothership
     SobGroup_Clear(sel)
