@@ -79,6 +79,11 @@ DEATHS = {"deathDamage": "deathCannon", "deathProjectile": "deathPlasma", "death
 # NIS object type (substring) -> seconds its HWRM weapon charges before firing: attack() is ordered that much early.
 # Ion cannons: tai/kus_ioncannon.wepn beam anticipation 2 s (+ margin).
 ATTACK_LEAD = {"ioncannonfrigate": 2.2}
+# ... and seconds its haltAttack() is put off (the beam stops at once in HWRM; nislet01's ion frigate beam cut off on
+# screen: the user asked for ~0.5 s more)
+HALT_DELAY = {"ioncannonfrigate": 0.5}
+# explosion for a target that "dies" under such a beam (beam_kills): stock HW1 fighter death effect
+BEAM_KILL_FX, BEAM_KILL_SCALE, BEAM_KILL_SUFFIX = "death_generic_fighter", 0.75, "_explosion"
 COMMANDS = {c.lower(): c for c in TRANSLATED + list(NOT_CONVERTED)}   # spelling used below, by lower case
 HW1_NIS_FOV = 75.0          # NIS.h NIS_DefaultFOV: HW1 field of view is vertical (Camera.c), on a 4:3 screen
 SCREEN_ASPECT = 16 / 9
@@ -374,7 +379,48 @@ def speech_lookup():
     return events
 
 
-def translate_script(src, objects, nisname, speech, fps, end_frame, cam_events, teleports):
+def beam_kills(src, objects, fps):
+    """{target key: death frame} for NIS objects that die while a HALT_DELAY ship (a beam) is attacking them: an
+    HWRM beam stops when its target dies (nislet01's ion frigate cut off as the interceptor blew up, though HW1's
+    kept firing into space), so such a death becomes hide() + an explosion effect object on the target's path (the
+    hidden ship stays the target until haltAttack)."""
+    lines = [l.split(";")[0].split("//")[0].strip() for l in open(src, encoding="latin-1").read().splitlines()]
+    cur, t, attacks, deaths = None, 0, [], {}
+    for l in lines:
+        if not l or l.startswith("#"):
+            continue
+        m = re.match(r"with\s+(.+)$", l)
+        if m:
+            cur = objects.get(object_key(m.group(1)))
+            continue
+        if l == "}":
+            cur = None
+            continue
+        m = re.match(r"at\s+frame\s+(\d+)", l)
+        if m:
+            t = int(m.group(1))
+            continue
+        m = re.match(r"(\w+)\s*(.*)$", l)
+        if not m:                                          # "{"
+            continue
+        cmd = COMMANDS.get(m.group(1).lower(), m.group(1))
+        if cur and cmd == "attack" and any(k in cur.lower() for k in HALT_DELAY):
+            attacks.append([cur, objects.get(object_key(m.group(2).strip())), t, None])
+        elif cur and cmd == "haltAttack":
+            for a_ in attacks:
+                if a_[0] == cur and a_[3] is None:
+                    a_[3] = t
+        elif cur and cmd in DEATHS:
+            deaths[cur] = t
+    out = {}
+    for ship, target, t0, t1 in attacks:
+        d = deaths.get(target)
+        if target and d is not None and t0 <= d <= (t1 if t1 is not None else 10 ** 9):
+            out[target] = d
+    return out
+
+
+def translate_script(src, objects, nisname, speech, fps, end_frame, cam_events, teleports, hidden_deaths=None):
     """HW1 NIS script -> HWRM NIS script. Returns (text, speech ids used, runtime cues, report rows).
     Report rows: (frame, object, HW1 command, what became of it)."""
     lines = [l.split(";")[0].split("//")[0].rstrip() for l in open(src, encoding="latin-1").read().splitlines()]
@@ -461,7 +507,21 @@ def translate_script(src, objects, nisname, speech, fps, end_frame, cam_events, 
                 continue
             emit(f'attack("{target}")')
         elif cmd == "haltAttack" and cur_obj:
+            delay = next((s_ for k_, s_ in HALT_DELAY.items() if k_ in cur_obj.lower()), 0)
+            if delay:
+                frame = cur_time + round(delay * fps)
+                cur_list.extend([f"    at frame {frame}", "        haltAttack()", f"    at frame {cur_time}"])
+                note(f"translated: haltAttack() at frame {frame} ({delay}s late: the beam keeps firing off-screen)")
+                continue
             emit("haltAttack()")
+        elif cmd in DEATHS and cur_obj and cur_obj in (hidden_deaths or {}):
+            # a beam is still on it (beam_kills): hidden, with its explosion effect object, so the beam fires on
+            emit("hide()")
+            out_obj.setdefault(cur_obj + BEAM_KILL_SUFFIX, []).extend(
+                [f"    at frame {cur_time}", f"        triggerEffect({BEAM_KILL_SCALE})"])
+            note(f"translated: hide() + {BEAM_KILL_FX} effect (a beam is still firing at it: HWRM beams stop when "
+                 f"their target dies)")
+            continue
         elif cmd in DEATHS and cur_obj:
             emit(f'death("{DEATHS[cmd]}")')
         elif cmd == "health" and cur_obj:
@@ -521,25 +581,27 @@ def translate_script(src, objects, nisname, speech, fps, end_frame, cam_events, 
     for f, cam in cam_events:
         out += [f"at frame {f}", f'    cameraCut("{cam}")']
     out += ["at frame 1", f'    cameraBlendOutOnSkip("{last}", 1)'] + out_global
-    # HW1 faded the game back in after an NIS; HWRM keeps the NIS fade. A script that ends on black stays black:
-    # a "black" cue just before its end (still black) puts up the runtime's black screen and hides the UI, and the
-    # runtime fades the game in unless another NIS follows (KAS_NisEndsBlack; n01 -> nislet01 showed seconds of
-    # space and UI: the NIS fade and wideScreenOut end with the NIS). Otherwise end like Gearbox's scripts do.
+    # End like Gearbox's scripts: wideScreenOut (without it the NIS never completes, frozen on its last frame). HW1
+    # faded the game back in after an NIS, so the end fades in - unless the script ends on black: then it stays
+    # black (the NIS and Universe_Fade share the fade; a fade-in here showed space and UI between n01 and nislet01),
+    # a "noui" cue just after hides the UI again, and the runtime fades the game in unless another NIS follows
+    # (KAS_NisEndsBlack). The NIS runs TAIL_FRAMES past end_frame.
     fades = [re.match(r"\s*fade(?:Set|To)\(([0-9.]+)", b) for b in out_global]
     fades = [float(m.group(1)) for m in fades if m]
     ends_black = bool(fades) and fades[-1] >= 1
+    out += [f"at frame {end_frame}", "    wideScreenOut(1)", f'    cameraBlendOut("{last}", 1)']
     if ends_black:
-        out += [f"at frame {end_frame}", f'    cameraBlendOut("{last}", 1)']
-        # at the HW1 end: its fade to black is done, and the NIS still runs TAIL_FRAMES more
-        cues.append((end_frame, "black", ""))
+        cues.append((end_frame + 1, "noui", ""))
     else:
-        out += [f"at frame {end_frame}", "    wideScreenOut(1)", f'    cameraBlendOut("{last}", 1)', "    fadeTo(0, 1)"]
+        out.append("    fadeTo(0, 1)")
     for key, body in out_obj.items():
         if key == "#drop" or not any(not b.strip().startswith("at frame") for b in body):
             continue
         # every NIS ship invincible (Gearbox's HW1 conversions): attack() fires real weapons, deaths are scripted
         # and death() still kills an invincible ship (their n07 Tai_AssaultFrigate3)
-        if body and body[0].strip() == "at frame 0":
+        if key.endswith(BEAM_KILL_SUFFIX):
+            pass
+        elif body and body[0].strip() == "at frame 0":
             body = body[:1] + ["        invincible()"] + body[1:]
         else:
             body = ["    at frame 0", "        invincible()"] + body
@@ -565,7 +627,7 @@ def main():
     nframes = int(math.ceil(nis["length"] * fps))
     times = [f / fps for f in range(nframes + 1)]
 
-    anim, folw, objects, dropped, teleports = [], [], {}, [], {}
+    anim, folw, objects, dropped, teleports, object_channels = [], [], {}, [], {}, {}
     kept = []
     for o in nis["objects"]:
         k = hwrm_object(o["name"], o["race"], shipmap, a.placeholder)
@@ -605,6 +667,7 @@ def main():
                                                             "rotateX", "rotateY", "rotateZ")))
         folw.append(lstr(key) + lstr("HW1") + lstr(kind) + lstr(typ) + b"".join(lstr(n) for n in names)
                     + start + b" ZYX")
+        object_channels[key] = (names, start)
         # Cataclysm's Kuun-Lan carries its modules; HWRM NIS objects have no subsystems, so each module is a dummy
         # ship on the Kuun-Lan's own channels (modules share its frame)
         if typ == "smt_ms_sp":
@@ -612,6 +675,13 @@ def main():
                 mtyp = f"smt_kl_{m}_dummy"
                 folw.append(lstr(f"{key}_{m}") + lstr("HW1") + lstr(kind) + lstr(mtyp)
                             + b"".join(lstr(n) for n in names) + start + b" ZYX")
+
+    # explosion effect objects for targets that die under a beam (beam_kills), on the target's own channels
+    hidden_deaths = beam_kills(src + ".script", objects, fps)
+    for target in hidden_deaths:
+        names, start = object_channels[target]
+        folw.append(lstr(target + BEAM_KILL_SUFFIX) + lstr("HW1") + lstr("effect") + lstr(BEAM_KILL_FX)
+                    + b"".join(lstr(n) for n in names) + start + b" ZYX")
 
     # One HWRM camera per HW1 shot, switched with cameraCut() like Gearbox's scripts: HWRM interpolates camera
     # keys at the render frame rate, so a cut inside one camera path shows in-between frames.
@@ -650,8 +720,8 @@ def main():
             + chunk(b"LEAD", LEAD)
             + chunk(b"FOLW", struct.pack("<I", len(folw)) + b"".join(folw))
             + chunk(b"CMRA", struct.pack("<I", len(cmra)) + b"".join(cmra)))
-    text, used, cues, report, ends_black = translate_script(src + ".script", objects, a.name, speech_lookup(), fps, nframes + 2,
-                                                cam_events, teleports)
+    text, used, cues, report, ends_black = translate_script(src + ".script", objects, a.name, speech_lookup(), fps,
+                                                            nframes + 2, cam_events, teleports, hidden_deaths)
     write_report(a.name, report, dropped, fps)
     if a.audit_only:
         todo = [r for r in report if r[3].startswith(("NOT CONVERTED", "NO LINE"))]

@@ -44,6 +44,7 @@ at frame 3149
 at frame 3209
     hideUniverse(0)
 at frame 3212
+    wideScreenOut(1)
     cameraBlendOut("Camera12", 1)
 with kus_carrier
 {
@@ -194,7 +195,9 @@ with kus_ioncannonfrigate5
         attack("tai_ioncannonfrigate2")
     at frame 2910
     at frame 2970
+    at frame 2985
         haltAttack()
+    at frame 2970
 }
 with kus_interceptor1
 {
@@ -246,7 +249,12 @@ with kus_interceptor4
     at frame 1050
         show()
     at frame 1500
-        death("deathCannon")
+        hide()
+}
+with kus_interceptor4_explosion
+{
+    at frame 1500
+        triggerEffect(0.75)
 }
 with kus_interceptor5
 {
@@ -391,7 +399,9 @@ with tai_ioncannonfrigate1
         attack("kus_interceptor4")
     at frame 1470
     at frame 1540
+    at frame 1555
         haltAttack()
+    at frame 1540
 }
 with tai_ioncannonfrigate3
 {

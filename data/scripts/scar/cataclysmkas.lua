@@ -431,20 +431,21 @@ end
 
 function KAS_NisCuesStart(name)
     KAS_NisCueList = KAS_NisCues[name]
-    if KAS_NisBlackGap then
-        -- started in the black gap after an NIS: release the black once this one's own black opening is up
-        KAS_NisBlackGap = nil
-        local l, i = { { 0.2, "unblack", "" } }, 1
-        while KAS_NisCueList and i <= getn(KAS_NisCueList) do
-            tinsert(l, KAS_NisCueList[i])
-            i = i + 1
-        end
-        KAS_NisCueList = l
-    end
     KAS_NisCueNext = 1
     KAS_NisCueStart = Universe_GameTime()
     if KAS_NisCueList and getn(KAS_NisCueList) > 0 then
         Rule_AddInterval("KAS_NisCueTick", 0.1)
+    end
+end
+
+function KAS_NisEndWatch()
+    local h = NISGetAnyPlayingHandle()
+    if h == NISHandle_Invalid or NISComplete(h) == 1 then
+        if KAS_BlackSince then                -- (not if the safety net already faded in)
+            Universe_Fade(1, 0)
+            Camera_SetLetterboxStateNoUI(1, 0)
+        end
+        Rule_Remove("KAS_NisEndWatch")
     end
 end
 
@@ -460,11 +461,12 @@ function KAS_NisCueTick()
         KAS_NisCueNext = KAS_NisCueNext + 1
         if c[2] == "music" then                        -- as kasfMusicPlay
             Sound_MusicPlayType(c[3], MUS_Ambient)
-        elseif c[2] == "black" then                    -- NIS ending on black: hold black, UI hidden, past its end
-            Universe_Fade(1, 0)
+        elseif c[2] == "noui" then                     -- NIS ending on black, after its wideScreenOut: UI hidden
             Camera_SetLetterboxStateNoUI(1, 0)
-        elseif c[2] == "unblack" then
-            Universe_Fade(0, 0)
+            KAS_BlackSince = Universe_GameTime()
+            -- the NIS drops its black fade when it ends: black again on the very tick it does (the 0.5 s
+            -- KAS_EngineTick showed a quarter second of space and UI)
+            Rule_Add("KAS_NisEndWatch")
         end
         print("CKAS: NIS cue " .. c[2] .. " " .. c[3] .. " at " .. t .. "s")
     end
@@ -504,10 +506,7 @@ function KAS_NisStart(name)
             print("CKAS: " .. path .. " has no " .. SobGroup_GetShipType("KAS_NisCentre") .. ": played at the origin")
         end
     end
-    if KAS_FadeInAt then                  -- black between two NIS: the new one does its own fade in
-        KAS_FadeInAt = nil
-        KAS_NisBlackGap = 1
-    end
+    KAS_FadeInAt = nil                    -- black between two NIS: the new one does its own fade in
     NISPlayFromCoordSys(path, position, nisMatrix)
     KAS_NisCuesStart(name)
     print("CKAS: playing " .. path .. " at {" .. position[1] .. ", " .. position[2] .. ", " .. position[3] .. "}")
@@ -557,6 +556,13 @@ function KAS_NisFinished()
     if p.playing == nil then return now >= p.at end
     if now - p.started < 2 then return nil end
     local h = NISGetAnyPlayingHandle()
+    if KAS_BlackSince then                -- safety net: an NIS that ends black but never completes
+        if now - KAS_BlackSince > 15 then
+            print("CKAS: NIS did not end 15 s after the black cue: fading in")
+            KAS_BlackSince = nil
+            Universe_Fade(0, 1)
+        end
+    end
     if h == NISHandle_Invalid then return 1 end
     if NISComplete(h) == 1 then return 1 end
     return now - p.started > 600
@@ -583,6 +589,7 @@ function KAS_EngineTick()
         local p = KAS_NisPending
         KAS_NisPending = nil
         KAS_NisCueList = nil              -- ended or skipped: no more cues
+        KAS_BlackSince = nil
         if p.name and KAS_NisEndsBlack[p.name] then
             Universe_Fade(1, 0)
             Camera_SetLetterboxStateNoUI(1, 0)
