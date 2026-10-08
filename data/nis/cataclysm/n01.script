@@ -95,6 +95,14 @@ with Kus_Scout3
 }
 with Kus_Scout4
 {
+    at frame 0
+        show()
+    at frame 720
+    at frame 2030
+    at frame 2005
+        hide()
+    at frame 2480
+        show()
     at frame 2510
         hide()
     at frame 2511
@@ -102,8 +110,125 @@ with Kus_Scout4
 }
 with Kus_Scout5
 {
-    at frame 2789
+    at frame 0
+        show()
+    at frame 960
+    at frame 1510
         hide()
-    at frame 2790
+    at frame 1835
+        show()
+    at frame 2200
+        hide()
+    at frame 2800
+        show()
+}
+with Asteroid11
+{
+    at frame 0
+        show()
+}
+with Asteroid12
+{
+    at frame 0
+        show()
+}
+with Asteroid13
+{
+    at frame 0
+        show()
+}
+with Asteroid14
+{
+    at frame 0
+        show()
+}
+with Asteroid21
+{
+    at frame 0
+        show()
+}
+with Asteroid22
+{
+    at frame 0
+        show()
+}
+with Asteroid23
+{
+    at frame 0
+        show()
+}
+with Asteroid24
+{
+    at frame 0
+        show()
+}
+with Asteroid25
+{
+    at frame 0
+        show()
+}
+with Asteroid26
+{
+    at frame 0
+        show()
+}
+with Asteroid27
+{
+    at frame 0
+        show()
+}
+with Asteroid28
+{
+    at frame 0
+        show()
+}
+with Asteroid29
+{
+    at frame 0
+        show()
+}
+with Asteroid210
+{
+    at frame 0
+        show()
+}
+with Asteroid211
+{
+    at frame 0
+        show()
+}
+with Asteroid31
+{
+    at frame 0
+        show()
+}
+with Asteroid32
+{
+    at frame 0
+        show()
+}
+with Asteroid33
+{
+    at frame 0
+        show()
+}
+with Asteroid34
+{
+    at frame 0
+        show()
+}
+with Asteroid35
+{
+    at frame 0
+        show()
+}
+with Asteroid36
+{
+    at frame 0
+        show()
+}
+with Asteroid37
+{
+    at frame 0
         show()
 }

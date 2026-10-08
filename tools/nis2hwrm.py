@@ -309,7 +309,7 @@ def hwrm_object(name, race, shipmap, placeholder):
 def object_key(name):
     """'sRecon(1)' / 'RACE_SECT\\sRecon (1)' -> 'sRecon1'."""
     name = name.split("\\")[-1]
-    return re.sub(r"[^A-Za-z0-9_]", "", name)
+    return re.sub(r"[^A-Za-z0-9_]", "", name).lower()           # scripts are not consistent about case
 
 
 # ----------------------------------------------------------------------------------------------- script
