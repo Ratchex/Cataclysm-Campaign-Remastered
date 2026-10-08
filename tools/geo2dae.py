@@ -270,9 +270,29 @@ def main():
     weapons, nweap = weapon_nodes(points, conv, convn)
     hold_dock, ndock = dock_nodes(points, conv)
     # Engine nozzles from the .mex Eng chunks: JNT[EngineNozzle<n>] (setEngineTrail index n-1 / setEngineBurn).
+    # Each nozzle as in HODOR's engine layout (toolkit demo ship): BURN[EngineBurn<n>] with five flame divisions
+    # trailing backwards and an ETSH[EngineShape<n>] quad; trails/burns need these, not just the joint.
     engines = [pt for pt in points if pt[0] == "Eng"]
     for i, (_, _, pos, _) in enumerate(engines):
-        weapons += jnode(f"JNT[EngineNozzle{i + 1}]", conv(*pos))
+        n = i + 1
+        flames = "".join(jnode(f"Flame[0]_Div[{d}]", (0, 0, -2.0 * d)) for d in range(5))
+        gid = f"ETSH[EngineShape{n}]"
+        h = 1.5
+        P = [-h, -h, 0, -h, h, 0, h, h, 0, h, -h, 0]
+        geoms.append(f'<geometry id="{gid}" name="{gid}"><mesh>'
+                     f'<source id="{gid}-pos"><float_array id="{gid}-pos-a" count="12">{fl(P)}</float_array>'
+                     f'<technique_common><accessor source="#{gid}-pos-a" count="4" stride="3"><param name="X" type="float"/>'
+                     f'<param name="Y" type="float"/><param name="Z" type="float"/></accessor></technique_common></source>'
+                     f'<source id="{gid}-nrm"><float_array id="{gid}-nrm-a" count="12">{fl([0, 0, -1] * 4)}</float_array>'
+                     f'<technique_common><accessor source="#{gid}-nrm-a" count="4" stride="3"><param name="X" type="float"/>'
+                     f'<param name="Y" type="float"/><param name="Z" type="float"/></accessor></technique_common></source>'
+                     f'<vertices id="{gid}-v"><input semantic="POSITION" source="#{gid}-pos"/></vertices>'
+                     f'<triangles count="2"><input semantic="VERTEX" offset="0" source="#{gid}-v"/>'
+                     f'<input semantic="NORMAL" offset="0" source="#{gid}-nrm"/><p>0 1 2 0 2 3</p></triangles>'
+                     f'</mesh></geometry>')
+        shape = (f'<node name="{gid}" id="{gid}" sid="{gid}E"><translate sid="translate">0 0 0</translate>'
+                 f'<instance_geometry url="#{gid}"></instance_geometry></node>')
+        weapons += jnode(f"JNT[EngineNozzle{n}]", conv(*pos), jnode(f"BURN[EngineBurn{n}]", (0, 0, 0), flames) + shape)
     for hp in a.hardpoint:   # subsystem hardpoint: <name>_Position with _Direction / _Rest (HWRM toolkit layout)
         weapons += jnode(f"JNT[{hp}_Position]", (0, 0, 0), jnode(f"JNT[{hp}_Direction]", (0, 10, 0))
                          + jnode(f"JNT[{hp}_Rest]", (0, 0, 10)))

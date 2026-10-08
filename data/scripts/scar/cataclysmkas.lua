@@ -889,7 +889,13 @@ end
 
 -- ------------------------------------------------------------------ pings and tutorial pointers
 function K_495e50(sel, name) KAS_PingRemove(name, name) KAS_PingAddShips(sel, name, name) end     -- kasfPingAddShips
-function K_495e80(vec, name) KAS_PingRemove(name, name) KAS_PingAddPoint(vec, name, name) end     -- kasfPingAddPoint
+-- kasfPingAddPoint(point, name): Ping_AddPoint takes a volume name (Gearbox passes AI volume names), so ping a
+-- small sphere made at the point.
+function K_495e80(vec, name)                                                                        -- kasfPingAddPoint
+    KAS_PingRemove(name, name)
+    Volume_AddSphere("KAS_Ping_" .. name, vec, 10)
+    KAS_PingAddPoint("KAS_Ping_" .. name, name, name)
+end
 function K_495ea0(name) KAS_PingRemove(name, name) end                                            -- kasfPingRemove
 
 KAS_Pointers = {}
