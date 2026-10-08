@@ -80,8 +80,8 @@ DEATHS = {"deathDamage": "deathCannon", "deathProjectile": "deathPlasma", "death
 # Ion cannons: tai/kus_ioncannon.wepn beam anticipation 2 s (+ margin).
 ATTACK_LEAD = {"ioncannonfrigate": 2.2}
 # ... and seconds its haltAttack() is put off (the beam stops at once in HWRM; nislet01's ion frigate beam cut off on
-# screen: the user asked for ~0.5 s more)
-HALT_DELAY = {"ioncannonfrigate": 0.5}
+# screen: 0.5 s was a little long in game)
+HALT_DELAY = {"ioncannonfrigate": 0.25}
 # explosion for a target that "dies" under such a beam (beam_kills): stock HW1 fighter death effect
 BEAM_KILL_FX, BEAM_KILL_SCALE, BEAM_KILL_SUFFIX = "death_generic_fighter", 0.75, "_explosion"
 COMMANDS = {c.lower(): c for c in TRANSLATED + list(NOT_CONVERTED)}   # spelling used below, by lower case
@@ -591,6 +591,7 @@ def translate_script(src, objects, nisname, speech, fps, end_frame, cam_events, 
     ends_black = bool(fades) and fades[-1] >= 1
     out += [f"at frame {end_frame}", "    wideScreenOut(1)", f'    cameraBlendOut("{last}", 1)']
     if ends_black:
+        cues.append((end_frame - 5, "hideui", ""))     # before wideScreenOut brings the HUD back
         cues.append((end_frame + 1, "noui", ""))
     else:
         out.append("    fadeTo(0, 1)")

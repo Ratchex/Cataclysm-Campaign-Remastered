@@ -461,6 +461,9 @@ function KAS_NisCueTick()
         KAS_NisCueNext = KAS_NisCueNext + 1
         if c[2] == "music" then                        -- as kasfMusicPlay
             Sound_MusicPlayType(c[3], MUS_Ambient)
+        elseif c[2] == "hideui" then                   -- NIS ending on black, before its wideScreenOut: the HUD
+            UI_SetScreenVisible("NewTaskbar", 0)          -- screen itself hidden (the letterbox alone flashed it)
+            KAS_HudHidden = 1
         elseif c[2] == "noui" then                     -- NIS ending on black, after its wideScreenOut: UI hidden
             Camera_SetLetterboxStateNoUI(1, 0)
             KAS_BlackSince = Universe_GameTime()
@@ -561,6 +564,11 @@ function KAS_NisFinished()
             print("CKAS: NIS did not end 15 s after the black cue: fading in")
             KAS_BlackSince = nil
             Universe_Fade(0, 1)
+            Camera_SetLetterboxStateNoUI(0, 1)
+            if KAS_HudHidden then
+                KAS_HudHidden = nil
+                UI_SetScreenVisible("NewTaskbar", 1)
+            end
         end
     end
     if h == NISHandle_Invalid then return 1 end
@@ -603,6 +611,10 @@ function KAS_EngineTick()
         KAS_FadeInAt = nil
         Universe_Fade(0, 1.5)
         Camera_SetLetterboxStateNoUI(0, 1.5)
+        if KAS_HudHidden then
+            KAS_HudHidden = nil
+            UI_SetScreenVisible("NewTaskbar", 1)
+        end
         print("CKAS: fade in after the cutscenes")
     end
     if KAS_ShipsArriveAt and now >= KAS_ShipsArriveAt then

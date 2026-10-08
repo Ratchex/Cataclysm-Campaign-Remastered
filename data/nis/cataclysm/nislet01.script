@@ -195,7 +195,7 @@ with kus_ioncannonfrigate5
         attack("tai_ioncannonfrigate2")
     at frame 2910
     at frame 2970
-    at frame 2985
+    at frame 2978
         haltAttack()
     at frame 2970
 }
@@ -399,7 +399,7 @@ with tai_ioncannonfrigate1
         attack("kus_interceptor4")
     at frame 1470
     at frame 1540
-    at frame 1555
+    at frame 1548
         haltAttack()
     at frame 1540
 }

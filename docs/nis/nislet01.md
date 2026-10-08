@@ -475,7 +475,7 @@ None.
 | 1470 | 49.0s | tai_ioncannonfrigate1 | `attack RACE_KUSHAN\kHeavyInterceptor (4)` | translated: attack("kus_interceptor4") at frame 1404 (2.2s early: HWRM weapon charge time) |
 | 1500 | 50.0s | kus_interceptor4 | `deathDamage` | translated: hide() + death_generic_fighter effect (a beam is still firing at it: HWRM beams stop when their target dies) |
 | 1525 | 50.8s | tai_assaultfrigate2 | `show` | translated: show() |
-| 1540 | 51.3s | tai_ioncannonfrigate1 | `haltAttack` | translated: haltAttack() at frame 1555 (0.5s late: the beam keeps firing off-screen) |
+| 1540 | 51.3s | tai_ioncannonfrigate1 | `haltAttack` | translated: haltAttack() at frame 1548 (0.25s late: the beam keeps firing off-screen) |
 | 1550 | 51.7s | kus_interceptor1 | `attack RACE_TAIDAN\tIonCannonFrigate (4)` | translated: attack("tai_ioncannonfrigate4") |
 | 1550 | 51.7s | kus_interceptor2 | `attack RACE_TAIDAN\tIonCannonFrigate (4)` | translated: attack("tai_ioncannonfrigate4") |
 | 1550 | 51.7s | kus_interceptor3 | `attack RACE_TAIDAN\tIonCannonFrigate (4)` | translated: attack("tai_ioncannonfrigate4") |
@@ -563,7 +563,7 @@ None.
 | 2900 | 96.7s | kus_ioncannonfrigate5 | `fleetSpeechEvent ( 713 + 4096 + 536870912 )` | speech $2207386 (Fleet Command, 2.5s, unsubtitled: invisible subtitle): speechEventActor |
 | 2900 | 96.7s | tai_missiledestroyer1 | `haltAttack` | translated: haltAttack() |
 | 2910 | 97.0s | kus_ioncannonfrigate5 | `attack RACE_TAIDAN\tIonCannonFrigate (2)` | translated: attack("tai_ioncannonfrigate2") at frame 2844 (2.2s early: HWRM weapon charge time) |
-| 2970 | 99.0s | kus_ioncannonfrigate5 | `haltAttack` | translated: haltAttack() at frame 2985 (0.5s late: the beam keeps firing off-screen) |
+| 2970 | 99.0s | kus_ioncannonfrigate5 | `haltAttack` | translated: haltAttack() at frame 2978 (0.25s late: the beam keeps firing off-screen) |
 | 3000 | 100.0s | kus_destroyer3 | `hide` | translated: hide() |
 | 3020 | 100.7s | tai_ioncannonfrigate2 | `deathDamage` | translated: death("deathCannon") |
 | 3050 | 101.7s | tai_assaultfrigate2 | `hide` | translated: hide() |
