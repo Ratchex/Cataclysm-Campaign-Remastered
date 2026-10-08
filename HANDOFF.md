@@ -19,14 +19,14 @@ findings).
 ## How to run
 - `powershell -File C:\Modding\Cataclysm-HWRM\launch.ps1`, then Single Player Game → Extra Missions → Homeworld Cataclysm.
 - Log: `...\HomeworldRM\Bin\Release\HwRM.log` (strip NUL bytes before grepping). Mission `print()`s appear there.
-- Rebuild a mission: `python tools/build_mission.py 01 --fleet "Kus_Mothership,Kus_Scout*3,Kus_ResourceCollector*2"`.
+- Rebuild a mission: `python tools/build_mission.py 01 --intro n01` (default fleet: their Kuun-Lan, 3 Recon, 2 Workers).
 
 ## Phase 0 status
 | # | Item | Status |
 |---|---|---|
 | 0.1 | Campaign skeleton | Done. Rules in `NOTES.md` (keeper.txt, `<campaign>.dds`, createSOBGroup before addToSOBGroup, launch args). |
 | 0.2 | Level converter `mission2level.py` | Done; matches Gearbox's HW1 conversions; Mission01 layout checked in game. Resources/AIBox/derelicts/mines not converted yet. |
-| 0.3 | One Somtaaw ship end to end | **Done** (confirmed in game: look, size vs Kus_Carrier, no loose parts). Kuun-Lan = core + Mission01 modules baked into one mesh: `GEO2DAE_ARGS="--dock-from C:/Modding/Cataclysm-decomp/reference/cr_beast/ship/smt_ms/smt_ms.hod --dock-scale 0.909" HARDPOINTS="Hardpoint_Research Hardpoint_Resource" bash tools/build_ship.sh race_sect/smothership som_mothership race_sect/smothershipcommand race_sect/smothershipdockingbay race_sect/smothershipengineering race_sect/smothershipengineslower race_sect/smothershipenginesupper race_sect/smothershiplowerspine race_sect/smothershiporecanarmour`. Real modules (HWRM subsystems) later. |
+| 0.3 | One Somtaaw ship end to end | **Done** (confirmed in game: look, size vs Kus_Carrier, no loose parts). Kuun-Lan is now core + module subsystems: `bash tools/build_kuunlan.sh` (see RESUME HERE). |
 | 0.4 | Speech/subtitles; localized `$IDs` | **Done.** `build_speech.py` makes one 44.1 kHz WAV + speech.dat string per phrase; runtime plays them via Subtitle_AddSkippable. Confirmed in game (lines, subtitles, objective text). |
 | 0.5 | NIS cutscenes | **Done** (n01 confirmed in game: cameras, cuts, zoom, speech, choreography). `tools/nis2hwrm.py <name>`; Mission01 plays n01 first (`build_mission.py --intro n01`). Open items in NOTES.md. |
 | 0.6 | KAS API naming | Partial. `out/kas_usage.tsv`: 302 functions used; confident names only for the first third of the API. Verified names in `out/kas_api_overrides.tsv`. Tools: `kasalign.py`, `kasverify.py <Mission>`. |
