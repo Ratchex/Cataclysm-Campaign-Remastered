@@ -2420,9 +2420,9 @@ rangestart 2200000 2219999
 2207018	Picking up another wave of incoming missiles.
 2207019	Sensors indicate Beast attack vessels are escorting this wave. Possible mixed group of strike craft and frigates.
 2207020	That's the last of them. All ships stand down. We've pushed the Beast back for now.
-2207021	(Pilot)
-2207022	(Pilot)
-2207023	(Pilot)
+2207021	(Worker)
+2207022	(Fleet Command)
+2207023	(Worker)
 2207024	This is Somtaaw Fleet Command to all ships Prepare for emergency hyperspace. Set course for the Homeworld.
 2207025	Tactical Officer: Tactical officer on-line. Full power to sensors. Analyzing combat data now. Command, we need to find out where we can do the most good.
 2207026	Tactical Officer: We've picked up a flight of Taiidan fighters incoming from the main battle. They're probably investigating our hyperspace signature.
@@ -2773,7 +2773,7 @@ rangestart 2200000 2219999
 2207371	For years to come, isolated pockets of the cancer would flare up to threaten the quadrant. But the new technologies born from Somtaaw's bitter campaign soon rendered Hiigaran ships immune to the infection. In time, the last remnants of the monster were crushed. The Beast never rose again.
 2207372	The miners of Kiith Somtaaw sacrificed much, and risked all. For their efforts they were brought into the innermost circle of Hiigaran power. Naabal, S'jet, and Sobanii bowed before them. And from that day to this, Soomtaaw's children have been known to one and all as Beastslayers.
 2207373	If you're going to break us out, it will have to be soon though. This Raider force is just pinning us until a larger fleet can get here and board us.
-2207374	(Pilot)
+2207374	(Recon)
 2207375	(Fleet Command)
 2207376	(Fleet Command)
 2207377	(Fleet Command)

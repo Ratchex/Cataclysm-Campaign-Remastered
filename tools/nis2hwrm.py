@@ -463,8 +463,10 @@ def translate_script(src, objects, nisname, speech, fps, end_frame, cam_events, 
             if not text:
                 raise SystemExit(f"{src}: speech ${sid} has no subtitle and no speaker tag (it would play nothing): "
                                  f"rerun tools/build_speech.py")
-            # HWRM actors (logged in game): 16 Fleet Command, 17 Fleet Intel. Cataclysm 0x1000 = Fleet Command.
-            emit(f'speechEventActor("${sid}", {16 if ev & 0x1000 else 17}, 2)')
+            # HWRM actors (logged in game): 16 Fleet Command, 17 Fleet Intel. Cataclysm 0x1000 = Fleet Command; a
+            # known speaker (tools/speech_speakers.tsv) overrides the bits (n01's Fleet Command line has 0x800)
+            fc = text == "(Fleet Command)" if tagged else ev & 0x1000
+            emit(f'speechEventActor("${sid}", {16 if fc else 17}, 2)')
             kind = "unsubtitled in Cataclysm, speaker tag" if tagged else "subtitled"
             note(f"speech ${sid} ({speaker}, {secs:.1f}s, {kind}): speechEventActor - \"{text[:60]}\"")
             continue
