@@ -35,7 +35,6 @@ at frame 1
     musicVolume(0.5)
     speechVolume(0.6)
     SFXVolume(0.6)
-    musicStart("cataclysm/music_25")
 at frame 300
 at frame 451
 at frame 480
@@ -65,11 +64,15 @@ with smt_scout1
     at frame 0
         hide()
     at frame 170
+        speechEventActor("$2207021", 17, 2)
     at frame 860
+        speechEventActor("$2207022", 17, 2)
     at frame 910
+        speechEventActor("$2207023", 17, 2)
     at frame 950
         show()
     at frame 1230
+        speechEventActor("$2207374", 17, 2)
     at frame 1530
         speechEventActor("$2206899", 17, 2)
     at frame 2200

@@ -128,10 +128,16 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
 2. Read the report's audio table: every speech line, its speaker, subtitle or not, and the music.
 3. Play the original cutscene (Cataclysm) and the converted one; every line heard in the original must be in the
    table and heard in game. Anything missing that the report does not list is a converter bug: fix the tables.
-- Unsubtitled speech (blank speech.dat string, 4762 of 5390 Cataclysm phrases) is silent through
-  `speechEventActor` (n01: 4 pilot lines). Those go to `data/nis/cataclysm/<name>_cues.lua` and the runtime plays
-  them with `Sound_SpeechPlay` at their time (cataclysmkas.lua KAS_NisCues, 0.1 s rule; cleared when the NIS ends).
-- `startMusic n` -> `musicStart("cataclysm/music_nn")` (path under data:sound/music/).
+- **A speech line with a blank subtitle plays nothing** (confirmed in game: `speechEventActor` in NIS, and
+  `Subtitle_AddSkippable` in missions returns 0). `Sound_SpeechPlay` stayed silent too, in every path form tried
+  ("speech:" is not an alias for it). Fix: speech.dat gets a speaker tag for every unsubtitled line a mission or
+  cutscene plays (tools/speech_tags.py; tools/build_speech.py writes it): `tools/speech_speakers.tsv` for known
+  speakers ("(Recon)"), else from the actor bits it is played with: 0x800 "(Pilot)", 0x1000 "(Fleet Command)",
+  0x2000 "(Tactical Officer)", others "(Comms)". 314 phrases; the user chose visible tags. A Latin-1 no-break
+  space shows as "?". nis2hwrm stops if a line it emits would still be blank.
+- `startMusic n`: the NIS script's `musicStart("cataclysm/music_nn")` stayed silent; it is a runtime cue
+  (`data/nis/cataclysm/<name>_cues.lua`, cataclysmkas.lua KAS_NisCues: `Sound_MusicPlayType`, as kasfMusicPlay;
+  0.1 s rule from the NIS start, cleared when it ends). Confirmed in game.
 - Speech events with no phrase in Cataclysm's tables (n01 event 347) were silent in Cataclysm too.
 - Cataclysm's `subtitle <n> <ms>` (12 uses) is not decoded yet (no string table found; exe string 0x888e88).
 - HWRM NIS = IFF `FORM NIS ` (layout in tools/nis2hwrm.py docstring). Played with `NISLoad("nis/cataclysm/n01")`

@@ -355,15 +355,20 @@ def object_key(name):
 
 # ----------------------------------------------------------------------------------------------- script
 def speech_lookup():
-    """Speech event -> (string / wav id, duration s, subtitle text) of its first phrase (NIS events have one),
-    from Cataclysm-decomp/out/speech_events_sect.tsv (tools/speechmap.py) as tools/build_speech.py numbers them."""
+    """Speech event -> (string / wav id, duration s, subtitle, tagged) of its first phrase (NIS events have one),
+    from Cataclysm-decomp/out/speech_events_sect.tsv (tools/speechmap.py) as tools/build_speech.py numbers them;
+    unsubtitled lines carry their speaker tag (tools/speech_tags.py, also in speech.dat)."""
+    import speech_tags
+    tagger = speech_tags.Tagger()
     events = {}
     base_id = 2200000
     with open(os.path.join(DECOMP, "out", "speech_events_sect.tsv"), encoding="utf-8") as f:
         for r in csv.DictReader(f, delimiter="\t", quoting=csv.QUOTE_NONE):
             ev = int(r["event"])
             if ev not in events:
-                events[ev] = (base_id + int(r["phrase"]), int(r["duration_ms"]) / 1000, r["subtitle"].strip())
+                sid, text = base_id + int(r["phrase"]), r["subtitle"].strip()
+                tag = None if text else tagger.tag(ev, sid)
+                events[ev] = (sid, int(r["duration_ms"]) / 1000, text or tag or "", tag is not None)
     return events
 
 
@@ -440,26 +445,27 @@ def translate_script(src, objects, nisname, speech, fps, end_frame, cam_events, 
                 note("NOT CONVERTED: no NIS_STATES entry for this clip")
                 continue
         elif cmd == "startMusic":
-            # Cataclysm stream n (tools/build_music.py: data/sound/music/cataclysm/music_nn)
-            emit(f'musicStart("cataclysm/music_{int(args):02d}")')
+            # Cataclysm stream n (tools/build_music.py): the NIS script's musicStart("cataclysm/music_nn") stayed
+            # silent in game; the runtime's Sound_MusicPlayType (as kasfMusicPlay) plays it
+            cues.append((cur_time or 0, "music", f"data:sound/music/cataclysm/music_{int(args):02d}"))
+            note("CUED Sound_MusicPlayType")
+            continue
         elif cmd in ("fleetSpeechEvent", "speechEvent"):
             ev = eval(re.sub(r"[^0-9+ ]", "", args))      # "(343 + 2048 + 536870912)"
             line = speech.get(ev & 0x3FF)
             if line is None:
                 note(f"NO LINE: Cataclysm's speech tables have no phrase for event {ev & 0x3FF} (silent there too)")
                 continue
-            sid, secs, text = line
+            sid, secs, text, tagged = line
             used.append(sid)
             speaker = SPEAKERS.get(ev & 0x3FC00, f"actor bits {ev & 0x3FC00:#x}")
-            if text:
-                # HWRM actors (logged in game): 16 Fleet Command, 17 Fleet Intel. Cataclysm 0x1000 = Fleet Command.
-                emit(f'speechEventActor("${sid}", {16 if ev & 0x1000 else 17}, 2)')
-                note(f"speech ${sid} ({speaker}, {secs:.1f}s, subtitled): speechEventActor - \"{text[:60]}\"")
-            else:
-                # unsubtitled lines never played through speechEventActor (blank speech.dat string; n01's pilot
-                # chatter): the runtime plays them with Sound_SpeechPlay at this time
-                cues.append((cur_time, "speech", f"data:sound/speech/nis/{nisname}/{sid}"))
-                note(f"speech ${sid} ({speaker}, {secs:.1f}s, no subtitle): CUED Sound_SpeechPlay")
+            if not text:
+                raise SystemExit(f"{src}: speech ${sid} has no subtitle and no speaker tag (it would play nothing): "
+                                 f"rerun tools/build_speech.py")
+            # HWRM actors (logged in game): 16 Fleet Command, 17 Fleet Intel. Cataclysm 0x1000 = Fleet Command.
+            emit(f'speechEventActor("${sid}", {16 if ev & 0x1000 else 17}, 2)')
+            kind = "unsubtitled in Cataclysm, speaker tag" if tagged else "subtitled"
+            note(f"speech ${sid} ({speaker}, {secs:.1f}s, {kind}): speechEventActor - \"{text[:60]}\"")
             continue
         elif cmd in NOT_CONVERTED:
             note(("NOT CONVERTED: " if NOT_CONVERTED[cmd].startswith("TODO") else "dropped: ") + NOT_CONVERTED[cmd])

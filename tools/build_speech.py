@@ -1,6 +1,7 @@
 """Build Cataclysm speech for the mod from Cataclysm-decomp/out/speech_events_<bank>.tsv (tools/speechmap.py):
   data/sound/speech/missions/cataclysm/<id>.wav   one file per phrase (multi-segment phrases are joined)
-  data/locale/english/leveldata/campaign/cataclysm/speech.dat   subtitle per phrase (ends with rangeend)
+  data/locale/english/leveldata/campaign/cataclysm/speech.dat   subtitle per phrase (ends with rangeend); unsubtitled
+      lines the missions / cutscenes play get a speaker tag (tools/speech_tags.py: blank ones play nothing)
   data/scripts/scar/cataclysmspeech.lua   KAS_SpeechEvent[event] = { nvar, maxvar, base, bank } for the runtime
 String/file id = base id of the bank + phrase index (Sect 2200000, Beast 2210000: all below the 22-bit limit).
 Phrases are resampled from the decoded 22050 Hz to 44.1 kHz (HWRM plays WAVs at 44.1 kHz regardless of their header).
@@ -12,6 +13,8 @@ import csv
 import os
 import subprocess
 import wave
+
+import speech_tags
 
 DECOMP = r"C:\Modding\Cataclysm-decomp"
 MOD = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -44,7 +47,8 @@ def main():
     os.makedirs(wav_dir, exist_ok=True)
     os.makedirs(dat_dir, exist_ok=True)
     src = os.path.join(DECOMP, "extracted", "audio", "speech")
-    subs, events, written = {}, {}, 0
+    subs, events, written, tagged = {}, {}, 0, 0
+    tagger = speech_tags.Tagger()
     for bank in a.banks.split(","):
         with open(os.path.join(DECOMP, "out", f"speech_events_{bank}.tsv"), encoding="utf-8") as f:
             rows = list(csv.DictReader(f, delimiter="\t", quoting=csv.QUOTE_NONE))
@@ -60,7 +64,12 @@ def main():
                 e["base"] = ph
             if sid in subs:
                 continue
-            subs[sid] = (r["subtitle"] or " ", int(r["duration_ms"]))
+            text = r["subtitle"].strip()
+            if not text and bank == "sect":
+                # a blank subtitle plays nothing in HWRM: speaker tag for the lines missions / cutscenes play
+                text = tagger.tag(ev, sid) or ""
+                tagged += bool(text)
+            subs[sid] = (text or " ", int(r["duration_ms"]))
             out = os.path.join(wav_dir, f"{sid}.wav")
             if not os.path.exists(out):
                 join_wavs([os.path.join(src, x) for x in r["files"].split(",")], out, a.rate)
@@ -83,7 +92,7 @@ def main():
         f.write("KAS_SpeechDurations = {}\n")
         for sid in sorted(subs):
             f.write(f"KAS_SpeechDurations[{sid}] = {subs[sid][1]}\n")
-    print(f"{len(subs)} phrases ({written} WAVs written), {len(events)} events")
+    print(f"{len(subs)} phrases ({written} WAVs written), {len(events)} events, {tagged} unsubtitled lines tagged")
 
 
 if __name__ == "__main__":

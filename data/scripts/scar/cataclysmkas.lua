@@ -416,9 +416,9 @@ KAS_NisPath = "nis/cataclysm/"
 KAS_NisAvailable = {}                 -- names converted so far
 KAS_NisAvailable["n01"] = 1
 
--- Cues: what a converted cutscene's HWRM script can't play (unsubtitled speech: speechEventActor stays silent
--- for a blank subtitle), as { seconds after the start, kind, argument }; generated next to each NIS by
--- tools/nis2hwrm.py (data/nis/cataclysm/<name>_cues.lua, report in docs/nis/<name>.md).
+-- Cues: what a converted cutscene's HWRM script can't play (music: its musicStart stayed silent), as
+-- { seconds after the start, kind, argument }; generated next to each NIS by tools/nis2hwrm.py
+-- (data/nis/cataclysm/<name>_cues.lua, report in docs/nis/<name>.md).
 KAS_NisCues = {}
 for name, _ in KAS_NisAvailable do
     dofilepath("data:nis/cataclysm/" .. name .. "_cues.lua")
@@ -443,8 +443,8 @@ function KAS_NisCueTick()
     while KAS_NisCueNext <= getn(l) and l[KAS_NisCueNext][1] <= t do
         local c = l[KAS_NisCueNext]
         KAS_NisCueNext = KAS_NisCueNext + 1
-        if c[2] == "speech" then
-            Sound_SpeechPlay(c[3])
+        if c[2] == "music" then                        -- as kasfMusicPlay
+            Sound_MusicPlayType(c[3], MUS_Ambient)
         end
         print("CKAS: NIS cue " .. c[2] .. " " .. c[3] .. " at " .. t .. "s")
     end
