@@ -1,8 +1,32 @@
 speechSetDir("n01")
 at frame 0
     cameraCut("Camera0")
+at frame 451
+    cameraCut("Camera1")
+at frame 691
+    cameraCut("Camera2")
+at frame 991
+    cameraCut("Camera3")
+at frame 1211
+    cameraCut("Camera4")
+at frame 1510
+    cameraCut("Camera5")
+at frame 1690
+    cameraCut("Camera6")
+at frame 1851
+    cameraCut("Camera7")
+at frame 2001
+    cameraCut("Camera8")
+at frame 2151
+    cameraCut("Camera9")
+at frame 2281
+    cameraCut("Camera10")
+at frame 2511
+    cameraCut("Camera11")
+at frame 2689
+    cameraCut("Camera12")
 at frame 1
-    cameraBlendOutOnSkip("Camera0", 1)
+    cameraBlendOutOnSkip("Camera12", 1)
 at frame 0
     wideScreenIn(0.0333333)
     fadeSet(1)
@@ -28,7 +52,7 @@ at frame 3259
     fadeTo(1, 2)
 at frame 3321
     wideScreenOut(1)
-    cameraBlendOut("Camera0", 1)
+    cameraBlendOut("Camera12", 1)
     fadeTo(0, 1)
 with Som_Mothership
 {

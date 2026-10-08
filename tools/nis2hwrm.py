@@ -197,6 +197,32 @@ def sample_times(path, frame_times):
     return out, len(cuts)
 
 
+def camera_cuts(path):
+    """Times where the HW1 camera cuts. A cut is a cluster of keys at most a frame apart; the cut is the gap in
+    the cluster with the biggest change of position/view (the other keys only shape the spline)."""
+    ts = path["times"]
+    off = max(path.get("timeOffset", 0.0), 0.0)
+
+    def change(t0, t1):
+        (p0, r0), (p1, r1) = pose(path, t0, True), pose(path, t1, True)
+        d = math.dist(p0, p1)
+        a = sum(abs(math.atan2(math.sin(r1[i] - r0[i]), math.cos(r1[i] - r0[i]))) for i in range(3))
+        return d + 500 * a
+
+    cuts, i, n = [], 1, len(ts)
+    while i < n - 2:
+        if 0 < ts[i + 1] - ts[i] <= 0.04:
+            j = i
+            while j + 1 < n - 1 and 0 < ts[j + 1] - ts[j] <= 0.04:
+                j += 1
+            best = max(range(i, j), key=lambda k: change(ts[k] + off, ts[k + 1] + off))
+            cuts.append(ts[best + 1] + off)
+            i = j + 1
+        else:
+            i += 1
+    return cuts
+
+
 def unwrap(vals):
     out = [vals[0]]
     for v in vals[1:]:
@@ -254,7 +280,7 @@ def speech_lookup():
     return events
 
 
-def translate_script(src, objects, nisname, speech, fps, end_frame):
+def translate_script(src, objects, nisname, speech, fps, end_frame, cam_events):
     """HW1 NIS script -> HWRM NIS script. Returns (text, speech ids used, notes)."""
     lines = [l.split(";")[0].split("//")[0].rstrip() for l in open(src, encoding="latin-1").read().splitlines()]
     lines = [l for l in lines if l.strip() and not l.lstrip().startswith("#")]
@@ -315,10 +341,13 @@ def translate_script(src, objects, nisname, speech, fps, end_frame):
             emit(f'speechEventActor("${sid}", {16 if ev & 0x1000 else 17}, 2)')
         else:
             skipped[cmd] = skipped.get(cmd, 0) + 1
-    out = [f'speechSetDir("{nisname}")', "at frame 0", '    cameraCut("Camera0")',
-           "at frame 1", '    cameraBlendOutOnSkip("Camera0", 1)'] + out_global
+    last = cam_events[-1][1]
+    out = [f'speechSetDir("{nisname}")']
+    for f, cam in cam_events:
+        out += [f"at frame {f}", f'    cameraCut("{cam}")']
+    out += ["at frame 1", f'    cameraBlendOutOnSkip("{last}", 1)'] + out_global
     # HW1 faded the game back in after an NIS; HWRM keeps the NIS fade, so end like Gearbox's scripts do.
-    out += [f"at frame {end_frame}", "    wideScreenOut(1)", '    cameraBlendOut("Camera0", 1)', "    fadeTo(0, 1)"]
+    out += [f"at frame {end_frame}", "    wideScreenOut(1)", f'    cameraBlendOut("{last}", 1)', "    fadeTo(0, 1)"]
     for key, body in out_obj.items():
         if key == "#drop" or not any(not b.strip().startswith("at frame") for b in body):
             continue
@@ -375,25 +404,32 @@ def main():
                     + struct.pack("<6d", *(chans[c][0] for c in ("translateX", "translateY", "translateZ",
                                                                   "rotateX", "rotateY", "rotateZ"))) + b" ZYX")
 
-    cmra = []
-    for i, c in enumerate(nis["cameras"]):
-        cam, eye = f"Camera{i}", f"Camera{i}_Eye"
-        st, ncuts = sample_times(c, times)
-        tlist = [t for t, _ in st]
-        poses = [pose(c, te, True) for _, te in st]
-        rots = continuous_euler([p[1] for p in poses])
-        chans = {}
-        for j, ax in enumerate("XYZ"):
-            chans["translate" + ax] = [p[0][j] for p in poses]
-            chans["rotate" + ax] = [r[j] for r in rots]
-        print(f"  {cam}: {ncuts} cuts made instant")
-        order = ("translateX", "translateY", "translateZ", "rotateX", "rotateY", "rotateZ")
-        for c_ in order:
-            anim.append(channel(f"{eye}_{c_}", list(zip(tlist, chans[c_])), fps))
-        # The eye is also a FOLW object of kind "camera" (Gearbox); without it the engine has a NULL camera.
-        folw.append(lstr(eye) + lstr("HW1") + lstr("camera") + lstr("") + b"".join(lstr(f"{eye}_{c_}") for c_ in order)
-                    + struct.pack("<6d", *(chans[c_][0] for c_ in order)) + b" ZYX")
-        cmra.append(lstr(cam) + lstr(eye) + CAMERA_LENS)
+    # One HWRM camera per HW1 shot, switched with cameraCut() like Gearbox's scripts: HWRM interpolates camera
+    # keys at the render frame rate, so a cut inside one camera path shows in-between frames.
+    cmra, cam_events = [], []
+    order = ("translateX", "translateY", "translateZ", "rotateX", "rotateY", "rotateZ")
+    for c in nis["cameras"]:
+        bounds = [0.0] + [t for t in camera_cuts(c) if t < nis["length"]] + [nis["length"] + TAIL_FRAMES / fps]
+        for k in range(len(bounds) - 1):
+            cam = f"Camera{len(cmra)}"
+            eye = cam + "_Eye"
+            f0, f1 = round(bounds[k] * fps), max(round(bounds[k + 1] * fps) - 1, round(bounds[k] * fps))
+            tlist = [f / fps for f in range(f0, f1 + 1)]
+            poses = [pose(c, t, True) for t in tlist]
+            rots = continuous_euler([p_[1] for p_ in poses])
+            chans = {}
+            for j, ax in enumerate("XYZ"):
+                chans["translate" + ax] = [p_[0][j] for p_ in poses]
+                chans["rotate" + ax] = [r[j] for r in rots]
+            for c_ in order:
+                anim.append(channel(f"{eye}_{c_}", list(zip(tlist, chans[c_])), fps))
+            # The eye is also a FOLW object of kind "camera" (Gearbox); without it the engine has a NULL camera.
+            folw.append(lstr(eye) + lstr("HW1") + lstr("camera") + lstr("") + b"".join(lstr(f"{eye}_{c_}") for c_ in order)
+                        + struct.pack("<6d", *(chans[c_][0] for c_ in order)) + b" ZYX")
+            cmra.append(lstr(cam) + lstr(eye) + CAMERA_LENS)
+            cam_events.append((f0, cam))
+        break                                              # HW1 NIS files have one camera path
+    print(f"  cameras: {len(cmra)} shots")
 
     body = (chunk(b"NAME", b"Homeworld2 NIS File") + chunk(b"VERS", struct.pack("<I", 0x100))
             + chunk(b"INFO", struct.pack("<III", fps, 0, nframes + TAIL_FRAMES))
@@ -406,7 +442,7 @@ def main():
     with open(os.path.join(out_dir, a.name + ".nis"), "wb") as f:
         f.write(b"FORM" + struct.pack(">I", len(body) + 4) + b"NIS " + body)
 
-    text, used, skipped = translate_script(src + ".script", objects, a.name, speech_lookup(), fps, nframes + 2)
+    text, used, skipped = translate_script(src + ".script", objects, a.name, speech_lookup(), fps, nframes + 2, cam_events)
     with open(os.path.join(out_dir, a.name + ".script"), "w", encoding="latin-1", newline="\n") as f:
         f.write(text)
     sp_dir = os.path.join(MOD, "data", "sound", "speech", "nis", a.name)
