@@ -587,6 +587,11 @@ function KAS_EngineTick()
         KAS_ApplyAlliances()
         KAS_FreezeSensorArrays()
     end
+    if KAS_WatchTeams and (KAS_WatchAt == nil or now >= KAS_WatchAt) then
+        KAS_WatchAt = now + 10
+        KAS_LogTeams()
+    end
+    KAS_PatrolTick()
     if KAS_ROEAt == nil or now >= KAS_ROEAt then
         KAS_ROEAt = now + 5
         KAS_TeamsDefensive()
@@ -766,6 +771,22 @@ end
 -- themselves; HWRM's default offensive ROE sent them after anything they saw (the picket's interceptors and the
 -- flank bombers / ion frigates ended up in the capital ship battle, which Mission01's dialogue keeps apart).
 -- Defensive ROE (1) on every non-player ship, again every 5 s for ships that arrive later.
+-- Debug trace: position, order and distance to a point of chosen teams every 10 s (KAS_WatchTeams = { {team, point}, ... })
+KAS_WatchTeams = { { "KushanProxDefend1", { -24568, -2087, -7384 } }, { "KushanProxDefend2", { -24568, -2087, -7384 } } }   -- ProxPatrol_0
+function KAS_LogTeams()
+    local i = 1
+    while i <= getn(KAS_WatchTeams) do
+        local t, pt = KAS_WatchTeams[i][1], KAS_WatchTeams[i][2]
+        if SobGroup_Count(t) > 0 then
+            local a, b = SobGroup_GetPosition(t), pt
+            local d = floor(sqrt((a[1]-b[1])*(a[1]-b[1]) + (a[2]-b[2])*(a[2]-b[2]) + (a[3]-b[3])*(a[3]-b[3])))
+            print(format("CKAS watch %s: %d ships at %d %d %d, order %d, %d from %s", t, SobGroup_Count(t),
+                floor(a[1]), floor(a[2]), floor(a[3]), SobGroup_GetCurrentOrder(t), d, "ProxPatrol_0"))
+        end
+        i = i + 1
+    end
+end
+
 function KAS_TeamsDefensive()
     local p = 1
     while p < Universe_PlayerCount() do
@@ -797,6 +818,7 @@ function K_492190(targets)                                                      
         SobGroup_SobGroupAdd("KAS_AttackTargets", "KAS_AttackTmp")
         i = i + 1
     end
+    KAS_EndPatrol()
     if SobGroup_Count("KAS_AttackTargets") > 0 then KAS_Attack(KAS_Team, "KAS_AttackTargets") end
 end
 
@@ -987,8 +1009,57 @@ function KAS_Owner(sel) return SobGroup_GetPlayerOwner(sel) end
 function K_491cb0() KAS_MissionFailed() end                                                          -- kasfMissionFailed
 function K_492780() KAS_SetFormation(KAS_Team, "Delta") end                                          -- kasfFormationDelta
 function K_492810() KAS_SetFormation(KAS_Team, "Claw") end                                           -- kasfFormationClaw
-function K_492960(sel) SobGroup_GuardSobGroup(KAS_Team, sel) end                                     -- kasfGuardShips
-function K_4929d0(path) SobGroup_FollowPath(KAS_Team, path, 1, 1, 0) end                             -- kasfPatrolPath
+function K_492960(sel) KAS_EndPatrol() SobGroup_GuardSobGroup(KAS_Team, sel) end                                     -- kasfGuardShips
+-- kasfPatrolPath: SobGroup_FollowPath (Gearbox's emulation) is an attack-move (COMMAND_AttackMove, 20): the ships
+-- engage whatever their side sees, and Mission01's Kushan picket (33 proximity sensors) sees across the map, so the
+-- picket's interceptor wings left their patrol for the Taiidan interceptors on the far side (trace: order 20, then
+-- 2 = attack, with no kasfAttack for them, even with passive ROE). Cataclysm's wings patrol until the alarm (an
+-- explicit kasfAttack). Here the patrol is plain moves point to point (KAS_Paths: mission2level.py
+-- m<NN>_paths.lua), around a closed path, back and forth along an open one; any other order ends it.
+KAS_Patrols = {}
+KAS_PatrolReach = 600          -- a team is at a waypoint when its centre is this close (or it has stopped)
+function KAS_EndPatrol() KAS_Patrols[KAS_Team] = nil end
+function KAS_PatrolGo(team)
+    local p = KAS_Patrols[team]
+    SobGroup_MoveToPoint(KAS_Owner(team), team, KAS_Paths[p.path][p.i])
+end
+function K_4929d0(path)                                                                             -- kasfPatrolPath
+    if KAS_Paths == nil or KAS_Paths[path] == nil then
+        KAS_Patrols[KAS_Team] = nil
+        SobGroup_FollowPath(KAS_Team, path, 1, 1, 0)
+        return
+    end
+    KAS_Patrols[KAS_Team] = { path = path, i = 1, dir = 1 }
+    KAS_PatrolGo(KAS_Team)
+end
+function KAS_PatrolTick()
+    local gone = {}
+    for team, p in KAS_Patrols do
+        if SobGroup_Count(team) == 0 then
+            gone[getn(gone) + 1] = team
+        else
+            local pts, a = KAS_Paths[p.path], SobGroup_GetPosition(team)
+            local b = pts[p.i]
+            local d = sqrt((a[1] - b[1]) * (a[1] - b[1]) + (a[2] - b[2]) * (a[2] - b[2]) + (a[3] - b[3]) * (a[3] - b[3]))
+            if d < KAS_PatrolReach or SobGroup_GetCurrentOrder(team) == COMMAND_Idle then
+                local n = getn(pts)
+                if pts.closed == 1 then
+                    p.i = p.i + 1
+                    if p.i > n then p.i = 1 end
+                else
+                    if p.i + p.dir < 1 or p.i + p.dir > n then p.dir = -p.dir end
+                    p.i = p.i + p.dir
+                end
+                KAS_PatrolGo(team)
+            end
+        end
+    end
+    local i = 1
+    while i <= getn(gone) do
+        KAS_Patrols[gone[i]] = nil
+        i = i + 1
+    end
+end
 function K_492b20() return floor(KAS_TeamHealth(KAS_Team)) end                                      -- kasfTeamHealthAverage
 function K_493aa0(pct) SobGroup_SetHealth(KAS_Team, pct / 100) end                                  -- kasfTeamSetPercentDamaged
 function K_493cf0(team, sel) SobGroup_SobGroupAdd(team, sel) end                                    -- kasfReinforceTeamWithShips
@@ -1004,6 +1075,7 @@ end
 
 -- ------------------------------------------------------------------ orders
 function K_4941a0(vec)                                                                              -- kasfMoveTo
+    KAS_EndPatrol()
     if SobGroup_Count(KAS_Team) > 0 then SobGroup_MoveToPoint(KAS_Owner(KAS_Team), KAS_Team, vec) end
 end
 function K_494750(host) SobGroup_DockSobGroupInstant(KAS_Team, host) end                            -- kasfDockInstant
@@ -1011,6 +1083,7 @@ function K_4947c0() KAS_Launch(KAS_Team) end                                    
 function K_4948a0() return KAS_B(KAS_TeamFinishedLaunching(KAS_Team) ~= 0) end                      -- kasfTeamFinishedLaunching
 function K_494940() return KAS_B(SobGroup_IsDockedCompletely(KAS_Team) == 1) end                   -- kasfTeamDockedReadyForLaunch
 function K_495eb0()                                                                                  -- kasfStop
+    KAS_EndPatrol()
     if SobGroup_Count(KAS_Team) > 0 then SobGroup_Stop(KAS_Owner(KAS_Team), KAS_Team) end
 end
 function K_495f00() KAS_Harvest(KAS_Owner(KAS_Team), KAS_Team) end                                  -- kasfHarvest

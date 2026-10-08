@@ -33,6 +33,7 @@ dofilepath("data:scripts/scar/cataclysmkas.lua")
 dofilepath("data:scripts/scar/cataclysmspeech.lua")
 dofilepath("data:scripts/scar/cataclysmships.lua")
 dofilepath("data:scripts/scar/cataclysmtech.lua")
+dofilepath("data:leveldata/campaign/cataclysm/m{nn}/m{nn}_paths.lua")
 dofilepath("data:leveldata/campaign/cataclysm/m{nn}/m{nn}_kas.lua")
 
 -- Kuun-Lan modules at the start (the mission's IncludeShips sMothership<Module>; tools/make_modules.py)
