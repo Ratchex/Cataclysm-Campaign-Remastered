@@ -101,6 +101,25 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
   name, e.g. kus_interceptor `Weapon_Gun0`), whose events give the muzzle flash/sound.
 - `NewShipType.upLOD/downLOD` switch to LOD 1: a LOD-0-only model vanishes at distance with them.
 
+## Mesh animations and ship effects (Worker, confirmed in game)
+- HWRM .mad (IFF; layout in tools/mad2hwrm.py): clip and key times are **seconds** (stock clips e.g. 0.067-1.8),
+  tangents in value per second; channels `<joint>_translateX/Y/Z`, `_rotateX/Y/Z` (radians, same Euler triple
+  as the HOD joint's, Z*Y*X). Frames made every clip 30x slow (looked frozen).
+- Meshes parented to a JNT in the DAE are bound to it in the HOD (MULT records the joint): rigid parts animate.
+- Cataclysm .mad ("Mellonn" 0.91): per object 6 TCB splines over shared times (s); local matrix = translation
+  (c1, c2, -c0), rotation nisObjectEulerToMatrix(c3..c5). sworker: pose at t=0 equals the .geo matrices exactly.
+- .madstate: `<SHIP>_<State>_OnSet/_OnPause`; `setPauseTime(ship, clip, 1000)` holds the last frame. Setting the
+  Start state to 0 and back to 1 in `_OnPause` waits for the clip started there (beam after the boom is out).
+- NIS: only numbered states work in `setMADState` (`NIS00`, `NIS01`...; "NIS_DockOpen" did nothing), and not at
+  frame 0 (moved to frame 5). tools/nis2hwrm.py NIS_STATES maps HW1 `meshAnimStart <clip>`.
+- Harvest stand-off = the model's `LatchOrientation` joint (put on the asteroid's surface; stock tai collector:
+  95 ahead, Up along the beam). Without one the collector sits on the rock. The Harvest ability's last argument
+  did not change it.
+- .events effect markers are joints. Stock harvest cone (harvesting_beam_kus) is ~35 long at fx_scale 1, so a
+  140-unit stand-off showed only its glow. Effects start where the marker is when started.
+- Cataclysm: harvest = SectBeast_resource_solid.ebg (orange cone), repair = Repair_Corvette.ebg (green);
+  nozzles = .mex Gun "GUN0" (resources) / "Rep0" (repair), HW1 ResCollect.c ASTEROID_HARVEST_RANGE 400.
+
 ## Cutscenes (Phase 0.5, confirmed in game with n01)
 - HWRM NIS = IFF `FORM NIS ` (layout in tools/nis2hwrm.py docstring). Played with `NISLoad("nis/cataclysm/n01")`
   then `NISPlayFromCoordSys(path, pos, matrix)`; `NISShipStartPosition(path, shipType, -1)` finds the centre ship
@@ -117,8 +136,7 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
 - HW1 left the screen black at the end of an NIS and faded in itself; the converted script fades back in.
 - Speech actors: 16 Fleet Command, 17 Fleet Intel (logged from Actor_HW1_*).
 - Not converted yet: music (startMusic), subtitle text cards, lights/ambient, lens flares, the planet backdrop,
-  buoys, colour schemes, FOV changes inside a shot, mesh animations (Kuun-Lan DockOpen/DockClose: with real
-  modules), remainAtEnd (the real ships are hidden during the intro instead; Gearbox keeps the NIS ships).
+  buoys, colour schemes, FOV changes inside a shot, Kuun-Lan mesh animations (DockOpen/DockClose; Worker ones are), remainAtEnd (the real ships are hidden during the intro instead; Gearbox keeps the NIS ships).
 
 ## Debugging crashes (Phase 1)
 - Every crash writes `Bin/Release/<date>_ErrorLog.txt` (+ minidumps): faulting address and stack. The exe is loaded

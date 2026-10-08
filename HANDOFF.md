@@ -4,7 +4,7 @@ Last updated 2026-10-08. Read this first, then `C:\Modding\Cataclysm-decomp\PORT
 `NOTES.md` (HWRM engine rules learned in game) and `C:\Modding\Cataclysm-decomp\MODLOG.md` (reverse-engineering
 findings).
 
-## RESUME HERE (session of 2026-10-08, last code commit 9dbac5c)
+## RESUME HERE (session of 2026-10-08, last code commit f2231c8)
 User's direction: set up each mission's units as we reach that mission. Current goal: the Kuun-Lan fully working
 (side docks + every module as an HW2 subsystem, Cataclysm Remastered's Kuun-Lan as the template), then the
 Worker's leg / resource-harvest animations and effects.
@@ -35,9 +35,15 @@ Workers unaffected): the Hangar is a ~480-unit box under the core with the DB po
 waypoint (~315 out) was at its corner, so ships flew through it; fighter / corvette paths now start from an outer
 waypoint (geo2dae.py OUTER_APPROACH: 2400 / 2800 HW1 units out) and launches leave all the way out.
 
+Then the Worker (f2231c8, confirmed in game: "actually perfect"): Cataclysm's sworker.mad converted
+(tools/mad2hwrm.py; animated objects are joints via geo2dae --anim-joints): clamps open docked / close on launch
+and on n01's cues, boom out (5 deg less than Cataclysm's) before the stock HW1 harvest / repair beams, which start
+at fixed markers; hovers 45 off the rock (LatchOrientation joint); RepairCommand enabled. Build: `bash
+tools/build_ship.sh race_sect/sworker som_worker` (per-ship args in build_ship.sh), then install_cr.py; our
+.events / .madstate live in tools/overrides/.
+
 To fix next, in order:
-1. The Worker's leg / harvest animations and effects (Cataclysm sworker objects Jackbase, Jackhamr, Blade(1-3),
-   DockClmp(1-4); their smt_worker has .mad/.madstate to borrow from).
+1. Other animated Somtaaw ships the same way (sworker pattern: --anim-joints, mad2hwrm, tools/overrides madstate).
 Open, lower priority: Support units (SU); Siege Cannon weapon; how many Support modules each mission starts with
 (1 for now); losing engine modules should slow the Kuun-Lan; n01 `startMusic` cue; hyperspace exit (`K_497290`).
 
