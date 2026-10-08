@@ -795,7 +795,19 @@ function KAS_TeamsDefensive()
     end
 end
 
+-- HWRM runs its skirmish AI for every computer player unless told not to (Gearbox's KAS_CPUPlayerInit: player 1
+-- KAS-controlled, player 2 the human's allies, both CPU_Enable(p, 0)). Left on, it ran the Taiidan and the Kushan
+-- alongside the mission: attack-moves (order 20) nobody scripted sent the picket's interceptor wings across the map.
+function KAS_DisableCPUPlayers()
+    local p = 1
+    while p < Universe_PlayerCount() do
+        CPU_Enable(p, 0)
+        p = p + 1
+    end
+end
+
 function KAS_StartEngine()
+    KAS_DisableCPUPlayers()
     KAS_ApplyAlliances()
     KAS_RestrictTechs()
     Rule_AddInterval("KAS_EngineTick", 0.5)
