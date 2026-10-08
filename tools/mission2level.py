@@ -37,11 +37,11 @@ SCALE, RADIUS_SCALE, OUTER = 0.35, 0.175, 1.2
 # StartPointPlayer: SobGroup_HyperspaceTo brings the Kuun-Lan in unrotated (bow +Z, port +X, up +Y), whatever the
 # point's rotation (two in-game tries: a camera placed for its -241 degree heading showed the port stern, then
 # starboard abeam). Ahead of and below the port bow, looking up at it as in Cataclysm (user's screenshot of the
-# original warp-in), a little below the ship's level (pitch and yaw confirmed by the user); twice the first
-# confirmed-angle distance (~1650 was inside the hangar module's reach). Level addCamera(name, target, eye).
+# original warp-in), a little below the ship's level (pitch and yaw confirmed by the user); 6x the first
+# confirmed-angle distance (1x and 2x still started nearly inside the hangar). Level addCamera(name, target, eye).
 ARRIVAL_TARGET = (0.0, 0.0, 600.0)
 ARRIVAL_DIRECTION = (900.0, -200.0, 1380.0)     # eye - target, confirmed angle
-ARRIVAL_DISTANCE_SCALE = 2.0
+ARRIVAL_DISTANCE_SCALE = 6.0
 ARRIVAL_EYE = tuple(ARRIVAL_TARGET[k] + ARRIVAL_DISTANCE_SCALE * ARRIVAL_DIRECTION[k] for k in range(3))
 
 
