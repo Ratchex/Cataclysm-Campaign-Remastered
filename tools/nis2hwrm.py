@@ -149,16 +149,52 @@ def channel(name, samples, fps):
     if max(v for _, v in samples) - min(v for _, v in samples) < 1e-6:
         samples = [samples[0], samples[-1]] if len(samples) > 1 else samples
     out = [lstr(name), struct.pack("<HH", len(samples), 0)]
-    for i, (t, v) in enumerate(samples):
-        a = samples[max(i - 1, 0)]
-        c = samples[min(i + 1, len(samples) - 1)]
-        dt = c[0] - a[0]
-        slope = (c[1] - a[1]) / dt if dt > 0 else 0.0
+    def tangent(a, b):
+        dt = b[0] - a[0]
+        slope = (b[1] - a[1]) / dt if dt > 0 else 0.0
         n = math.hypot(1.0, slope)
-        tan = (1.0 / n, slope / n)
-        out.append(struct.pack("<dd4f", t, v, tan[0], tan[1], tan[0], tan[1]))
+        return 1.0 / n, slope / n
+    # One-sided tangents (slope to the previous / next key): no overshoot between keys or across cuts.
+    for i, (t, v) in enumerate(samples):
+        tin = tangent(samples[i - 1], samples[i]) if i > 0 else tangent(samples[i], samples[min(i + 1, len(samples) - 1)])
+        tout = tangent(samples[i], samples[i + 1]) if i + 1 < len(samples) else tin
+        out.append(struct.pack("<dd4f", t, v, tin[0], tin[1], tout[0], tout[1]))
     out.append(bytes(8))
     return b"".join(out)
+
+
+def continuous_euler(rots):
+    """Per-frame (rx, ry, rz) -> the equivalent triple closest to the previous frame: (x, y, z) and
+    (x + pi, pi - y, z + pi) are the same rotation, and each angle is free modulo 2 pi."""
+    def near(a, ref):
+        return a + 2 * math.pi * round((ref - a) / (2 * math.pi))
+    out = [rots[0]]
+    for r in rots[1:]:
+        p = out[-1]
+        best = None
+        for cand in (r, (r[0] + math.pi, math.pi - r[1], r[2] + math.pi)):
+            c = tuple(near(cand[i], p[i]) for i in range(3))
+            d = sum((c[i] - p[i]) ** 2 for i in range(3))
+            if best is None or d < best[0]:
+                best = (d, c)
+        out.append(best[1])
+    return out
+
+
+def sample_times(path, frame_times):
+    """Frame times plus instant-cut keys: where two HW1 keys sit at most a frame apart (camera cuts, often in
+    clusters of 2-4 keys), hold the old pose until the first and jump 1 ms later. HWRM interpolates between keys at
+    the render frame rate, which turned these one-frame steps into fast swoops."""
+    ts = path["times"]
+    off = max(path.get("timeOffset", 0.0), 0.0)
+    cuts = []
+    for i in range(1, len(ts) - 2):
+        if 0 < ts[i + 1] - ts[i] <= 0.04:                  # every 1-frame gap was a step at HW1's 30 fps
+            cuts.append((ts[i] + off, ts[i + 1] + off))
+    extra = [(a + 0.001, b) for a, b in cuts]           # (sample time, time to evaluate)
+    out = [(t, t) for t in frame_times] + extra
+    out.sort()
+    return out, len(cuts)
 
 
 def unwrap(vals):
@@ -322,16 +358,19 @@ def main():
         seen[typ] = seen.get(typ, 0) + 1
         key = typ if counts[typ] == 1 else f"{typ}{seen[typ]}"
         objects[object_key(o["name"])] = key
-        poses = [pose(o, t, False) for t in times]
+        st, _ = sample_times(o, times)
+        tlist = [t for t, _ in st]
+        poses = [pose(o, te, False) for _, te in st]
+        rots = continuous_euler([p[1] for p in poses])
         chans = {}
         for i, ax in enumerate("XYZ"):
             chans["translate" + ax] = [p[0][i] for p in poses]
-            chans["rotate" + ax] = unwrap([p[1][i] for p in poses])
+            chans["rotate" + ax] = [r[i] for r in rots]
         names = []
         for c in ("translateX", "translateY", "translateZ", "rotateX", "rotateY", "rotateZ"):
             nm = f"{key}_{c}"
             names.append(nm)
-            anim.append(channel(nm, list(zip(times, chans[c])), fps))
+            anim.append(channel(nm, list(zip(tlist, chans[c])), fps))
         folw.append(lstr(key) + lstr("HW1") + lstr(kind) + lstr(typ) + b"".join(lstr(n) for n in names)
                     + struct.pack("<6d", *(chans[c][0] for c in ("translateX", "translateY", "translateZ",
                                                                   "rotateX", "rotateY", "rotateZ"))) + b" ZYX")
@@ -339,14 +378,18 @@ def main():
     cmra = []
     for i, c in enumerate(nis["cameras"]):
         cam, eye = f"Camera{i}", f"Camera{i}_Eye"
-        poses = [pose(c, t, True) for t in times]
+        st, ncuts = sample_times(c, times)
+        tlist = [t for t, _ in st]
+        poses = [pose(c, te, True) for _, te in st]
+        rots = continuous_euler([p[1] for p in poses])
         chans = {}
         for j, ax in enumerate("XYZ"):
             chans["translate" + ax] = [p[0][j] for p in poses]
-            chans["rotate" + ax] = unwrap([p[1][j] for p in poses])
+            chans["rotate" + ax] = [r[j] for r in rots]
+        print(f"  {cam}: {ncuts} cuts made instant")
         order = ("translateX", "translateY", "translateZ", "rotateX", "rotateY", "rotateZ")
         for c_ in order:
-            anim.append(channel(f"{eye}_{c_}", list(zip(times, chans[c_])), fps))
+            anim.append(channel(f"{eye}_{c_}", list(zip(tlist, chans[c_])), fps))
         # The eye is also a FOLW object of kind "camera" (Gearbox); without it the engine has a NULL camera.
         folw.append(lstr(eye) + lstr("HW1") + lstr("camera") + lstr("") + b"".join(lstr(f"{eye}_{c_}") for c_ in order)
                     + struct.pack("<6d", *(chans[c_][0] for c_ in order)) + b" ZYX")
