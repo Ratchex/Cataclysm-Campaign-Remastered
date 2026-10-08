@@ -13,7 +13,7 @@ GEO="$(geo "$SRC")"
 OUT="$MOD/build/ships/$NAME"
 HODOR="C:/Program Files (x86)/Steam/steamapps/common/Homeworld 347380/GBXTools/HODOR"
 rm -rf "$OUT"
-python "$MOD/tools/geo2dae.py" "$GEO" "$OUT" "$NAME" ${HARDPOINTS:+--hardpoint $HARDPOINTS} ${MERGE:+--merge "${MERGE[@]}"} | grep -v '^HODOR hangs'
+python "$MOD/tools/geo2dae.py" "$GEO" "$OUT" "$NAME" $(for h in $HARDPOINTS; do printf -- "--hardpoint %s " "$h"; done) ${MERGE:+--merge "${MERGE[@]}"} | grep -v '^HODOR hangs'
 "$HODOR/HODOR.exe" -action=convert "-\$CONVERT_IN=$OUT/$NAME.dae" "-\$CONVERT_OUT=$OUT/$NAME.hod" \
     "-\$SHADER_MAP=$HODOR/SHADERS.MAP" < /dev/null > "$OUT/hodor.log" 2>&1 || true
 grep -v -e '^X*$' -e 'Building LMIP' "$OUT/hodor.log" | sed 's/^/  /'

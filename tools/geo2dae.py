@@ -85,7 +85,12 @@ def read_mex(path):
             label = name.split(b"\0")[0].decode("latin-1")
             if typ == "Dok" and len(body) >= 52:
                 label = body[32:52].split(b"\0")[0].decode("latin-1")
-            out.append((typ, label, pos, nrm))
+            parent = ""
+            if typ == "Eng" and len(body) >= 48:   # Cataclysm: optional object the nozzle is attached to
+                raw = body[32:48].split(b"\0")[0]
+                if raw and all(32 <= c < 127 for c in raw):
+                    parent = raw.decode("latin-1")
+            out.append((typ, label, pos, nrm, parent))
         p += 16 + size
     return out
 
@@ -114,7 +119,7 @@ def dock_nodes(points, conv):
     def along(pos, nrm, d):
         return conv(*(pos[k] + nrm[k] * d for k in range(3)))
 
-    docks = {lbl: (pos, nrm) for typ, lbl, pos, nrm in points if typ == "Dok"}
+    docks = {lbl: (pos, nrm) for typ, lbl, pos, nrm, _ in points if typ == "Dok"}
     paths = []
     for prefix, fam, flags, (far, near) in DOCK_KINDS:
         for lbl in sorted(l for l in docks if l.startswith(prefix)):
@@ -151,7 +156,7 @@ def weapon_nodes(points, conv, convn):
     """JNT[Weapon_<GUNn>_Position] with _Direction (up), _Rest (firing direction), _Muzzle children (the layout of
     the HWRM Blender toolkit's hardpoint tool); the position joint itself is not rotated."""
     out = []
-    for typ, lbl, pos, nrm in points:
+    for typ, lbl, pos, nrm, _ in points:
         if typ != "Gun":
             continue
         n = convn(*nrm)
@@ -273,8 +278,12 @@ def main():
     # Each nozzle as in HODOR's engine layout (toolkit demo ship): BURN[EngineBurn<n>] with five flame divisions
     # trailing backwards and an ETSH[EngineShape<n>] quad; trails/burns need these, not just the joint.
     engines = [pt for pt in points if pt[0] == "Eng"]
-    for i, (_, _, pos, _) in enumerate(engines):
+    b0, _, _, objs0 = geo2obj.parse(a.geo)
+    by_name, cache0 = {o["name"]: i for i, o in enumerate(objs0)}, {}
+    for i, (_, _, pos, _, parent) in enumerate(engines):
         n = i + 1
+        if parent in by_name:                       # position is local to that object (Worker: Thruster(1)/(2))
+            pos = geo2obj.xform(geo2obj.world(objs0, by_name[parent], cache0), *pos)
         flames = "".join(jnode(f"Flame[0]_Div[{d}]", (0, 0, -2.0 * d)) for d in range(5))
         gid = f"ETSH[EngineShape{n}]"
         h = 1.5
