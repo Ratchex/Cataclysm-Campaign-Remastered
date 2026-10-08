@@ -159,6 +159,13 @@ def use_our_model(ship, ours, joints):
     mad = os.path.join(BUILD, ours, ours + ".mad")   # converted Cataclysm animation (tools/mad2hwrm.py)
     if os.path.exists(mad):
         shutil.copyfile(mad, os.path.join(folder, ship + ".mad"))
+    else:
+        # no animation of ours: their .mad animates their model's joints, and with ours its motion data was freed
+        # twice at shutdown (heap corruption 0xc0000374 on every exit; ProcDump stack in MotionNode/MotionFollower)
+        for ext in (".mad", ".madstate"):
+            if os.path.exists(os.path.join(folder, ship + ext)):
+                os.remove(os.path.join(folder, ship + ext))
+                print(f"  {ship}: their {ext} removed (made for their model)")
     model = open(os.path.join(folder, ship + ".hod"), "rb").read()
     path = os.path.join(folder, ship + ".ship")
     text = open(path, encoding="latin-1").read()
