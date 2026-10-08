@@ -33,6 +33,7 @@ sys.path.insert(0, os.path.join(DECOMP, "tools"))
 import nisread  # noqa: E402
 
 SCALE = 0.35
+TAIL_FRAMES = 45   # extra time after the HW1 NIS ends, for the fade back in (HW1's engine did that itself)
 NIS_SPEECH_FLAG = 0x20000000
 # Lens record Gearbox writes for every camera (52 bytes after the eye name; 21.8 / 31.9 / 24 / near 3 / far 50000).
 CAMERA_LENS = bytes.fromhex("000000000000000000000000000000c0cccc354080b8ab5791ed3f40000000000000384000000000000008"
@@ -217,7 +218,7 @@ def speech_lookup():
     return events
 
 
-def translate_script(src, objects, nisname, speech, fps):
+def translate_script(src, objects, nisname, speech, fps, end_frame):
     """HW1 NIS script -> HWRM NIS script. Returns (text, speech ids used, notes)."""
     lines = [l.split(";")[0].split("//")[0].rstrip() for l in open(src, encoding="latin-1").read().splitlines()]
     lines = [l for l in lines if l.strip() and not l.lstrip().startswith("#")]
@@ -278,7 +279,10 @@ def translate_script(src, objects, nisname, speech, fps):
             emit(f'speechEventActor("${sid}", {16 if ev & 0x1000 else 17}, 2)')
         else:
             skipped[cmd] = skipped.get(cmd, 0) + 1
-    out = [f'speechSetDir("{nisname}")', "at frame 0", '    cameraCut("Camera0")'] + out_global
+    out = [f'speechSetDir("{nisname}")', "at frame 0", '    cameraCut("Camera0")',
+           "at frame 1", '    cameraBlendOutOnSkip("Camera0", 1)'] + out_global
+    # HW1 faded the game back in after an NIS; HWRM keeps the NIS fade, so end like Gearbox's scripts do.
+    out += [f"at frame {end_frame}", "    wideScreenOut(1)", '    cameraBlendOut("Camera0", 1)', "    fadeTo(0, 1)"]
     for key, body in out_obj.items():
         if key == "#drop" or not any(not b.strip().startswith("at frame") for b in body):
             continue
@@ -349,7 +353,7 @@ def main():
         cmra.append(lstr(cam) + lstr(eye) + CAMERA_LENS)
 
     body = (chunk(b"NAME", b"Homeworld2 NIS File") + chunk(b"VERS", struct.pack("<I", 0x100))
-            + chunk(b"INFO", struct.pack("<III", fps, 0, nframes))
+            + chunk(b"INFO", struct.pack("<III", fps, 0, nframes + TAIL_FRAMES))
             + chunk(b"ANIM", struct.pack("<I", len(anim)) + b"".join(anim))
             + chunk(b"LEAD", LEAD)
             + chunk(b"FOLW", struct.pack("<I", len(folw)) + b"".join(folw))
@@ -359,7 +363,7 @@ def main():
     with open(os.path.join(out_dir, a.name + ".nis"), "wb") as f:
         f.write(b"FORM" + struct.pack(">I", len(body) + 4) + b"NIS " + body)
 
-    text, used, skipped = translate_script(src + ".script", objects, a.name, speech_lookup(), fps)
+    text, used, skipped = translate_script(src + ".script", objects, a.name, speech_lookup(), fps, nframes + 2)
     with open(os.path.join(out_dir, a.name + ".script"), "w", encoding="latin-1", newline="\n") as f:
         f.write(text)
     sp_dir = os.path.join(MOD, "data", "sound", "speech", "nis", a.name)

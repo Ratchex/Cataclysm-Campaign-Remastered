@@ -465,10 +465,19 @@ end
 function KAS_RunAfterIntro(name, start)
     print("CKAS: actors FleetCommand=" .. Actor_HW1_FleetCommand .. " FleetIntel=" .. Actor_HW1_FleetIntel)
     if name ~= "" and KAS_NisAvailable[name] then
-        KAS_NisPlay(name, nil, start)
+        -- The intro has its own copies of the player's ships (HW1 played it before the mission's ships existed):
+        -- hide the real ones until it ends. (Gearbox keeps the NIS ships instead with remainAtEnd; later.)
+        KAS_IntroStart = start
+        SobGroup_SetHidden("Player_Ships0", 1)
+        KAS_NisPlay(name, nil, KAS_IntroDone)
     else
         start()
     end
+end
+
+function KAS_IntroDone()
+    SobGroup_SetHidden("Player_Ships0", 0)
+    KAS_IntroStart()
 end
 
 function KAS_NisFinished()
