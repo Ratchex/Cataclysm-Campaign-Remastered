@@ -500,6 +500,10 @@ end
 
 function KAS_EngineTick()
     local now = Universe_GameTime()
+    if KAS_AlliancesDone == nil then
+        KAS_AlliancesDone = 1
+        KAS_ApplyAlliances()
+    end
     if KAS_NisPending == nil then
         local n = KAS_Vars[KAS_Key_PlayNislet]
         if n and n ~= 0 then
@@ -531,12 +535,18 @@ function K_498230()
     KAS_ShipsArriveAt = Universe_GameTime() + 3
 end
 
-function KAS_StartEngine()
-    -- Player 2 (when the level has one) is the allied Kushan fleet.
-    if Universe_PlayerCount() > 2 then
+-- Player 2 (when the level has one) is the allied Kushan fleet. Applied at start and again on the first tick.
+function KAS_ApplyAlliances()
+    local n = Universe_PlayerCount()
+    print("CKAS: " .. n .. " players; allying 0 and 2")
+    if n > 2 then
         SetAlliance(0, 2)
         SetAlliance(2, 0)
     end
+end
+
+function KAS_StartEngine()
+    KAS_ApplyAlliances()
     Rule_AddInterval("KAS_EngineTick", 0.5)
 end
 
@@ -856,10 +866,12 @@ function K_496260(a) KAS_NoOp("496260", "kasfCameraSetDistance") end
 function K_49a2a0(vec) KAS_NoOp("49a2a0", "set focus point (sensors manager)") end
 function K_497580(frames) KAS_SetLetterboxState(1, frames / 30) end                              -- kasfWideScreenIn
 function K_497630(frames) KAS_SetLetterboxState(0, frames / 30) end                              -- kasfWideScreenOut
-function K_497a90() KAS_NoOp("497a90", "UI flag a4cb68 = 1") end
-function K_497aa0() KAS_NoOp("497aa0", "UI flag a4cb68 = 0") end
-function K_497ad0() KAS_NoOp("497ad0", "UI mode save + FUN_0052c7e0") end
-function K_497af0() KAS_NoOp("497af0", "UI mode restore") end
+-- Fleet Intel pauses the universe and the other KAS teams while it points something out (Mission01 variables
+-- PauseUniverse / UnpauseOtherKAS). Not reproduced: HWRM keeps playing during the sensors-manager reveal.
+function K_497a90() KAS_NoOp("497a90", "pause universe (Fleet Intel)") end
+function K_497aa0() KAS_NoOp("497aa0", "unpause universe") end
+function K_497ad0() KAS_NoOp("497ad0", "pause other KAS teams") end
+function K_497af0() KAS_NoOp("497af0", "unpause other KAS teams") end
 
 -- ------------------------------------------------------------------ economy, research, trading, music
 function K_496e20(player, ru) Player_SetRU(player, ru) end                                       -- kasfRUsSet
