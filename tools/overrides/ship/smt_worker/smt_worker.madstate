@@ -58,8 +58,10 @@ end
 
 -- RESOURCE COLLECTION: boom out (as for repairs), harvest beam, blades turning ----
 SMT_WORKER_ResourceStart_OnSet = function(ship)
+    -- held until the boom is out (ResourceStart_OnPause), as for repairs: the beam starts at its tip
     setState(ship, "ResourceStart", 0)
     endEffect(ship, "Resourcing")
+    SMT_WORKER_Swap(ship, "JackClose", "JackOut")
 end
 
 SMT_WORKER_ResourceStart_OnPause = function(ship)
@@ -82,7 +84,7 @@ SMT_WORKER_ResourceEnd_OnSet = function(ship)
     setState(ship, "ResourceEnd", 1)
 end
 
--- REPAIRING: jack swings out, green cone from its tip, jack swings back -----------
+-- REPAIRING: jack swings out, repair beam from its tip, jack swings back -----------
 SMT_WORKER_RepairStart_OnSet = function(ship)
     -- held until the jack is out (RepairStart_OnPause)
     setState(ship, "RepairStart", 0)
