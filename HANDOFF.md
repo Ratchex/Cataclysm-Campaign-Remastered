@@ -26,7 +26,7 @@ findings).
 |---|---|---|
 | 0.1 | Campaign skeleton | Done. Rules in `NOTES.md` (keeper.txt, `<campaign>.dds`, createSOBGroup before addToSOBGroup, launch args). |
 | 0.2 | Level converter `mission2level.py` | Done; matches Gearbox's HW1 conversions; Mission01 layout checked in game. Resources/AIBox/derelicts/mines not converted yet. |
-| 0.3 | One Somtaaw ship end to end | **Done** (confirmed in game: look, size vs Kus_Carrier, no loose parts). Kuun-Lan = core + Mission01 modules baked into one mesh: `bash tools/build_ship.sh race_sect/smothership som_mothership race_sect/smothershipcommand race_sect/smothershipdockingbay race_sect/smothershipengineering race_sect/smothershipengineslower race_sect/smothershipenginesupper race_sect/smothershiplowerspine race_sect/smothershiporecanarmour`. Real modules (HWRM subsystems) later. |
+| 0.3 | One Somtaaw ship end to end | **Done** (confirmed in game: look, size vs Kus_Carrier, no loose parts). Kuun-Lan = core + Mission01 modules baked into one mesh: `GEO2DAE_ARGS="--dock-from C:/Modding/Cataclysm-decomp/reference/cr_beast/ship/smt_ms/smt_ms.hod --dock-scale 0.909" HARDPOINTS="Hardpoint_Research Hardpoint_Resource" bash tools/build_ship.sh race_sect/smothership som_mothership race_sect/smothershipcommand race_sect/smothershipdockingbay race_sect/smothershipengineering race_sect/smothershipengineslower race_sect/smothershipenginesupper race_sect/smothershiplowerspine race_sect/smothershiporecanarmour`. Real modules (HWRM subsystems) later. |
 | 0.4 | Speech/subtitles; localized `$IDs` | **Done.** `build_speech.py` makes one 44.1 kHz WAV + speech.dat string per phrase; runtime plays them via Subtitle_AddSkippable. Confirmed in game (lines, subtitles, objective text). |
 | 0.5 | NIS cutscenes | **Done** (n01 confirmed in game: cameras, cuts, zoom, speech, choreography). `tools/nis2hwrm.py <name>`; Mission01 plays n01 first (`build_mission.py --intro n01`). Open items in NOTES.md. |
 | 0.6 | KAS API naming | Partial. `out/kas_usage.tsv`: 302 functions used; confident names only for the first third of the API. Verified names in `out/kas_api_overrides.tsv`. Tools: `kasalign.py`, `kasverify.py <Mission>`. |
@@ -67,3 +67,11 @@ findings).
   Kuun-Lan modules as subsystems (ksh_sec_ms_*), a started "beastwar" campaign (2 missions, Somtaaw build/research).
 - Models mostly from HWU (HW2 mod). Permission needed before any Workshop release (HWU in indefinite maintenance);
   keep a list of every file used. Plan: their models/effects, our Cataclysm stats; our converter as fallback.
+
+## Cataclysm Remastered setup on our models (confirmed in game)
+- `tools/install_cr.py` installs CR's files, then puts our models (`build/ships/som_*`, from `tools/build_ship.sh`)
+  under their `smt_ms_sp`, `smt_worker`, `smt_scout`, `smt_acolyte` (OUR_MODELS joint maps, OUR_EVENTS). Rebuild a
+  model, then rerun `install_cr.py`. Worker docking/unloading, Acolyte guns + effects, trails, Recon glow confirmed.
+- Music: `tools/build_music.py` (Cataclysm's 62 streams, gain 0.5 confirmed); `kasfMusicPlay(n)` = stream n.
+- Next: Kuun-Lan side docks (9 Cataclysm RES points unused), real Kuun-Lan modules, the n01 `startMusic` cue.
+

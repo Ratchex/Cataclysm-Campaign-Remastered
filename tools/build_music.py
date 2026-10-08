@@ -6,7 +6,7 @@ Cataclysm's .wxh/.wxd, in stream order):
 kasfMusicPlay(n) plays stream n (cataclysm.exe FUN_00523480 indexes the stream table directly; n = 1102 picks
 0-16 at random). The runtime side is K_497000 / K_498c10 in scripts/scar/cataclysmkas.lua.
 
-Usage: build_music.py [--rate 44100] [--volume 0.7]
+Usage: build_music.py [--rate 44100] [--volume 0.5]
 """
 import argparse
 import glob
@@ -29,7 +29,7 @@ randSampContainer = 0
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--rate", type=int, default=44100)
-    ap.add_argument("--volume", type=float, default=0.7, help="gain (1.0 = as in Cataclysm; that played too loud)")
+    ap.add_argument("--volume", type=float, default=0.5, help="gain (1.0 = as in Cataclysm; 0.7 still played too loud)")
     a = ap.parse_args()
     out_dir = os.path.join(MOD, "data", "sound", "music", "cataclysm")
     os.makedirs(out_dir, exist_ok=True)

@@ -90,6 +90,17 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
   the core's frame (Mission01 includes Command, DockingBay, Engineering, EnginesLower/Upper, LowerSpine,
   OreCanArmour). For now they are baked into the hull; real modules need HWRM subsystems + hardpoint joints.
 
+- **Collector dock paths** (Workers): copy Cataclysm Remastered's Kuun-Lan paths (`geo2dae.py --dock-from`),
+  moved onto our nose RES points. What did not dock: stock Kus_Mothership flags (Player/Queue/ClearRes, no
+  rotations) - Workers stopped short of the nose; CR's flags (Check/Queue, Close, tol 50, UseRot) on straight
+  approaches along Cataclysm's RES normals with computed orientations - still no dock. CR's paths dock even with
+  their latch moved onto our hull, so the approach shape/turns matter. Their waypoints rotate Z*Y*X (radians).
+- Dock path segment record (64 B): pos 3f, rot 3f, u32 UseRot, f Tol, u32 Unfocus, f Speed, u32 Check, Close,
+  Player, Queue, Clip, ClearRes; path header u32 6, 10, Exit, Latch, 0.
+- `StartShipWeaponConfig`'s 4th argument names the firing **animation** in the .events (stock: the weapon joint's
+  name, e.g. kus_interceptor `Weapon_Gun0`), whose events give the muzzle flash/sound.
+- `NewShipType.upLOD/downLOD` switch to LOD 1: a LOD-0-only model vanishes at distance with them.
+
 ## Cutscenes (Phase 0.5, confirmed in game with n01)
 - HWRM NIS = IFF `FORM NIS ` (layout in tools/nis2hwrm.py docstring). Played with `NISLoad("nis/cataclysm/n01")`
   then `NISPlayFromCoordSys(path, pos, matrix)`; `NISShipStartPosition(path, shipType, -1)` finds the centre ship

@@ -15,6 +15,7 @@ HODOR quirks: it must be started from Git Bash (from Python or PowerShell it spi
 paths; textures must be square powers of two >= 64; image ids must be IMG[x]-image.
 """
 import argparse
+import itertools
 import math
 import re
 import os
@@ -108,6 +109,7 @@ DOCK_KINDS = [  # (dock point name prefix, HWRM dock family, path flags, approac
     ("DBMEDIN", "Corvette", "", (1200, 350)),
 ]
 EXIT_OF = {"DBSMALLIN": "DBSMALLOUT", "DBMEDIN": "DBMEDOUT"}
+LATCH_OFFSET = 45   # collector latch waypoint off the dock point along its normal (HW1 units; ~16 HWRM)
 
 
 def dock_nodes(points, conv, extra="", skip=()):
@@ -137,8 +139,12 @@ def dock_nodes(points, conv, extra="", skip=()):
         side = [up[1] * fwd[2] - up[2] * fwd[1], up[2] * fwd[0] - up[0] * fwd[2], up[0] * fwd[1] - up[1] * fwd[0]]
         m = [[side[r], up[r], fwd[r]] for r in range(3)]       # columns: the collector's x, y, z in ship space
         ry = math.asin(max(-1.0, min(1.0, -m[2][0])))
-        rx = math.atan2(m[2][1], m[2][2])
-        rz = math.atan2(m[1][0], m[0][0])
+        if abs(m[2][0]) < 0.9999:
+            rx = math.atan2(m[2][1], m[2][2])
+            rz = math.atan2(m[1][0], m[0][0])
+        else:   # gimbal lock (sideways normals, ry = +-90): the roll goes into X, Z = 0
+            rz = 0.0
+            rx = math.atan2(m[0][1] if ry > 0 else -m[0][1], m[1][1])
         return tuple(math.degrees(v) for v in (rx, ry, rz))
 
     def along(pos, nrm, d):
@@ -168,8 +174,10 @@ def dock_nodes(points, conv, extra="", skip=()):
             # latch_rotation): with the stock flags they never unloaded, without rotations they stopped short.
             rot = latch_rotation(pos, nrm) if fam == "Utility" else None
             if fam == "Utility":
+                # the waypoint is the collector's centre: off the hull by about its half-height (Worker clamps 14.4
+                # below centre; CR's nose latch is ~28 off the hull), not on the Cataclysm dock point itself
                 entry = (seg(0, along(pos, nrm, far), 50, 0, "Check Queue", rot) + seg(1, along(pos, nrm, near), 50, 0, "", rot)
-                         + seg(2, conv(*pos), 50, 0, "", rot))
+                         + seg(2, along(pos, nrm, LATCH_OFFSET), 50, 0, "", rot))
             else:
                 entry = (seg(0, along(pos, nrm, far), 25, 200, "Player Queue")
                          + seg(1, along(pos, nrm, near), 25, 120, "Player") + seg(2, conv(*pos), 25, 50, "Clip ClearRes"))
@@ -178,7 +186,7 @@ def dock_nodes(points, conv, extra="", skip=()):
             paths.append(jnode(f"DOCK[{name}]_Fam[{fam}]_Link[]_Flags[{flags}]_MAD[0]", (0, 0, 0), entry))
             epos, enrm = docks[exit_lbl] if exit_lbl else (pos, nrm)
             if fam == "Utility":
-                exitp = (seg(0, conv(*epos), 50, 0, "", rot) + seg(1, along(epos, enrm, near), 50, 0, "Close", rot)
+                exitp = (seg(0, along(epos, enrm, LATCH_OFFSET), 50, 0, "", rot) + seg(1, along(epos, enrm, near), 50, 0, "Close", rot)
                          + seg(2, along(epos, enrm, far), 50, 0, "", rot))
             else:
                 exitp = (seg(0, conv(*epos), 25, 50, "") + seg(1, along(epos, enrm, near), 25, 150, "")
@@ -223,16 +231,28 @@ def read_hod_docks(path):
     return out
 
 
-def borrowed_dock_nodes(path, scale, family):
+def borrowed_dock_nodes(path, scale, family, anchors=()):
     """Dock paths copied from another model (positions scaled), those whose families include `family`:
-    SEG[i]_Tol[]_Spd[]_Flags[] joints rotated as the source waypoints (Z*Y*X, as HODOR stores them)."""
+    SEG[i]_Tol[]_Spd[]_Flags[] joints rotated as the source waypoints (Z*Y*X, as HODOR stores them).
+    With anchors (latch points on this model), each latching path moves whole so its latch point lands on an
+    anchor (in and out paths share the point, so a pair moves together; anchors assigned for the least travel)."""
+    docks = [d for d in read_hod_docks(path) if family.lower() in d[3].lower()]
+    shift = {}
+    if anchors:
+        keys = sorted({tuple(round(c * scale, 3) for c in (segs[-1] if not ex else segs[0])[0:3])
+                       for _, ex, latch, _, segs in docks if latch and segs})
+        dist = lambda a, b: math.sqrt(sum((a[k] - b[k]) ** 2 for k in range(3)))
+        best = min(itertools.permutations(range(len(anchors)), len(keys)),
+                   key=lambda perm: sum(dist(keys[i], anchors[j]) for i, j in enumerate(perm)))
+        shift = {k: tuple(anchors[j][c] - k[c] for c in range(3)) for k, j in zip(keys, best)}
     nodes = []
-    for name, ex, latch, fam, segs in read_hod_docks(path):
-        if family.lower() not in fam.lower():
-            continue
+    for name, ex, latch, fam, segs in docks:
+        key = tuple(round(c * scale, 3) for c in (segs[-1] if not ex else segs[0])[0:3]) if segs else None
+        dx = shift.get(key, (0, 0, 0)) if latch else (0, 0, 0)
         kids = ""
         for i, v in enumerate(segs):
             pos, rot, use_rot, tol, unfocus, spd = v[0:3], v[3:6], v[6], v[7], v[8], v[9]
+            pos = tuple(pos[c] + dx[c] / scale for c in range(3))
             flags = (["UseRot"] if use_rot else []) + (["Unfocus"] if unfocus else []) + \
                 [f for f, on in zip(SEG_FLAGS, v[10:]) if on]
             sname = f"SEG[{i}]_Tol[{tol:g}]_Spd[{spd:g}]_Flags[{' '.join(flags)}]"
@@ -371,7 +391,10 @@ def main():
     for g in a.merge:
         points += read_mex(os.path.splitext(g)[0] + ".mex")
     weapons, nweap = weapon_nodes(points, conv, convn)
-    extra, nextra = borrowed_dock_nodes(a.dock_from, a.dock_scale, "Utility") if a.dock_from else ("", 0)
+    # collector paths borrowed from another model, moved onto our Cataclysm RES points (LATCH_OFFSET off the hull)
+    anchors = [conv(*(pos[k] + nrm[k] * LATCH_OFFSET for k in range(3)))
+               for typ, lbl, pos, nrm, _ in points if typ == "Dok" and re.match(r"RES\d+$", lbl)]
+    extra, nextra = borrowed_dock_nodes(a.dock_from, a.dock_scale, "Utility", anchors) if a.dock_from else ("", 0)
     hold_dock, ndock = dock_nodes(points, conv, extra, ("RES",) if a.dock_from else ())
     ndock += nextra
     # Engine nozzles from the .mex Eng chunks: JNT[EngineNozzle<n>] (setEngineTrail index n-1 / setEngineBurn).
