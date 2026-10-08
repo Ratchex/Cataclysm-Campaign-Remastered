@@ -161,6 +161,7 @@ KAS_Timers = {}
 function KAS_Now() return Universe_GameTime() end
 
 function KAS_TimerRemaining(t)
+    if t.paused then return 2147483647 end      -- Timer.c: a paused timer never expires (SDWORD_Max)
     if t.running ~= 1 then return 0 end
     local rem = floor(t.dur - (KAS_Now() - t.start))
     if rem < 0 then rem = 0 end
@@ -779,18 +780,31 @@ function K_495620(n, o) return KAS_SelectInto(n, o, KAS_FillShipsByNonCapital) e
 -- exe 0x493f80 toggles each ship: player-owned -> computer player, anything else -> human player. HWRM SobGroups
 -- drop ships that change owner unless their switch-owner flag is cleared (Gearbox's KASSobGroup_Create does this),
 -- which emptied the team and made e.g. the proximity array report itself destroyed.
--- Teams keep their level owner (1 enemy, 2 allied Kushan: mission2level.py) to switch back to.
-KAS_TeamOwners = {}
+-- Cataclysm starts every mission team with the computer (its .mission files have no owner) and Mission01 switches
+-- the Kushan teams to the human at their start, then flags them (K_497ed0) so they stay KAS-driven. HWRM has a
+-- third player for that: the level gives allies to player 2 (mission2level.py), allied with the player and not
+-- under the player's control. So "to the human" is player 2 here when the level has one; an allied team's first
+-- switch is the one the level already made, a second one turns it back to the computer (hostile), as in Cataclysm.
+-- Switching allies to player 0 put them in the player's hands, recoloured the picket and let the arrival code dock
+-- and launch it with the fleet (it then flew off).
+KAS_TeamSwitched = {}
+function KAS_AllyPlayer()
+    if Universe_PlayerCount() > 2 then return 2 end
+    return 0
+end
 function K_494160(flag)                                                                              -- kasfTeamSwitchPlayerOwner
     SobGroup_SetSwitchOwnerFlag(KAS_Team, 0)
     if SobGroup_Count(KAS_Team) == 0 then return end
     local owner = SobGroup_GetPlayerOwner(KAS_Team)
-    if owner == 0 then
-        SobGroup_SwitchOwner(KAS_Team, KAS_TeamOwners[KAS_Team] or 1)
-    else
-        KAS_TeamOwners[KAS_Team] = owner
-        SobGroup_SwitchOwner(KAS_Team, 0)
+    local to = 1
+    if owner == 1 then
+        to = KAS_AllyPlayer()
+    elseif owner == 2 and KAS_TeamSwitched[KAS_Team] == nil then
+        to = 2
     end
+    KAS_TeamSwitched[KAS_Team] = 1
+    if to ~= owner then SobGroup_SwitchOwner(KAS_Team, to) end
+    print("CKAS: team " .. KAS_Team .. " owner " .. owner .. " -> " .. to)
 end
 
 -- kasfResetShipRenderFlags: clears per-ship "has been rendered" bits used by kasfRenderedShips; no HWRM state.
@@ -961,7 +975,10 @@ function K_49aae0(sel, scheme)
 end
 
 -- 0x497ed0(team), called right after kasfTeamSwitchPlayerOwner: per-ship engine update (FUN_0051c0b0).
-function K_497ed0(sel) KAS_NoOp("497ed0", "post owner-switch ship update") end
+-- kasfShipsDeleteAfterHyperspace (exe 0x497ed0: sets ATTRIBUTES_DeleteAfterHSOut, 0x40, on each ship): HW1 deletes
+-- such ships when the fleet jumps out instead of carrying them to the next mission. Mission01 sets it on the Kushan
+-- teams it gives the player; here allies stay with player 2 and are never carried, so nothing to do.
+function K_497ed0(sel) end
 
 -- 0x499870(team): 1 if any ship lacks the data at ship+0x370 (Mission01: decides whether to hunt Workers).
 function K_499870(sel) return 1 end
@@ -1110,12 +1127,36 @@ function K_496260(a) KAS_NoOp("496260", "kasfCameraSetDistance") end
 function K_49a2a0(vec) KAS_NoOp("49a2a0", "set focus point (sensors manager)") end
 function K_497580(frames) KAS_SetLetterboxState(1, frames / 30) end                              -- kasfWideScreenIn
 function K_497630(frames) KAS_SetLetterboxState(0, frames / 30) end                              -- kasfWideScreenOut
--- Fleet Intel pauses the universe and the other KAS teams while it points something out (Mission01 variables
--- PauseUniverse / UnpauseOtherKAS). Not reproduced: HWRM keeps playing during the sensors-manager reveal.
-function K_497a90() KAS_NoOp("497a90", "pause universe (Fleet Intel)") end
-function K_497aa0() KAS_NoOp("497aa0", "unpause universe") end
-function K_497ad0() KAS_NoOp("497ad0", "pause other KAS teams") end
-function K_497af0() KAS_NoOp("497af0", "unpause other KAS teams") end
+-- kasfUniversePause / kasfUniverseUnpause (exe 0x497a90 / 0x497aa0 set nisUniversePause): Gearbox's HW1 port
+-- leaves these empty too (KASUtil.lua KAS_UniversePause: Universe_Pause would also stop timers and KAS).
+function K_497a90() end
+function K_497aa0() end
+
+-- kasfOtherKASPause / kasfOtherKASUnpause (exe 0x497ad0 / 0x497af0, HW1 KASFunc.c): only the calling team's FSM
+-- keeps running; every other team's and the mission's watches stop (Gearbox's KASRules_PauseExceptFSM) and every
+-- timer outside the team's scope pauses (Timer.c timTimerPauseAllNotScoped / timTimerUnpauseAll). Mission01 does
+-- it around Fleet Intel's sensors sequences.
+function K_497ad0()
+    KASRules_PauseExceptFSM(KAS_Team)
+    local prefix, now = KAS_Scope .. ":", KAS_Now()
+    for k, t in KAS_Timers do
+        if strsub(k, 1, strlen(prefix)) ~= prefix and t.paused == nil then
+            t.paused = now
+        end
+    end
+    print("CKAS: other KAS paused (running only " .. KAS_Team .. ")")
+end
+function K_497af0()
+    KASRules_UnpauseOthers()
+    local now = KAS_Now()
+    for k, t in KAS_Timers do
+        if t.paused then
+            t.dur = t.dur + (now - t.paused)
+            t.paused = nil
+        end
+    end
+    print("CKAS: other KAS unpaused")
+end
 
 -- ------------------------------------------------------------------ economy, research, trading, music
 function K_496e20(player, ru) Player_SetRU(player, ru) end                                       -- kasfRUsSet
