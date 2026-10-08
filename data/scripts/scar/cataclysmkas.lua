@@ -651,6 +651,9 @@ function KAS_FleetAwaitHyperspace()
     return 1
 end
 
+-- camera distance from the Kuun-Lan's centre on arrival: KAS_ArrivalCamera's (mission2level ARRIVAL_*, 2x)
+KAS_ArrivalCameraDistance = 3700
+
 function K_498230()
     if KAS_FleetWaiting == nil then           -- no Kuun-Lan held back: only the signal
         KAS_ShipsArriveAt = Universe_GameTime() + 3
@@ -669,10 +672,11 @@ end
 function KAS_ArrivalWatch()
     local t = Universe_GameTime() - KAS_ArrivalStarted
     if KAS_ArrivalFocused == nil then
-        -- the camera point is fixed: focus it on the Kuun-Lan (now spawned) so it follows the ship; distance 0
-        -- keeps the camera point's view (as stock Camera_FocusSobGroup('Frigate_2', 0, 0, 2))
+        -- the camera point is fixed: focus it on the Kuun-Lan (now spawned) so it follows the ship, at the camera
+        -- point's distance (Gearbox's hyperspace focus call). Camera_FocusSobGroup(g, 0, 0, 0) zoomed right in:
+        -- the start view stayed at the hangar however far out the camera point was put (1x, 2x, 6x)
         KAS_ArrivalFocused = 1
-        Camera_FocusSobGroup("KAS_ArrivalMS", 0, 0, 0)
+        Camera_FocusSobGroupWithBuffer("KAS_ArrivalMS", KAS_ArrivalCameraDistance, 0, 0)
     end
     if t < 2 then return end
     if SobGroup_GetCurrentOrder("KAS_ArrivalMS") ~= COMMAND_Idle and t < 30 then return end
