@@ -555,6 +555,20 @@ function KAS_RestrictTechs()
     end
 end
 
+-- Kuun-Lan modules the mission starts with (KAS_StartModules from build_mission.py: subsystems smt_kl_*).
+function KAS_CreateStartModules()
+    if KAS_StartModules == nil then return end
+    SobGroup_Create("KAS_KuunLan")
+    SobGroup_Clear("KAS_KuunLan")
+    SobGroup_FilterInclude("KAS_KuunLan", "Player_Ships0", "ShipType", "smt_ms_sp")
+    print("CKAS: Kuun-Lan x" .. SobGroup_Count("KAS_KuunLan") .. ", " .. getn(KAS_StartModules) .. " modules")
+    local i = 1
+    while i <= getn(KAS_StartModules) do
+        SobGroup_CreateSubSystem("KAS_KuunLan", KAS_StartModules[i])
+        i = i + 1
+    end
+end
+
 function KAS_StartEngine()
     KAS_ApplyAlliances()
     KAS_RestrictTechs()

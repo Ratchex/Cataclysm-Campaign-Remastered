@@ -13,6 +13,10 @@ Usage: make_race.py
 import csv
 import os
 import re
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import make_modules  # noqa: E402
 
 DECOMP = r"C:\Modding\Cataclysm-decomp"
 MOD = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -37,6 +41,15 @@ def read_research():
     return techs, tech_dep, ship_dep
 
 
+HANGAR = make_modules.MODULES["dockingbay"][2]   # ships need the Hangar module (Cataclysm: "We need a hangar module")
+
+
+def module_of(tech):
+    """RequiredSubSystems: the typeString of the module that researches the tech, else any research subsystem."""
+    key = make_modules.TECH_MODULE.get(tech)
+    return make_modules.MODULES[key][2] if key else "Research"
+
+
 def write(path, text):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w", encoding="latin-1", newline="\n") as f:
@@ -55,9 +68,16 @@ def main():
         req = " & ".join(ship_dep.get(cat, []))
         name = ship.split("_", 1)[1].title()
         b += ["\t{", "\t\tType =\t\t\t\t\tShip,", f'\t\tThingToBuild =\t\t\t"{ship}",',
-              f'\t\tRequiredResearch =\t\t"{req}",', '\t\tRequiredShipSubSystems =\t"",',
+              f'\t\tRequiredResearch =\t\t"{req}",',
+              f'\t\tRequiredShipSubSystems =\t"{"" if ship == "smt_worker" else HANGAR}",',
               f"\t\tDisplayPriority =\t\t{10 + prio},", f'\t\tDisplayedName =\t\t\t"{name}",',
               f'\t\tDescription =\t\t\t"{name}",', "\t},"]
+    for prio, (key, (_, disp, _, _, buildable, tech)) in enumerate(make_modules.MODULES.items()):
+        if buildable:   # Kuun-Lan modules (the structural ones are not in Cataclysm's build manager)
+            b += ["\t{", "\t\tType =\t\t\t\t\tSubSystem,", f'\t\tThingToBuild =\t\t\t"{make_modules.subsystem(key)}",',
+                  f'\t\tRequiredResearch =\t\t"{tech}",', '\t\tRequiredShipSubSystems =\t"",',
+                  f"\t\tDisplayPriority =\t\t{100 + prio},", f'\t\tDisplayedName =\t\t\t"{disp}",',
+                  f'\t\tDescription =\t\t\t"{disp}",', "\t},"]
     write(os.path.join(RACE, "scripts", "sp_build.lua"), "\n".join(b + ["}", ""]))
 
     converted = dict(ships)
@@ -70,7 +90,7 @@ def main():
         unlocks = [converted[c] for c, deps in ship_dep.items() if t in deps and c in converted]
         title = t[5:].replace("_", " ").title()
         r += ["\t{", f'\t\tName =\t\t\t\t"{t}",', f'\t\tRequiredResearch =\t"{req}",',
-              '\t\tRequiredSubSystems =\t"Research",', f"\t\tCost =\t\t\t\t{secs * COST_PER_SECOND},",
+              f'\t\tRequiredSubSystems =\t"{module_of(t)}",', f"\t\tCost =\t\t\t\t{secs * COST_PER_SECOND},",
               f"\t\tTime =\t\t\t\t{secs},", f'\t\tDisplayedName =\t\t"{title}",', f'\t\tShortDisplayedName =\t"{title}",',
               f"\t\tDisplayPriority =\t{10 + i},", f'\t\tDescription =\t\t"{title}",',
               f"\t\tIcon =\t\t\t\t{'Icon_Build' if unlocks else 'Icon_Tech'},",

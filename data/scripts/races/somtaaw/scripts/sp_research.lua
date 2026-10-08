@@ -11,7 +11,7 @@ research =
 	{
 		Name =				"TECH_ADRIVE_DESTROYER",
 		RequiredResearch =	"TECH_DRIVE_DESTROYER",
-		RequiredSubSystems =	"Research",
+		RequiredSubSystems =	"Hangar",
 		Cost =				1750,
 		Time =				175,
 		DisplayedName =		"Adrive Destroyer",
@@ -24,7 +24,7 @@ research =
 	{
 		Name =				"TECH_ADRIVE_FIGHTER",
 		RequiredResearch =	"TECH_DRIVE_FIGHTER",
-		RequiredSubSystems =	"Research",
+		RequiredSubSystems =	"Hangar",
 		Cost =				750,
 		Time =				75,
 		DisplayedName =		"Adrive Fighter",
@@ -37,7 +37,7 @@ research =
 	{
 		Name =				"TECH_ADRIVE_FRIGATE",
 		RequiredResearch =	"TECH_DRIVE_FRIGATE",
-		RequiredSubSystems =	"Research",
+		RequiredSubSystems =	"Hangar",
 		Cost =				1250,
 		Time =				125,
 		DisplayedName =		"Adrive Frigate",
@@ -50,7 +50,7 @@ research =
 	{
 		Name =				"TECH_ADVANCED_SENSORS",
 		RequiredResearch =	"",
-		RequiredSubSystems =	"Research",
+		RequiredSubSystems =	"AdvEngineeringModule",
 		Cost =				2000,
 		Time =				200,
 		DisplayedName =		"Advanced Sensors",
@@ -63,7 +63,7 @@ research =
 	{
 		Name =				"TECH_AFTERBURNER",
 		RequiredResearch =	"",
-		RequiredSubSystems =	"Research",
+		RequiredSubSystems =	"EngineeringModule",
 		Cost =				1750,
 		Time =				175,
 		DisplayedName =		"Afterburner",
@@ -76,7 +76,7 @@ research =
 	{
 		Name =				"TECH_ARMOUR2",
 		RequiredResearch =	"",
-		RequiredSubSystems =	"Research",
+		RequiredSubSystems =	"ArmourModule",
 		Cost =				1000,
 		Time =				100,
 		DisplayedName =		"Armour2",
@@ -89,7 +89,7 @@ research =
 	{
 		Name =				"TECH_ARMOUR3",
 		RequiredResearch =	"TECH_ARMOUR2",
-		RequiredSubSystems =	"Research",
+		RequiredSubSystems =	"ArmourModule",
 		Cost =				1500,
 		Time =				150,
 		DisplayedName =		"Armour3",
@@ -102,7 +102,7 @@ research =
 	{
 		Name =				"TECH_BEAST_VACCINE",
 		RequiredResearch =	"",
-		RequiredSubSystems =	"Research",
+		RequiredSubSystems =	"AdvEngineeringModule",
 		Cost =				2000,
 		Time =				200,
 		DisplayedName =		"Beast Vaccine",
@@ -115,7 +115,7 @@ research =
 	{
 		Name =				"TECH_BIG_GUN",
 		RequiredResearch =	"",
-		RequiredSubSystems =	"Research",
+		RequiredSubSystems =	"WeaponsModule",
 		Cost =				1800,
 		Time =				180,
 		DisplayedName =		"Big Gun",
@@ -154,7 +154,7 @@ research =
 	{
 		Name =				"TECH_CRYSTAL_HARVEST",
 		RequiredResearch =	"TECH_SALVAGE",
-		RequiredSubSystems =	"Research",
+		RequiredSubSystems =	"AdvEngineeringModule",
 		Cost =				2000,
 		Time =				200,
 		DisplayedName =		"Crystal Harvest",
@@ -180,7 +180,7 @@ research =
 	{
 		Name =				"TECH_DRIVE_DESTROYER",
 		RequiredResearch =	"TECH_DRIVE_FRIGATE",
-		RequiredSubSystems =	"Research",
+		RequiredSubSystems =	"Hangar",
 		Cost =				1500,
 		Time =				150,
 		DisplayedName =		"Drive Destroyer",
@@ -193,7 +193,7 @@ research =
 	{
 		Name =				"TECH_DRIVE_FIGHTER",
 		RequiredResearch =	"",
-		RequiredSubSystems =	"Research",
+		RequiredSubSystems =	"Hangar",
 		Cost =				450,
 		Time =				45,
 		DisplayedName =		"Drive Fighter",
@@ -206,7 +206,7 @@ research =
 	{
 		Name =				"TECH_DRIVE_FRIGATE",
 		RequiredResearch =	"TECH_DRIVE_FIGHTER",
-		RequiredSubSystems =	"Research",
+		RequiredSubSystems =	"Hangar",
 		Cost =				1000,
 		Time =				100,
 		DisplayedName =		"Drive Frigate",
@@ -219,7 +219,7 @@ research =
 	{
 		Name =				"TECH_EMP",
 		RequiredResearch =	"",
-		RequiredSubSystems =	"Research",
+		RequiredSubSystems =	"WeaponsModule",
 		Cost =				2000,
 		Time =				200,
 		DisplayedName =		"Emp",
@@ -232,7 +232,7 @@ research =
 	{
 		Name =				"TECH_ENERGY",
 		RequiredResearch =	"",
-		RequiredSubSystems =	"Research",
+		RequiredSubSystems =	"WeaponsModule",
 		Cost =				1500,
 		Time =				150,
 		DisplayedName =		"Energy",
@@ -245,7 +245,7 @@ research =
 	{
 		Name =				"TECH_EXPLOSIVE_CHARGE",
 		RequiredResearch =	"",
-		RequiredSubSystems =	"Research",
+		RequiredSubSystems =	"WeaponsModule",
 		Cost =				2000,
 		Time =				200,
 		DisplayedName =		"Explosive Charge",
@@ -258,7 +258,7 @@ research =
 	{
 		Name =				"TECH_FORCE_FIELD1",
 		RequiredResearch =	"",
-		RequiredSubSystems =	"Research",
+		RequiredSubSystems =	"ArmourModule",
 		Cost =				1000,
 		Time =				100,
 		DisplayedName =		"Force Field1",
@@ -271,7 +271,7 @@ research =
 	{
 		Name =				"TECH_FORCE_FIELD2",
 		RequiredResearch =	"TECH_FORCE_FIELD1",
-		RequiredSubSystems =	"Research",
+		RequiredSubSystems =	"ArmourModule",
 		Cost =				1500,
 		Time =				150,
 		DisplayedName =		"Force Field2",
@@ -284,7 +284,7 @@ research =
 	{
 		Name =				"TECH_FORCE_FIELD3",
 		RequiredResearch =	"TECH_FORCE_FIELD2",
-		RequiredSubSystems =	"Research",
+		RequiredSubSystems =	"ArmourModule",
 		Cost =				2000,
 		Time =				200,
 		DisplayedName =		"Force Field3",
@@ -323,7 +323,7 @@ research =
 	{
 		Name =				"TECH_INFECT",
 		RequiredResearch =	"",
-		RequiredSubSystems =	"Research",
+		RequiredSubSystems =	"EngineeringModule",
 		Cost =				2000,
 		Time =				200,
 		DisplayedName =		"Infect",
@@ -336,7 +336,7 @@ research =
 	{
 		Name =				"TECH_ION",
 		RequiredResearch =	"",
-		RequiredSubSystems =	"Research",
+		RequiredSubSystems =	"WeaponsModule",
 		Cost =				2250,
 		Time =				225,
 		DisplayedName =		"Ion",
@@ -349,7 +349,7 @@ research =
 	{
 		Name =				"TECH_LINK",
 		RequiredResearch =	"",
-		RequiredSubSystems =	"Research",
+		RequiredSubSystems =	"Hangar",
 		Cost =				1750,
 		Time =				175,
 		DisplayedName =		"Link",
@@ -375,7 +375,7 @@ research =
 	{
 		Name =				"TECH_MICRO_SHIP",
 		RequiredResearch =	"",
-		RequiredSubSystems =	"Research",
+		RequiredSubSystems =	"AdvEngineeringModule",
 		Cost =				1000,
 		Time =				100,
 		DisplayedName =		"Micro Ship",
@@ -388,7 +388,7 @@ research =
 	{
 		Name =				"TECH_MIMIC",
 		RequiredResearch =	"",
-		RequiredSubSystems =	"Research",
+		RequiredSubSystems =	"EngineeringModule",
 		Cost =				2000,
 		Time =				200,
 		DisplayedName =		"Mimic",
@@ -401,7 +401,7 @@ research =
 	{
 		Name =				"TECH_MISSILE",
 		RequiredResearch =	"",
-		RequiredSubSystems =	"Research",
+		RequiredSubSystems =	"WeaponsModule",
 		Cost =				1500,
 		Time =				150,
 		DisplayedName =		"Missile",
@@ -414,7 +414,7 @@ research =
 	{
 		Name =				"TECH_PHASED_TELEMETRY",
 		RequiredResearch =	"TECH_MICRO_SHIP",
-		RequiredSubSystems =	"Research",
+		RequiredSubSystems =	"AdvEngineeringModule",
 		Cost =				600,
 		Time =				60,
 		DisplayedName =		"Phased Telemetry",
@@ -440,7 +440,7 @@ research =
 	{
 		Name =				"TECH_REPAIR",
 		RequiredResearch =	"",
-		RequiredSubSystems =	"Research",
+		RequiredSubSystems =	"EngineeringModule",
 		Cost =				300,
 		Time =				30,
 		DisplayedName =		"Repair",
@@ -453,7 +453,7 @@ research =
 	{
 		Name =				"TECH_REPAIRBOTS",
 		RequiredResearch =	"TECH_MICRO_SHIP",
-		RequiredSubSystems =	"Research",
+		RequiredSubSystems =	"AdvEngineeringModule",
 		Cost =				1750,
 		Time =				175,
 		DisplayedName =		"Repairbots",
@@ -466,7 +466,7 @@ research =
 	{
 		Name =				"TECH_REPULSE",
 		RequiredResearch =	"",
-		RequiredSubSystems =	"Research",
+		RequiredSubSystems =	"WeaponsModule",
 		Cost =				2000,
 		Time =				200,
 		DisplayedName =		"Repulse",
@@ -492,7 +492,7 @@ research =
 	{
 		Name =				"TECH_SALVAGE",
 		RequiredResearch =	"",
-		RequiredSubSystems =	"Research",
+		RequiredSubSystems =	"EngineeringModule",
 		Cost =				300,
 		Time =				30,
 		DisplayedName =		"Salvage",
@@ -505,7 +505,7 @@ research =
 	{
 		Name =				"TECH_SUPPORT_SYSTEMS",
 		RequiredResearch =	"",
-		RequiredSubSystems =	"Research",
+		RequiredSubSystems =	"EngineeringModule",
 		Cost =				500,
 		Time =				50,
 		DisplayedName =		"Support Systems",

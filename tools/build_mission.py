@@ -9,9 +9,13 @@ Usage: build_mission.py <NN> [--fleet "smt_ms_sp,smt_scout*3,smt_worker*2"] [--b
 """
 import argparse
 import os
+import re
 import shutil
 import subprocess
 import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import make_modules  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 MOD = os.path.dirname(HERE)
@@ -31,6 +35,9 @@ dofilepath("data:scripts/scar/cataclysmships.lua")
 dofilepath("data:scripts/scar/cataclysmtech.lua")
 dofilepath("data:leveldata/campaign/cataclysm/m{nn}/m{nn}_kas.lua")
 
+-- Kuun-Lan modules at the start (the mission's IncludeShips sMothership<Module>; tools/make_modules.py)
+KAS_StartModules = {{ {modules} }}
+
 function OnStartOrLoad()
     print("CATACLYSM Mission{nn}: OnStartOrLoad")
     Sound_SpeechSubtitlePath(KAS_SpeechPath)
@@ -39,6 +46,7 @@ end
 function OnInit()
     print("CATACLYSM Mission{nn}: OnInit")
     KAS_StartEngine()
+    KAS_CreateStartModules()
     KAS_RunAfterIntro("{intro}", Mission{nn}_Start)
 end
 
@@ -56,6 +64,18 @@ DATFILES = '''Dictionaries =
 \t},
 }
 '''
+
+
+def start_modules(src, nn):
+    """Kuun-Lan modules the mission starts with: the sMothership<Module> types its .mission includes (Cataclysm
+    keeps the Kuun-Lan's modules between missions; the story drops some). One Support module (the count is not
+    in the .mission)."""
+    keys = []
+    for line in open(os.path.join(src, f"mission{nn}.mission"), encoding="latin-1"):
+        m = re.match(r"\s*IncludeShips\s+RACE_SECT\s*,\s*sMothership(\w+)", line, re.I)
+        if m and m.group(1).lower() in make_modules.MODULES:
+            keys.append(make_modules.subsystem(m.group(1).lower()))
+    return keys
 
 
 def run(*args):
@@ -84,7 +104,7 @@ def main():
     run(os.path.join(HERE, "mission2level.py"), src, os.path.join(out, f"m{nn}.level"), *lvl)
     run(os.path.join(HERE, "kas2lua.py"), DECOMP, f"Mission{nn}", src, os.path.join(out, f"m{nn}_kas.lua"))
     with open(os.path.join(out, f"m{nn}.lua"), "w", newline="\n") as f:
-        f.write(WRAPPER.format(nn=nn, intro=a.intro))
+        f.write(WRAPPER.format(nn=nn, intro=a.intro, modules=", ".join(f'"{m}"' for m in start_modules(src, nn))))
     test = os.path.join(MOD, "data", "leveldata", "campaign", "cataclysm", "m00_test")
     shutil.copyfile(os.path.join(test, "teamcolour.lua"), os.path.join(out, "teamcolour.lua"))
     with open(os.path.join(out, "datfiles.lua"), "w", newline="\n") as f:

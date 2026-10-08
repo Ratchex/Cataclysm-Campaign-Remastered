@@ -295,7 +295,11 @@ def main():
     ap.add_argument("--dock-from", help="take the collector (Utility) dock paths from this HOD instead of RES*")
     ap.add_argument("--dock-scale", type=float, default=1.0, help="position scale for --dock-from paths")
     ap.add_argument("--hardpoint", action="append", default=[],
-                    help="extra subsystem hardpoint joint set at the origin (e.g. Hardpoint_Research)")
+                    help="extra subsystem hardpoint joint set: NAME at the origin, NAME@x,y,z (HWRM units) or "
+                         "NAME@dok:LABEL (at that .mex dock point); a trailing @flip turns it 180 degrees about Y")
+    ap.add_argument("--points-from", action="append", default=[],
+                    help="another .geo whose .mex guns/engines are added (Kuun-Lan engine modules' nozzles)")
+    ap.add_argument("--no-docks", action="store_true", help="no dock paths (module subsystems)")
     ap.add_argument("--merge", nargs="*", default=[],
                     help="more .geo files baked into the same mesh (Kuun-Lan modules share the core's frame)")
     a = ap.parse_args()
@@ -390,6 +394,14 @@ def main():
     points = read_mex(os.path.splitext(a.geo)[0] + ".mex")
     for g in a.merge:
         points += read_mex(os.path.splitext(g)[0] + ".mex")
+    engine_geo = {}   # engine point -> the .geo its parent object is in
+    for g in a.points_from:
+        extra_pts = [pt for pt in read_mex(os.path.splitext(g)[0] + ".mex") if pt[0] in ("Gun", "Eng")]
+        engine_geo.update({id(pt): g for pt in extra_pts})
+        points += extra_pts
+    dok_points = {pt[1]: pt for pt in points if pt[0] == "Dok"}
+    if a.no_docks:
+        points = [pt for pt in points if pt[0] != "Dok"]
     weapons, nweap = weapon_nodes(points, conv, convn)
     # collector paths borrowed from another model, moved onto our Cataclysm RES points (LATCH_OFFSET off the hull)
     anchors = [conv(*(pos[k] + nrm[k] * LATCH_OFFSET for k in range(3)))
@@ -401,10 +413,15 @@ def main():
     # Each nozzle as in HODOR's engine layout (toolkit demo ship): BURN[EngineBurn<n>] with five flame divisions
     # trailing backwards and an ETSH[EngineShape<n>] quad; trails/burns need these, not just the joint.
     engines = [pt for pt in points if pt[0] == "Eng"]
-    b0, _, _, objs0 = geo2obj.parse(a.geo)
-    by_name, cache0 = {o["name"]: i for i, o in enumerate(objs0)}, {}
-    for i, (_, _, pos, _, parent) in enumerate(engines):
+    parsed = {}
+    for i, pt in enumerate(engines):
+        _, _, pos, _, parent = pt
         n = i + 1
+        g = engine_geo.get(id(pt), a.geo)
+        if g not in parsed:
+            b0, _, _, objs0 = geo2obj.parse(g)
+            parsed[g] = (b0, objs0, {o["name"]: k for k, o in enumerate(objs0)}, {})
+        b0, objs0, by_name, cache0 = parsed[g]
         if parent in by_name:                       # position is local to that object (Worker: Thruster(1)/(2))
             k = by_name[parent]
             W = geo2obj.world(objs0, k, cache0)
@@ -436,10 +453,18 @@ def main():
     # resource drop-off at the collector docks (Cataclysm Remastered's sits at its Kuun-Lan's front dock)
     res = [conv(*pt[2]) for pt in points if pt[0] == "Dok" and re.match(r"RES\d+$", pt[1])]
     res_at = tuple(sum(p[k] for p in res) / len(res) for k in range(3)) if res else (0, 0, 0)
-    for hp in a.hardpoint:   # subsystem hardpoint: <name>_Position with _Direction / _Rest (HWRM toolkit layout)
-        at = res_at if hp == "Hardpoint_Resource" else (0, 0, 0)
+    for spec in a.hardpoint:   # subsystem hardpoint: <name>_Position with _Direction / _Rest (HWRM toolkit layout)
+        hp, *opts = spec.split("@")
+        at, rest = (res_at if hp == "Hardpoint_Resource" else (0, 0, 0)), (0, 0, 10)
+        for o in opts:
+            if o == "flip":
+                rest = (0, 0, -10)
+            elif o.startswith("dok:"):
+                at = conv(*dok_points[o[4:]][2])
+            else:
+                at = tuple(float(c) for c in o.split(","))
         weapons += jnode(f"JNT[{hp}_Position]", at, jnode(f"JNT[{hp}_Direction]", (0, 10, 0))
-                         + jnode(f"JNT[{hp}_Rest]", (0, 0, 10)))
+                         + jnode(f"JNT[{hp}_Rest]", rest))
 
     dae = os.path.join(a.out_dir, a.name + ".dae")
     with open(dae, "w", encoding="utf-8", newline="\n") as f:

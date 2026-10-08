@@ -10,8 +10,12 @@ Usage: install_cr.py
 import os
 import re
 import shutil
+import sys
 
-MOD = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import make_modules  # noqa: E402
+
+MOD =os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = r"C:\Modding\Cataclysm-decomp\reference\cr_beast"
 DATA = os.path.join(MOD, "data")
 
@@ -29,7 +33,9 @@ def patch_ms_sp(text):
     if "HW1_ResearchModule" in text:
         return text
     return text.replace("LoadModel(NewShipType, 1);",
-                        "LoadModel(NewShipType, 1);\n-- Cataclysm-HWRM: innate research module\n" + RESEARCH_HP, 1)
+                        "LoadModel(NewShipType, 1);\n-- Cataclysm-HWRM: innate research module\n" + RESEARCH_HP +
+                        "\n-- Cataclysm-HWRM: Kuun-Lan module slots (tools/make_modules.py)\n" +
+                        "\n".join(make_modules.hardpoint_lines()), 1)
 
 
 def patch_sp_props(text):

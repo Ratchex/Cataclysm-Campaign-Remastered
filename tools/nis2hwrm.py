@@ -427,6 +427,8 @@ def main():
     ap.add_argument("name")
     ap.add_argument("--fps", type=int, default=30)
     ap.add_argument("--placeholder", default="Kus_Scout")
+    ap.add_argument("--modules", default="", help="Kuun-Lan modules shown on it (make_modules.py keys, comma "
+                                                  "separated: the mission's starting modules)")
     a = ap.parse_args()
     src = os.path.join(DECOMP, "extracted", "big", "nis", a.name)
     nis = nisread.read(src + ".nis")
@@ -471,9 +473,17 @@ def main():
             nm = f"{key}_{c}"
             names.append(nm)
             anim.append(channel(nm, list(zip(tlist, chans[c])), fps))
+        start = struct.pack("<6d", *(chans[c][0] for c in ("translateX", "translateY", "translateZ",
+                                                            "rotateX", "rotateY", "rotateZ")))
         folw.append(lstr(key) + lstr("HW1") + lstr(kind) + lstr(typ) + b"".join(lstr(n) for n in names)
-                    + struct.pack("<6d", *(chans[c][0] for c in ("translateX", "translateY", "translateZ",
-                                                                  "rotateX", "rotateY", "rotateZ"))) + b" ZYX")
+                    + start + b" ZYX")
+        # Cataclysm's Kuun-Lan carries its modules; HWRM NIS objects have no subsystems, so each module is a dummy
+        # ship on the Kuun-Lan's own channels (modules share its frame)
+        if typ == "smt_ms_sp":
+            for m in a.modules.split(",") if a.modules else []:
+                mtyp = f"smt_kl_{m}_dummy"
+                folw.append(lstr(f"{key}_{m}") + lstr("HW1") + lstr(kind) + lstr(mtyp)
+                            + b"".join(lstr(n) for n in names) + start + b" ZYX")
 
     # One HWRM camera per HW1 shot, switched with cameraCut() like Gearbox's scripts: HWRM interpolates camera
     # keys at the render frame rate, so a cut inside one camera path shows in-between frames.
