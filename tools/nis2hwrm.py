@@ -33,6 +33,7 @@ sys.path.insert(0, os.path.join(DECOMP, "tools"))
 import nisread  # noqa: E402
 
 SCALE = 0.35
+TELEPORT = 20     # HWRM units moved between two keys a frame apart: an off-camera reposition, hidden while it moves
 TAIL_FRAMES = 45   # extra time after the HW1 NIS ends, for the fade back in (HW1's engine did that itself)
 NIS_SPEECH_FLAG = 0x20000000
 HW1_NIS_FOV = 75.0          # NIS.h NIS_DefaultFOV: HW1 field of view is vertical (Camera.c), on a 4:3 screen
@@ -142,7 +143,6 @@ def matrix_to_euler_xyz(m):
 
 def pose(path, t, camera):
     cv, times, tcb = path["curves"], path["times"], path["tcb"]
-    t = t - max(path.get("timeOffset", 0.0), 0.0)
     x, y, z, h, p, b = (spline_eval(times, cv[k], tcb, t) for k in range(6))
     world = (-z, x, y)                                    # NIS.c: position mode "-Z, X, Y"
     pos = tuple(SCALE * c for c in to_hwrm_vec(world))
@@ -157,7 +157,7 @@ def pose(path, t, camera):
         yax = to_hwrm_vec(up)
         zax = to_hwrm_vec(heading)
     hm = [[xax[0], yax[0], zax[0]], [xax[1], yax[1], zax[1]], [xax[2], yax[2], zax[2]]]
-    return pos, matrix_to_euler_xyz(hm)
+    return pos, hm
 
 
 # ----------------------------------------------------------------------------------------------- HWRM writer
@@ -189,14 +189,32 @@ def channel(name, samples, fps):
     return b"".join(out)
 
 
-def continuous_euler(rots):
-    """Per-frame (rx, ry, rz) -> the equivalent triple closest to the previous frame: (x, y, z) and
-    (x + pi, pi - y, z + pi) are the same rotation, and each angle is free modulo 2 pi."""
+GIMBAL_LOCK = 0.99995     # |sin ry| above this (within ~0.6 deg of +-90): keep rz from the previous frame
+
+
+def continuous_euler(mats):
+    """Per-frame rotation matrices -> (rx, ry, rz) with M = Rz Ry Rx, each frame the equivalent triple closest
+    to the previous one: (x, y, z) and (x + pi, pi - y, z + pi) are the same rotation, angles are free modulo
+    2 pi. Near gimbal lock (ry = +-90, where only x -/+ z is defined; HW1 NIS cameras rest there at heading 0)
+    rz is held and rx, ry solved for it, so the angles do not flip between frames."""
     def near(a, ref):
         return a + 2 * math.pi * round((ref - a) / (2 * math.pi))
-    out = [rots[0]]
-    for r in rots[1:]:
+    out = []
+    for m in mats:
+        r = matrix_to_euler_xyz(m)
+        if not out:
+            out.append(r)
+            continue
         p = out[-1]
+        if abs(m[2][0]) > GIMBAL_LOCK:
+            cz, sz = math.cos(p[2]), math.sin(p[2])
+            m2 = [[cz * m[0][j] + sz * m[1][j] for j in range(3)],          # Rz(-z) * M = Ry * Rx
+                  [-sz * m[0][j] + cz * m[1][j] for j in range(3)],
+                  list(m[2])]
+            x = math.atan2(-m2[1][2], m2[1][1])
+            y = math.atan2(-m2[2][0], m2[0][0])
+            out.append((near(x, p[0]), near(y, p[1]), p[2]))
+            continue
         best = None
         for cand in (r, (r[0] + math.pi, math.pi - r[1], r[2] + math.pi)):
             c = tuple(near(cand[i], p[i]) for i in range(3))
@@ -212,7 +230,7 @@ def sample_times(path, frame_times):
     clusters of 2-4 keys), hold the old pose until the first and jump 1 ms later. HWRM interpolates between keys at
     the render frame rate, which turned these one-frame steps into fast swoops."""
     ts = path["times"]
-    off = max(path.get("timeOffset", 0.0), 0.0)
+    off = 0.0                                              # HW1 reads timeOffset but never uses it
     cuts = []
     for i in range(1, len(ts) - 2):
         if 0 < ts[i + 1] - ts[i] <= 0.04:                  # every 1-frame gap was a step at HW1's 30 fps
@@ -227,12 +245,13 @@ def camera_cuts(path):
     """Times where the HW1 camera cuts. A cut is a cluster of keys at most a frame apart; the cut is the gap in
     the cluster with the biggest change of position/view (the other keys only shape the spline)."""
     ts = path["times"]
-    off = max(path.get("timeOffset", 0.0), 0.0)
+    off = 0.0                                              # HW1 reads timeOffset but never uses it
 
     def change(t0, t1):
         (p0, r0), (p1, r1) = pose(path, t0, True), pose(path, t1, True)
         d = math.dist(p0, p1)
-        a = sum(abs(math.atan2(math.sin(r1[i] - r0[i]), math.cos(r1[i] - r0[i]))) for i in range(3))
+        tr = sum(r0[k][i] * r1[k][i] for i in range(3) for k in range(3))   # trace(R0^T R1)
+        a = math.acos(max(-1.0, min(1.0, (tr - 1) / 2)))
         return d + 500 * a
 
     cuts, i, n = [], 1, len(ts)
@@ -306,7 +325,7 @@ def speech_lookup():
     return events
 
 
-def translate_script(src, objects, nisname, speech, fps, end_frame, cam_events):
+def translate_script(src, objects, nisname, speech, fps, end_frame, cam_events, teleports):
     """HW1 NIS script -> HWRM NIS script. Returns (text, speech ids used, notes)."""
     lines = [l.split(";")[0].split("//")[0].rstrip() for l in open(src, encoding="latin-1").read().splitlines()]
     lines = [l for l in lines if l.strip() and not l.lstrip().startswith("#")]
@@ -367,6 +386,24 @@ def translate_script(src, objects, nisname, speech, fps, end_frame, cam_events):
             emit(f'speechEventActor("${sid}", {16 if ev & 0x1000 else 17}, 2)')
         else:
             skipped[cmd] = skipped.get(cmd, 0) + 1
+    # HWRM interpolates keys at the render frame rate (and snaps them to whole frames), so a one-frame HW1
+    # reposition shows as a slide: hide the object for that frame unless the script already hides it.
+    for key, jumps in teleports.items():
+        body = out_obj.setdefault(key, [])
+        state, frame, vis = 1, 0, []
+        for b in body:
+            m = re.match(r"\s*at frame (\d+)", b)
+            if m:
+                frame = int(m.group(1))
+            elif b.strip() in ("hide()", "show()"):
+                vis.append((frame, 1 if b.strip() == "show()" else 0))
+        for fa, fb in jumps:
+            shown = 1
+            for f, v in sorted(vis):
+                if f <= fb:
+                    shown = v
+            if shown:
+                body += [f"    at frame {fa}", "        hide()", f"    at frame {fb}", "        show()"]
     last = cam_events[-1][1]
     out = [f'speechSetDir("{nisname}")']
     for f, cam in cam_events:
@@ -395,7 +432,7 @@ def main():
     nframes = int(math.ceil(nis["length"] * fps))
     times = [f / fps for f in range(nframes + 1)]
 
-    anim, folw, objects, dropped = [], [], {}, []
+    anim, folw, objects, dropped, teleports = [], [], {}, [], {}
     kept = []
     for o in nis["objects"]:
         k = hwrm_object(o["name"], o["race"], shipmap, a.placeholder)
@@ -415,8 +452,13 @@ def main():
         objects[object_key(o["name"])] = key
         st, _ = sample_times(o, times)
         tlist = [t for t, _ in st]
+        ts_ = o["times"]
+        for i_ in range(1, len(ts_) - 2):
+            if 0 < ts_[i_ + 1] - ts_[i_] <= 0.04 and math.dist(pose(o, ts_[i_], False)[0],
+                                                               pose(o, ts_[i_ + 1], False)[0]) > TELEPORT:
+                teleports.setdefault(key, []).append((round(ts_[i_] * fps), round(ts_[i_ + 1] * fps)))
         poses = [pose(o, te, False) for _, te in st]
-        rots = continuous_euler([p[1] for p in poses])
+        rots = continuous_euler([p_[1] for p_ in poses])
         chans = {}
         for i, ax in enumerate("XYZ"):
             chans["translate" + ax] = [p[0][i] for p in poses]
@@ -472,7 +514,7 @@ def main():
     with open(os.path.join(out_dir, a.name + ".nis"), "wb") as f:
         f.write(b"FORM" + struct.pack(">I", len(body) + 4) + b"NIS " + body)
 
-    text, used, skipped = translate_script(src + ".script", objects, a.name, speech_lookup(), fps, nframes + 2, cam_events)
+    text, used, skipped = translate_script(src + ".script", objects, a.name, speech_lookup(), fps, nframes + 2, cam_events, teleports)
     with open(os.path.join(out_dir, a.name + ".script"), "w", encoding="latin-1", newline="\n") as f:
         f.write(text)
     sp_dir = os.path.join(MOD, "data", "sound", "speech", "nis", a.name)

@@ -93,3 +93,17 @@ with Kus_Scout3
     at frame 950
         show()
 }
+with Kus_Scout4
+{
+    at frame 2510
+        hide()
+    at frame 2511
+        show()
+}
+with Kus_Scout5
+{
+    at frame 2789
+        hide()
+    at frame 2790
+        show()
+}
