@@ -108,3 +108,12 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
 - Not converted yet: music (startMusic), subtitle text cards, lights/ambient, lens flares, the planet backdrop,
   buoys, colour schemes, FOV changes inside a shot, mesh animations (Kuun-Lan DockOpen/DockClose: with real
   modules), remainAtEnd (the real ships are hidden during the intro instead; Gearbox keeps the NIS ships).
+
+## Debugging crashes (Phase 1)
+- Every crash writes `Bin/Release/<date>_ErrorLog.txt` (+ minidumps): faulting address and stack. The exe is loaded
+  at 0x00da0000 here; its Ghidra image base is 0x400000 (project `Cataclysm-decomp/project_hwrm`, copy of the exe;
+  `scripts/DecompileAt.java`). Source file/line strings in the exe name the subsystem (e.g. sctobjectload.cpp).
+- `.ship`: StartShipWeaponConfig / StartShipHardPointConfig must come after `LoadModel(NewShipType,1)`;
+  solStartShipHardPointConfig reads the joint from the loaded HOD (null -> access violation at load).
+- Build families must be declared in scripts/familylist.lua ("could not find family ..."); dock path MAD must be a
+  valid animation index (stock paths use 0).

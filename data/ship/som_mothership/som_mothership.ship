@@ -145,10 +145,11 @@ addAbility(NewShipType,"ShipHold",1,500,200,"rallypoint","Fighter, Corvette, Uti
 {Fighter="36"},
 {Corvette="75"});
 addAbility(NewShipType,"CanBuildShips",1,"Fighter_Som, Corvette_Som, Frigate_Som, Resource_Som, NonCombat_Som","Fighter, Corvette, Frigate, Resource, NonCombat");
-StartShipHardPointConfig(NewShipType,"Research Module","Hardpoint_Research","System","Innate","Damageable","HW1_ResearchModule","","","","","","","","");
 addAbility(NewShipType,"CanBeCaptured",300,0.5);
 addAbility(NewShipType,"CanBeRepaired");
 LoadModel(NewShipType,1);
+-- Hardpoints and weapons must follow LoadModel: solStartShipHardPointConfig reads the joint from the loaded HOD.
+StartShipHardPointConfig(NewShipType,"Research Module","Hardpoint_Research","System","Innate","Damageable","HW1_ResearchModule","","","","","","","","");
 addShield(NewShipType,"EMP",10000,20);
 SpawnSalvageOnDeath(NewShipType,"Slv_Chunk_Lrg03",1, 0.34,0,0,0, 0,0,0,50,0,0,0,200,0,0,0,50,0,0,0,50);
 SpawnSalvageOnDeath(NewShipType,"Slv_Chunk_Lrg02",1, 0.13,0,0,0, 30,-20,200,25,300,150,85,50,0,0,0,85,0,0,0,50);
