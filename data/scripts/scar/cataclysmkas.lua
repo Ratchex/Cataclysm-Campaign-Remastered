@@ -668,6 +668,12 @@ end
 -- out of hyperspace (the Kuun-Lan idle again, as Gearbox's singlePlayerWatchHyperspaceComplete): launch, arrived
 function KAS_ArrivalWatch()
     local t = Universe_GameTime() - KAS_ArrivalStarted
+    if KAS_ArrivalFocused == nil then
+        -- the camera point is fixed: focus it on the Kuun-Lan (now spawned) so it follows the ship; distance 0
+        -- keeps the camera point's view (as stock Camera_FocusSobGroup('Frigate_2', 0, 0, 2))
+        KAS_ArrivalFocused = 1
+        Camera_FocusSobGroup("KAS_ArrivalMS", 0, 0, 0)
+    end
     if t < 2 then return end
     if SobGroup_GetCurrentOrder("KAS_ArrivalMS") ~= COMMAND_Idle and t < 30 then return end
     Rule_Remove("KAS_ArrivalWatch")

@@ -34,10 +34,11 @@ SCALE, RADIUS_SCALE, OUTER = 0.35, 0.175, 1.2
 
 
 # Camera on the player's hyperspace arrival (cataclysmkas.lua K_498230, Camera_UseCameraPoint): in the frame of the
-# ship at StartPointPlayer (HWRM: +Z forward, +X port, +Y up; the Kuun-Lan core runs z -434..697), below and off
-# its port bow, looking up at the bow (user's request). Level addCamera(name, target, eye).
-ARRIVAL_TARGET = (80.0, 0.0, 500.0)
-ARRIVAL_EYE = (800.0, -550.0, 1300.0)
+# ship at StartPointPlayer (+X port, +Y up; the placed Kuun-Lan's bow is at -Z in this frame: a camera at +Z showed
+# its port stern), ahead of and below the port bow, looking up at it as in Cataclysm (user's screenshot of the
+# original warp-in). Level addCamera(name, target, eye).
+ARRIVAL_TARGET = (0.0, 0.0, -600.0)
+ARRIVAL_EYE = (600.0, -600.0, -1300.0)
 
 
 def arrival_camera(p, rot):
