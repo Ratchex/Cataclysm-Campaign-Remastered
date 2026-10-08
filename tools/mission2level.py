@@ -254,12 +254,13 @@ if __name__ == "__main__":
     ap.add_argument("--placeholder")
     ap.add_argument("--player-race", default="Kushan")
     ap.add_argument("--enemy-race", default="Taiidan")
+    ap.add_argument("--ally-race", default="Kushan")
     ap.add_argument("--background")
     ap.add_argument("--player-start-ship")
     ap.add_argument("--player-fleet")
     a = ap.parse_args()
     lv = convert(a.mission_dir, a.out, load_shipmap(a.shipmap), a.placeholder,
-                 {0: a.player_race, 1: a.enemy_race, 2: a.player_race},
+                 {0: a.player_race, 1: a.enemy_race, 2: a.ally_race},
                  a.background, a.player_start_ship, a.player_fleet)
     print(f"{a.out}: {len(lv.squadrons)} squadrons, {len(lv.groups)} groups, {len(lv.points)} points, "
           f"{len(lv.spheres)} spheres, {len(lv.paths)} paths; unmapped types {sum(lv.unmapped.values())}; "

@@ -400,7 +400,7 @@ maxPlayers = 3
 player = {}
 player[0] = { id = 0, name = "Somtaaw", resources = 0, raceName = "Somtaaw", startPos = 0 }
 player[1] = { id = 1, name = "Taiidan", resources = 0, raceName = "Taiidan", startPos = 0 }
-player[2] = { id = 2, name = "Somtaaw", resources = 0, raceName = "Somtaaw", startPos = 0 }
+player[2] = { id = 2, name = "Kushan", resources = 0, raceName = "Kushan", startPos = 0 }
 
 -- unconverted MissionMan lines: Derelict x2
 -- unmapped ship types (placeholder used): 
