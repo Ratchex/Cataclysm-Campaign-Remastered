@@ -1,30 +1,30 @@
 race	ship	hwrm	note
-RACE_BEAST	bacolyte		needs a new HWRM ship (Phase 1)
-RACE_BEAST	bacv		needs a new HWRM ship (Phase 1)
-RACE_BEAST	battackbomber		needs a new HWRM ship (Phase 1)
-RACE_BEAST	bcarrier		needs a new HWRM ship (Phase 1)
-RACE_BEAST	bcloakedfighter		needs a new HWRM ship (Phase 1)
-RACE_BEAST	bcruisemissile		needs a new HWRM ship (Phase 1)
+RACE_BEAST	bacolyte	bst_acolyte	Cataclysm Remastered
+RACE_BEAST	bacv	bst_acv	Cataclysm Remastered
+RACE_BEAST	battackbomber	bst_attackbomber	Cataclysm Remastered
+RACE_BEAST	bcarrier	bst_carrier	Cataclysm Remastered
+RACE_BEAST	bcloakedfighter	bst_cloakedfighter	Cataclysm Remastered
+RACE_BEAST	bcruisemissile	bst_cruisemissile	Cataclysm Remastered
 RACE_BEAST	bdfgfrigate		needs a new HWRM ship (Phase 1)
-RACE_BEAST	bheavycorvette		needs a new HWRM ship (Phase 1)
-RACE_BEAST	bheavycruiser		needs a new HWRM ship (Phase 1)
-RACE_BEAST	bhivefrigate		needs a new HWRM ship (Phase 1)
+RACE_BEAST	bheavycorvette	bst_heavycorvette	Cataclysm Remastered
+RACE_BEAST	bheavycruiser	bst_heavycruiser	Cataclysm Remastered
+RACE_BEAST	bhivefrigate	bst_hivefrigate	Cataclysm Remastered
 RACE_BEAST	binterceptor		needs a new HWRM ship (Phase 1)
-RACE_BEAST	bionarrayfrigate		needs a new HWRM ship (Phase 1)
-RACE_BEAST	bmissilecorvette		needs a new HWRM ship (Phase 1)
-RACE_BEAST	bmothership		needs a new HWRM ship (Phase 1)
+RACE_BEAST	bionarrayfrigate	bst_ionarrayfrigate	Cataclysm Remastered
+RACE_BEAST	bmissilecorvette	bst_missilecorvette	Cataclysm Remastered
+RACE_BEAST	bmothership	bst_mothership	Cataclysm Remastered
 RACE_BEAST	bmothershipdockingbay		needs a new HWRM ship (Phase 1)
 RACE_BEAST	bmothershipengineslower		needs a new HWRM ship (Phase 1)
 RACE_BEAST	bmothershipsupport		needs a new HWRM ship (Phase 1)
-RACE_BEAST	bmultibeamfrigate		needs a new HWRM ship (Phase 1)
-RACE_BEAST	bmultiguncorvette		needs a new HWRM ship (Phase 1)
+RACE_BEAST	bmultibeamfrigate	bst_multibeamfrigate	Cataclysm Remastered
+RACE_BEAST	bmultiguncorvette	bst_multiguncorvette	Cataclysm Remastered
 RACE_BEAST	bprocessor		needs a new HWRM ship (Phase 1)
-RACE_BEAST	brammingfrigate		needs a new HWRM ship (Phase 1)
+RACE_BEAST	brammingfrigate	bst_rammingfrigate	Cataclysm Remastered
 RACE_BEAST	brecon		needs a new HWRM ship (Phase 1)
 RACE_BEAST	brepairdroid		needs a new HWRM ship (Phase 1)
 RACE_BEAST	bsectmoship		needs a new HWRM ship (Phase 1)
 RACE_BEAST	bsentinel		needs a new HWRM ship (Phase 1)
-RACE_BEAST	bswarmer		needs a new HWRM ship (Phase 1)
+RACE_BEAST	bswarmer	bst_swarmer	Cataclysm Remastered
 RACE_BEAST	bworker		needs a new HWRM ship (Phase 1)
 RACE_BEAST	mine		needs a new HWRM ship (Phase 1)
 RACE_BEAST	missile		needs a new HWRM ship (Phase 1)
@@ -92,18 +92,18 @@ RACE_P1	p1standardcorvette		needs a new HWRM ship (Phase 1)
 RACE_SECT	generic_ship		needs a new HWRM ship (Phase 1)
 RACE_SECT	mine		needs a new HWRM ship (Phase 1)
 RACE_SECT	missile		needs a new HWRM ship (Phase 1)
-RACE_SECT	sacolyte	Som_Acolyte	Phase 1
-RACE_SECT	sacv		needs a new HWRM ship (Phase 1)
-RACE_SECT	scarrier		needs a new HWRM ship (Phase 1)
+RACE_SECT	sacolyte	smt_acolyte	Cataclysm Remastered
+RACE_SECT	sacv	smt_acv	Cataclysm Remastered
+RACE_SECT	scarrier	smt_carrier	Cataclysm Remastered
 RACE_SECT	scarriersupport		needs a new HWRM ship (Phase 1)
-RACE_SECT	sdestroyer		needs a new HWRM ship (Phase 1)
-RACE_SECT	sdreadnought		needs a new HWRM ship (Phase 1)
+RACE_SECT	sdestroyer	smt_destroyer	Cataclysm Remastered
+RACE_SECT	sdreadnought	smt_dreadnought	Cataclysm Remastered
 RACE_SECT	sdreadnoughtcannon		needs a new HWRM ship (Phase 1)
-RACE_SECT	shivefrigate		needs a new HWRM ship (Phase 1)
+RACE_SECT	shivefrigate	smt_hivefrigate	Cataclysm Remastered
 RACE_SECT	sleech		needs a new HWRM ship (Phase 1)
 RACE_SECT	smcv		needs a new HWRM ship (Phase 1)
-RACE_SECT	smimic		needs a new HWRM ship (Phase 1)
-RACE_SECT	smothership	Som_Mothership	Phase 0.3 prototype (hull only)
+RACE_SECT	smimic	smt_mimic	Cataclysm Remastered
+RACE_SECT	smothership	smt_ms_sp	Cataclysm Remastered
 RACE_SECT	smothershiparmour		needs a new HWRM ship (Phase 1)
 RACE_SECT	smothershipbiggun		needs a new HWRM ship (Phase 1)
 RACE_SECT	smothershipcommand		needs a new HWRM ship (Phase 1)
@@ -117,14 +117,14 @@ RACE_SECT	smothershiporecanarmour		needs a new HWRM ship (Phase 1)
 RACE_SECT	smothershipspecial		needs a new HWRM ship (Phase 1)
 RACE_SECT	smothershipsupport		needs a new HWRM ship (Phase 1)
 RACE_SECT	smothershipweapons		needs a new HWRM ship (Phase 1)
-RACE_SECT	smultibeamfrigate		needs a new HWRM ship (Phase 1)
-RACE_SECT	sprocessor		needs a new HWRM ship (Phase 1)
-RACE_SECT	srammingfrigate		needs a new HWRM ship (Phase 1)
-RACE_SECT	srecon	Som_Recon	Phase 1
+RACE_SECT	smultibeamfrigate	smt_multibeamfrigate	Cataclysm Remastered
+RACE_SECT	sprocessor	smt_processor	Cataclysm Remastered
+RACE_SECT	srammingfrigate	smt_rammingfrigate	Cataclysm Remastered
+RACE_SECT	srecon	smt_scout	Cataclysm Remastered
 RACE_SECT	srepairdroid		needs a new HWRM ship (Phase 1)
-RACE_SECT	ssentinel		needs a new HWRM ship (Phase 1)
-RACE_SECT	sswarmer		needs a new HWRM ship (Phase 1)
-RACE_SECT	sworker	Som_Worker	Phase 1
+RACE_SECT	ssentinel	smt_sentinel	Cataclysm Remastered
+RACE_SECT	sswarmer	smt_swarmer	Cataclysm Remastered
+RACE_SECT	sworker	smt_worker	Cataclysm Remastered
 RACE_TAIDAN	mine		no HWRM equivalent
 RACE_TAIDAN	missile		no HWRM equivalent
 RACE_TAIDAN	tadvancesupportfrigate	tai_supportfrigate	Gearbox substitute

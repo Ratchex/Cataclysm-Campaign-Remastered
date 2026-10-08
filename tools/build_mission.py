@@ -5,7 +5,7 @@
   datfiles.lua, teamcolour.lua, and ui/mapthumbnails/campaign/cataclysm/m<NN>.dds (from the loading screen)
 Then regenerates the runtime stubs.
 
-Usage: build_mission.py <NN> [--fleet "Som_Mothership,Som_Recon*3,Som_Worker*2"] [--background ez01] [--intro n01]
+Usage: build_mission.py <NN> [--fleet "smt_ms_sp,smt_scout*3,smt_worker*2"] [--background ez01] [--intro n01]
 """
 import argparse
 import os
@@ -69,7 +69,7 @@ def run(*args):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("nn")
-    ap.add_argument("--fleet", default="Som_Mothership,Som_Recon*3,Som_Worker*2")
+    ap.add_argument("--fleet", default="smt_ms_sp,smt_scout*3,smt_worker*2")
     ap.add_argument("--background", default="ez01")
     ap.add_argument("--intro", default="", help="cutscene played before the mission starts (e.g. n01)")
     a = ap.parse_args()

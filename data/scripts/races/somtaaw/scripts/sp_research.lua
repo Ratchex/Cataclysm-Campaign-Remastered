@@ -18,8 +18,8 @@ research =
 		ShortDisplayedName =	"Adrive Destroyer",
 		DisplayPriority =	10,
 		Description =		"Adrive Destroyer",
-		Icon =				Icon_Tech,
-		TargetName =		"Som_Mothership",
+		Icon =				Icon_Build,
+		TargetName =		"smt_dreadnought",
 	},
 	{
 		Name =				"TECH_ADRIVE_FIGHTER",
@@ -32,7 +32,7 @@ research =
 		DisplayPriority =	11,
 		Description =		"Adrive Fighter",
 		Icon =				Icon_Tech,
-		TargetName =		"Som_Mothership",
+		TargetName =		"smt_ms_sp",
 	},
 	{
 		Name =				"TECH_ADRIVE_FRIGATE",
@@ -45,7 +45,7 @@ research =
 		DisplayPriority =	12,
 		Description =		"Adrive Frigate",
 		Icon =				Icon_Tech,
-		TargetName =		"Som_Mothership",
+		TargetName =		"smt_ms_sp",
 	},
 	{
 		Name =				"TECH_ADVANCED_SENSORS",
@@ -58,7 +58,7 @@ research =
 		DisplayPriority =	13,
 		Description =		"Advanced Sensors",
 		Icon =				Icon_Tech,
-		TargetName =		"Som_Mothership",
+		TargetName =		"smt_ms_sp",
 	},
 	{
 		Name =				"TECH_AFTERBURNER",
@@ -71,7 +71,7 @@ research =
 		DisplayPriority =	14,
 		Description =		"Afterburner",
 		Icon =				Icon_Tech,
-		TargetName =		"Som_Mothership",
+		TargetName =		"smt_ms_sp",
 	},
 	{
 		Name =				"TECH_ARMOUR2",
@@ -84,7 +84,7 @@ research =
 		DisplayPriority =	15,
 		Description =		"Armour2",
 		Icon =				Icon_Tech,
-		TargetName =		"Som_Mothership",
+		TargetName =		"smt_ms_sp",
 	},
 	{
 		Name =				"TECH_ARMOUR3",
@@ -97,7 +97,7 @@ research =
 		DisplayPriority =	16,
 		Description =		"Armour3",
 		Icon =				Icon_Tech,
-		TargetName =		"Som_Mothership",
+		TargetName =		"smt_ms_sp",
 	},
 	{
 		Name =				"TECH_BEAST_VACCINE",
@@ -110,7 +110,7 @@ research =
 		DisplayPriority =	17,
 		Description =		"Beast Vaccine",
 		Icon =				Icon_Tech,
-		TargetName =		"Som_Mothership",
+		TargetName =		"smt_ms_sp",
 	},
 	{
 		Name =				"TECH_BIG_GUN",
@@ -123,7 +123,7 @@ research =
 		DisplayPriority =	18,
 		Description =		"Big Gun",
 		Icon =				Icon_Tech,
-		TargetName =		"Som_Mothership",
+		TargetName =		"smt_ms_sp",
 	},
 	{
 		Name =				"TECH_BIOWARHEAD",
@@ -136,7 +136,7 @@ research =
 		DisplayPriority =	19,
 		Description =		"Biowarhead",
 		Icon =				Icon_Tech,
-		TargetName =		"Som_Mothership",
+		TargetName =		"smt_ms_sp",
 	},
 	{
 		Name =				"TECH_CLOAKING",
@@ -149,7 +149,7 @@ research =
 		DisplayPriority =	20,
 		Description =		"Cloaking",
 		Icon =				Icon_Tech,
-		TargetName =		"Som_Mothership",
+		TargetName =		"smt_ms_sp",
 	},
 	{
 		Name =				"TECH_CRYSTAL_HARVEST",
@@ -162,7 +162,7 @@ research =
 		DisplayPriority =	21,
 		Description =		"Crystal Harvest",
 		Icon =				Icon_Tech,
-		TargetName =		"Som_Mothership",
+		TargetName =		"smt_ms_sp",
 	},
 	{
 		Name =				"TECH_DEFENSE_FIELD",
@@ -175,7 +175,7 @@ research =
 		DisplayPriority =	22,
 		Description =		"Defense Field",
 		Icon =				Icon_Tech,
-		TargetName =		"Som_Mothership",
+		TargetName =		"smt_ms_sp",
 	},
 	{
 		Name =				"TECH_DRIVE_DESTROYER",
@@ -187,8 +187,8 @@ research =
 		ShortDisplayedName =	"Drive Destroyer",
 		DisplayPriority =	23,
 		Description =		"Drive Destroyer",
-		Icon =				Icon_Tech,
-		TargetName =		"Som_Mothership",
+		Icon =				Icon_Build,
+		TargetName =		"smt_destroyer",
 	},
 	{
 		Name =				"TECH_DRIVE_FIGHTER",
@@ -201,7 +201,7 @@ research =
 		DisplayPriority =	24,
 		Description =		"Drive Fighter",
 		Icon =				Icon_Build,
-		TargetName =		"Som_Acolyte",
+		TargetName =		"smt_acolyte",
 	},
 	{
 		Name =				"TECH_DRIVE_FRIGATE",
@@ -213,8 +213,8 @@ research =
 		ShortDisplayedName =	"Drive Frigate",
 		DisplayPriority =	25,
 		Description =		"Drive Frigate",
-		Icon =				Icon_Tech,
-		TargetName =		"Som_Mothership",
+		Icon =				Icon_Build,
+		TargetName =		"smt_multibeamfrigate",
 	},
 	{
 		Name =				"TECH_EMP",
@@ -227,7 +227,7 @@ research =
 		DisplayPriority =	26,
 		Description =		"Emp",
 		Icon =				Icon_Tech,
-		TargetName =		"Som_Mothership",
+		TargetName =		"smt_ms_sp",
 	},
 	{
 		Name =				"TECH_ENERGY",
@@ -239,8 +239,8 @@ research =
 		ShortDisplayedName =	"Energy",
 		DisplayPriority =	27,
 		Description =		"Energy",
-		Icon =				Icon_Tech,
-		TargetName =		"Som_Mothership",
+		Icon =				Icon_Build,
+		TargetName =		"smt_dreadnought",
 	},
 	{
 		Name =				"TECH_EXPLOSIVE_CHARGE",
@@ -253,7 +253,7 @@ research =
 		DisplayPriority =	28,
 		Description =		"Explosive Charge",
 		Icon =				Icon_Tech,
-		TargetName =		"Som_Mothership",
+		TargetName =		"smt_ms_sp",
 	},
 	{
 		Name =				"TECH_FORCE_FIELD1",
@@ -266,7 +266,7 @@ research =
 		DisplayPriority =	29,
 		Description =		"Force Field1",
 		Icon =				Icon_Tech,
-		TargetName =		"Som_Mothership",
+		TargetName =		"smt_ms_sp",
 	},
 	{
 		Name =				"TECH_FORCE_FIELD2",
@@ -279,7 +279,7 @@ research =
 		DisplayPriority =	30,
 		Description =		"Force Field2",
 		Icon =				Icon_Tech,
-		TargetName =		"Som_Mothership",
+		TargetName =		"smt_ms_sp",
 	},
 	{
 		Name =				"TECH_FORCE_FIELD3",
@@ -292,7 +292,7 @@ research =
 		DisplayPriority =	31,
 		Description =		"Force Field3",
 		Icon =				Icon_Tech,
-		TargetName =		"Som_Mothership",
+		TargetName =		"smt_ms_sp",
 	},
 	{
 		Name =				"TECH_HEAVY_GUNS",
@@ -305,7 +305,7 @@ research =
 		DisplayPriority =	32,
 		Description =		"Heavy Guns",
 		Icon =				Icon_Tech,
-		TargetName =		"Som_Mothership",
+		TargetName =		"smt_ms_sp",
 	},
 	{
 		Name =				"TECH_INERTIALESS_DRIVE",
@@ -318,7 +318,7 @@ research =
 		DisplayPriority =	33,
 		Description =		"Inertialess Drive",
 		Icon =				Icon_Tech,
-		TargetName =		"Som_Mothership",
+		TargetName =		"smt_ms_sp",
 	},
 	{
 		Name =				"TECH_INFECT",
@@ -331,7 +331,7 @@ research =
 		DisplayPriority =	34,
 		Description =		"Infect",
 		Icon =				Icon_Tech,
-		TargetName =		"Som_Mothership",
+		TargetName =		"smt_ms_sp",
 	},
 	{
 		Name =				"TECH_ION",
@@ -343,8 +343,8 @@ research =
 		ShortDisplayedName =	"Ion",
 		DisplayPriority =	35,
 		Description =		"Ion",
-		Icon =				Icon_Tech,
-		TargetName =		"Som_Mothership",
+		Icon =				Icon_Build,
+		TargetName =		"smt_multibeamfrigate",
 	},
 	{
 		Name =				"TECH_LINK",
@@ -356,8 +356,8 @@ research =
 		ShortDisplayedName =	"Link",
 		DisplayPriority =	36,
 		Description =		"Link",
-		Icon =				Icon_Tech,
-		TargetName =		"Som_Mothership",
+		Icon =				Icon_Build,
+		TargetName =		"smt_acv",
 	},
 	{
 		Name =				"TECH_MEDIUM_GUNS",
@@ -370,7 +370,7 @@ research =
 		DisplayPriority =	37,
 		Description =		"Medium Guns",
 		Icon =				Icon_Tech,
-		TargetName =		"Som_Mothership",
+		TargetName =		"smt_ms_sp",
 	},
 	{
 		Name =				"TECH_MICRO_SHIP",
@@ -382,8 +382,8 @@ research =
 		ShortDisplayedName =	"Micro Ship",
 		DisplayPriority =	38,
 		Description =		"Micro Ship",
-		Icon =				Icon_Tech,
-		TargetName =		"Som_Mothership",
+		Icon =				Icon_Build,
+		TargetName =		"smt_hivefrigate",
 	},
 	{
 		Name =				"TECH_MIMIC",
@@ -395,8 +395,8 @@ research =
 		ShortDisplayedName =	"Mimic",
 		DisplayPriority =	39,
 		Description =		"Mimic",
-		Icon =				Icon_Tech,
-		TargetName =		"Som_Mothership",
+		Icon =				Icon_Build,
+		TargetName =		"smt_mimic",
 	},
 	{
 		Name =				"TECH_MISSILE",
@@ -408,8 +408,8 @@ research =
 		ShortDisplayedName =	"Missile",
 		DisplayPriority =	40,
 		Description =		"Missile",
-		Icon =				Icon_Tech,
-		TargetName =		"Som_Mothership",
+		Icon =				Icon_Build,
+		TargetName =		"smt_destroyer",
 	},
 	{
 		Name =				"TECH_PHASED_TELEMETRY",
@@ -422,7 +422,7 @@ research =
 		DisplayPriority =	41,
 		Description =		"Phased Telemetry",
 		Icon =				Icon_Tech,
-		TargetName =		"Som_Mothership",
+		TargetName =		"smt_ms_sp",
 	},
 	{
 		Name =				"TECH_PLASMA_WEAPONS",
@@ -435,7 +435,7 @@ research =
 		DisplayPriority =	42,
 		Description =		"Plasma Weapons",
 		Icon =				Icon_Tech,
-		TargetName =		"Som_Mothership",
+		TargetName =		"smt_ms_sp",
 	},
 	{
 		Name =				"TECH_REPAIR",
@@ -448,7 +448,7 @@ research =
 		DisplayPriority =	43,
 		Description =		"Repair",
 		Icon =				Icon_Tech,
-		TargetName =		"Som_Mothership",
+		TargetName =		"smt_ms_sp",
 	},
 	{
 		Name =				"TECH_REPAIRBOTS",
@@ -461,7 +461,7 @@ research =
 		DisplayPriority =	44,
 		Description =		"Repairbots",
 		Icon =				Icon_Tech,
-		TargetName =		"Som_Mothership",
+		TargetName =		"smt_ms_sp",
 	},
 	{
 		Name =				"TECH_REPULSE",
@@ -474,7 +474,7 @@ research =
 		DisplayPriority =	45,
 		Description =		"Repulse",
 		Icon =				Icon_Tech,
-		TargetName =		"Som_Mothership",
+		TargetName =		"smt_ms_sp",
 	},
 	{
 		Name =				"TECH_RESEARCH_CLEESAN_ATTACK",
@@ -487,7 +487,7 @@ research =
 		DisplayPriority =	46,
 		Description =		"Research Cleesan Attack",
 		Icon =				Icon_Tech,
-		TargetName =		"Som_Mothership",
+		TargetName =		"smt_ms_sp",
 	},
 	{
 		Name =				"TECH_SALVAGE",
@@ -500,7 +500,7 @@ research =
 		DisplayPriority =	47,
 		Description =		"Salvage",
 		Icon =				Icon_Tech,
-		TargetName =		"Som_Mothership",
+		TargetName =		"smt_ms_sp",
 	},
 	{
 		Name =				"TECH_SUPPORT_SYSTEMS",
@@ -512,8 +512,8 @@ research =
 		ShortDisplayedName =	"Support Systems",
 		DisplayPriority =	48,
 		Description =		"Support Systems",
-		Icon =				Icon_Tech,
-		TargetName =		"Som_Mothership",
+		Icon =				Icon_Build,
+		TargetName =		"smt_carrier",
 	},
 	{
 		Name =				"TECH_TARGETING_SYSTEMS",
@@ -526,6 +526,6 @@ research =
 		DisplayPriority =	49,
 		Description =		"Targeting Systems",
 		Icon =				Icon_Tech,
-		TargetName =		"Som_Mothership",
+		TargetName =		"smt_ms_sp",
 	},
 }

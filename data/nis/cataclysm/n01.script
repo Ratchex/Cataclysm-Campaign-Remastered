@@ -54,12 +54,12 @@ at frame 3321
     wideScreenOut(1)
     cameraBlendOut("Camera12", 1)
     fadeTo(0, 1)
-with Som_Mothership
+with smt_ms_sp
 {
     at frame 0
         show()
 }
-with Som_Recon1
+with smt_scout1
 {
     at frame 0
         hide()
@@ -79,21 +79,21 @@ with Som_Recon1
         speechEventActor("$2207024", 16, 2)
     at frame 2700
 }
-with Som_Recon2
+with smt_scout2
 {
     at frame 0
         hide()
     at frame 950
         show()
 }
-with Som_Recon3
+with smt_scout3
 {
     at frame 0
         hide()
     at frame 950
         show()
 }
-with Som_Worker1
+with smt_worker1
 {
     at frame 0
         show()
@@ -108,7 +108,7 @@ with Som_Worker1
     at frame 2511
         show()
 }
-with Som_Worker2
+with smt_worker2
 {
     at frame 0
         show()
