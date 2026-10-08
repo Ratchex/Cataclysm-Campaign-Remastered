@@ -640,6 +640,18 @@ def main():
     for o, (kind, typ) in kept:
         counts[typ] = counts.get(typ, 0) + 1
     seen = {}
+
+    def own_channels(new_key, src_key):
+        """A copy of another object's channels under the new object's names: HWRM frees each object's channels
+        when the NIS ends, so two objects on the same channels freed them twice (heap corruption 0xc0000374,
+        found as a crash on every exit to the menu; ProcDump stack in MotionNode / MotionFollower)."""
+        tl, ch, _ = object_channels[src_key]
+        out = []
+        for c in ("translateX", "translateY", "translateZ", "rotateX", "rotateY", "rotateZ"):
+            out.append(f"{new_key}_{c}")
+            anim.append(channel(out[-1], list(zip(tl, ch[c])), fps))
+        return out
+
     for o, (kind, typ) in kept:
         # NISShipStartPosition finds the centre ship by object name = ship type (Gearbox: "Kus_Mothership",
         # "Tur_Fighter1"), so name objects after their HWRM type, numbered when the type repeats.
@@ -668,21 +680,21 @@ def main():
                                                             "rotateX", "rotateY", "rotateZ")))
         folw.append(lstr(key) + lstr("HW1") + lstr(kind) + lstr(typ) + b"".join(lstr(n) for n in names)
                     + start + b" ZYX")
-        object_channels[key] = (names, start)
+        object_channels[key] = (tlist, chans, start)
         # Cataclysm's Kuun-Lan carries its modules; HWRM NIS objects have no subsystems, so each module is a dummy
-        # ship on the Kuun-Lan's own channels (modules share its frame)
+        # ship moving with the Kuun-Lan (modules share its frame)
         if typ == "smt_ms_sp":
             for m in a.modules.split(",") if a.modules else []:
                 mtyp = f"smt_kl_{m}_dummy"
                 folw.append(lstr(f"{key}_{m}") + lstr("HW1") + lstr(kind) + lstr(mtyp)
-                            + b"".join(lstr(n) for n in names) + start + b" ZYX")
+                            + b"".join(lstr(n) for n in own_channels(f"{key}_{m}", key)) + start + b" ZYX")
 
     # explosion effect objects for targets that die under a beam (beam_kills), on the target's own channels
     hidden_deaths = beam_kills(src + ".script", objects, fps)
     for target in hidden_deaths:
-        names, start = object_channels[target]
+        start = object_channels[target][2]
         folw.append(lstr(target + BEAM_KILL_SUFFIX) + lstr("HW1") + lstr("effect") + lstr(BEAM_KILL_FX)
-                    + b"".join(lstr(n) for n in names) + start + b" ZYX")
+                    + b"".join(lstr(n) for n in own_channels(target + BEAM_KILL_SUFFIX, target)) + start + b" ZYX")
 
     # One HWRM camera per HW1 shot, switched with cameraCut() like Gearbox's scripts: HWRM interpolates camera
     # keys at the render frame rate, so a cut inside one camera path shows in-between frames.
