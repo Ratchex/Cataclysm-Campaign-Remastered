@@ -945,7 +945,23 @@ function K_496d10(tech) Player_UnrestrictResearchOption(0, tech) print("CKAS: pu
 function K_497710(i, text) KAS_NoOp("497710", "kasfSetTraderDialog") end
 function K_4977a0(scale) KAS_NoOp("4977a0", "kasfSetTraderPriceScale") end
 function K_497800(off) KAS_NoOp("497800", "kasfSetTraderDisabled") end
-function K_497000(track) KAS_NoOp("497000", "kasfMusicPlay " .. track .. " (music not converted yet)") end
+-- kasfMusicPlay(trackNum): Cataclysm stream trackNum (tools/build_music.py), 1102 = a random one of 0-16.
+-- HWRM has no music stop: kasfMusicStop goes back to the previous track, as Gearbox's HW1 KAS port does.
+KAS_MusicPrevious, KAS_MusicCurrent = "", ""
+function K_497000(track)
+    if track == 1102 then track = random(0, 16) end
+    if track < 0 or track > 61 then return end
+    local path = format("data:sound/music/cataclysm/music_%02d", track)
+    KAS_MusicPrevious, KAS_MusicCurrent = KAS_MusicCurrent, path
+    print("CKAS: music " .. path)
+    Sound_MusicPlayType(path, MUS_Ambient)
+end
+function K_498c10(fadeTime)                                                                      -- kasfMusicStop
+    if KAS_MusicPrevious ~= "" then
+        KAS_MusicCurrent, KAS_MusicPrevious = KAS_MusicPrevious, ""
+        Sound_MusicPlayType(KAS_MusicCurrent, MUS_Ambient)
+    end
+end
 
 -- kasfEnableShipConstruction(type, race, enabled)
 function K_4980c0(shipType, race, on)

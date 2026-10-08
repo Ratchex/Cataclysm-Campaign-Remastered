@@ -6,3 +6,6 @@ __pycache__/
 # Generated speech audio (tools/build_speech.py), ~700 MB
 data/sound/speech/
 build/
+
+# Generated music audio (tools/build_music.py)
+data/sound/music/cataclysm/

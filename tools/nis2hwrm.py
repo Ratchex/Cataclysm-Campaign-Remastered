@@ -33,10 +33,9 @@ sys.path.insert(0, os.path.join(DECOMP, "tools"))
 import nisread  # noqa: E402
 
 SCALE = 0.35
-# Cataclysm Remastered's models are about 10% bigger than Cataclysm's at Gearbox's 0.35 (Kuun-Lan ~1.1 long,
-# Worker ~1.1, Recon ~1.14, Acolyte ~1.04): the scene is spread by as much, so cameras keep their framing
-# instead of clipping into the bigger hulls
-MODEL_SCALE = 1.1
+# Scene spread for models bigger than Cataclysm's at Gearbox's 0.35: 1.0 with our converted models
+# (Cataclysm Remastered's own were ~1.1)
+MODEL_SCALE = 1.0
 TELEPORT = 20     # HWRM units moved between two keys a frame apart: an off-camera reposition, hidden while it moves
 TAIL_FRAMES = 45   # extra time after the HW1 NIS ends, for the fade back in (HW1's engine did that itself)
 NIS_SPEECH_FLAG = 0x20000000

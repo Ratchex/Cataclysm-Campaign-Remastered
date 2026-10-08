@@ -110,11 +110,36 @@ DOCK_KINDS = [  # (dock point name prefix, HWRM dock family, path flags, approac
 EXIT_OF = {"DBSMALLIN": "DBSMALLOUT", "DBMEDIN": "DBMEDOUT"}
 
 
-def dock_nodes(points, conv):
+def dock_nodes(points, conv, extra="", skip=()):
     """HOLD_DOCK with DOCK[...] paths (HODOR naming: DOCK[name]_Fam[]_Link[]_Flags[]_MAD[];
     SEG[i]_Tol[]_Spd[]_Flags[])."""
-    def seg(i, xyz, tol, spd, flags):
-        return jnode(f"SEG[{i}]_Tol[{tol}]_Spd[{spd}]_Flags[{flags}]", xyz)
+    def seg(i, xyz, tol, spd, flags, rot=None):
+        if rot is None:
+            return jnode(f"SEG[{i}]_Tol[{tol}]_Spd[{spd}]_Flags[{flags}]", xyz)
+        name = f"SEG[{i}]_Tol[{tol}]_Spd[{spd}]_Flags[{('UseRot ' + flags).strip()}]"
+        return (f'<node name="{name}" id="{name}" sid="{name}E"><translate sid="translate">{fl(xyz)}</translate>'
+                f'<rotate sid="rotateZ">0 0 1 {rot[2]:.4f}</rotate><rotate sid="rotateY">0 1 0 {rot[1]:.4f}</rotate>'
+                f'<rotate sid="rotateX">1 0 0 {rot[0]:.4f}</rotate></node>')
+
+    def latch_rotation(pos, nrm):
+        """Collector orientation at a dock point (degrees, Z*Y*X): its top along the point's outward normal, so the
+        clamps underneath face the hull, nose towards the ship's top (or front when the normal is vertical) - the
+        orientation of Cataclysm Remastered's Kuun-Lan collector paths, which need it (UseRot) to latch."""
+        a, b = conv(*pos), conv(*(pos[k] + nrm[k] for k in range(3)))
+        up = [b[k] - a[k] for k in range(3)]
+        ln = math.sqrt(sum(c * c for c in up)) or 1.0
+        up = [c / ln for c in up]
+        ref = (0.0, 1.0, 0.0) if abs(up[1]) < 0.9 else (0.0, 0.0, 1.0)
+        dot = sum(ref[k] * up[k] for k in range(3))
+        fwd = [ref[k] - dot * up[k] for k in range(3)]
+        ln = math.sqrt(sum(c * c for c in fwd))
+        fwd = [c / ln for c in fwd]
+        side = [up[1] * fwd[2] - up[2] * fwd[1], up[2] * fwd[0] - up[0] * fwd[2], up[0] * fwd[1] - up[1] * fwd[0]]
+        m = [[side[r], up[r], fwd[r]] for r in range(3)]       # columns: the collector's x, y, z in ship space
+        ry = math.asin(max(-1.0, min(1.0, -m[2][0])))
+        rx = math.atan2(m[2][1], m[2][2])
+        rz = math.atan2(m[1][0], m[0][0])
+        return tuple(math.degrees(v) for v in (rx, ry, rz))
 
     def along(pos, nrm, d):
         return conv(*(pos[k] + nrm[k] * d for k in range(3)))
@@ -122,6 +147,8 @@ def dock_nodes(points, conv):
     docks = {lbl: (pos, nrm) for typ, lbl, pos, nrm, _ in points if typ == "Dok"}
     paths = []
     for prefix, fam, flags, (far, near) in DOCK_KINDS:
+        if prefix in skip:
+            continue
         for lbl in sorted(l for l in docks if l.startswith(prefix)):
             if prefix == "RES" and not re.match(r"RES\d+$", lbl):
                 continue                                   # RESLEECH*: Beast attachment points
@@ -136,20 +163,87 @@ def dock_nodes(points, conv):
             ex_name = name + "Ex"
             # Waypoint flags as in kus_mothership.hod (decoded with a HODOR flag test): queue/player control on the
             # approach, ClearRes at the dock point (collectors latch there, fighters are clipped into the hold).
-            last = "Clip ClearRes" if fam != "Utility" else "ClearRes"
-            entry = (seg(0, along(pos, nrm, far), 25, 200, "Player Queue") + seg(1, along(pos, nrm, near), 25, 120, "Player")
-                     + seg(2, conv(*pos), 25, 50, last))
+            # Collectors (Utility) instead follow Cataclysm Remastered's Kuun-Lan, which their Workers unload at:
+            # Check+Queue on the approach, Close leaving, no Player/ClearRes, tolerance 50, oriented waypoints (UseRot,
+            # latch_rotation): with the stock flags they never unloaded, without rotations they stopped short.
+            rot = latch_rotation(pos, nrm) if fam == "Utility" else None
+            if fam == "Utility":
+                entry = (seg(0, along(pos, nrm, far), 50, 0, "Check Queue", rot) + seg(1, along(pos, nrm, near), 50, 0, "", rot)
+                         + seg(2, conv(*pos), 50, 0, "", rot))
+            else:
+                entry = (seg(0, along(pos, nrm, far), 25, 200, "Player Queue")
+                         + seg(1, along(pos, nrm, near), 25, 120, "Player") + seg(2, conv(*pos), 25, 50, "Clip ClearRes"))
             # Stock HW1 Kushan paths (kus_mothership.hod): MAD 0 (an invalid -1 crashed the level load), empty links,
             # Exit on the way out, Latch on both ways for collectors.
             paths.append(jnode(f"DOCK[{name}]_Fam[{fam}]_Link[]_Flags[{flags}]_MAD[0]", (0, 0, 0), entry))
             epos, enrm = docks[exit_lbl] if exit_lbl else (pos, nrm)
-            exitp = (seg(0, conv(*epos), 25, 50, "") + seg(1, along(epos, enrm, near), 25, 150, "")
-                     + seg(2, along(epos, enrm, far), 50, 200, ""))
+            if fam == "Utility":
+                exitp = (seg(0, conv(*epos), 50, 0, "", rot) + seg(1, along(epos, enrm, near), 50, 0, "Close", rot)
+                         + seg(2, along(epos, enrm, far), 50, 0, "", rot))
+            else:
+                exitp = (seg(0, conv(*epos), 25, 50, "") + seg(1, along(epos, enrm, near), 25, 150, "")
+                         + seg(2, along(epos, enrm, far), 50, 200, ""))
             paths.append(jnode(f"DOCK[{ex_name}]_Fam[{fam}]_Link[]_Flags[{(flags + ' Exit').strip()}]_MAD[0]",
                                (0, 0, 0), exitp))
-    if not paths:
+    if not paths and not extra:
         return "", 0
-    return jnode("HOLD_DOCK", (0, 0, 0), "".join(paths)), len(paths) // 2
+    return jnode("HOLD_DOCK", (0, 0, 0), "".join(paths) + extra), len(paths) // 2
+
+
+SEG_FLAGS = ("Check", "Close", "Player", "Queue", "Clip", "ClearRes")
+
+
+def read_hod_docks(path):
+    """DOCK chunk of a HOD: [(name, exit, latch, families, [(pos, rot, useRot, tol, unfocus, spd, flags...)])].
+    Path: name, parent, u32 6, u32 10, u32 exit, u32 latch, u32 0, families, links, i32 MAD, u32 segments;
+    segment (64 B): pos 3f, rot 3f (radians), u32 useRot, f tol, u32 unfocus, f speed, u32 x6 SEG_FLAGS."""
+    d = open(path, "rb").read()
+    o = d.index(b"DOCK") + 8
+    n, = struct.unpack_from("<I", d, o)
+    o += 4
+
+    def s():
+        nonlocal o
+        k, = struct.unpack_from("<I", d, o)
+        o += 4 + k
+        return d[o - k:o].decode("latin-1")
+    out = []
+    for _ in range(n):
+        name, _parent = s(), s()
+        _, _, ex, latch, _ = struct.unpack_from("<5I", d, o)
+        o += 20
+        fam, _links = s(), s()
+        _mad, nseg = struct.unpack_from("<iI", d, o)
+        o += 8
+        segs = []
+        for _ in range(nseg):
+            segs.append(struct.unpack_from("<3f3fIfIfIIIIII", d, o))
+            o += 64
+        out.append((name, ex, latch, fam, segs))
+    return out
+
+
+def borrowed_dock_nodes(path, scale, family):
+    """Dock paths copied from another model (positions scaled), those whose families include `family`:
+    SEG[i]_Tol[]_Spd[]_Flags[] joints rotated as the source waypoints (Z*Y*X, as HODOR stores them)."""
+    nodes = []
+    for name, ex, latch, fam, segs in read_hod_docks(path):
+        if family.lower() not in fam.lower():
+            continue
+        kids = ""
+        for i, v in enumerate(segs):
+            pos, rot, use_rot, tol, unfocus, spd = v[0:3], v[3:6], v[6], v[7], v[8], v[9]
+            flags = (["UseRot"] if use_rot else []) + (["Unfocus"] if unfocus else []) + \
+                [f for f, on in zip(SEG_FLAGS, v[10:]) if on]
+            sname = f"SEG[{i}]_Tol[{tol:g}]_Spd[{spd:g}]_Flags[{' '.join(flags)}]"
+            kids += (f'<node name="{sname}" id="{name}_{sname}" sid="{name}_{i}E">'
+                     f'<translate sid="translate">{fl([c * scale for c in pos])}</translate>'
+                     f'<rotate sid="rotateZ">0 0 1 {math.degrees(rot[2]):.4f}</rotate>'
+                     f'<rotate sid="rotateY">0 1 0 {math.degrees(rot[1]):.4f}</rotate>'
+                     f'<rotate sid="rotateX">1 0 0 {math.degrees(rot[0]):.4f}</rotate></node>')
+        pflags = " ".join(f for f, on in (("Exit", ex), ("Latch", latch)) if on)
+        nodes.append(jnode(f"DOCK[{name}]_Fam[{fam}]_Link[]_Flags[{pflags}]_MAD[0]", (0, 0, 0), kids))
+    return "".join(nodes), len(nodes)
 
 
 def weapon_nodes(points, conv, convn):
@@ -178,6 +272,8 @@ def main():
     ap.add_argument("name")
     ap.add_argument("--scale", type=float, default=0.35)
     ap.add_argument("--no-hodor", action="store_true")
+    ap.add_argument("--dock-from", help="take the collector (Utility) dock paths from this HOD instead of RES*")
+    ap.add_argument("--dock-scale", type=float, default=1.0, help="position scale for --dock-from paths")
     ap.add_argument("--hardpoint", action="append", default=[],
                     help="extra subsystem hardpoint joint set at the origin (e.g. Hardpoint_Research)")
     ap.add_argument("--merge", nargs="*", default=[],
@@ -192,6 +288,7 @@ def main():
     # Group triangles by texture (materials sharing a texture share one HWRM material).
     groups = {}   # key -> {"mat", "png_dir", "tris": [(positions[3], normals[3], uvs[3])]}
     flipped = total = 0
+    extent = 0.0   # largest |coordinate| of the hull (HW1 units), sizes the engine glow quads
     for geo in [a.geo] + a.merge:
         b, ver, mats, objs = geo2obj.parse(geo)
         png_dir = os.path.join(DECOMP, "extracted", "textures",
@@ -208,6 +305,7 @@ def main():
                 for vi in (i0, i1, i2):
                     x, y, z, ivn = verts[vi]
                     pos.append(geo2obj.xform(W, x, y, z))
+                    extent = max(extent, *map(abs, pos[-1]))
                     nx, ny, nz = struct.unpack_from("<fff", b, p_norm + ivn * 16)
                     wx, wy, wz = (W[0] * nx + W[4] * ny + W[8] * nz, W[1] * nx + W[5] * ny + W[9] * nz,
                                   W[2] * nx + W[6] * ny + W[10] * nz)
@@ -273,7 +371,9 @@ def main():
     for g in a.merge:
         points += read_mex(os.path.splitext(g)[0] + ".mex")
     weapons, nweap = weapon_nodes(points, conv, convn)
-    hold_dock, ndock = dock_nodes(points, conv)
+    extra, nextra = borrowed_dock_nodes(a.dock_from, a.dock_scale, "Utility") if a.dock_from else ("", 0)
+    hold_dock, ndock = dock_nodes(points, conv, extra, ("RES",) if a.dock_from else ())
+    ndock += nextra
     # Engine nozzles from the .mex Eng chunks: JNT[EngineNozzle<n>] (setEngineTrail index n-1 / setEngineBurn).
     # Each nozzle as in HODOR's engine layout (toolkit demo ship): BURN[EngineBurn<n>] with five flame divisions
     # trailing backwards and an ETSH[EngineShape<n>] quad; trails/burns need these, not just the joint.
@@ -283,10 +383,18 @@ def main():
     for i, (_, _, pos, _, parent) in enumerate(engines):
         n = i + 1
         if parent in by_name:                       # position is local to that object (Worker: Thruster(1)/(2))
-            pos = geo2obj.xform(geo2obj.world(objs0, by_name[parent], cache0), *pos)
+            k = by_name[parent]
+            W = geo2obj.world(objs0, k, cache0)
+            pos = geo2obj.xform(W, *pos)
+            o = objs0[k]
+            vs = [geo2obj.xform(W, *struct.unpack_from("<fff", b0, o["pV"] + v * 16)) for v in range(o["nV"])]
+            if vs:   # on the engine object's rear face, centred on it (the .mex point sat ~0.6 inboard)
+                pos = tuple((min(v[c] for v in vs) + max(v[c] for v in vs)) / 2 for c in (0, 1)) + \
+                    (min(v[2] for v in vs),)
         flames = "".join(jnode(f"Flame[0]_Div[{d}]", (0, 0, -2.0 * d)) for d in range(5))
         gid = f"ETSH[EngineShape{n}]"
-        h = 1.5
+        # glow quad half-size ~6% of the ship's half-length (Cataclysm Remastered's Recon: 0.45 on ~7)
+        h = min(30.0, max(0.3, 0.06 * extent * a.scale))
         P = [-h, -h, 0, -h, h, 0, h, h, 0, h, -h, 0]
         geoms.append(f'<geometry id="{gid}" name="{gid}"><mesh>'
                      f'<source id="{gid}-pos"><float_array id="{gid}-pos-a" count="12">{fl(P)}</float_array>'
@@ -302,8 +410,12 @@ def main():
         shape = (f'<node name="{gid}" id="{gid}" sid="{gid}E"><translate sid="translate">0 0 0</translate>'
                  f'<instance_geometry url="#{gid}"></instance_geometry></node>')
         weapons += jnode(f"JNT[EngineNozzle{n}]", conv(*pos), jnode(f"BURN[EngineBurn{n}]", (0, 0, 0), flames) + shape)
+    # resource drop-off at the collector docks (Cataclysm Remastered's sits at its Kuun-Lan's front dock)
+    res = [conv(*pt[2]) for pt in points if pt[0] == "Dok" and re.match(r"RES\d+$", pt[1])]
+    res_at = tuple(sum(p[k] for p in res) / len(res) for k in range(3)) if res else (0, 0, 0)
     for hp in a.hardpoint:   # subsystem hardpoint: <name>_Position with _Direction / _Rest (HWRM toolkit layout)
-        weapons += jnode(f"JNT[{hp}_Position]", (0, 0, 0), jnode(f"JNT[{hp}_Direction]", (0, 10, 0))
+        at = res_at if hp == "Hardpoint_Resource" else (0, 0, 0)
+        weapons += jnode(f"JNT[{hp}_Position]", at, jnode(f"JNT[{hp}_Direction]", (0, 10, 0))
                          + jnode(f"JNT[{hp}_Rest]", (0, 0, 10)))
 
     dae = os.path.join(a.out_dir, a.name + ".dae")
@@ -319,7 +431,8 @@ def main():
                 '<library_visual_scenes><visual_scene id="scene" name="scene">\n'
                 '<node name="ROOT_LOD[0]" id="ROOT_LOD[0]" sid="ROOT_LOD[0]E"><translate sid="translate">0 0 0</translate>\n'
                 '<node name="JNT[Root]" id="JNT[Root]" sid="JNT[Root]E"><translate sid="translate">0 0 0</translate>\n'
-                + "\n".join(nodes) + '\n</node>\n' + weapons + hold_dock + '\n</node>\n'
+                # weapon/engine/hardpoint joints inside JNT[Root], with the meshes (HODOR adds its own Root above it)
+                + "\n".join(nodes) + '\n' + weapons + '\n</node>\n' + hold_dock + '\n</node>\n'
                 '<node name="ROOT_INFO" id="ROOT_INFO" sid="ROOT_INFOE"><translate sid="translate">0 0 0</translate>'
                 '<node name="Class[MultiMesh]_Version[512]" id="Class[MultiMesh]_Version[512]" sid="ClassE"/>'
                 '<node name="UVSets[1]" id="UVSets[1]" sid="UVSetsE"/></node>\n'

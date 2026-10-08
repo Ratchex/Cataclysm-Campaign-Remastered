@@ -70,6 +70,79 @@ COPIES = {
     "ship/smt_ms_sp/smt_ms_sp.hod": "ship/smt_ms/smt_ms.hod",
 }
 
+# Our models (tools/build_ship.sh: Cataclysm's geometry at Gearbox's scale, matching the converted NIS and
+# levels) under their ship setup. Their joint names map to ours; hardpoint/weapon configs on joints our model
+# lacks are commented out.
+BUILD = os.path.join(MOD, "build", "ships")
+OUR_MODELS = {
+    "smt_ms_sp": ("som_mothership", {
+        "Hardpoint_GravGenerator": "Hardpoint_Research",
+        "Weapon_TurretTopCenter": "Weapon_GUN0", "Weapon_TurretRearLeftTop": "Weapon_GUN1",
+        "Weapon_TurretRearRightTop": "Weapon_GUN2", "Weapon_TurretRearLeftBot": "Weapon_GUN3",
+        "Weapon_TurretRearRightBot": "Weapon_GUN4", "Weapon_TurretFrontCenter": "Weapon_GUN5"}),
+    "smt_worker": ("som_worker", {}),
+    "smt_scout": ("som_recon", {"Weapon_Autogun": "Weapon_GUN0"}),
+    "smt_acolyte": ("som_acolyte", {"Weapon_FrontGun": "Weapon_GUN0", "Weapon_FrontBotGun": "Weapon_GUN1",
+                                    "Weapon_Missile": "Weapon_GUN2"}),
+}
+
+
+# Effects for ships whose own .events have none (their Acolyte's is empty: no muzzle flash): a stock HWRM ship's,
+# its joint/animation names mapped to ours
+HW1SHIPS = r"C:\Modding\Cataclysm-decomp\reference\hwrm\HW1Ships\ship"
+OUR_EVENTS = {
+    "smt_acolyte": (os.path.join(HW1SHIPS, "kus_interceptor", "kus_interceptor.events"),
+                    {"Weapon_Gun0": "Weapon_GUN0", "Weapon_Gun1": "Weapon_GUN1"}),
+}
+
+
+def use_our_events(ship, src, names):
+    text = open(src, encoding="latin-1").read()
+    for theirs, mine in names.items():
+        text = text.replace(theirs, mine)
+    with open(os.path.join(DATA, "ship", ship, ship + ".events"), "w", encoding="latin-1", newline="") as f:
+        f.write(text)
+
+
+def use_our_model(ship, ours, joints):
+    folder = os.path.join(DATA, "ship", ship)
+    shutil.copyfile(os.path.join(BUILD, ours, ours + ".hod"), os.path.join(folder, ship + ".hod"))
+    model = open(os.path.join(folder, ship + ".hod"), "rb").read()
+    path = os.path.join(folder, ship + ".ship")
+    text = open(path, encoding="latin-1").read()
+    for theirs, mine in joints.items():
+        text = re.sub(r'"%s"' % theirs, '"%s"' % mine, text)
+
+    def drop(m):
+        joint = m.group(2)
+        return m.group(0) if joint.encode() in model else "-- Cataclysm-HWRM (no joint in our model): " + m.group(0)
+    text = re.sub(r'^(Start(?:Ship)?(?:HardPoint|Weapon)Config\(NewShipType,\s*"[^"]*",\s*"([^"]*)").*$', drop,
+                  text, flags=re.M)
+
+    # the weapon's 4th argument names its firing animation in the .events ("Fire", "Missile" on theirs, from their
+    # .mad); stock names it after the weapon joint, as our OUR_EVENTS do
+    def fire_joint(m):
+        return m.group(0) if not m.group(3) or m.group(3).encode() in model else m.group(1) + m.group(2) + '"'
+    text = re.sub(r'^(StartShipWeaponConfig\(NewShipType,\s*"[^"]*",\s*"([^"]*)",\s*")([^"]*)"', fire_joint,
+                  text, flags=re.M)
+
+    # engine trails on nozzles we lack go to our last nozzle (their Acolyte trails its 3rd, centre nozzle; ours
+    # has one), once per nozzle
+    nozzles = len(set(re.findall(rb"EngineNozzle\d+", model)))
+    seen = set()
+
+    def trail(m):
+        idx = min(int(m.group(2)), nozzles - 1)
+        if nozzles == 0 or idx in seen:
+            return "-- Cataclysm-HWRM (no such nozzle): " + m.group(0)
+        seen.add(idx)
+        return m.group(1) + str(idx) + m.group(3)
+    text = re.sub(r'^(setEngineTrail\(NewShipType,\s*)(\d+)(.*)$', trail, text, flags=re.M)
+
+    # LOD switching: our models have LOD 0 only (their Worker vanished at distance, switching to a LOD 1)
+    text = re.sub(r'^(NewShipType\.(?:up|down)LOD\s*=)', r'-- Cataclysm-HWRM (LOD 0 only): \1', text, flags=re.M)
+    open(path, "w", encoding="latin-1", newline="").write(text)
+
 
 def fix_event_markers(path):
     """Events naming a marker joint their model lacks are fatal ("No valid markers for event", rendermodel);
@@ -112,20 +185,24 @@ def main():
             copied.append(rel)
     for rel, src in COPIES.items():
         shutil.copyfile(os.path.join(SRC, src), os.path.join(DATA, rel))
-    for rel in copied:
-        if rel.endswith(".events"):
-            fix_event_markers(os.path.join(DATA, rel))
     for rel, fn in PATCHES.items():
         p = os.path.join(DATA, rel)
         t = open(p, encoding="latin-1").read()
         open(p, "w", encoding="latin-1", newline="\n").write(fn(t))
+    for ship, (ours, joints) in OUR_MODELS.items():
+        use_our_model(ship, ours, joints)
+    for ship, (src, names) in OUR_EVENTS.items():
+        use_our_events(ship, src, names)
+    for rel in copied:
+        if rel.endswith(".events"):
+            fix_event_markers(os.path.join(DATA, rel))
     copied.sort()
     with open(os.path.join(DATA, "cr_files.txt"), "w", newline="\n") as f:
         f.write("\n".join(copied) + "\n")
     with open(os.path.join(DATA, ".gitignore"), "w", newline="\n") as f:
         f.write("# Generated by tools/install_cr.py: Cataclysm Remastered files (not committed)\n")
         f.write("\n".join("/" + re.sub(r"([\[\]*?])", r"\\\1", r) for r in copied) + "\n")
-    print(f"installed {len(copied)} Cataclysm Remastered files into data/ ({len(PATCHES)} patched, {len(COPIES)} replaced)")
+    print(f"installed {len(copied)} Cataclysm Remastered files into data/ ({len(PATCHES)} patched, {len(COPIES)} replaced, {len(OUR_MODELS)} on our models)")
 
 
 if __name__ == "__main__":
