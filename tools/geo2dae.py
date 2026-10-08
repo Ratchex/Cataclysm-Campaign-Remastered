@@ -108,6 +108,11 @@ DOCK_KINDS = [  # (dock point name prefix, HWRM dock family, path flags, approac
     ("DBSMALLIN", "Fighter", "", (900, 250)),
     ("DBMEDIN", "Corvette", "", (1200, 350)),
 ]
+# Hangar paths also line up from well outside the Kuun-Lan's docking bay (the module is a ~480-unit box under the
+# core with the dock points inside it): with only the near approach (~315 HWRM units out, at the box's corner) ships
+# flew straight through the box to reach it, and launched ships turned back through it. Cataclysm Remastered's
+# fighter / corvette paths start ~1100 units out.
+OUTER_APPROACH = {"Fighter": 2400, "Corvette": 2800}
 EXIT_OF = {"DBSMALLIN": "DBSMALLOUT", "DBMEDIN": "DBMEDOUT"}
 LATCH_OFFSET = 45   # collector latch waypoint off the dock point along its normal (HW1 units; ~16 HWRM)
 
@@ -179,8 +184,12 @@ def dock_nodes(points, conv, extra="", skip=()):
                 entry = (seg(0, along(pos, nrm, far), 50, 0, "Check Queue", rot) + seg(1, along(pos, nrm, near), 50, 0, "", rot)
                          + seg(2, along(pos, nrm, LATCH_OFFSET), 50, 0, "", rot))
             else:
-                entry = (seg(0, along(pos, nrm, far), 25, 200, "Player Queue")
-                         + seg(1, along(pos, nrm, near), 25, 120, "Player") + seg(2, conv(*pos), 25, 50, "Clip ClearRes"))
+                outer = OUTER_APPROACH.get(fam)
+                pre = [(along(pos, nrm, outer), 60, 250)] if outer else []
+                way = pre + [(along(pos, nrm, far), 25, 200), (along(pos, nrm, near), 25, 120)]
+                entry = "".join(seg(i, p, tol, spd, "Player Queue" if i == 0 else "Player")
+                                for i, (p, tol, spd) in enumerate(way))
+                entry += seg(len(way), conv(*pos), 25, 50, "Clip ClearRes")
             # Stock HW1 Kushan paths (kus_mothership.hod): MAD 0 (an invalid -1 crashed the level load), empty links,
             # Exit on the way out, Latch on both ways for collectors.
             paths.append(jnode(f"DOCK[{name}]_Fam[{fam}]_Link[]_Flags[{flags}]_MAD[0]", (0, 0, 0), entry))
@@ -191,6 +200,8 @@ def dock_nodes(points, conv, extra="", skip=()):
             else:
                 exitp = (seg(0, conv(*epos), 25, 50, "") + seg(1, along(epos, enrm, near), 25, 150, "")
                          + seg(2, along(epos, enrm, far), 50, 200, ""))
+                if OUTER_APPROACH.get(fam):    # leave all the way out before turning (see OUTER_APPROACH)
+                    exitp += seg(3, along(epos, enrm, OUTER_APPROACH[fam]), 60, 250, "")
             paths.append(jnode(f"DOCK[{ex_name}]_Fam[{fam}]_Link[]_Flags[{(flags + ' Exit').strip()}]_MAD[0]",
                                (0, 0, 0), exitp))
     if not paths and not extra:
