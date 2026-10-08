@@ -129,14 +129,17 @@ def dock_nodes(points, conv):
                     next((l for l in cands if l[len(EXIT_OF[prefix]):].rstrip("0123456789") == side.rstrip("0123456789")), None)
             name = lbl.title()
             ex_name = name + "Ex"
-            entry = (seg(0, along(pos, nrm, far), 60, 250, "Queue") + seg(1, along(pos, nrm, near), 30, 120, "")
-                     + seg(2, conv(*pos), 10, 60, "Close"))
+            # Waypoint flags as in kus_mothership.hod (decoded with a HODOR flag test): queue/player control on the
+            # approach, ClearRes at the dock point (collectors latch there, fighters are clipped into the hold).
+            last = "Clip ClearRes" if fam != "Utility" else "ClearRes"
+            entry = (seg(0, along(pos, nrm, far), 25, 200, "Player Queue") + seg(1, along(pos, nrm, near), 25, 120, "Player")
+                     + seg(2, conv(*pos), 25, 50, last))
             # Stock HW1 Kushan paths (kus_mothership.hod): MAD 0 (an invalid -1 crashed the level load), empty links,
             # Exit on the way out, Latch on both ways for collectors.
             paths.append(jnode(f"DOCK[{name}]_Fam[{fam}]_Link[]_Flags[{flags}]_MAD[0]", (0, 0, 0), entry))
             epos, enrm = docks[exit_lbl] if exit_lbl else (pos, nrm)
-            exitp = (seg(0, conv(*epos), 10, 60, "") + seg(1, along(epos, enrm, near), 30, 150, "")
-                     + seg(2, along(epos, enrm, far), 60, 300, "Unfocus"))
+            exitp = (seg(0, conv(*epos), 25, 50, "") + seg(1, along(epos, enrm, near), 25, 150, "")
+                     + seg(2, along(epos, enrm, far), 50, 200, ""))
             paths.append(jnode(f"DOCK[{ex_name}]_Fam[{fam}]_Link[]_Flags[{(flags + ' Exit').strip()}]_MAD[0]",
                                (0, 0, 0), exitp))
     if not paths:
@@ -266,6 +269,10 @@ def main():
         points += read_mex(os.path.splitext(g)[0] + ".mex")
     weapons, nweap = weapon_nodes(points, conv, convn)
     hold_dock, ndock = dock_nodes(points, conv)
+    # Engine nozzles from the .mex Eng chunks: JNT[EngineNozzle<n>] (setEngineTrail index n-1 / setEngineBurn).
+    engines = [pt for pt in points if pt[0] == "Eng"]
+    for i, (_, _, pos, _) in enumerate(engines):
+        weapons += jnode(f"JNT[EngineNozzle{i + 1}]", conv(*pos))
     for hp in a.hardpoint:   # subsystem hardpoint: <name>_Position with _Direction / _Rest (HWRM toolkit layout)
         weapons += jnode(f"JNT[{hp}_Position]", (0, 0, 0), jnode(f"JNT[{hp}_Direction]", (0, 10, 0))
                          + jnode(f"JNT[{hp}_Rest]", (0, 0, 10)))
@@ -290,7 +297,7 @@ def main():
                 '</visual_scene></library_visual_scenes>\n'
                 '<scene><instance_visual_scene url="#scene"/></scene>\n</COLLADA>\n')
     print(f"{dae}: {total} triangles ({flipped} rewound), {len(groups)} materials, {nweap} weapon joints, "
-          f"{ndock} dock paths")
+          f"{ndock} dock paths, {len(engines)} engine nozzles")
     if not a.no_hodor:
         print("HODOR hangs when started from Python/PowerShell (not from Git Bash); use tools/build_ship.sh")
 

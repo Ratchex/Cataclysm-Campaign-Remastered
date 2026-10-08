@@ -117,3 +117,6 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
   solStartShipHardPointConfig reads the joint from the loaded HOD (null -> access violation at load).
 - Build families must be declared in scripts/familylist.lua ("could not find family ..."); dock path MAD must be a
   valid animation index (stock paths use 0).
+- Dock path waypoint (SEG) record, 64 bytes (HODOR flag test): pos f3, rot f3, UseRot u32, Tol f, Unfocus u32,
+  Spd f, Check u32, Close, Player, Queue, Clip, ClearRes (u32 each). Stock collector In: Player+Queue, Player,
+  ClearRes; fighter In: Player+Queue, Player, Clip+ClearRes; Out paths: no flags. HOLD_DOCK must be under ROOT_LOD[0].

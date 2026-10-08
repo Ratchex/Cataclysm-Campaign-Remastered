@@ -735,12 +735,16 @@ function K_493e00()
 end
 
 -- ------------------------------------------------------------------ orders
-function K_4941a0(vec) SobGroup_MoveToPoint(KAS_Owner(KAS_Team), KAS_Team, vec) end                   -- kasfMoveTo
+function K_4941a0(vec)                                                                              -- kasfMoveTo
+    if SobGroup_Count(KAS_Team) > 0 then SobGroup_MoveToPoint(KAS_Owner(KAS_Team), KAS_Team, vec) end
+end
 function K_494750(host) SobGroup_DockSobGroupInstant(KAS_Team, host) end                            -- kasfDockInstant
 function K_4947c0() KAS_Launch(KAS_Team) end                                                         -- kasfLaunch
 function K_4948a0() return KAS_B(KAS_TeamFinishedLaunching(KAS_Team) ~= 0) end                      -- kasfTeamFinishedLaunching
 function K_494940() return KAS_B(SobGroup_IsDockedCompletely(KAS_Team) == 1) end                   -- kasfTeamDockedReadyForLaunch
-function K_495eb0() SobGroup_Stop(KAS_Owner(KAS_Team), KAS_Team) end                                -- kasfStop
+function K_495eb0()                                                                                  -- kasfStop
+    if SobGroup_Count(KAS_Team) > 0 then SobGroup_Stop(KAS_Owner(KAS_Team), KAS_Team) end
+end
 function K_495f00() KAS_Harvest(KAS_Owner(KAS_Team), KAS_Team) end                                  -- kasfHarvest
 
 -- ------------------------------------------------------------------ ships
@@ -823,19 +827,45 @@ end
 function K_498d90(dst, src) SobGroup_Clear(dst) SobGroup_SobGroupAdd(dst, src) end                -- kasfFirstShip (all, for now)
 function K_49a100(sel, vec) end                                                                    -- sort by distance: order unused
 
--- kasfFindEnemyShipsInside(ships, radius) as Mission01 calls it: human player ships within radius of this team.
-function K_492e90(sel, radius)
+-- Enemies are relative to the asking team's owner: players 0 (human) and 2 (allied Kushan) are allied, 1 is the
+-- enemy (mission2level.py). Always using player 0 made teams handed to the player attack themselves.
+function KAS_EnemyPlayers(owner)
+    if owner == 1 then return { 0, 2 } end
+    return { 1 }
+end
+
+function KAS_FillEnemiesNear(sel, centre, radius)
     SobGroup_Clear(sel)
-    if SobGroup_Count(KAS_Team) == 0 then return 0 end
-    Player_FillProximitySobGroup(sel, 0, KAS_Team, KAS_Dist(radius))
+    if SobGroup_Count(centre) == 0 then return 0 end
+    SobGroup_CreateIfNotExist("KAS_EnemyTmp")
+    local enemies = KAS_EnemyPlayers(SobGroup_GetPlayerOwner(centre))
+    local i = 1
+    while i <= getn(enemies) do
+        SobGroup_Clear("KAS_EnemyTmp")
+        Player_FillProximitySobGroup("KAS_EnemyTmp", enemies[i], centre, radius)
+        SobGroup_SobGroupAdd(sel, "KAS_EnemyTmp")
+        i = i + 1
+    end
     return SobGroup_Count(sel)
 end
 
--- kasfFindEnemiesInside(ships, point, radius) as Mission01 calls it: human player ships near the point.
+-- kasfFindEnemyShipsInside(ships, radius) as Mission01 calls it: enemy ships within radius of this team.
+function K_492e90(sel, radius) return KAS_FillEnemiesNear(sel, KAS_Team, KAS_Dist(radius)) end
+
+-- kasfFindEnemiesInside(ships, point, radius) as Mission01 calls it: this team's enemies near the point.
 function K_4931a0(sel, vec, radius)
     SobGroup_Clear(sel)
+    if SobGroup_Count(KAS_Team) == 0 then return 0 end
+    local enemies = KAS_EnemyPlayers(SobGroup_GetPlayerOwner(KAS_Team))
     Volume_AddSphere("KAS_FindVol", vec, KAS_Dist(radius))
-    Player_FillSobGroupInVolume(sel, 0, "KAS_FindVol")
+    SobGroup_CreateIfNotExist("KAS_EnemyTmp")
+    local i = 1
+    while i <= getn(enemies) do
+        SobGroup_Clear("KAS_EnemyTmp")
+        Player_FillSobGroupInVolume("KAS_EnemyTmp", enemies[i], "KAS_FindVol")
+        SobGroup_SobGroupAdd(sel, "KAS_EnemyTmp")
+        i = i + 1
+    end
     Volume_Delete("KAS_FindVol")
     return SobGroup_Count(sel)
 end
