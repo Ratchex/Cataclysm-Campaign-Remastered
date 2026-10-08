@@ -1,8 +1,52 @@
 # Session handoff: Cataclysm → HWRM port
 
-Last updated 2026-10-07. Read this first, then `C:\Modding\Cataclysm-decomp\PORT_PLAN.md` (plan and decisions),
+Last updated 2026-10-08. Read this first, then `C:\Modding\Cataclysm-decomp\PORT_PLAN.md` (plan and decisions),
 `NOTES.md` (HWRM engine rules learned in game) and `C:\Modding\Cataclysm-decomp\MODLOG.md` (reverse-engineering
 findings).
+
+## RESUME HERE (session of 2026-10-08, last code commit fa363dc)
+User's direction: set up each mission's units as we reach that mission. Current goal: the Kuun-Lan fully working
+(side docks + every module as an HW2 subsystem, Cataclysm Remastered's Kuun-Lan as the template), then the
+Worker's leg / resource-harvest animations and effects.
+
+**Pipeline now** (all in `C:\Modding\Cataclysm-HWRM`; anything that runs HODOR from Git Bash):
+1. `bash tools/build_kuunlan.sh` - core (`build/ships/som_mothership`) + 13 module models (`build/ships/smt_kl_<key>`).
+   Other ships: `bash tools/build_ship.sh race_sect/<ship> som_<name>` (sworker, srecon, sacolyte).
+2. `python tools/make_modules.py` - module table (MODULES, HARDPOINTS, TECH_MODULE) -> `data/subsystem/smt_kl_*`
+   (.subs + .hod) and dummy ships `data/ship/smt_kl_*_dummy` (loose/jettisoned modules; Cataclysm's
+   sMothership<Module> types map to them in `tools/shipmap.tsv`).
+3. `python tools/install_cr.py` - Cataclysm Remastered base layer (git-ignored) + patches + our models under their
+   setups (OUR_MODELS/OUR_EVENTS) + module slots appended to their `smt_ms_sp.ship`.
+4. `python tools/make_race.py` - SP build/research lists (ships need the Hangar; techs need their module).
+5. `python tools/build_mission.py 01 --intro n01` (writes `KAS_StartModules` from the .mission IncludeShips) and
+   `python tools/nis2hwrm.py n01 --modules command,dockingbay,engineering,engineslower,enginesupper,lowerspine,orecanarmour`.
+6. `powershell -File launch.ps1`; the user plays; read `HwRM.log` (strip NULs). Close the game before rebuilding music.
+
+**Last test (fa363dc), Mission 1:** cutscene Kuun-Lan with modules OK; research OK (Hangar techs); Acolytes build OK.
+To fix next, in order:
+1. **In game only the core + Hangar show.** HwRM.log: `SobGroup_CreateSubSystem: could not create Subsystem
+   (smt_kl_command) ... either Ship doesn't have slots, slots are full, or trying to build a Race Specific
+   subsystem` for all 6 structural modules; the Hangar (the only one of the 7 in sp_build.lua) was created. Likely
+   fix: put the structural modules in sp_build.lua too (make_race.py: all MODULES as SubSystem entries) and keep the
+   non-buildable ones out of the player's reach (Player_RestrictBuildOption at start, or an impossible
+   RequiredResearch) - check which still lets SobGroup_CreateSubSystem work.
+2. **Acolytes dock/undock through the side of the Hangar.** The docking-bay paths (DBSMALLIN*/OUT*, DBMEDIN*/OUT*)
+   are still geo2dae's straight stock-style paths. Do as for Workers: borrow Cataclysm Remastered's fighter/corvette
+   paths (their smt_ms.hod: path1/path2 fighter, path10/path11 corvette, path7 frigate; read with
+   `geo2dae.read_hod_docks`) and anchor them on our DB points (generalise `borrowed_dock_nodes` beyond "Utility").
+3. Workers unloaded at the nose although Resource Processing (typeString Resourcing) was not created, so something
+   else accepts drop-offs (check their smt_ms_sp.ship). After fix 1, check that losing the module stops it.
+4. Then the Worker's leg / harvest animations and effects (Cataclysm sworker objects Jackbase, Jackhamr, Blade(1-3),
+   DockClmp(1-4); their smt_worker has .mad/.madstate to borrow from).
+Open, lower priority: Support units (SU); Siege Cannon weapon; how many Support modules each mission starts with
+(1 for now); losing engine modules should slow the Kuun-Lan; n01 `startMusic` cue; hyperspace exit (`K_497290`).
+
+**Facts from this session** (details in NOTES.md): Cataclysm's Kuun-Lan has only two Worker docks (Res0/Res1, the
+nose pads; RES2-10 in its .mex are unused). Module functions come from english.script `str*ModuleInfo` (Hangar =
+drives/linking + ship production, Armour, Weapons, Engineering = sMothershipMicro, Adv. Engineering =
+sMothershipSpecial, Resource Processing = sMothershipEngineering). All modules attach at the Kuun-Lan origin;
+Support modules at SUPPORT1-12 (pairs share a point, one turned 180 degrees about Y). Worker docking needed CR's
+path shapes (straight oriented paths never docked). `StartShipWeaponConfig` arg 4 = firing animation in .events.
 
 ## Repositories
 | Path | What |
