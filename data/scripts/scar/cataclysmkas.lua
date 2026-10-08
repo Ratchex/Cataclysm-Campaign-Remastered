@@ -434,17 +434,21 @@ function KAS_NisStart(name)
             position = Vector3_Subtract(SobGroup_GetPosition("KAS_NisCentre"),
                                         Matrix3_MultiplyVector3ByMatrix(motherVector, nisMatrix))
         else
-            print("CKAS: " .. path .. " has no " .. SobGroup_GetShipType("KAS_NisCentre") .. " to centre on")
+            print("CKAS: " .. path .. " has no " .. SobGroup_GetShipType("KAS_NisCentre") .. " to centre on - skipped")
+            return nil
         end
     end
     NISPlayFromCoordSys(path, position, nisMatrix)
     print("CKAS: playing " .. path .. " at {" .. position[1] .. ", " .. position[2] .. ", " .. position[3] .. "}")
+    return 1
 end
 
 -- Play a cutscene; when it ends set KAS variable `key` (may be nil) and call `after` (may be nil).
 function KAS_NisPlay(name, key, after)
     KAS_NisPending = { key = key, after = after, playing = 1, started = Universe_GameTime() }
-    KAS_NisStart(name)
+    if KAS_NisStart(name) == nil then
+        KAS_NisPending = { key = key, after = after, at = Universe_GameTime() }
+    end
 end
 
 function KAS_NisRequest(number, nislet, key)

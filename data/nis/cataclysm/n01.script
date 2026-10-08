@@ -1,5 +1,7 @@
 speechSetDir("n01")
 at frame 0
+    cameraCut("Camera0")
+at frame 0
     wideScreenIn(0.0333333)
     fadeSet(1)
 at frame 1
@@ -22,39 +24,39 @@ at frame 3258
     fadeSet(0)
 at frame 3259
     fadeTo(1, 2)
-with sMothership
+with Som_Mothership
 {
     at frame 0
         show()
 }
-with sRecon1
+with Kus_Scout1
 {
     at frame 0
         hide()
     at frame 170
-        speechEventActor("$2207021", 26, 2)
+        speechEventActor("$2207021", 17, 2)
     at frame 860
-        speechEventActor("$2207022", 26, 2)
+        speechEventActor("$2207022", 17, 2)
     at frame 910
-        speechEventActor("$2207023", 26, 2)
+        speechEventActor("$2207023", 17, 2)
     at frame 950
         show()
     at frame 1230
-        speechEventActor("$2207374", 26, 2)
+        speechEventActor("$2207374", 17, 2)
     at frame 1530
-        speechEventActor("$2206899", 26, 2)
+        speechEventActor("$2206899", 17, 2)
     at frame 2200
-        speechEventActor("$2207024", 26, 2)
+        speechEventActor("$2207024", 16, 2)
     at frame 2700
 }
-with sRecon2
+with Kus_Scout2
 {
     at frame 0
         hide()
     at frame 950
         show()
 }
-with sRecon3
+with Kus_Scout3
 {
     at frame 0
         hide()

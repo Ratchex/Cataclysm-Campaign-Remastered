@@ -233,7 +233,7 @@ def translate_script(src, objects, nisname, speech, fps):
         m = re.match(r"with\s+(.+)$", l)
         if m:
             key = object_key(m.group(1))
-            cur_obj = key if key in objects else "#drop"
+            cur_obj = objects.get(key, "#drop")
             cur_list = out_obj.setdefault(cur_obj, [])
             continue
         if l == "{":
@@ -274,10 +274,11 @@ def translate_script(src, objects, nisname, speech, fps):
                 skipped["fleetSpeechEvent (no line)"] = skipped.get("fleetSpeechEvent (no line)", 0) + 1
                 continue
             used.append(sid)
-            emit(f'speechEventActor("${sid}", 26, 2)')
+            # HWRM actors (logged in game): 16 Fleet Command, 17 Fleet Intel. Cataclysm 0x1000 = Fleet Command.
+            emit(f'speechEventActor("${sid}", {16 if ev & 0x1000 else 17}, 2)')
         else:
             skipped[cmd] = skipped.get(cmd, 0) + 1
-    out = [f'speechSetDir("{nisname}")'] + out_global
+    out = [f'speechSetDir("{nisname}")', "at frame 0", '    cameraCut("Camera0")'] + out_global
     for key, body in out_obj.items():
         if key == "#drop" or not any(not b.strip().startswith("at frame") for b in body):
             continue
@@ -300,13 +301,23 @@ def main():
     times = [f / fps for f in range(nframes + 1)]
 
     anim, folw, objects, dropped = [], [], {}, []
+    kept = []
     for o in nis["objects"]:
         k = hwrm_object(o["name"], o["race"], shipmap, a.placeholder)
-        key = object_key(o["name"])
         if k is None:
             dropped.append(o["name"])
-            continue
-        kind, typ = k
+        else:
+            kept.append((o, k))
+    counts = {}
+    for o, (kind, typ) in kept:
+        counts[typ] = counts.get(typ, 0) + 1
+    seen = {}
+    for o, (kind, typ) in kept:
+        # NISShipStartPosition finds the centre ship by object name = ship type (Gearbox: "Kus_Mothership",
+        # "Tur_Fighter1"), so name objects after their HWRM type, numbered when the type repeats.
+        seen[typ] = seen.get(typ, 0) + 1
+        key = typ if counts[typ] == 1 else f"{typ}{seen[typ]}"
+        objects[object_key(o["name"])] = key
         poses = [pose(o, t, False) for t in times]
         chans = {}
         for i, ax in enumerate("XYZ"):
@@ -320,7 +331,6 @@ def main():
         folw.append(lstr(key) + lstr("HW1") + lstr(kind) + lstr(typ) + b"".join(lstr(n) for n in names)
                     + struct.pack("<6d", *(chans[c][0] for c in ("translateX", "translateY", "translateZ",
                                                                   "rotateX", "rotateY", "rotateZ"))) + b" ZYX")
-        objects[key] = typ
 
     cmra = []
     for i, c in enumerate(nis["cameras"]):
