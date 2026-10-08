@@ -101,6 +101,18 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
   name, e.g. kus_interceptor `Weapon_Gun0`), whose events give the muzzle flash/sound.
 - `NewShipType.upLOD/downLOD` switch to LOD 1: a LOD-0-only model vanishes at distance with them.
 
+## Mission start: the fleet's hyperspace arrival (confirmed in game, Mission01)
+- kasfStartLevelByHyperspacingShips (all 17 missions) = exe SP flow state 9: the fleet arrives at StartPointPlayer.
+  Runtime: the real fleet is captured before the intro NIS (an NIS's ships belong to the player too), small ships
+  docked instantly, the Kuun-Lan `SobGroup_Despawn`ed; then `SobGroup_HyperspaceTo(ms, "StartPointPlayer")`, launch
+  once its order is COMMAND_Idle, then G_ShipsHaveArrived.
+- HyperspaceTo brings the ship in unrotated (bow +Z, port +X), ignoring the point's rotation.
+- Camera: level `addCamera(name, target, eye)` + `Camera_UseCameraPoint`, then
+  `Camera_FocusSobGroupWithBuffer(g, distance, 0, 0)`. `Camera_FocusSobGroup(g, 0, 0, 0)` zooms right in, whatever
+  the camera point.
+- A ship spawned (or SetPosition'ed, even ghosted) inside another ship's collision box is pushed out of it: the
+  Workers could not be made to leave through the Hangar this way (dropped by the user).
+
 ## Mesh animations and ship effects (Worker, confirmed in game)
 - HWRM .mad (IFF; layout in tools/mad2hwrm.py): clip and key times are **seconds** (stock clips e.g. 0.067-1.8),
   tangents in value per second; channels `<joint>_translateX/Y/Z`, `_rotateX/Y/Z` (radians, same Euler triple

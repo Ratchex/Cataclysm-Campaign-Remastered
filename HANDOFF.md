@@ -4,7 +4,7 @@ Last updated 2026-10-08. Read this first, then `C:\Modding\Cataclysm-decomp\PORT
 `NOTES.md` (HWRM engine rules learned in game) and `C:\Modding\Cataclysm-decomp\MODLOG.md` (reverse-engineering
 findings).
 
-## RESUME HERE (session of 2026-10-08, last code commit f2231c8)
+## RESUME HERE (session of 2026-10-08, last code commit 169f5ac)
 User's direction: set up each mission's units as we reach that mission. Current goal: the Kuun-Lan fully working
 (side docks + every module as an HW2 subsystem, Cataclysm Remastered's Kuun-Lan as the template), then the
 Worker's leg / resource-harvest animations and effects.
@@ -42,10 +42,20 @@ at fixed markers; hovers 45 off the rock (LatchOrientation joint); RepairCommand
 tools/build_ship.sh race_sect/sworker som_worker` (per-ship args in build_ship.sh), then install_cr.py; our
 .events / .madstate live in tools/overrides/.
 
+Then Mission 1's opening (all confirmed in game, last commit 169f5ac): cutscene checklist (NOTES.md "Cutscenes":
+nis2hwrm writes docs/nis/<name>.md for all 14, unknown commands stop it), unsubtitled speech plays (invisible
+subtitle `<c=ffffff></c>` on all 4762 phrases), NIS music as runtime cues, nislet01 converted (battle commands, ion
+beam timing, beam-target explosions), black between n01 / nislet01 / the mission (one frame of HUD remains), and
+the fleet's hyperspace arrival: Kuun-Lan held out of the world during the intro, `SobGroup_HyperspaceTo`
+StartPointPlayer on kasfStartLevelByHyperspacingShips, small ships docked and launched on arrival, camera point
+KAS_ArrivalCamera (mission2level ARRIVAL_*) + focus at 2200. The user dropped launching the Workers from the Hangar
+(reverted): they undock from the nose pads.
+
 To fix next, in order:
-1. Other animated Somtaaw ships the same way (sworker pattern: --anim-joints, mad2hwrm, tools/overrides madstate).
+1. Continue Mission 1 (the user's choice of what next); then other animated Somtaaw ships the same way.
 Open, lower priority: Support units (SU); Siege Cannon weapon; how many Support modules each mission starts with
-(1 for now); losing engine modules should slow the Kuun-Lan; n01 `startMusic` cue; hyperspace exit (`K_497290`).
+(1 for now); losing engine modules should slow the Kuun-Lan; hyperspace exit (`K_497290`); the Kuun-Lan arrives
+unrotated (HyperspaceTo ignores StartPointPlayer's -241 degree heading).
 
 **Facts from this session** (details in NOTES.md): Cataclysm's Kuun-Lan has only two Worker docks (Res0/Res1, the
 nose pads; RES2-10 in its .mex are unused). Module functions come from english.script `str*ModuleInfo` (Hangar =
