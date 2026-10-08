@@ -46,16 +46,17 @@ SMT_WORKER_Docked_OnSet = function(ship)
     SMT_WORKER_OpenClamps(ship)
 end
 
--- cutscenes: Cataclysm's NIS "meshAnimStart <clip>" (tools/nis2hwrm.py: setMADState("NIS_<clip>"))
-SMT_WORKER_NIS_DockOpen_OnSet = function(ship)
+-- cutscenes: Cataclysm's NIS "meshAnimStart <clip>" (tools/nis2hwrm.py NIS_STATES: DockOpen = NIS00,
+-- DockClose = NIS01)
+SMT_WORKER_NIS00_OnSet = function(ship)
     SMT_WORKER_OpenClamps(ship)
 end
 
-SMT_WORKER_NIS_DockClose_OnSet = function(ship)
+SMT_WORKER_NIS01_OnSet = function(ship)
     SMT_WORKER_CloseClamps(ship)
 end
 
--- RESOURCE COLLECTION: harvest cone, blades turning ------------------------------
+-- RESOURCE COLLECTION: boom out (as for repairs), harvest beam, blades turning ----
 SMT_WORKER_ResourceStart_OnSet = function(ship)
     setState(ship, "ResourceStart", 0)
     endEffect(ship, "Resourcing")
@@ -66,6 +67,7 @@ SMT_WORKER_ResourceStart_OnPause = function(ship)
 end
 
 SMT_WORKER_ResourceDo_OnSet = function(ship)
+    SMT_WORKER_Swap(ship, "JackClose", "JackOut")
     if(isAnimRunning(ship, "BladesSpin") == 0) then
         startAnim(ship, "BladesSpin")
     end
@@ -75,6 +77,7 @@ end
 
 SMT_WORKER_ResourceEnd_OnSet = function(ship)
     stopAnim(ship, "BladesSpin")
+    SMT_WORKER_Swap(ship, "JackOut", "JackClose")
     endEffect(ship, "Resourcing")
     setState(ship, "ResourceEnd", 1)
 end

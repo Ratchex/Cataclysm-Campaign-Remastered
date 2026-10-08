@@ -36,7 +36,7 @@ effects =
             { "marker", "marker_beam" },
             { "fx", "harvesting_beam_kus_combo" },
             { "sound", "SP_ELEMENTS/HGN_RESOURCECOLLECTOR_RESOURCING" },
-            { "fx_scale", "1" },
+            { "fx_scale", "1.3" },          -- reaches the rock 45 off (tools/build_ship.sh --latch)
         },
         repairing1 =
         {

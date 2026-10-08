@@ -23,10 +23,10 @@ case "$NAME" in
     # at the target, which the Worker faces). The beams are stock HWRM effects (smt_worker.events).
     GEO2DAE_ARGS="$GEO2DAE_ARGS --anim-joints $ANIM --marker marker_beam@gun:GUN0"
     GEO2DAE_ARGS="$GEO2DAE_ARGS --marker marker_repair@Jackhamr@0,0,34.3@40.97,0,180"
-    # asteroid surface 35 ahead of the nozzle: the length of the stock harvest cone (harvesting_beam_kus at scale 1;
-    # stock kus_resourcecollector's beam marker to its LatchOrientation plane). Cataclysm held 400 HW1 units
-    # (140) off, which left the stock cone far short of the rock.
-    GEO2DAE_ARGS="$GEO2DAE_ARGS --latch 0,29.225,35.5"
+    # asteroid surface 45 ahead of the nozzle (35 was a little close in game): the stock harvest cone is ~35 long at
+    # scale 1 (stock kus_resourcecollector's beam marker to its LatchOrientation plane), scaled 1.3 in
+    # smt_worker.events. Cataclysm held 400 HW1 units (140) off, far beyond the stock cone.
+    GEO2DAE_ARGS="$GEO2DAE_ARGS --latch 0,29.225,45.5"
     ;;
 esac
 rm -rf "$OUT"

@@ -98,9 +98,9 @@ with smt_worker1
     at frame 0
         show()
     at frame 720
-        setMADState("NIS_DockOpen")
+        setMADState("NIS00")
     at frame 2030
-        setMADState("NIS_DockClose")
+        setMADState("NIS01")
     at frame 2005
         hide()
     at frame 2480
@@ -114,9 +114,9 @@ with smt_worker2
 {
     at frame 0
         show()
-        setMADState("NIS_DockOpen")
+        setMADState("NIS00")
     at frame 960
-        setMADState("NIS_DockClose")
+        setMADState("NIS01")
     at frame 1510
         hide()
     at frame 1835
