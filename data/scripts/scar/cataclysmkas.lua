@@ -634,38 +634,17 @@ end
 -- kasTeamHyperspaceOut does at frame 0, and brought in with SobGroup_HyperspaceTo as their kasTeamHyperspaceIn.
 -- The player's real fleet, taken before any NIS starts: an NIS's ships belong to the player too (n01's Kuun-Lan
 -- copy was despawned and its Recon / Workers docked away when this ran after it started)
--- Ships whose only Kuun-Lan docks are the nose pads (Workers: Utility family) leave through the Hangar on arrival
--- instead (launched from the nose they clipped it): held out with the Kuun-Lan, then spawned in the Hangar module
--- and flown out along its port corvette exit (geo2dae DBMEDINP exit path, Kuun-Lan frame, HWRM units; the
--- Kuun-Lan arrives unrotated, so these are world offsets from it).
-KAS_HangarLaunchTypes = { "smt_worker" }
-KAS_HangarSpawn = { 7, -187, 354 }
-KAS_HangarExit = { 775, 421, 381 }
-
 function KAS_FleetCapture()
     SobGroup_CreateIfNotExist("KAS_ArrivalMS")
     K_498790("KAS_ArrivalMS")
-    SobGroup_CreateIfNotExist("KAS_ArrivalHangar")
-    SobGroup_Clear("KAS_ArrivalHangar")
-    local i = 1
-    while i <= getn(KAS_HangarLaunchTypes) do
-        SobGroup_CreateIfNotExist("KAS_ArrivalTmp")
-        SobGroup_Clear("KAS_ArrivalTmp")
-        SobGroup_FillShipsByType("KAS_ArrivalTmp", "Player_Ships0", KAS_HangarLaunchTypes[i])
-        SobGroup_SobGroupAdd("KAS_ArrivalHangar", "KAS_ArrivalTmp")
-        i = i + 1
-    end
     SobGroup_CreateIfNotExist("KAS_ArrivalDocked")
     SobGroup_Clear("KAS_ArrivalDocked")
-    SobGroup_Clear("KAS_ArrivalTmp")
-    SobGroup_FillSubtract("KAS_ArrivalTmp", "Player_Ships0", "KAS_ArrivalMS")
-    SobGroup_FillSubtract("KAS_ArrivalDocked", "KAS_ArrivalTmp", "KAS_ArrivalHangar")
+    SobGroup_FillSubtract("KAS_ArrivalDocked", "Player_Ships0", "KAS_ArrivalMS")
 end
 
 function KAS_FleetAwaitHyperspace()
     if SobGroup_Count("KAS_ArrivalMS") == 0 then return nil end
     SobGroup_DockSobGroupInstant("KAS_ArrivalDocked", "KAS_ArrivalMS")
-    if SobGroup_Count("KAS_ArrivalHangar") > 0 then SobGroup_Despawn("KAS_ArrivalHangar") end
     SobGroup_Despawn("KAS_ArrivalMS")
     KAS_FleetWaiting = 1
     print("CKAS: fleet waits in hyperspace (" .. SobGroup_Count("KAS_ArrivalDocked") .. " ships docked)")
@@ -703,17 +682,9 @@ function KAS_ArrivalWatch()
     if SobGroup_GetCurrentOrder("KAS_ArrivalMS") ~= COMMAND_Idle and t < 30 then return end
     Rule_Remove("KAS_ArrivalWatch")
     SobGroup_Launch("KAS_ArrivalDocked", "KAS_ArrivalMS")
-    if SobGroup_Count("KAS_ArrivalHangar") > 0 then
-        local at = SobGroup_GetPosition("KAS_ArrivalMS")
-        Volume_AddSphere("KAS_HangarVol", { at[1] + KAS_HangarSpawn[1], at[2] + KAS_HangarSpawn[2],
-                                            at[3] + KAS_HangarSpawn[3] }, 40)
-        SobGroup_Spawn("KAS_ArrivalHangar", "KAS_HangarVol")
-        SobGroup_MoveToPoint(0, "KAS_ArrivalHangar", { at[1] + KAS_HangarExit[1], at[2] + KAS_HangarExit[2],
-                                                       at[3] + KAS_HangarExit[3] })
-    end
     KAS_Vars[KAS_Key_ShipsHaveArrived] = 1
     print("CKAS: fleet out of hyperspace after " .. t .. "s; launching " .. SobGroup_Count("KAS_ArrivalDocked")
-          .. " ships, " .. SobGroup_Count("KAS_ArrivalHangar") .. " from the Hangar; G_ShipsHaveArrived")
+          .. " ships; G_ShipsHaveArrived")
 end
 
 -- Player 2 (when the level has one) is the allied Kushan fleet. Applied at start and again on the first tick.
