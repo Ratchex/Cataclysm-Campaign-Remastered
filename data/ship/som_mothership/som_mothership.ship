@@ -1,7 +1,7 @@
 -- som_mothership: Kuun-Lan (Cataclysm race_sect/smothership), Phase 0.3 prototype.
 -- Based on Gearbox's kus_mothership.ship; Cataclysm stats scaled by Gearbox's HW1 -> HWRM ratios for the Kushan
 -- mothership (speed 50 -> 48, health 160000 -> 280000, rotation 10 -> 4): smothership.shp maxvelocity 140,
--- maxhealth 130000, maxrot 5. No weapons, hardpoints, docking or building yet (the model has no joints for them).
+-- maxhealth 130000, maxrot 5. No weapons yet; docking, building and research added in Phase 1.
 NewShipType = StartShipConfig()
 NewShipType.displayedName="Kuun-Lan"
 NewShipType.sobDescription="Somtaaw Mining Vessel"
@@ -126,6 +126,26 @@ NewShipType.SMHighlightDistMax=30000
 addAbility(NewShipType,"MoveCommand",1,0);
 addAbility(NewShipType,"WaypointMove");
 addAbility(NewShipType,"HyperSpaceCommand",1,1.1,1000,1500,0,4);
+-- Phase 1: docking (dock paths from the Kuun-Lan's .mex: RES*, docking bay DBSMALL*/DBMED*), building, research.
+addAbility(NewShipType,"CanDock",1,0);
+NewShipType.dockTimeBetweenTwoFormations=1
+NewShipType.dockTimeBeforeStart=2
+NewShipType.dockNrOfShipsInDockFormation=1
+NewShipType.dockFormation="delta"
+NewShipType.queueFormation="dockline"
+NewShipType.dontDockWithOtherRaceShips=0
+NewShipType.ignoreRaceWhenDocking=0
+addAbility(NewShipType,"CanLaunch");
+NewShipType.launchTimeBetweenTwoFormations=1
+NewShipType.launchTimeBeforeStart=2
+NewShipType.launchNrOfShipsInDockFormation=1
+NewShipType.launchFormation="delta"
+addAbility(NewShipType,"ShipHold",1,500,200,"rallypoint","Fighter, Corvette, Utility",100,
+{Frigate="800"},
+{Fighter="36"},
+{Corvette="75"});
+addAbility(NewShipType,"CanBuildShips",1,"Fighter_Som, Corvette_Som, Frigate_Som, Resource_Som, NonCombat_Som","Fighter, Corvette, Frigate, Resource, NonCombat");
+StartShipHardPointConfig(NewShipType,"Research Module","Hardpoint_Research","System","Innate","Damageable","HW1_ResearchModule","","","","","","","","");
 addAbility(NewShipType,"CanBeCaptured",300,0.5);
 addAbility(NewShipType,"CanBeRepaired");
 LoadModel(NewShipType,1);

@@ -9,6 +9,7 @@ dofilepath("data:scripts/scar/cataclysmkas_stubs.lua")
 dofilepath("data:scripts/scar/cataclysmkas.lua")
 dofilepath("data:scripts/scar/cataclysmspeech.lua")
 dofilepath("data:scripts/scar/cataclysmships.lua")
+dofilepath("data:scripts/scar/cataclysmtech.lua")
 dofilepath("data:leveldata/campaign/cataclysm/m01/m01_kas.lua")
 
 function OnStartOrLoad()

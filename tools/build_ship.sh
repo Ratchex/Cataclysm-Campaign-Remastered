@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Build one Cataclysm ship model into the mod: geo2dae.py (DAE + textures in build/ships/<name>/), HODOR (.hod),
 # then copy the .hod to data/ship/<name>/. Run from Git Bash: HODOR spins forever when Python/PowerShell start it.
+# HARDPOINTS=Hardpoint_Research adds a subsystem hardpoint joint set at the origin.
 # Usage: tools/build_ship.sh <race_dir>/<cataclysm_ship> <hwrm_name> [<race_dir>/<module> ...]
 #   e.g. race_sect/smothership som_mothership race_sect/smothershipcommand ...  (modules are baked into the mesh)
 set -e
@@ -12,7 +13,7 @@ GEO="$(geo "$SRC")"
 OUT="$MOD/build/ships/$NAME"
 HODOR="C:/Program Files (x86)/Steam/steamapps/common/Homeworld 347380/GBXTools/HODOR"
 rm -rf "$OUT"
-python "$MOD/tools/geo2dae.py" "$GEO" "$OUT" "$NAME" ${MERGE:+--merge "${MERGE[@]}"} | grep -v '^HODOR hangs'
+python "$MOD/tools/geo2dae.py" "$GEO" "$OUT" "$NAME" ${HARDPOINTS:+--hardpoint $HARDPOINTS} ${MERGE:+--merge "${MERGE[@]}"} | grep -v '^HODOR hangs'
 "$HODOR/HODOR.exe" -action=convert "-\$CONVERT_IN=$OUT/$NAME.dae" "-\$CONVERT_OUT=$OUT/$NAME.hod" \
     "-\$SHADER_MAP=$HODOR/SHADERS.MAP" < /dev/null > "$OUT/hodor.log" 2>&1 || true
 grep -v -e '^X*$' -e 'Building LMIP' "$OUT/hodor.log" | sed 's/^/  /'

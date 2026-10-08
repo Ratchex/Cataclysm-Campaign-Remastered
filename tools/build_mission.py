@@ -5,7 +5,7 @@
   datfiles.lua, teamcolour.lua, and ui/mapthumbnails/campaign/cataclysm/m<NN>.dds (from the loading screen)
 Then regenerates the runtime stubs.
 
-Usage: build_mission.py <NN> [--fleet "Som_Mothership,Kus_Scout*3,Kus_ResourceCollector*2"] [--background ez01] [--intro n01]
+Usage: build_mission.py <NN> [--fleet "Som_Mothership,Som_Recon*3,Som_Worker*2"] [--background ez01] [--intro n01]
 """
 import argparse
 import os
@@ -28,6 +28,7 @@ dofilepath("data:scripts/scar/cataclysmkas_stubs.lua")
 dofilepath("data:scripts/scar/cataclysmkas.lua")
 dofilepath("data:scripts/scar/cataclysmspeech.lua")
 dofilepath("data:scripts/scar/cataclysmships.lua")
+dofilepath("data:scripts/scar/cataclysmtech.lua")
 dofilepath("data:leveldata/campaign/cataclysm/m{nn}/m{nn}_kas.lua")
 
 function OnStartOrLoad()
@@ -68,7 +69,7 @@ def run(*args):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("nn")
-    ap.add_argument("--fleet", default="")
+    ap.add_argument("--fleet", default="Som_Mothership,Som_Recon*3,Som_Worker*2")
     ap.add_argument("--background", default="ez01")
     ap.add_argument("--intro", default="", help="cutscene played before the mission starts (e.g. n01)")
     a = ap.parse_args()
@@ -76,7 +77,8 @@ def main():
     src = os.path.join(DECOMP, "extracted", "big", "singleplayer", f"mission{nn}")
     out = os.path.join(MOD, "data", "leveldata", "campaign", "cataclysm", f"m{nn}")
     os.makedirs(out, exist_ok=True)
-    lvl = ["--shipmap", os.path.join(HERE, "shipmap.tsv"), "--placeholder", "Kus_Scout", "--background", a.background]
+    lvl = ["--shipmap", os.path.join(HERE, "shipmap.tsv"), "--placeholder", "Kus_Scout", "--background", a.background,
+           "--player-race", "Somtaaw"]
     if a.fleet:
         lvl += ["--player-fleet", a.fleet]
     run(os.path.join(HERE, "mission2level.py"), src, os.path.join(out, f"m{nn}.level"), *lvl)

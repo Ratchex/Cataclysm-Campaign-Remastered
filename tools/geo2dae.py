@@ -15,6 +15,8 @@ HODOR quirks: it must be started from Git Bash (from Python or PowerShell it spi
 paths; textures must be square powers of two >= 64; image ids must be IMG[x]-image.
 """
 import argparse
+import math
+import re
 import os
 import struct
 import sys
@@ -62,6 +64,102 @@ def fl(vals):
     return " ".join("%.6g" % v for v in vals)
 
 
+
+# ----------------------------------------------------------------------------------------------- .mex extras
+def read_mex(path):
+    """HW1 Game/MEX.h: header ident[8], version u16, nChunks u16; chunks: type[4], name[8], size (body bytes),
+    body. Gun/Eng/Dok bodies start with position, normal (HW1 model space); Dok bodies end with a 20-byte name."""
+    out = []
+    if not os.path.exists(path):
+        return out
+    b = open(path, "rb").read()
+    n = struct.unpack_from("<H", b, 10)[0]
+    p = 12
+    for _ in range(n):
+        typ, name, size = struct.unpack_from("<4s8sI", b, p)
+        body = b[p + 16:p + 16 + size]
+        typ = typ.split(b"\0")[0].decode("latin-1")
+        if typ in ("Gun", "Eng", "Dok") and len(body) >= 24:
+            pos = struct.unpack_from("<3f", body, 0)
+            nrm = struct.unpack_from("<3f", body, 12)
+            label = name.split(b"\0")[0].decode("latin-1")
+            if typ == "Dok" and len(body) >= 52:
+                label = body[32:52].split(b"\0")[0].decode("latin-1")
+            out.append((typ, label, pos, nrm))
+        p += 16 + size
+    return out
+
+
+def jnode(name, xyz, children=""):
+    return (f'<node name="{name}" id="{name}" sid="{name}E"><translate sid="translate">{fl(xyz)}</translate>'
+            f'{children}</node>')
+
+
+# Dock paths built from Cataclysm dock points (distances in HW1 units, scaled with the model):
+# entry = approach along the point's normal, then onto the point; exit = the reverse.
+DOCK_KINDS = [  # (dock point name prefix, HWRM dock family, path flags, approach distances)
+    ("RES", "Utility", "Latch", (1200, 350)),
+    ("DBSMALLIN", "Fighter", "", (900, 250)),
+    ("DBMEDIN", "Corvette", "", (1200, 350)),
+]
+EXIT_OF = {"DBSMALLIN": "DBSMALLOUT", "DBMEDIN": "DBMEDOUT"}
+
+
+def dock_nodes(points, conv):
+    """HOLD_DOCK with DOCK[...] paths (HODOR naming: DOCK[name]_Fam[]_Link[]_Flags[]_MAD[];
+    SEG[i]_Tol[]_Spd[]_Flags[])."""
+    def seg(i, xyz, tol, spd, flags):
+        return jnode(f"SEG[{i}]_Tol[{tol}]_Spd[{spd}]_Flags[{flags}]", xyz)
+
+    def along(pos, nrm, d):
+        return conv(*(pos[k] + nrm[k] * d for k in range(3)))
+
+    docks = {lbl: (pos, nrm) for typ, lbl, pos, nrm in points if typ == "Dok"}
+    paths = []
+    for prefix, fam, flags, (far, near) in DOCK_KINDS:
+        for lbl in sorted(l for l in docks if l.startswith(prefix)):
+            if prefix == "RES" and not re.match(r"RES\d+$", lbl):
+                continue                                   # RESLEECH*: Beast attachment points
+            pos, nrm = docks[lbl]
+            exit_lbl = None
+            if prefix in EXIT_OF:   # DBSMALLINP0 leaves by DBSMALLOUTP0, else the first exit on that side
+                side = lbl[len(prefix):]
+                cands = sorted(l for l in docks if l.startswith(EXIT_OF[prefix]))
+                exit_lbl = next((l for l in cands if l[len(EXIT_OF[prefix]):] == side), None) or \
+                    next((l for l in cands if l[len(EXIT_OF[prefix]):].rstrip("0123456789") == side.rstrip("0123456789")), None)
+            name = lbl.title()
+            ex_name = name + "Ex"
+            entry = (seg(0, along(pos, nrm, far), 60, 250, "Queue") + seg(1, along(pos, nrm, near), 30, 120, "")
+                     + seg(2, conv(*pos), 10, 60, "Close"))
+            paths.append(jnode(f"DOCK[{name}]_Fam[{fam}]_Link[{ex_name}]_Flags[{flags}]_MAD[-1]", (0, 0, 0), entry))
+            epos, enrm = docks[exit_lbl] if exit_lbl else (pos, nrm)
+            exitp = (seg(0, conv(*epos), 10, 60, "") + seg(1, along(epos, enrm, near), 30, 150, "")
+                     + seg(2, along(epos, enrm, far), 60, 300, "Unfocus"))
+            paths.append(jnode(f"DOCK[{ex_name}]_Fam[{fam}]_Link[]_Flags[Exit]_MAD[-1]", (0, 0, 0), exitp))
+    if not paths:
+        return "", 0
+    return jnode("HOLD_DOCK", (0, 0, 0), "".join(paths)), len(paths) // 2
+
+
+def weapon_nodes(points, conv, convn):
+    """JNT[Weapon_<GUNn>_Position] with _Direction (up), _Rest (firing direction), _Muzzle children (the layout of
+    the HWRM Blender toolkit's hardpoint tool); the position joint itself is not rotated."""
+    out = []
+    for typ, lbl, pos, nrm in points:
+        if typ != "Gun":
+            continue
+        n = convn(*nrm)
+        ln = math.sqrt(sum(c * c for c in n)) or 1.0
+        n = tuple(c / ln for c in n)
+        up = (0.0, 1.0, 0.0) if abs(n[1]) < 0.9 else (1.0, 0.0, 0.0)
+        base = f"Weapon_{lbl}"
+        kids = (jnode(f"JNT[{base}_Direction]", tuple(10 * c for c in up))
+                + jnode(f"JNT[{base}_Rest]", tuple(10 * c for c in n))
+                + jnode(f"JNT[{base}_Muzzle]", tuple(0.1 * c for c in n)))
+        out.append(jnode(f"JNT[{base}_Position]", conv(*pos), kids))
+    return "".join(out), len(out)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("geo")
@@ -69,6 +167,8 @@ def main():
     ap.add_argument("name")
     ap.add_argument("--scale", type=float, default=0.35)
     ap.add_argument("--no-hodor", action="store_true")
+    ap.add_argument("--hardpoint", action="append", default=[],
+                    help="extra subsystem hardpoint joint set at the origin (e.g. Hardpoint_Research)")
     ap.add_argument("--merge", nargs="*", default=[],
                     help="more .geo files baked into the same mesh (Kuun-Lan modules share the core's frame)")
     a = ap.parse_args()
@@ -158,6 +258,15 @@ def main():
                      f'input_semantic="TEXCOORD" input_set="0"/></instance_material>'
                      f'</technique_common></bind_material></instance_geometry></node>')
 
+    points = read_mex(os.path.splitext(a.geo)[0] + ".mex")
+    for g in a.merge:
+        points += read_mex(os.path.splitext(g)[0] + ".mex")
+    weapons, nweap = weapon_nodes(points, conv, convn)
+    hold_dock, ndock = dock_nodes(points, conv)
+    for hp in a.hardpoint:   # subsystem hardpoint: <name>_Position with _Direction / _Rest (HWRM toolkit layout)
+        weapons += jnode(f"JNT[{hp}_Position]", (0, 0, 0), jnode(f"JNT[{hp}_Direction]", (0, 10, 0))
+                         + jnode(f"JNT[{hp}_Rest]", (0, 0, 10)))
+
     dae = os.path.join(a.out_dir, a.name + ".dae")
     with open(dae, "w", encoding="utf-8", newline="\n") as f:
         f.write('<?xml version="1.0" encoding="utf-8"?>\n'
@@ -171,13 +280,14 @@ def main():
                 '<library_visual_scenes><visual_scene id="scene" name="scene">\n'
                 '<node name="ROOT_LOD[0]" id="ROOT_LOD[0]" sid="ROOT_LOD[0]E"><translate sid="translate">0 0 0</translate>\n'
                 '<node name="JNT[Root]" id="JNT[Root]" sid="JNT[Root]E"><translate sid="translate">0 0 0</translate>\n'
-                + "\n".join(nodes) + '\n</node></node>\n'
+                + "\n".join(nodes) + '\n</node>\n' + weapons + hold_dock + '\n</node>\n'
                 '<node name="ROOT_INFO" id="ROOT_INFO" sid="ROOT_INFOE"><translate sid="translate">0 0 0</translate>'
                 '<node name="Class[MultiMesh]_Version[512]" id="Class[MultiMesh]_Version[512]" sid="ClassE"/>'
                 '<node name="UVSets[1]" id="UVSets[1]" sid="UVSetsE"/></node>\n'
                 '</visual_scene></library_visual_scenes>\n'
                 '<scene><instance_visual_scene url="#scene"/></scene>\n</COLLADA>\n')
-    print(f"{dae}: {total} triangles ({flipped} rewound), {len(groups)} materials")
+    print(f"{dae}: {total} triangles ({flipped} rewound), {len(groups)} materials, {nweap} weapon joints, "
+          f"{ndock} dock paths")
     if not a.no_hodor:
         print("HODOR hangs when started from Python/PowerShell (not from Git Bash); use tools/build_ship.sh")
 

@@ -545,8 +545,19 @@ function KAS_ApplyAlliances()
     end
 end
 
+-- Cataclysm research is offered by the mission (kasfAllowPlayerToResearch / Purchase): lock every tech first.
+function KAS_RestrictTechs()
+    if KAS_Techs == nil then return end
+    local i = 1
+    while i <= getn(KAS_Techs) do
+        Player_RestrictResearchOption(0, KAS_Techs[i])
+        i = i + 1
+    end
+end
+
 function KAS_StartEngine()
     KAS_ApplyAlliances()
+    KAS_RestrictTechs()
     Rule_AddInterval("KAS_EngineTick", 0.5)
 end
 
@@ -876,8 +887,8 @@ function K_497af0() KAS_NoOp("497af0", "unpause other KAS teams") end
 -- ------------------------------------------------------------------ economy, research, trading, music
 function K_496e20(player, ru) Player_SetRU(player, ru) end                                       -- kasfRUsSet
 function K_496e40() return Universe_GetWorldResources() end                                      -- kasfGetWorldResources
-function K_496cf0(tech) KAS_NoOp("496cf0", "kasfAllowPlayerToResearch " .. tech) end
-function K_496d10(tech) KAS_NoOp("496d10", "kasfAllowPlayerToPurchase " .. tech) end
+function K_496cf0(tech) Player_UnrestrictResearchOption(0, tech) print("CKAS: research allowed " .. tech) end   -- kasfAllowPlayerToResearch
+function K_496d10(tech) Player_UnrestrictResearchOption(0, tech) print("CKAS: purchase allowed " .. tech) end   -- kasfAllowPlayerToPurchase
 function K_497710(i, text) KAS_NoOp("497710", "kasfSetTraderDialog") end
 function K_4977a0(scale) KAS_NoOp("4977a0", "kasfSetTraderPriceScale") end
 function K_497800(off) KAS_NoOp("497800", "kasfSetTraderDisabled") end

@@ -59,7 +59,7 @@ with Som_Mothership
     at frame 0
         show()
 }
-with Kus_Scout1
+with Som_Recon1
 {
     at frame 0
         hide()
@@ -79,21 +79,21 @@ with Kus_Scout1
         speechEventActor("$2207024", 16, 2)
     at frame 2700
 }
-with Kus_Scout2
+with Som_Recon2
 {
     at frame 0
         hide()
     at frame 950
         show()
 }
-with Kus_Scout3
+with Som_Recon3
 {
     at frame 0
         hide()
     at frame 950
         show()
 }
-with Kus_ResourceCollector1
+with Som_Worker1
 {
     at frame 0
         show()
@@ -108,7 +108,7 @@ with Kus_ResourceCollector1
     at frame 2511
         show()
 }
-with Kus_ResourceCollector2
+with Som_Worker2
 {
     at frame 0
         show()
