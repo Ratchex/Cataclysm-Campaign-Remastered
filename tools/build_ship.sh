@@ -23,6 +23,9 @@ case "$NAME" in
     # at the target, which the Worker faces)
     GEO2DAE_ARGS="$GEO2DAE_ARGS --anim-joints $ANIM --marker marker_beam@gun:GUN0"
     GEO2DAE_ARGS="$GEO2DAE_ARGS --marker marker_repair@Jackhamr@0,0,34.3@40.97,0,180"
+    # asteroid surface 140 ahead of the nozzle: Cataclysm harvests from 400 HW1 units off (ResCollect.c
+    # ASTEROID_HARVEST_RANGE, range to the asteroid's surface)
+    GEO2DAE_ARGS="$GEO2DAE_ARGS --latch 0,29.225,140"
     ;;
 esac
 rm -rf "$OUT"

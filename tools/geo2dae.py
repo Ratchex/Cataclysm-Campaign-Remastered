@@ -375,6 +375,8 @@ def main():
                     help="effect marker joint NAME@OBJECT@x,y,z[@rx,ry,rz] (HW1 units in that animated object's "
                          "frame; pointing along its +Z, or turned by those HWRM degrees, Z*Y*X) or NAME@gun:LABEL "
                          "(at that .mex gun point, pointing forward)")
+    ap.add_argument("--latch", help="LatchOrientation joint at x,y,z (HWRM units): the point a collector puts on "
+                                    "the asteroid's surface while harvesting")
     a = ap.parse_args()
     anim_names = {n for n in a.anim_joints.split(",") if n}
     os.makedirs(a.out_dir, exist_ok=True)
@@ -586,6 +588,14 @@ def main():
         return out
     if frames:
         weapons += joint_tree(None)
+    if a.latch:
+        # harvesting: HWRM puts LatchOrientation on the asteroid's surface, so it sets how far off a collector holds
+        # (none = the ship's origin: it sits on the rock). Layout of stock tai_resourcecollector's: Up along the
+        # beam (+Z), Heading up, with _Heading / _Left / _Up joints 10 units out.
+        at = tuple(float(c) for c in a.latch.split(","))
+        weapons += jnode("JNT[LatchOrientation]", at, jnode("JNT[LatchOrientationHeading]", (0, 0, 10))
+                         + jnode("JNT[LatchOrientationLeft]", (10, 0, 0)) + jnode("JNT[LatchOrientationUp]", (0, 10, 0)),
+                         rot=(90.0, 0.0, 180.0))
 
     dae = os.path.join(a.out_dir, a.name + ".dae")
     with open(dae, "w", encoding="utf-8", newline="\n") as f:

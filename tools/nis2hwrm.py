@@ -378,6 +378,10 @@ def translate_script(src, objects, nisname, speech, fps, end_frame, cam_events, 
             emit(f"hideUniverse({1 if hidden_universe else 0})")
         elif cmd in ("hide", "show") and cur_obj:
             emit(f"{cmd}()")
+        elif cmd == "meshAnimStart" and cur_obj:
+            # HW1 plays a .mad clip; HWRM NIS can only set a .madstate state: NIS_<clip>, whose <SHIP>_NIS_<clip>_OnSet
+            # (our .madstate overrides, tools/overrides) starts the converted clip (tools/mad2hwrm.py)
+            emit(f'setMADState("NIS_{args.strip()}")')
         elif cmd == "fleetSpeechEvent":
             ev = eval(re.sub(r"[^0-9+ ]", "", args))      # "(343 + 2048 + 536870912)"
             sid = speech.get(ev & 0x3FF)

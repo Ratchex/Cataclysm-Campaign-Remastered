@@ -22,12 +22,37 @@ SMT_WORKER_Swap = function(ship, from, to)
 end
 
 -- DOCKING: clamps out while latched to the Kuun-Lan, stowed in flight -----------
+-- Workers whose clamps are out; a ship that never opened them (spawned in flight) does not play DockClose, which
+-- starts from the open pose.
+SMT_WORKER_ClampsOut = {}
+
+SMT_WORKER_OpenClamps = function(ship)
+    SMT_WORKER_Swap(ship, "DockClose", "DockOpen")
+    SMT_WORKER_ClampsOut[ship] = 1
+end
+
+SMT_WORKER_CloseClamps = function(ship)
+    if(SMT_WORKER_ClampsOut[ship]) then
+        SMT_WORKER_Swap(ship, "DockOpen", "DockClose")
+        SMT_WORKER_ClampsOut[ship] = nil
+    end
+end
+
 SMT_WORKER_Launched_OnSet = function(ship)
-    SMT_WORKER_Swap(ship, "DockOpen", "DockClose")
+    SMT_WORKER_CloseClamps(ship)
 end
 
 SMT_WORKER_Docked_OnSet = function(ship)
-    SMT_WORKER_Swap(ship, "DockClose", "DockOpen")
+    SMT_WORKER_OpenClamps(ship)
+end
+
+-- cutscenes: Cataclysm's NIS "meshAnimStart <clip>" (tools/nis2hwrm.py: setMADState("NIS_<clip>"))
+SMT_WORKER_NIS_DockOpen_OnSet = function(ship)
+    SMT_WORKER_OpenClamps(ship)
+end
+
+SMT_WORKER_NIS_DockClose_OnSet = function(ship)
+    SMT_WORKER_CloseClamps(ship)
 end
 
 -- RESOURCE COLLECTION: harvest cone, blades turning ------------------------------
