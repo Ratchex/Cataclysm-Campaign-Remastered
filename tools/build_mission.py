@@ -27,6 +27,7 @@ dofilepath("data:scripts/SCAR/SpecialFlags.lua")
 dofilepath("data:scripts/scar/cataclysmkas_stubs.lua")
 dofilepath("data:scripts/scar/cataclysmkas.lua")
 dofilepath("data:scripts/scar/cataclysmspeech.lua")
+dofilepath("data:scripts/scar/cataclysmships.lua")
 dofilepath("data:leveldata/campaign/cataclysm/m{nn}/m{nn}_kas.lua")
 
 function OnStartOrLoad()
@@ -88,6 +89,7 @@ def main():
         f.write(DATFILES)
     run(os.path.join(HERE, "make_dds.py"), os.path.join(src, "loading.jpg"),
         os.path.join(MOD, "data", "ui", "mapthumbnails", "campaign", "cataclysm", f"m{nn}.dds"), "1024", "512")
+    run(os.path.join(HERE, "make_shipmap_lua.py"))
     run(os.path.join(HERE, "make_kas_stubs.py"), MOD)
     run(os.path.join(HERE, "luacheck.py"), os.path.join(out, f"m{nn}_kas.lua"),
         os.path.join(MOD, "data", "scripts", "scar", "cataclysmkas_stubs.lua"),

@@ -93,7 +93,7 @@ with Kus_Scout3
     at frame 950
         show()
 }
-with Kus_Scout4
+with Kus_ResourceCollector1
 {
     at frame 0
         show()
@@ -108,7 +108,7 @@ with Kus_Scout4
     at frame 2511
         show()
 }
-with Kus_Scout5
+with Kus_ResourceCollector2
 {
     at frame 0
         show()

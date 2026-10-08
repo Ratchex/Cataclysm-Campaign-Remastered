@@ -310,6 +310,13 @@ function K_494e70(label, brief, full)                                           
     end
 end
 
+function K_494f70()                                                                                 -- kasfObjectiveDestroyAll
+    for label, id in KAS_Objectives do
+        Objective_SetState(id, OS_Off)
+    end
+    KAS_Objectives = {}
+end
+
 function K_494f60(label)                                                                            -- kasfObjectiveDestroy
     if KAS_Objectives[label] then
         Objective_SetState(KAS_Objectives[label], OS_Off)
@@ -657,4 +664,211 @@ function K_498790(sel)                                                          
         if SobGroup_Count(sel) > 0 then return end
         i = i + 1
     end
+end
+
+-- ================================================================== Mission01 API (stubs implemented)
+-- Distances in KAS code are HW1 units; HWRM levels are scaled by 0.35 (mission2level.py, Gearbox's HW1 port).
+KAS_WorldScale = 0.35
+
+function KAS_Dist(d) return d * KAS_WorldScale end
+
+function KAS_HWRMType(t)
+    if t == nil then return KAS_PlaceholderType end
+    return KAS_ShipTypes[strlower(t)] or KAS_PlaceholderType
+end
+
+-- Log once and do nothing: HWRM has no equivalent (yet) or the function only drives HW1 UI state.
+function KAS_NoOp(addr, what)
+    KAS_WarnOnce("noop" .. addr, "no-op " .. addr .. " " .. what)
+end
+
+function KAS_Owner(sel) return SobGroup_GetPlayerOwner(sel) end
+
+-- ------------------------------------------------------------------ mission / team
+function K_491cb0() KAS_MissionFailed() end                                                          -- kasfMissionFailed
+function K_492780() KAS_SetFormation(KAS_Team, "Delta") end                                          -- kasfFormationDelta
+function K_492810() KAS_SetFormation(KAS_Team, "Claw") end                                           -- kasfFormationClaw
+function K_492960(sel) SobGroup_GuardSobGroup(KAS_Team, sel) end                                     -- kasfGuardShips
+function K_4929d0(path) SobGroup_FollowPath(KAS_Team, path, 1, 1, 0) end                             -- kasfPatrolPath
+function K_492b20() return floor(KAS_TeamHealth(KAS_Team)) end                                      -- kasfTeamHealthAverage
+function K_493aa0(pct) SobGroup_SetHealth(KAS_Team, pct / 100) end                                  -- kasfTeamSetPercentDamaged
+function K_493cf0(team, sel) SobGroup_SobGroupAdd(team, sel) end                                    -- kasfReinforceTeamWithShips
+
+-- kasfTeamCountOriginal: ship count when the team was first asked (Gearbox registers at team creation).
+KAS_TeamOriginalCounts = {}
+function K_493e00()
+    if KAS_TeamOriginalCounts[KAS_Team] == nil then
+        KAS_TeamOriginalCounts[KAS_Team] = SobGroup_Count(KAS_Team)
+    end
+    return KAS_TeamOriginalCounts[KAS_Team]
+end
+
+-- ------------------------------------------------------------------ orders
+function K_4941a0(vec) SobGroup_MoveToPoint(KAS_Owner(KAS_Team), KAS_Team, vec) end                   -- kasfMoveTo
+function K_494750(host) SobGroup_DockSobGroupInstant(KAS_Team, host) end                            -- kasfDockInstant
+function K_4947c0() KAS_Launch(KAS_Team) end                                                         -- kasfLaunch
+function K_4948a0() return KAS_B(KAS_TeamFinishedLaunching(KAS_Team) ~= 0) end                      -- kasfTeamFinishedLaunching
+function K_494940() return KAS_B(SobGroup_IsDockedCompletely(KAS_Team) == 1) end                   -- kasfTeamDockedReadyForLaunch
+function K_495eb0() SobGroup_Stop(KAS_Owner(KAS_Team), KAS_Team) end                                -- kasfStop
+function K_495f00() KAS_Harvest(KAS_Owner(KAS_Team), KAS_Team) end                                  -- kasfHarvest
+
+-- ------------------------------------------------------------------ ships
+function K_493980(sel, pct) SobGroup_SetDamageMultiplier(sel, pct / 100) end                        -- kasfShipsSetDamageFactor
+function K_493a10(sel, v) KAS_NoOp("493a10", "kasfShipsSetRepairFactor") end
+function K_4939d0(sel) KAS_NoOp("4939d0", "kasfShipsClearRepairFactor") end
+
+-- kasfShipsParalyze (the exe sets SOF_DontApplyPhysics): the ships cannot move.
+function K_4984c0(sel, on)
+    if on ~= 0 then SobGroup_AbilityActivate(sel, AB_Move, 0) else SobGroup_AbilityActivate(sel, AB_Move, 1) end
+end
+
+-- kasfShipsSetColor(ships, scheme): Gearbox colour schemes when the index exists.
+function K_49aae0(sel, scheme)
+    if KAS_ColourSchemes and KAS_ColourSchemes[scheme] then KAS_SetColourScheme(sel, scheme)
+    else KAS_NoOp("49aae0", "kasfShipsSetColor scheme " .. scheme) end
+end
+
+-- 0x497ed0(team), called right after kasfTeamSwitchPlayerOwner: per-ship engine update (FUN_0051c0b0).
+function K_497ed0(sel) KAS_NoOp("497ed0", "post owner-switch ship update") end
+
+-- 0x499870(team): 1 if any ship lacks the data at ship+0x370 (Mission01: decides whether to hunt Workers).
+function K_499870(sel) return 1 end
+
+-- 0x499c70(dst, shipType, count, nearShips, player): creates count ships of the type next to nearShips.
+function K_499c70(dst, shipType, count, near, player)
+    SobGroup_Clear(dst)
+    if count <= 0 or SobGroup_Count(near) == 0 then return end
+    local t = KAS_HWRMType(shipType)
+    local i = 0
+    while i < count do
+        local g = SobGroup_CreateShip(near, t)
+        if g and g ~= "" then SobGroup_SobGroupAdd(dst, g) end
+        i = i + 1
+    end
+end
+
+-- ------------------------------------------------------------------ selections
+-- Source of a selection call; copied first when it is also the destination (as KAS_SelectInto does).
+function KAS_SelSrc(n, o)
+    if n == o then
+        SobGroup_CreateIfNotExist("KAS_SelTemp")
+        SobGroup_Clear("KAS_SelTemp")
+        SobGroup_SobGroupAdd("KAS_SelTemp", o)
+        return "KAS_SelTemp"
+    end
+    return o
+end
+
+function K_495690(n, o, shipType)                                                                   -- kasfShipsSelectType
+    local src = KAS_SelSrc(n, o)
+    SobGroup_Clear(n)
+    SobGroup_FillShipsByType(n, src, KAS_HWRMType(shipType))
+    return SobGroup_Count(n)
+end
+
+function K_495a50(n, o, vec, dist)                                                                  -- kasfShipsSelectNearby
+    local src = KAS_SelSrc(n, o)
+    SobGroup_Clear(n)
+    SobGroup_FillProximityPoint(n, src, vec, KAS_Dist(dist))
+    return SobGroup_Count(n)
+end
+
+-- Selections through the generic filter (FUN_00494f90) whose callback is not identified yet: keep all ships.
+function KAS_SelectAll(n, o)
+    local src = KAS_SelSrc(n, o)
+    SobGroup_Clear(n)
+    SobGroup_SobGroupAdd(n, src)
+    return SobGroup_Count(n)
+end
+function K_4952b0(n, o)
+    KAS_WarnOnce("sel4952b0", "0x4952b0 filter not identified: selecting all")
+    return KAS_SelectAll(n, o)
+end
+function K_4985f0(n, o, v)
+    KAS_WarnOnce("sel4985f0", "0x4985f0 filter not identified: selecting all")
+    return KAS_SelectAll(n, o)
+end
+
+function K_498d90(dst, src) SobGroup_Clear(dst) SobGroup_SobGroupAdd(dst, src) end                -- kasfFirstShip (all, for now)
+function K_49a100(sel, vec) end                                                                    -- sort by distance: order unused
+
+-- kasfFindEnemyShipsInside(ships, radius) as Mission01 calls it: human player ships within radius of this team.
+function K_492e90(sel, radius)
+    SobGroup_Clear(sel)
+    if SobGroup_Count(KAS_Team) == 0 then return 0 end
+    Player_FillProximitySobGroup(sel, 0, KAS_Team, KAS_Dist(radius))
+    return SobGroup_Count(sel)
+end
+
+-- kasfFindEnemiesInside(ships, point, radius) as Mission01 calls it: human player ships near the point.
+function K_4931a0(sel, vec, radius)
+    SobGroup_Clear(sel)
+    Volume_AddSphere("KAS_FindVol", vec, KAS_Dist(radius))
+    Player_FillSobGroupInVolume(sel, 0, "KAS_FindVol")
+    Volume_Delete("KAS_FindVol")
+    return SobGroup_Count(sel)
+end
+
+-- ------------------------------------------------------------------ pings and tutorial pointers
+function K_495e50(sel, name) KAS_PingRemove(name, name) KAS_PingAddShips(sel, name, name) end     -- kasfPingAddShips
+function K_495e80(vec, name) KAS_PingRemove(name, name) KAS_PingAddPoint(vec, name, name) end     -- kasfPingAddPoint
+function K_495ea0(name) KAS_PingRemove(name, name) end                                            -- kasfPingRemove
+
+KAS_Pointers = {}
+function KAS_PointerSet(name, id)
+    if KAS_Pointers[name] then KASPointer_Remove(KAS_Pointers[name]) end
+    KAS_Pointers[name] = id
+end
+function K_4963a0(name, sel) KAS_PointerSet(name, KASPointer_AddShip(sel)) end                   -- kasfTutSetPointerTargetShip
+function K_4963e0(name, sel) KAS_PointerSet(name, KASPointer_AddShip(sel)) end                   -- ...TargetShipSelection
+function K_496490(name, vol) KAS_PointerSet(name, KASPointer_AddVolume(vol)) end                 -- ...TargetAIVolume
+function K_4964b0(name, vol) KAS_PointerSet(name, KASPointer_AddVolume(vol)) end                 -- kasfTutSetObjPointerTargetAIVolume
+function K_4964e0(name)                                                                          -- kasfTutRemovePointer
+    if KAS_Pointers[name] then
+        KASPointer_Remove(KAS_Pointers[name])
+        KAS_Pointers[name] = nil
+    end
+end
+function K_496530() KASPointer_RemoveAll() KAS_Pointers = {} end                                 -- kasfTutRemoveAllPointers
+function K_496870(sel) KAS_FocusShips(sel) end                                                   -- kasfTutCameraFocus
+function K_496ae0() KAS_FocusCancel() end                                                        -- kasfTutCameraFocusCancel
+
+-- ------------------------------------------------------------------ sensors, camera, screen
+function K_496bc0(flags) KAS_SensorsToggle(1, flags) end                                        -- kasfOpenSensors
+function K_496c30() KAS_SensorsToggle(0, 1) end                                                  -- kasfCloseSensors
+function K_496c80(flags) return KAS_B(Sensors_ManagerIsActive() == 1) end                        -- kasfSensorsIsOpen
+function K_496190() return 0 end                                                                 -- kasfCameraGetAngleDeg
+function K_4961f0() return 0 end                                                                 -- kasfCameraGetDeclinationDeg
+function K_496250() return 0 end                                                                 -- kasfCameraGetDistance
+function K_4961b0(a) KAS_NoOp("4961b0", "kasfCameraSetAngleDeg") end
+function K_496210(a) KAS_NoOp("496210", "kasfCameraSetDeclinationDeg") end
+function K_496260(a) KAS_NoOp("496260", "kasfCameraSetDistance") end
+function K_49a2a0(vec) KAS_NoOp("49a2a0", "set focus point (sensors manager)") end
+function K_497580(frames) KAS_SetLetterboxState(1, frames / 30) end                              -- kasfWideScreenIn
+function K_497630(frames) KAS_SetLetterboxState(0, frames / 30) end                              -- kasfWideScreenOut
+function K_497a90() KAS_NoOp("497a90", "UI flag a4cb68 = 1") end
+function K_497aa0() KAS_NoOp("497aa0", "UI flag a4cb68 = 0") end
+function K_497ad0() KAS_NoOp("497ad0", "UI mode save + FUN_0052c7e0") end
+function K_497af0() KAS_NoOp("497af0", "UI mode restore") end
+
+-- ------------------------------------------------------------------ economy, research, trading, music
+function K_496e20(player, ru) Player_SetRU(player, ru) end                                       -- kasfRUsSet
+function K_496e40() return Universe_GetWorldResources() end                                      -- kasfGetWorldResources
+function K_496cf0(tech) KAS_NoOp("496cf0", "kasfAllowPlayerToResearch " .. tech) end
+function K_496d10(tech) KAS_NoOp("496d10", "kasfAllowPlayerToPurchase " .. tech) end
+function K_497710(i, text) KAS_NoOp("497710", "kasfSetTraderDialog") end
+function K_4977a0(scale) KAS_NoOp("4977a0", "kasfSetTraderPriceScale") end
+function K_497800(off) KAS_NoOp("497800", "kasfSetTraderDisabled") end
+function K_497000(track) KAS_NoOp("497000", "kasfMusicPlay " .. track .. " (music not converted yet)") end
+
+-- kasfEnableShipConstruction(type, race, enabled)
+function K_4980c0(shipType, race, on)
+    local t = KAS_ShipTypes[strlower(shipType)]
+    if t == nil then return end
+    if on ~= 0 then Player_UnrestrictBuildOption(0, t) else Player_RestrictBuildOption(0, t) end
+end
+
+-- 0x497290(flag, destination): end-of-mission hyperspace ("Hiigara", "~ End of Mission").
+function K_497290(flag, dest)
+    print("CKAS: hyperspace destination '" .. dest .. "' (" .. flag .. ") - mission end flow not ported yet")
 end

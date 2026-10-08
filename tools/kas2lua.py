@@ -708,6 +708,9 @@ class Translator:
             addr, name = self.callee_addr(e[1])
             if name in ("kasJump", "kasFSMCreate"):
                 return self.fsm_call(name, e[2])
+            # Ghidra shows the result of a call made as a statement as "extraout_EAX" when it is used later.
+            if "extraout_EAX" in getattr(self, "cur_locals", ()):
+                return [f"extraout_EAX = {self.ex(e)[0]}"]
             return [self.ex(e)[0]]
         if e[0] == "assign":
             op, lhs, rhs = e[1], self.strip(e[2]), e[3]
@@ -1038,6 +1041,7 @@ class Translator:
                 for x in node:
                     collect(x)
         collect(body)
+        self.cur_locals = set(locals_)
         head = [f"-- {name} @ {addr:08x}", f"function {lname}(TeamName)"]
         pre = ["  KAS_Team = TeamName"]  # the C code reads the current team from a global (CurrentTeamP)
         if locals_:

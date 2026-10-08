@@ -263,7 +263,7 @@ function F_5d7050(TeamName)
     elseif _pc == 51 then
       K_494e70("ExploreRegion", "Explore Designated Region", "Our sensor grid has been knocked out in this area.  Send Recons in to explore and find out what enemy ships may be lurking there.")  -- kasfObjectiveCreate
       iVar1 = "Unexplored"
-      K_4964b0(9208760, iVar1)
+      K_4964b0("ObjPtr", iVar1)  -- kasfTutSetObjPointerTargetAIVolume
       _pc = 52
     elseif _pc == 52 then
       _pc = 49
@@ -508,7 +508,7 @@ function F_5d9b20(TeamName)
   iVar1 = K_491e30((-1939595995))  -- kasfVarValueGet
   if (iVar1 == 1) then
     K_498230()  -- kasfStartLevelByHyperspacingShips
-    K_497000(36)
+    K_497000(36)  -- kasfMusicPlay
     iVar1 = "KushanCarriers"
     -- kasFSMCreate(fsm 0xc0abd03)
     KASRule_AddFSM(iVar1, "F_62ca80", "F_5d9b20")
@@ -713,10 +713,10 @@ function F_5d9b20(TeamName)
     iVar2 = KAS_GS("gs_0cb402f8")
     K_495bd0(iVar2, iVar1)  -- kasfShipsAdd
     K_496d10("TECH_DRIVE_FIGHTER")  -- kasfAllowPlayerToPurchase
-    K_4980c0(8960248, 8958156, 0)
-    K_4980c0(8960204, 8958156, 0)
-    K_4980c0(8960184, 8958156, 0)
-    K_4980c0(8960164, 8958156, 0)
+    K_4980c0("sMothershipSpecial", "RACE_SECT", 0)  -- kasfEnableShipConstruction
+    K_4980c0("sMothershipArmour", "RACE_SECT", 0)  -- kasfEnableShipConstruction
+    K_4980c0("sMothershipMicro", "RACE_SECT", 0)  -- kasfEnableShipConstruction
+    K_4980c0("sMothershipWeapons", "RACE_SECT", 0)  -- kasfEnableShipConstruction
     K_496e20(0, 2000)  -- kasfRUsSet
     K_496e20(1, 100000)  -- kasfRUsSet
     K_491f90(50796994, 1)  -- kasfTimerCreateSetStart
@@ -989,8 +989,8 @@ function F_5da2c0(TeamName)
       if (puVar2 < 227009077) then _pc = 80 else _pc = 81 end
     elseif _pc == 75 then
       K_491d30(71552182, 1)  -- kasfVarCreateSet
-      K_497000(19)
-      K_497580(90)
+      K_497000(19)  -- kasfMusicPlay
+      K_497580(90)  -- kasfWideScreenIn
       K_491d70(127756738, 3)  -- StartTimer; kasfVarValueSet
       K_494a00(TeamName, 27065970)  -- kasfMsgSend
       -- kasJump(state 0xe989af2)
@@ -1103,7 +1103,7 @@ function F_5da2c0(TeamName)
     elseif _pc == 103 then
       _pc = 96
     elseif _pc == 104 then
-      K_497580(90)
+      K_497580(90)  -- kasfWideScreenIn
       K_491d70(127756738, 3)  -- StartTimer; kasfVarValueSet
       iVar1 = 153999810
       _pc = 106
@@ -1144,7 +1144,7 @@ function F_5da2c0(TeamName)
     elseif _pc == 115 then
       _pc = 10
     elseif _pc == 116 then
-      K_497000(0)
+      K_497000(0)  -- kasfMusicPlay
       K_496eb0(33559242, 0)  -- kasfSpeechEvent
       puVar2 = 187785210
       iVar1 = 160291907
@@ -1174,7 +1174,7 @@ function F_5da2c0(TeamName)
     elseif _pc == 127 then
       if (puVar2 == 51924198) then _pc = 132 else _pc = 133 end
     elseif _pc == 128 then
-      K_497580(90)
+      K_497580(90)  -- kasfWideScreenIn
       K_491d70(127756738, 3)  -- StartTimer; kasfVarValueSet
       iVar1 = 59769442
       _pc = 106
@@ -1226,7 +1226,7 @@ function F_5da2c0(TeamName)
     elseif _pc == 140 then
       _pc = 45
     elseif _pc == 141 then
-      K_497000(0)
+      K_497000(0)  -- kasfMusicPlay
       K_495ea0("BomberPing")  -- kasfPingRemove
       _pc = 134
     elseif _pc == 142 then
@@ -1282,7 +1282,7 @@ function F_5da2c0(TeamName)
     elseif _pc == 152 then
       _pc = 148
     elseif _pc == 153 then
-      K_497580(90)
+      K_497580(90)  -- kasfWideScreenIn
       K_491d70(127756738, 3)  -- StartTimer; kasfVarValueSet
       iVar1 = 227120642
       _pc = 106
@@ -1296,7 +1296,7 @@ function F_5da2c0(TeamName)
       _pc = 45
     elseif _pc == 158 then
       K_491d70((-2054310428), 0)  -- kasfVarValueSet
-      K_497000(36)
+      K_497000(36)  -- kasfMusicPlay
       K_496eb0(268443996, 0)  -- kasfSpeechEvent
       puVar2 = 263613923
       _pc = 123
@@ -1395,7 +1395,7 @@ function F_5da2c0(TeamName)
       K_491d30(60936190, iVar1)  -- kasfVarCreateSet
       iVar1 = K_496250()  -- kasfCameraGetDistance
       K_491d30(64272901, iVar1)  -- kasfVarCreateSet
-      K_497580(90)
+      K_497580(90)  -- kasfWideScreenIn
       K_491d70(127756738, 3)  -- StartTimer; kasfVarValueSet
       K_494a00(TeamName, 2772294)  -- kasfMsgSend
       -- kasJump(state 0xe989af2)
@@ -1535,7 +1535,7 @@ function F_5da060(TeamName)
       iVar1 = K_491e30(266064926)  -- kasfVarValueGet
       if (iVar1 ~= 0) then _pc = 7 else _pc = 8 end
     elseif _pc == 7 then
-      K_497630(90)
+      K_497630(90)  -- kasfWideScreenOut
       K_491d70(266064926, 0)  -- kasfVarValueSet
       _pc = 8
     elseif _pc == 8 then
@@ -2352,7 +2352,7 @@ function F_5d89d0(TeamName)
   K_495690(iVar2, iVar1, p3)  -- kasfShipsSelectType
   iVar1 = KAS_GS("gs_0b87dad3")
   iVar2 = KAS_GS("FirstShip")
-  K_498d90(iVar2, iVar1)
+  K_498d90(iVar2, iVar1)  -- kasfFirstShip
   iVar1 = KAS_ShipsVector(126432768)  -- FirstShip
   K_4941a0(iVar1)  -- kasfMoveTo
   K_491f90(150120898, 6)  -- kasfTimerCreateSetStart
@@ -2382,7 +2382,7 @@ function F_5d8a60(TeamName)
       if (iVar1 ~= 0) then
         iVar1 = KAS_GS("gs_0b87dad3")
         iVar2 = KAS_GS("FirstShip")
-        K_498d90(iVar2, iVar1)
+        K_498d90(iVar2, iVar1)  -- kasfFirstShip
         iVar1 = KAS_ShipsVector(126432768)  -- FirstShip
         K_4941a0(iVar1)  -- kasfMoveTo
       end
@@ -2492,7 +2492,7 @@ function F_5d7b80(TeamName)
   local iVar1 = 0
   KAS_ScopeKind = 1
   KAS_Scope = KAS_TeamHash(TeamName)
-  K_49aae0(TeamName, 6)
+  K_49aae0(TeamName, 6)  -- kasfShipsSetColor
   iVar1 = K_491e30(71552175)  -- kasfVarValueGet
   if (iVar1 == 0) then
     K_491d30(71552175, 1)  -- kasfVarCreateSet
@@ -2889,7 +2889,7 @@ function F_5d92a0(TeamName)
   KAS_Team = TeamName
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
-  K_4939d0(TeamName)
+  K_4939d0(TeamName)  -- kasfShipsClearRepairFactor
   do return end
 end
 
@@ -2912,7 +2912,7 @@ function F_5d8130(TeamName)
   KAS_Team = TeamName
   KAS_ScopeKind = 1
   KAS_Scope = KAS_TeamHash(TeamName)
-  K_4984c0(TeamName, 1)
+  K_4984c0(TeamName, 1)  -- kasfShipsParalyze
   K_498c70(TeamName)  -- kasfResetShipRenderFlags
   -- kasJump(state 0x569b0c5)
   KAS_TraceJump(TeamName, "F_5d8130", "F_5d8220")
@@ -2967,13 +2967,13 @@ function F_5d8220(TeamName)
     p3 = 0
     iVar1 = KAS_GS("gs_00005920")
     iVar2 = KAS_GS("gs_00005920")
-    K_4985f0(iVar2, iVar1, p3)  -- kasfSpeechEventShips
+    extraout_EAX = K_4985f0(iVar2, iVar1, p3)  -- kasfSpeechEventShips
     if (extraout_EAX ~= 0) then
-      K_4984c0(TeamName, 0)
+      extraout_EAX = K_4984c0(TeamName, 0)  -- kasfShipsParalyze
       do return end
     end
   end
-  K_4984c0(TeamName, 1)
+  extraout_EAX = K_4984c0(TeamName, 1)  -- kasfShipsParalyze
   do return end
 end
 
@@ -2984,8 +2984,8 @@ function F_5d82e0(TeamName)
   KAS_ScopeKind = 2
   KAS_Scope = KAS_TeamHash(TeamName)
   K_493980(TeamName, 50)  -- kasfShipsSetDamageFactor
-  K_493a10(TeamName, 0)
-  K_4984c0(TeamName, 0)
+  K_493a10(TeamName, 0)  -- kasfShipsSetRepairFactor
+  K_4984c0(TeamName, 0)  -- kasfShipsParalyze
   p1 = "DestroyerPath"
   K_4929d0(p1)  -- kasfPatrolPath
   do return end

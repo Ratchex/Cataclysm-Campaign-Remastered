@@ -120,11 +120,11 @@ RACE_SECT	smothershipweapons		needs a new HWRM ship (Phase 1)
 RACE_SECT	smultibeamfrigate		needs a new HWRM ship (Phase 1)
 RACE_SECT	sprocessor		needs a new HWRM ship (Phase 1)
 RACE_SECT	srammingfrigate		needs a new HWRM ship (Phase 1)
-RACE_SECT	srecon		needs a new HWRM ship (Phase 1)
+RACE_SECT	srecon	Kus_Scout	stand-in until the Somtaaw Recon is built
 RACE_SECT	srepairdroid		needs a new HWRM ship (Phase 1)
 RACE_SECT	ssentinel		needs a new HWRM ship (Phase 1)
 RACE_SECT	sswarmer		needs a new HWRM ship (Phase 1)
-RACE_SECT	sworker		needs a new HWRM ship (Phase 1)
+RACE_SECT	sworker	Kus_ResourceCollector	stand-in until the Somtaaw Worker is built
 RACE_TAIDAN	mine		no HWRM equivalent
 RACE_TAIDAN	missile		no HWRM equivalent
 RACE_TAIDAN	tadvancesupportfrigate	tai_supportfrigate	Gearbox substitute

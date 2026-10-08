@@ -386,4 +386,4 @@ player[0] = { id = 0, name = "Kushan", resources = 0, raceName = "Kushan", start
 player[1] = { id = 1, name = "Taiidan", resources = 0, raceName = "Taiidan", startPos = 0 }
 
 -- unconverted MissionMan lines: Derelict x2, Resources x4
--- unmapped ship types (placeholder used): RACE_SECT:sRecon x3
+-- unmapped ship types (placeholder used): 
