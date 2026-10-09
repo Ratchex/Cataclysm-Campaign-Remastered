@@ -1,0 +1,59 @@
+-- Unit test range (hand-written, not from a Cataclysm mission): the Kuun-Lan, a few of each Somtaaw ship ported so
+-- far, asteroids for the Workers and Taiidan targets at three distances. Script: range.lua.
+
+function DetermChunk()
+    addPoint("StartPos0", {0, 0, 0}, {0, 0, 0})
+    addPoint("StartPos1", {0, 0, 9000}, {0, 180, 0})
+
+    addSquadron("KuunLan", "smt_ms_sp", {0, 0, 0}, 0, {0, 0, 0}, 0, 0)
+    -- strike craft in rows ahead of the Kuun-Lan (+Z)
+    for i = 0, 7 do
+        addSquadron("Acolyte" .. i, "smt_acolyte", {-700 + i * 200, 0, 2200}, 0, {0, 0, 0}, 0, 0)
+    end
+    for i = 0, 1 do
+        addSquadron("ACV" .. i, "smt_acv", {-300 + i * 600, 0, 2600}, 0, {0, 0, 0}, 0, 0)
+        addSquadron("Worker" .. i, "smt_worker", {-1800 + i * 400, 0, 1200}, 0, {0, 0, 0}, 0, 0)
+    end
+    -- tilted (pitch 20, yaw 50, roll 10): the orientation-matrix layout check in range.lua
+    addSquadron("Recon0", "smt_scout", {0, 300, 2900}, 0, {20, 50, 10}, 0, 0)
+    createSOBGroup("Recon")
+    addToSOBGroup("Recon0", "Recon")
+
+    -- asteroids off the port side
+    for row = 0, 1 do
+        for i = 0, 3 do
+            addAsteroid("Asteroid2", {-4500 - i * 450, -200 + row * 400, 1500 + (row * 4 + i) * 250}, 400,
+                        37 * i, 61 * row, 23 * i, 0)
+        end
+    end
+
+    -- targets (player 1, its AI off): punching bags close, a strike group further out, frigates at long range
+    addSquadron("TargetCollector0", "tai_resourcecollector", {1500, 0, 5000}, 1, {0, 180, 0}, 0, 0)
+    addSquadron("TargetCollector1", "tai_resourcecollector", {2100, 0, 5000}, 1, {0, 180, 0}, 0, 0)
+    for i = 0, 3 do
+        addSquadron("TargetFighter" .. i, "tai_interceptor", {-2400 + i * 250, 0, 6500}, 1, {0, 180, 0}, 0, 0)
+    end
+    addSquadron("TargetCorvette0", "tai_heavycorvette", {-1300, 0, 6800}, 1, {0, 180, 0}, 0, 0)
+    addSquadron("TargetCorvette1", "tai_lightcorvette", {-1000, 0, 6800}, 1, {0, 180, 0}, 0, 0)
+    addSquadron("TargetFrigate0", "tai_assaultfrigate", {-500, 0, 9000}, 1, {0, 180, 0}, 0, 0)
+    addSquadron("TargetFrigate1", "tai_ioncannonfrigate", {500, 0, 9000}, 1, {0, 180, 0}, 0, 0)
+
+    addSphere("Everything", {0, 0, 0}, 30000)
+    addCamera("Camera_Startpos", {0, 0, 2200}, {2200, 1600, -1200})
+    setWorldBoundsInner({0, 0, 0}, {30000, 15000, 30000})
+    setWorldBoundsOuter({0, 0, 0}, {36000, 18000, 36000})
+end
+
+function NonDetermChunk()
+    fogSetActive(0)
+    setGlareIntensity(0.0)
+    setLevelShadowColour(0, 0, 0, 1)
+    loadBackground("ez01")
+    setSensorsManagerCameraDistances(10500, 87500)
+end
+
+maxPlayers = 2
+
+player = {}
+player[0] = { id = 0, name = "Somtaaw", resources = 50000, raceName = "Somtaaw", startPos = 0 }
+player[1] = { id = 1, name = "Taiidan", resources = 0, raceName = "Taiidan", startPos = 1 }

@@ -40,7 +40,8 @@ TELEPORT = 20     # HWRM units moved between two keys a frame apart: an off-came
 TAIL_FRAMES = 45   # extra time after the HW1 NIS ends, for the fade back in (HW1's engine did that itself)
 NIS_SPEECH_FLAG = 0x20000000
 # HW1 "meshAnimStart <clip>" -> numbered .madstate state (handled in tools/overrides/ship/*/*.madstate)
-NIS_STATES = {"DockOpen": "NIS00", "DockClose": "NIS01"}
+NIS_STATES = {"DockOpen": "NIS00", "DockClose": "NIS01",   # Worker
+              "Link": "NIS00", "Unlink": "NIS01"}       # Acolyte
 # Cataclysm speech actor bits (NOTES.md; 0x800 = the NIS pilots' chatter, e.g. n01's Workers / Recon)
 SPEAKERS = {0x800: "pilots", 0x1000: "Fleet Command", 0x2000: "Tactical Officer", 0x8000: "other fleets"}
 NIS_STATE_FIRST_FRAME = 5   # earlier state changes are moved here (frame 0 ones were ignored)

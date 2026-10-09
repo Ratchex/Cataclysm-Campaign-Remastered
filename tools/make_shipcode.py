@@ -29,6 +29,9 @@ GEN = "data:scripts/cataclysm/shipcode_gen.lua"
 MARK = "-- Cataclysm-HWRM ship rules (tools/make_shipcode.py)"
 CHAINED = "-- (chained by Cataclysm-HWRM ship rules) "
 TICK = 0.5   # shiprules.lua CAT_TICK
+# types whose custom code runs more often: ships pinned for an animation are re-placed on every run (shiprules.lua
+# CatPin, CAT_PIN_TICK); their rules still tick every TICK
+FAST = {"smt_acolyte": 0.05}
 
 CLASSES = ["Mothership", "HeavyCruiser", "Carrier", "Destroyer", "Frigate", "Corvette", "Fighter", "Resource",
            "NonCombat", "MonsterShip", "Component", "Micro"]
@@ -79,7 +82,7 @@ def hook(ship):
     else:   # hooked by an earlier run
         m = re.search(re.escape(CHAINED) + r"(.*)$", text, re.M)
         chain = m and CUSTOM.search(m.group(1)).groups()
-    interval = min(TICK, float(chain[6])) if chain else TICK
+    interval = min(FAST.get(ship, TICK), float(chain[6])) if chain else FAST.get(ship, TICK)
     n = lua_name(ship)
     lines = [MARK,
              f'addCustomCode(NewShipType,"{GEN}","{chain[1] if chain else ""}","CatCreate_{n}","CatUpdate_{n}",'

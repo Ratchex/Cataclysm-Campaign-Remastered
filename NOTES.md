@@ -235,6 +235,35 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
   (ati.lua auxiliaryPower). Plan (user): from Mission 3 (first kasfAllowPlayerToResearch TECH_MISSILE) the
   Acolyte's missile volley (sacolyte.shp MissileRegenerateTime 10.375, MissileVolleyTime 1.2) takes the
   CustomCommand and its energy bar; Link then needs another trigger.
+- **Link / Unlink animation (confirmed in game, user: "that's actually it 100%")**. Cataclysm (FUN_00467b80): both
+  Acolytes on one spot, the first rolled 180 about forward (right/up negated), both play sacolyte.mad "Link" (body
+  slides from 50 to 9.65 along its up axis, thrusters fold); the sACV replaces them when the clips end (2 s timer
+  fallback) with the second's orientation. Unlink: Acolytes 50 either side along the ACV's up, the second rolled,
+  "Unlink" clip slides each body out from the ACV half's pose (3 s). The ACV mesh is the two halves at +-9.65,
+  overlapping (Acolyte up extent -13.8..11). HWRM version (shiprules.lua CatLink_*, build_ship.sh som_acolyte):
+  - the partner stops and waits; the lead flies to a point 300 behind its slot (50 below the partner, along the
+    partner's heading), then to the slot; once it has **stopped** there it is swapped for one stand-in Acolyte at
+    rest at its exact pose, which glides 0.8 s into the start pose; then both clips; the ACV at the clip's end.
+  - the lower ship flies **upright**, its model shown rolled: clips LinkB / UnlinkB (mad2hwrm --rolled: the root
+    joint turned 180 about forward; UnlinkB then turns upright in place over 1 s). The Link clip is shifted -50
+    (mad2hwrm --shift) so each ship sits where its body starts: two ships on one spot collide and shake.
+  - ships held for a clip: re-placed every update (SetPosition + SetTransform; the Acolyte's custom code runs every
+    0.05 s, its rules still every 0.5 s), AB_Move / AB_Steering off, SobGroup_SetGhost on.
+  - dead ends: a really rolled ship jiggles (the engine levels it, the pin snaps it back); a ship that was flying
+    jiggles when pinned (no script way to zero its speed); swapping both ships (or a moving one) for stand-ins
+    drops frames visibly; both flying to one point bounce (avoidance).
+- **HWRM script facts found doing this**:
+  - the custom-code group (g) is **one name per ship type**, holding whichever ship's code is running: acting on
+    another ship needs that ship's own group (CatShip_Create: cat_ship_<id>), and g is still **empty in Create**
+    (fill the own group, and match spawned ships to their pending data, on the first update);
+  - ship scripts keep their Lua state across games (a restarted mission saw the last one's data): reset when the
+    game clock goes back (CatSession);
+  - SobGroup_GetCoordSys: 9 numbers **row by row**, columns = right, up, forward (Matrix3_GetVector3FromCol, only in
+    the mission script state; checked with a tilted ship in range.lua); SobGroup_SetTransform takes the same;
+  - madstate: only the engine's own state names reach <SHIP>_<State>_OnSet (NIS00-02, DockPathOpen4 /
+    DockPathClosed4 are spare on a fighter).
+- **Unit test range** (campaign entry 1, leveldata/campaign/cataclysm/range): Kuun-Lan with every module, Acolytes,
+  ACVs, Workers, a Recon, asteroids, Taiidan targets; all research granted (range.lua RANGE_GRANT_ALL).
 - **Economy**: Cataclysm asteroids are worth ~10x HW1's (resources/asteroids/*.shp resourcevalue: 11, 160, 400,
   1000, 2000); HWRM's HW1 asteroids are 100 RU x addAsteroid's percent, so mission2level.py writes the percent that
   gives Cataclysm's RU. RU trickle (resource.script): +25 RU every 256 frames (16 s) while under 400 RU, every

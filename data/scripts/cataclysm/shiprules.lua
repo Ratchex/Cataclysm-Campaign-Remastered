@@ -51,6 +51,17 @@ CAT_STAR_SCALE = CatFrom0({ 12, 8, 8, 6, 4, 2, 1, 1, 1, 1, 1, 1 })   -- star eff
 CAT_LINK_DIST = 50 * 0.35
 CAT_LINK_TIMEOUT = 30     -- give up if the pair has not met
 CAT_LINK_WAIT = 1.5       -- an Acolyte with no partner after this long gives up ("No Ships To Link With")
+-- The Link / Unlink animation (sacolyte.mad, played through the .madstate's NIS00 / NIS01): Cataclysm puts both
+-- Acolytes on one spot (here each 50 off it: see CatLink_Pose), the first rolled 180 degrees about its forward axis (right and up vectors negated), and
+-- their Link clips slide each body in from 50 above its own deck (so one comes from above, one from below); the ACV
+-- replaces them when the clips end or after 2 s, with the second one's orientation. Unlink places the Acolytes 50
+-- either side of the ACV along its up axis (the second rolled) and their Unlink clips start them inside it.
+CAT_LINK_ANIM = 1.6       -- the Link clip: Cataclysm swaps in the ACV when both clips end (its 2 s timer is a fallback);
+                          -- the bodies end overlapping, as its ACV model is made, so a later swap shows them clipping
+CAT_UNLINK_ANIM = 3.4     -- Unlink clip 2.27 s, the lower one then turning upright for 1 s: the new Acolytes stay put
+                          -- until it ends (Cataclysm: 3 s)
+CAT_LINK_OFFSET = 50 * 0.35
+CAT_HOLD_SPEED = 0.01     -- speed multiplier of a ship held still for an animation
 
 -- a ship's own custom code, chained under ours (tools/make_shipcode.py), keeps its own update interval
 if not CatChainNext then CatChainNext = {} end
@@ -99,12 +110,29 @@ function CatNative_Tick(rec)
     SobGroup_AbilityActivate(rec.g, AB_Custom, on)
 end
 
+-- Ship scripts keep their Lua state from one game to the next (a restarted mission found the last one's pending link
+-- spawns): a game clock gone backwards is a new game, so everything recorded is dropped
+function CatSession(now)
+    if CatLastTime and now < CatLastTime - 1 then
+        print("CATACLYSM ship rules: new game (clock " .. CatLastTime .. " -> " .. now .. "), records cleared")
+        CatShips, CatPending, CatLinkQueue, CatChainNext, CatLinkSwaps = {}, {}, {}, {}, {}
+    end
+    CatLastTime = now
+end
+
 function CatShip_Create(g, p, id, t)
+    CatSession(Universe_GameTime())
     local real = t
     t = (CatVariantBase and CatVariantBase[t]) or t      -- a variant (variants_gen.lua) is its base type here
     local kills = {}
     for i = 0, 11 do kills[i] = 0 end
-    local rec = { g = g, p = p, t = t, real = real, cls = CatClass[t] or CAT_FIGHTER, kills = kills, rank = 0,
+    -- g, the engine's custom-code group, is one name per ship type that holds whichever ship's code is running: a
+    -- ship acting on another (the Link pair, kill credit) needs that one's own group, kept here
+    local own = "cat_ship_" .. id
+    SobGroup_CreateIfNotExist(own)
+    SobGroup_Clear(own)
+    SobGroup_SobGroupAdd(own, g)
+    local rec = { g = own, p = p, t = t, real = real, cls = CatClass[t] or CAT_FIGHTER, kills = kills, rank = 0,
                   spd = 1, dmg = 1, next = 0, att = "cat_att_" .. id }
     CatShips[id] = rec
     -- its button abilities (tools/make_abilities.py): the mission script fills cat_cmd_<name> on a press
@@ -128,26 +156,45 @@ function CatShip_Create(g, p, id, t)
         local a = CatAbilities[i]
         if a.native == 1 and strfind(", " .. a.types .. ",", ", " .. t .. ",", 1, 1) then rec.native = a end
     end
-    -- a ship spawned by a link/unlink takes over its pilots' kills
-    for i = 1, getn(CatPending) do
+end
+
+-- A ship spawned by a link/unlink (CatSpawn) takes over its pilots' kills, and any pin / hold. Matched on its first
+-- update: at creation g is still empty, so the match found nothing (the pins never ran).
+CAT_PENDING_LIFE = 5
+function CatShip_Adopt(rec, g, now)
+    rec.adopted = 1
+    local i = 1
+    while i <= getn(CatPending) do
         local pend = CatPending[i]
-        if SobGroup_GroupInGroup(g, pend.group) == 1 then
-            for c = 0, 11 do kills[c] = pend.kills[c] end
+        if now - pend.since > CAT_PENDING_LIFE then
+            tremove(CatPending, i)                -- its ship never showed up
+        elseif SobGroup_GroupInGroup(g, pend.group) == 1 then
+            for c = 0, 11 do rec.kills[c] = pend.kills[c] end
             rec.parts = pend.parts
+            rec.hold, rec.pin = pend.hold, pend.pin
+            if pend.linking then                  -- standing in for the Link clip (CatLink_Pose)
+                rec.linking = pend.linking
+                tinsert(pend.linking.recs, rec)
+            end
             if pend.up then                       -- a variant swap: the same ship, already upgraded
                 rec.up, rec.armour, rec.launchFrom = pend.up, pend.armour, pend.launchFrom
             end
             tremove(CatPending, i)
             CatShip_UpdateRank(rec, 0)
-            break
+            return
+        else
+            i = i + 1
         end
     end
 end
 
 function CatShip_Update(g, p, id)
+    local now = Universe_GameTime()
+    CatSession(now)
+    if getn(CatLinkSwaps) > 0 then CatLinkSwap_Tick(now) end
     local rec = CatShips[id]
     if not rec then return end
-    local now = Universe_GameTime()
+    if not rec.adopted and SobGroup_Empty(g) == 0 then CatShip_Adopt(rec, g, now) end
     -- a ship swapped for its variant: SobGroup_Despawn did nothing while it was docked (the engine relaunched it), so
     -- it stays hidden and removes itself once out. Only through its own g: a group name kept after a ship's code
     -- ends is given to other ships (a removal list of old names removed every Acolyte)
@@ -158,9 +205,48 @@ function CatShip_Update(g, p, id)
         end
         return
     end
+    if rec.pin then
+        local pin = rec.pin
+        if now < pin.t then
+            if SobGroup_Empty(g) == 0 then
+                if not pin.frozen then
+                    pin.frozen = 1
+                    CatFreeze(g, 0)
+                end
+                if not pin.traced then
+                    pin.traced = 1
+                    CatTrace("pin " .. id .. " from " .. now .. " to " .. pin.t)
+                end
+                local f = pin.from
+                if f and now < f.t1 then          -- gliding into the pose
+                    local k = (now - f.t0) / (f.t1 - f.t0)
+                    k = k * k * (3 - 2 * k)
+                    CatPlace(g, CatLerp(f.pos, pin.pos, k), CatBlendXf(f.xf, pin.xf, k))
+                else
+                    CatPlace(g, pin.pos, pin.xf)
+                end
+            end
+        else
+            rec.pin = nil
+            CatTrace("pin " .. id .. " released at " .. now)
+            if pin.frozen then CatFreeze(g, 1) end
+            if pin.after then SobGroup_MoveToPoint(rec.p, g, pin.after) end
+        end
+    end
+    if rec.link and rec.filled then CatLink_Tick(rec, id, now) end     -- every update: the approach needs it
     if now < rec.next then return end
     rec.next = now + CAT_TICK
     if SobGroup_Empty(g) == 1 then return end
+    -- our own group (CatShip_Create): filled here, where g surely holds this ship (filled at creation, the level's
+    -- ships' groups came out empty)
+    SobGroup_CreateIfNotExist(rec.g)
+    if SobGroup_Empty(rec.g) == 1 then
+        SobGroup_SobGroupAdd(rec.g, g)
+        if not rec.filled then
+            rec.filled = 1
+            CatTrace("ship " .. id .. " own group " .. rec.g .. ": " .. SobGroup_Count(rec.g) .. " ship(s)")
+        end
+    end
     rec.p = SobGroup_OwnedBy(g)
     -- who is shooting at us, for the kill credit when we die
     SobGroup_Clear(rec.att)
@@ -189,7 +275,6 @@ function CatShip_Update(g, p, id)
     end
     CatUpgradeWeapons_Tick(rec, id, now)
     CatNative_Tick(rec)
-    if rec.link then CatLink_Tick(rec, id, now) end
     CatUpgrade_Instant(rec, id)
     if rec.upg then CatUpgrade_Tick(rec, id, now) end
     if rec.gone then return end
@@ -206,7 +291,7 @@ function CatShip_Destroy(g, p, id)
     local rec = CatShips[id]
     if not rec then return end
     CatShips[id] = nil
-    if rec.gone then return end           -- linked or unlinked away, not killed
+    if rec.gone or rec.linking then return end   -- linked or unlinked away, not killed
     if rec.link then CatLink_Cancel(rec, id) end
     CatShip_CreditKill(rec)
 end
@@ -264,6 +349,9 @@ function CatShip_ApplyMultipliers(rec)
     elseif h < 0.25 then spd = spd - 0.4
     elseif h < 0.5 then spd = spd - 0.2
     elseif h < 0.75 then spd = spd - 0.1 end
+    if rec.hold then                      -- held still for the Link / Unlink animation
+        if Universe_GameTime() < rec.hold then spd = CAT_HOLD_SPEED else rec.hold = nil end
+    end
     if rec.spd ~= spd then
         SobGroup_SetMaxSpeedMultiplier(rec.g, spd)
         rec.spd = spd
@@ -474,10 +562,33 @@ function CatMid(a, b)
     return { (a[1] + b[1]) / 2, (a[2] + b[2]) / 2, (a[3] + b[3]) / 2 }
 end
 
-function CatLink_Converge(ra, rb)
-    local mid = CatMid(SobGroup_GetPosition(ra.g), SobGroup_GetPosition(rb.g))
-    SobGroup_MoveToPoint(ra.p, ra.g, mid)
-    SobGroup_MoveToPoint(rb.p, rb.g, mid)
+-- The partner waits (both flying to one point, collision avoidance kept them bouncing apart); the lead flies to its
+-- slot under it (CatLink_Pose), first to a point CAT_LINK_APPROACH behind the slot along the partner's heading, so it
+-- comes in from behind pointing the right way. Returns the slot, or nil.
+CAT_LINK_APPROACH = 300
+CAT_LINK_NEAR = 120       -- this close to the approach point / the slot counts as there
+CAT_LINK_GLIDE = 0.8      -- seconds the lead glides from where it is into the clip's start pose
+CAT_LINK_STOPPED = 5      -- the lead is swapped for its stand-in only once its speed is below this (stopped)
+CAT_LINK_SETTLE = 3       -- ...or once it has been at its slot this long (a fighter that never quite stops)
+function CatLink_Converge(ra, rb, now)
+    if not rb.link.waiting then
+        rb.link.waiting = 1
+        SobGroup_Stop(rb.p, rb.g)
+    end
+    local xf = SobGroup_GetCoordSys(rb.g)
+    if getn(xf) ~= 9 then return nil end
+    local l = ra.link
+    local slot = CatAdd(SobGroup_GetPosition(rb.g), CatUpAxis(xf), -2 * CAT_LINK_OFFSET)
+    local target = slot
+    if not l.final then
+        local ap = CatAdd(slot, CatCol(xf, 2), -CAT_LINK_APPROACH)
+        if CatDist(SobGroup_GetPosition(ra.g), ap) < CAT_LINK_NEAR then l.final = 1 else target = ap end
+    end
+    if not l.ordered or now - l.ordered > 0.5 or l.orderedFinal ~= l.final then
+        SobGroup_MoveToPoint(ra.p, ra.g, target)
+        l.ordered, l.orderedFinal = now, l.final
+    end
+    return slot
 end
 
 function CatLink_Dequeue(id)
@@ -489,12 +600,242 @@ end
 -- the pair (or a lone Acolyte) stops linking
 function CatLink_Cancel(rec, id)
     local pid = rec.link and rec.link.partner
+    local posed = rec.link and rec.link.anim
     rec.link = nil
     CatLink_Dequeue(id)
+    CatLink_Unpose(rec, posed)
     if pid then
         CatLink_Dequeue(pid)
-        if CatShips[pid] then CatShips[pid].link = nil end
+        local other = CatShips[pid]
+        if other then
+            posed = posed or (other.link and other.link.anim)
+            other.link = nil
+            CatLink_Unpose(other, posed)
+        end
     end
+end
+
+-- a ship whose pair broke up mid-animation: free to move, back in its rest pose (.madstate DockPathClosed4)
+function CatLink_Unpose(rec, posed)
+    if rec.pin and rec.pin.frozen and SobGroup_Empty(rec.g) == 0 then CatFreeze(rec.g, 1) end
+    rec.hold, rec.pin = nil, nil
+    if posed and not rec.gone and SobGroup_Empty(rec.g) == 0 then SobGroup_SetMadState(rec.g, "DockPathClosed4") end
+end
+
+-- Ship orientations: SobGroup_GetCoordSys gives a 3x3 matrix as 9 numbers, its columns the ship's right, up and
+-- forward axes, stored row by row: column c is entries c+1, c+4, c+7 (checked in game against the engine's
+-- Matrix3_GetVector3FromCol, which the ship script state lacks: range.lua Range_CoordSys)
+function CatByColumn(m)
+    return 0
+end
+
+-- the orientation rolled 180 degrees about its forward axis: right and up negated
+function CatRoll(m)
+    local r = {}
+    for i = 1, 9 do r[i] = m[i] end
+    if CatByColumn(m) == 1 then
+        for i = 1, 6 do r[i] = -m[i] end
+    else
+        for i = 0, 2 do
+            r[i * 3 + 1], r[i * 3 + 2] = -m[i * 3 + 1], -m[i * 3 + 2]
+        end
+    end
+    return r
+end
+
+function CatUpAxis(m)
+    if CatByColumn(m) == 1 then return { m[4], m[5], m[6] } end
+    return { m[2], m[5], m[8] }
+end
+
+function CatCol(m, c)
+    return { m[c + 1], m[c + 4], m[c + 7] }
+end
+
+function CatLerp(a, b, k)
+    return { a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k, a[3] + (b[3] - a[3]) * k }
+end
+
+function CatAdd(a, v, s)
+    return { a[1] + v[1] * s, a[2] + v[2] * s, a[3] + v[3] * s }
+end
+
+function CatCross(a, b)
+    return { a[2] * b[3] - a[3] * b[2], a[3] * b[1] - a[1] * b[3], a[1] * b[2] - a[2] * b[1] }
+end
+
+function CatNorm(v)
+    local n = sqrt(v[1] * v[1] + v[2] * v[2] + v[3] * v[3])
+    if n < 0.0001 then return nil end
+    return { v[1] / n, v[2] / n, v[3] / n }
+end
+
+-- an orientation between a and b (k 0..1): forward and up blended, made square again (right = up x forward)
+function CatBlendXf(a, b, k)
+    local f = CatNorm(CatLerp(CatCol(a, 2), CatCol(b, 2), k))
+    local u = CatLerp(CatCol(a, 1), CatCol(b, 1), k)
+    if not f then return b end
+    local r = CatNorm(CatCross(u, f))
+    if not r then return b end
+    u = CatCross(f, r)
+    return { r[1], u[1], f[1], r[2], u[2], f[2], r[3], u[3], f[3] }
+end
+
+function CatPlace(g, pos, m)
+    SobGroup_SetPosition(g, pos)
+    SobGroup_SetTransform(g, m)
+end
+
+-- A ship pinned for an animation is put back on its spot, in its orientation, on every update of its own (the
+-- Acolyte's custom code runs every CAT_PIN_TICK: tools/make_shipcode.py FAST): left alone, HWRM's flight code levels
+-- the rolled one and moves both, sliding them through each other.
+CAT_PIN_TICK = 0.05
+function CatPin(rec, pos, m, untilT)
+    rec.pin = { pos = pos, xf = m, t = untilT }
+end
+
+-- steering and movement off while pinned (between re-placements the engine still turned and moved them: jiggling)
+function CatFreeze(g, on)
+    SobGroup_AbilityActivate(g, AB_Move, on)
+    if AB_Steering then SobGroup_AbilityActivate(g, AB_Steering, on) end
+    SobGroup_SetGhost(g, 1 - on)          -- and no collisions (the Link pair still jiggled)
+end
+
+-- step-by-step log of the Link / Unlink sequence (finding a fatal engine-call error: the log shows the last step)
+CAT_TRACE = 0
+function CatTrace(msg)
+    if CAT_TRACE == 1 then print("CATACLYSM trace: " .. msg) end
+end
+
+-- The met pair is replaced by two fresh Acolytes posed for the Link clip, which become the ACV when it has played
+-- (CatLinkSwap_Tick). Fresh ships because ships that were flying keep drifting with their speed once frozen (HWRM
+-- scripts can't zero it), so pinning them jittered; the Unlink ones, spawned at rest, are still.
+-- Not on one spot as in Cataclysm (two ships there collide and shake): each 50 off it along the partner's up axis,
+-- where its body starts (the Link clip is shifted to match: tools/build_ship.sh), the lead below and rolled.
+if not CatLinkSwaps then CatLinkSwaps = {} end
+-- 1: the pair is replaced by fresh Acolytes for the clip (at rest: the flying pair jittered when the pins were not
+-- yet running and the lower one was really rolled); 0: the pair itself plays it
+CAT_LINK_STANDINS = 1     -- (0 tried with the approach and glide: the lower one still jiggled)
+
+function CatLink_Pose(ra, rb, now)
+    local xf = SobGroup_GetCoordSys(rb.g)
+    local pb = SobGroup_GetPosition(rb.g)
+    local pos = pb
+    if getn(xf) == 9 then pos = CatAdd(pb, CatUpAxis(xf), -CAT_LINK_OFFSET) end     -- the ACV's place
+    local health = (SobGroup_HealthPercentage(ra.g) + SobGroup_HealthPercentage(rb.g)) / 2
+    local kills = {}
+    for c = 0, 11 do kills[c] = ra.kills[c] + rb.kills[c] end
+    local sw = { p = ra.p, pos = pos, t = now + CAT_LINK_ANIM, kills = kills, parts = { ra.kills, rb.kills },
+                 health = health, recs = {} }
+    if getn(xf) == 9 then
+        sw.xf = xf
+        local pa = CatAdd(pos, CatUpAxis(xf), -CAT_LINK_OFFSET)
+        if CAT_LINK_STANDINS == 1 then
+            -- only the lead, stopped under its partner, is swapped (two spawns at once dropped frames, and a
+            -- moving ship's swap showed); its stand-in glides the rest of the way, then both clips start together
+            -- (CatLinkSwap_Tick). The partner is the real ship, pinned where it waited.
+            sw.start = now + CAT_LINK_GLIDE
+            sw.t = sw.start + CAT_LINK_ANIM
+            sw.a = CatLink_Stand(ra, pa, xf, sw, sw.start,
+                                 { pos = SobGroup_GetPosition(ra.g), xf = SobGroup_GetCoordSys(ra.g), t0 = now,
+                                   t1 = sw.start })
+            sw.b = CatLink_Hold(rb, pb, xf, sw, sw.start, nil)
+            sw.states = { { sw.a, "NIS02" }, { sw.b, "NIS00" } }     -- below: its model shown rolled (LinkB)
+        else
+            sw.start = now + CAT_LINK_GLIDE
+            sw.t = sw.start + CAT_LINK_ANIM
+            sw.states = { { ra.g, "NIS02" }, { rb.g, "NIS00" } }
+            sw.a = CatLink_Hold(ra, pa, xf, sw, sw.start,
+                                { pos = SobGroup_GetPosition(ra.g), xf = SobGroup_GetCoordSys(ra.g), t0 = now, t1 = sw.start })
+            sw.b = CatLink_Hold(rb, pb, xf, sw, sw.start, nil)
+        end
+    else
+        print("CATACLYSM link: unexpected coordsys of " .. getn(xf) .. " numbers, no animation")
+        sw.t = now
+    end
+    CatLink_Dequeue(rb.link.partner)          -- the lead's id
+    CatLink_Dequeue(ra.link.partner)
+    if not sw.a then
+        CatLink_Remove(ra)
+        CatLink_Remove(rb)
+    elseif CAT_LINK_STANDINS == 1 then
+        CatLink_Remove(ra)
+        rb.link = nil
+    else
+        ra.link, rb.link = nil, nil
+    end
+    tinsert(CatLinkSwaps, sw)
+end
+
+-- the pair themselves posed for the Link clip: stopped, frozen, pinned (CAT_LINK_STANDINS = 0)
+-- (from: glide there from that pose; the clip itself is started by CatLinkSwap_Tick at sw.start)
+function CatLink_Hold(rec, at, xf, sw, start, from)
+    SobGroup_Stop(rec.p, rec.g)
+    CatPin(rec, at, xf, start + CAT_LINK_ANIM + 1)
+    rec.pin.from = from
+    rec.pin.frozen = 1
+    CatFreeze(rec.g, 0)
+    rec.hold = start + CAT_LINK_ANIM + 1
+    CatShip_ApplyMultipliers(rec)
+    rec.linking = sw
+    tinsert(sw.recs, rec)
+    return rec.g
+end
+
+-- a fresh Acolyte in rec's place for the Link clip: same type, kills and health, pinned and playing Link
+-- (from: it appears there, in that orientation, and glides to at / xf)
+function CatLink_Stand(rec, at, xf, sw, start, from)
+    local first = (from and from.pos) or at
+    local g = CatSpawn(rec.p, rec.real, first, rec.kills, rec.parts, start + CAT_LINK_ANIM + 1,
+                       { pos = at, xf = xf, t = start + CAT_LINK_ANIM + 1, from = from }, sw)
+    CatPlace(g, first, (from and from.xf) or xf)
+    SobGroup_SetHealth(g, SobGroup_HealthPercentage(rec.g))
+    return g
+end
+
+-- run from every ship's update: Link clips that have played become their ACV
+function CatLinkSwap_Tick(now)
+    local i = 1
+    while i <= getn(CatLinkSwaps) do
+        local sw = CatLinkSwaps[i]
+        if sw.states and now >= sw.start then     -- the glide is over: both clips together
+            for k = 1, getn(sw.states) do
+                if SobGroup_Empty(sw.states[k][1]) == 0 then SobGroup_SetMadState(sw.states[k][1], sw.states[k][2]) end
+            end
+            sw.states = nil
+        end
+        if now >= sw.t then
+            tremove(CatLinkSwaps, i)
+            CatLinkSwap_Do(sw)
+        else
+            i = i + 1
+        end
+    end
+end
+
+function CatLinkSwap_Do(sw)
+    if sw.a and (SobGroup_Empty(sw.a) == 1 or SobGroup_Empty(sw.b) == 1) then
+        -- one was killed mid-Link: the other is an Acolyte again
+        for k = 1, getn(sw.recs) do
+            local rec = sw.recs[k]
+            rec.linking, rec.pin, rec.hold = nil, nil, nil
+            if SobGroup_Empty(rec.g) == 0 then
+                CatFreeze(rec.g, 1)
+                SobGroup_SetMadState(rec.g, "DockPathClosed4")
+            end
+        end
+        print("CATACLYSM link: one of the pair was lost mid-Link")
+        return
+    end
+    local new = CatSpawn(sw.p, "smt_acv", sw.pos, sw.kills, sw.parts)
+    if sw.xf then CatPlace(new, sw.pos, sw.xf) end
+    SobGroup_SetHealth(new, sw.health)
+    if sw.a then
+        for k = 1, getn(sw.recs) do sw.recs[k].gone = 1 end
+        SobGroup_Despawn(sw.a)
+        SobGroup_Despawn(sw.b)
+    end
+    print("CATACLYSM link: two Acolytes linked into an ACV (health " .. sw.health .. ")")
 end
 
 function CatLink_Tick(rec, id, now)
@@ -517,22 +858,17 @@ function CatLink_Tick(rec, id, now)
         CatLink_Cancel(rec, id)
         return
     end
-    local pa, pb = SobGroup_GetPosition(rec.g), SobGroup_GetPosition(other.g)
-    if CatDist(pa, pb) > CAT_LINK_DIST then
-        CatLink_Converge(rec, other)
-        return
+    local slot = CatLink_Converge(rec, other, now)
+    if rec.link.final and slot and CatDist(SobGroup_GetPosition(rec.g), slot) < CAT_LINK_NEAR then
+        l.nearSince = l.nearSince or now
+        -- stopped under its partner (or there a while, if it keeps drifting)
+        if CAT_LINK_STANDINS == 0 or SobGroup_GetActualSpeed(rec.g) < CAT_LINK_STOPPED
+           or now - l.nearSince > CAT_LINK_SETTLE then
+            CatLink_Pose(rec, other, now)          -- the pair has met
+        end
+    else
+        l.nearSince = nil
     end
-    -- the pair has met: one ACV in their place
-    local kills = {}
-    for c = 0, 11 do kills[c] = rec.kills[c] + other.kills[c] end
-    local health = (SobGroup_HealthPercentage(rec.g) + SobGroup_HealthPercentage(other.g)) / 2
-    local new = CatSpawn(rec.p, "smt_acv", CatMid(pa, pb), kills, { rec.kills, other.kills })
-    SobGroup_SetHealth(new, health)
-    CatLink_Dequeue(id)
-    CatLink_Dequeue(l.partner)
-    CatLink_Remove(rec)
-    CatLink_Remove(other)
-    print("CATACLYSM link: two Acolytes linked into an ACV (health " .. health .. ")")
 end
 
 -- (SHELVED with tools/ship_variants.py: CatVariants is empty, so none of this runs; kept for a retry.)
@@ -618,14 +954,15 @@ function CatLink_Remove(rec)
 end
 
 -- spawn one ship at a point into a new group; its Create picks up the kills
-function CatSpawn(p, shiptype, pos, kills, parts)
+function CatSpawn(p, shiptype, pos, kills, parts, hold, pin, linking)
     CatSerial = CatSerial + 1
     local grp, vol = "cat_spawn" .. CatSerial, "cat_spawnvol" .. CatSerial
     SobGroup_CreateIfNotExist(grp)
     SobGroup_Clear(grp)
     Volume_Delete(vol)
     Volume_AddSphere(vol, pos, 1)
-    tinsert(CatPending, { group = grp, kills = kills, parts = parts })
+    tinsert(CatPending, { group = grp, kills = kills, parts = parts, hold = hold, pin = pin, linking = linking,
+                          since = Universe_GameTime() })
     SobGroup_SpawnNewShipInSobGroup(p, shiptype, "cat_squad" .. CatSerial, grp, vol)
     Volume_Delete(vol)
     return grp
@@ -648,10 +985,19 @@ function CatUnlink_Start(g, p, id)
         kills[1][c] = own[1][c] + gained
         kills[2][c] = own[2][c] + gained
     end
+    local m = SobGroup_GetCoordSys(g)
+    local up = { 0, 1, 0 }
+    if getn(m) == 9 then up = CatUpAxis(m) else m = nil end
+    local hold = Universe_GameTime() + CAT_UNLINK_ANIM
     for k = 1, 2 do
-        local side = (k * 2 - 3) * CAT_LINK_DIST
-        local new = CatSpawn(p, CatVariant_ForNew(p, "smt_acolyte"), { pos[1] + side, pos[2], pos[3] }, kills[k], nil)
+        local s = (3 - k * 2) * CAT_LINK_OFFSET          -- the first above, the second (rolled) below
+        local at = { pos[1] + up[1] * s, pos[2] + up[2] * s, pos[3] + up[3] * s }
+        -- both upright, the lower one's model shown rolled (UnlinkB), turning upright at the end
+        local new = CatSpawn(p, CatVariant_ForNew(p, "smt_acolyte"), at, kills[k], nil, hold,
+                             m and { pos = at, xf = m, t = hold })   -- pinned until the clips have played
+        if m then CatPlace(new, at, m) end
         SobGroup_SetHealth(new, health)
+        SobGroup_SetMadState(new, (k == 1 and "NIS01") or "DockPathOpen4")
     end
     rec.gone = 1
     SobGroup_Despawn(g)

@@ -1,0 +1,93 @@
+-- Somtaaw Acolyte animation states (Cataclysm-HWRM; installed over Cataclysm Remastered's by tools/install_cr.py).
+-- Clips from Cataclysm's sacolyte.mad (tools/mad2hwrm.py): CombatIn swings the wing pods out for battle, CombatOut
+-- back; Link slides the whole body 50 (HW1 units) along its up axis in to its partner and folds the thrusters, Unlink
+-- slides it out from the ACV's middle (its pose at the start of Unlink is the ACV half's). Link and Unlink are played
+-- by the ship rules (data/scripts/cataclysm/shiprules.lua CatLink_*) through SobGroup_SetMadState NIS00 / NIS01, the
+-- numbered states HWRM passes on (tools/nis2hwrm.py NIS_STATES). A clip paused at 1000 s holds its last frame.
+
+SMT_ACOLYTE_Clips = {"CombatIn", "CombatOut", "Link", "Unlink", "LinkB", "UnlinkB"}
+
+-- stop every clip but "keep"
+SMT_ACOLYTE_StopOthers = function(ship, keep)
+    for i = 1, 6 do
+        local c = SMT_ACOLYTE_Clips[i]
+        if(c ~= keep and isAnimRunning(ship, c) ~= 0) then
+            stopAnim(ship, c)
+        end
+    end
+end
+
+-- start clip "to"; if its opposite "from" is still running, from the matching point so the parts don't jump
+SMT_ACOLYTE_Swap = function(ship, from, to)
+    if(isAnimRunning(ship, to) == 0) then
+        startTime = 0
+        if(isAnimRunning(ship, from) ~= 0) then
+            startTime = getAnimLength(ship, from) - getTime(ship, from)
+            if(startTime < 0) then
+                startTime = 0
+            end
+            stopAnim(ship, from)
+        end
+        startAnim(ship, to)
+        setTime(ship, to, startTime)
+        setPauseTime(ship, to, 1000)
+    end
+end
+
+-- BATTLE: wing pods out while fighting, in otherwise -------------------------------------------------------------
+SMT_ACOLYTE_CodeRed_OnSet = function(ship)
+    if(isAnimRunning(ship, "Link") == 0 and isAnimRunning(ship, "Unlink") == 0 and isAnimRunning(ship, "LinkB") == 0
+       and isAnimRunning(ship, "UnlinkB") == 0) then
+        SMT_ACOLYTE_Swap(ship, "CombatOut", "CombatIn")
+    end
+end
+
+SMT_ACOLYTE_CodeGreen_OnSet = function(ship)
+    if(isAnimRunning(ship, "CombatIn") ~= 0) then
+        SMT_ACOLYTE_Swap(ship, "CombatIn", "CombatOut")
+    end
+end
+
+SMT_ACOLYTE_Docked_OnSet = function(ship)
+    SMT_ACOLYTE_StopOthers(ship, "")
+end
+
+-- LINK / UNLINK --------------------------------------------------------------------------------------------------
+SMT_ACOLYTE_NIS00_OnSet = function(ship)
+    if(isAnimRunning(ship, "Link") == 0) then
+        SMT_ACOLYTE_StopOthers(ship, "Link")
+        startAnim(ship, "Link")
+        setPauseTime(ship, "Link", 1000)    -- held until the pair is replaced by the ACV
+    end
+end
+
+SMT_ACOLYTE_NIS01_OnSet = function(ship)
+    if(isAnimRunning(ship, "Unlink") == 0) then
+        SMT_ACOLYTE_StopOthers(ship, "Unlink")
+        startAnim(ship, "Unlink")             -- ends in the rest pose
+    end
+end
+
+-- The pair's lower Acolyte flies upright with its model shown upside down: LinkB / UnlinkB are Link / Unlink with
+-- the body turned 180 degrees about the forward axis (tools/build_ship.sh --rolled; a rolled ship jiggled, the engine
+-- levelling it), UnlinkB then turning it upright in place. HWRM passes on only its own state names: NIS02 and two
+-- dock-path states fighters never get.
+SMT_ACOLYTE_NIS02_OnSet = function(ship)
+    if(isAnimRunning(ship, "LinkB") == 0) then
+        SMT_ACOLYTE_StopOthers(ship, "LinkB")
+        startAnim(ship, "LinkB")
+        setPauseTime(ship, "LinkB", 1000)
+    end
+end
+
+SMT_ACOLYTE_DockPathOpen4_OnSet = function(ship)
+    if(isAnimRunning(ship, "UnlinkB") == 0) then
+        SMT_ACOLYTE_StopOthers(ship, "UnlinkB")
+        startAnim(ship, "UnlinkB")
+    end
+end
+
+-- a pair broken up mid-Link (one was killed): back to the rest pose
+SMT_ACOLYTE_DockPathClosed4_OnSet = function(ship)
+    SMT_ACOLYTE_StopOthers(ship, "")
+end

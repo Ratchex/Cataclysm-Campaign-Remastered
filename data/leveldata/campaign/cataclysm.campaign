@@ -16,8 +16,19 @@ contentSort = 0.3
 
 Mission = {}
 
--- Phase 0.1 smoke test: proves the campaign loads, a level spawns ships and the KAS layer runs.
+-- Unit test range: Somtaaw ships and systems away from the missions (range/range.lua has its switches).
 Mission[1] =
+{
+    directory   = "range",
+    level       = "range.level",
+    postlevel   = function ( bWin ) postLevelComplete() end,
+
+    displayName = "Unit test range",
+    description = "The Kuun-Lan, Acolytes, ACVs, Workers and a Recon, with Taiidan targets. All research done.",
+}
+
+-- Phase 0.1 smoke test: proves the campaign loads, a level spawns ships and the KAS layer runs.
+Mission[2] =
 {
     directory   = "m00_test",
     level       = "m00_test.level",
@@ -29,7 +40,7 @@ Mission[1] =
 
 
 -- Phase 0.2 check: Cataclysm Mission01's converted layout (no mission logic; placeholder ships and background).
-Mission[2] =
+Mission[3] =
 {
     directory   = "m01_layout",
     level       = "m01_layout.level",
@@ -40,7 +51,7 @@ Mission[2] =
 }
 
 -- Phase 0.7: Cataclysm Mission01, translated from cataclysm.exe (stand-in ships; most KAS functions stubbed).
-Mission[3] =
+Mission[4] =
 {
     directory   = "m01",
     level       = "m01.level",

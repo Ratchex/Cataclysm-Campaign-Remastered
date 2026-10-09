@@ -73,7 +73,9 @@ Missiles disabled before the upgrade (no energy spent); missiles in normal comba
    mines, Somtaaw ramming frigate (no Cataclysm guns), armour upgrade levels (TECH_ARMOUR2/3: no per-ship incoming
    multiplier in HWRM), the Energy upgrade's damage (could be SobGroup_SetDamageMultiplier x energy/projectile per
    ship, now that Energy Cannons are shelved).
-3. Our own ACV model (convert sacv with build_ship.sh), ACV EMP (TECH_EMP), Mimic.
+3. **DONE (2026-10-09):** our ACV model (som_acv from sacv), the Acolyte's animations (combat wings, Link / Unlink
+   with Cataclysm's clips; NOTES.md "Link / Unlink animation"), and the **Unit test range** (campaign entry 1) for
+   trying units outside the missions. Left: ACV muzzle flashes (their .events are empty), ACV EMP (TECH_EMP), Mimic.
 4. Then Mission 1 against the original, the hyperspace exit (K_497290 stub), Missions 02-17.
 Open, lower priority: rank stars as UI; Fire Missiles burst (HWRM can't fire weapons from script; user: keep as-is);
 icons for our ability buttons (stock placeholders); sensor freeze / blanket defensive ROE (maybe unneeded since the AI

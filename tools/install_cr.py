@@ -166,6 +166,9 @@ OUR_MODELS = {
     "smt_scout": ("som_recon", {"Weapon_Autogun": "Weapon_GUN0"}),
     "smt_acolyte": ("som_acolyte", {"Weapon_FrontGun": "Weapon_GUN0", "Weapon_FrontBotGun": "Weapon_GUN1",
                                     "Weapon_Missile": "Weapon_GUN2"}),
+    # their four guns are Cataclysm's four, in order
+    "smt_acv": ("som_acv", {"Weapon_Gun": "Weapon_GUN0", "Weapon_Gun1": "Weapon_GUN1", "Weapon_Gun2": "Weapon_GUN2",
+                            "Weapon_Gun3": "Weapon_GUN3"}),
 }
 
 

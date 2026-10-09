@@ -125,6 +125,14 @@ def main():
     ap.add_argument("--trim", action="append", default=[],
                     help="OBJECT=DEGREES: the object turns that much less at its furthest from rest (over the clips "
                          "converted), every angle's swing scaled by the same factor")
+    ap.add_argument("--shift", action="append", default=[],
+                    help="CLIP:OBJECT=X,Y,Z: added to the object's translation (HW1 units, its parent's axes) during "
+                         "that clip; the game script places the ship that much the other way (the Acolyte's Link: "
+                         "two ships on one spot collide, so each sits where its body starts)")
+    ap.add_argument("--rolled", action="append", default=[],
+                    help="NEW=CLIP:OBJECT[:SECONDS]: a copy of CLIP named NEW with OBJECT turned 180 degrees about the "
+                         "forward axis (the model shown upside down while the ship flies upright: the engine fought a "
+                         "rolled ship, jiggling it), then turning upright over SECONDS after the clip's end")
     a = ap.parse_args()
     names = [n for n in a.joints.split(",") if n]
     _, clips, paths = read_mellonn(a.mad)
@@ -165,8 +173,32 @@ def main():
         trims[n] = (rest, (swing - math.radians(float(deg))) / swing)
         print(f"  {n}: swing {math.degrees(swing):.1f} deg -> {math.degrees(swing) - float(deg):.1f}")
 
-    def hwrm_pose(i, t):
-        m = local_matrix(paths[objs[i]["name"]], t, trims.get(objs[i]["name"]))
+    for spec in a.rolled:
+        new, rest = spec.split("=")
+        parts = rest.split(":")
+        base = next(c for c in clips if c["name"] == parts[0])
+        right = float(parts[2]) if len(parts) > 2 else 0.0
+        wanted.append({"name": new, "start": base["start"], "end": base["end"] + right, "base": base["name"],
+                       "base_end": base["end"], "roll": parts[1], "right": right})
+
+    shifts = {}
+    for spec in a.shift:
+        key, xyz = spec.split("=")
+        clip, obj = key.split(":")
+        shifts[(clip, obj)] = [float(v) for v in xyz.split(",")]
+
+    def hwrm_pose(i, t, c):
+        name = objs[i]["name"]
+        m = local_matrix(paths[name], min(t, c.get("base_end", t)), trims.get(name))
+        d = shifts.get((c.get("base", c["name"]), name))
+        if d:
+            m = m[:12] + [m[12] + d[0], m[13] + d[1], m[14] + d[2]] + m[15:]
+        if c.get("roll") == name:
+            # about the model's forward axis (HW1 +Z), through the ship's origin; easing upright after the clip
+            k = 0.0 if t <= c["base_end"] else min(1.0, (t - c["base_end"]) / c["right"])
+            th = math.pi * (1.0 - k * k * (3 - 2 * k))
+            cs, sn = math.cos(th), math.sin(th)
+            m = geo2obj.matmul([cs, sn, 0, 0, -sn, cs, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1], m)
         if prefix[i] is not None:
             m = geo2obj.matmul(prefix[i], m)
         return hwrm_local(m, a.scale)
@@ -188,7 +220,7 @@ def main():
         joints = []
         for n in names:
             i = by_name[n]
-            poses = [hwrm_pose(i, t) for t in fr]
+            poses = [hwrm_pose(i, t, c) for t in fr]
             eul = continuous_euler([r for _, r in poses])
             # anchor the angles to the bind pose's (2 pi turns kept: a full spin stays a spin)
             b_eul = matrix_to_euler_xyz(bind[i][1])
