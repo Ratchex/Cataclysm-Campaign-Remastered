@@ -104,6 +104,7 @@ function CatShip_Create(g, p, id, t)
     end
     SobGroup_CreateIfNotExist(rec.att)
     SobGroup_Clear(rec.att)
+    SobGroup_CreateIfNotExist("cat_kas_upgrade")
     -- new ships come with the player's upgrades (Cataclysm: only ships already in service need upgrading)
     rec.up, rec.armour = {}, 0
     CatUpgrade_Apply(rec)
@@ -157,6 +158,7 @@ function CatShip_Update(g, p, id)
     end
     CatUpgradeWeapons_Tick(rec, id)
     if rec.link then CatLink_Tick(rec, id, now) end
+    CatUpgrade_Instant(rec, id)
     if rec.upg then CatUpgrade_Tick(rec, id, now) end
 end
 
@@ -322,11 +324,29 @@ function CatUpgrade_Start(g, p, id)
     print("CATACLYSM upgrade: ship " .. id .. " (" .. rec.t .. ") " .. rec.upg.time .. " s")
 end
 
+-- Instant upgrades (FUN_00514490 without the command's timer): an UpgradeByDocking ship that is docked, for any
+-- reason (FUN_00465860, its dock completing), and the ships a mission script upgrades (kasfShipsUpgrade, K_498c70 in
+-- cataclysmkas.lua: SobGroup cat_kas_upgrade)
+function CatUpgrade_Instant(rec, id)
+    local u = CatUpgradeType[rec.t]
+    if not u then return end
+    local why
+    if u.dock == 1 and SobGroup_IsDocked(rec.g) == 1 then why = "docked"
+    elseif SobGroup_GroupInGroup(rec.g, "cat_kas_upgrade") == 1 then why = "mission" end
+    if not why then return end
+    local list, armour = CatUpgrade_Pending(rec)
+    if getn(list) == 0 and armour == rec.armour then return end
+    CatUpgrade_Apply(rec)
+    CatShip_ApplyMultipliers(rec)
+    print("CATACLYSM upgrade: ship " .. id .. " (" .. rec.t .. ") upgraded (" .. why .. ")")
+end
+
 function CatUpgrade_Tick(rec, id, now)
     local u = rec.upg
     if u.dock then
         if SobGroup_IsDocked(rec.g) == 1 then
-            u.dock, u.launch, u.done = nil, 1, now + u.time
+            -- docking upgrades at once (CatUpgrade_Instant); the command then sends it back out
+            u.dock, u.launch, u.done = nil, 1, now
         elseif now - u.since > CAT_UPGRADE_DOCK_GRACE and SobGroup_GetCurrentOrder(rec.g) ~= (COMMAND_Dock or 4) then
             rec.upg = nil                 -- given other orders on the way: no upgrade
             print("CATACLYSM upgrade: ship " .. id .. " cancelled")

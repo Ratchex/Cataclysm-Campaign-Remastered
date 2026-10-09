@@ -968,7 +968,20 @@ function K_494160(flag)                                                         
 end
 
 -- kasfResetShipRenderFlags: clears per-ship "has been rendered" bits used by kasfRenderedShips; no HWRM state.
-function K_498c70(sel) end
+-- kasfShipsUpgrade (named kasfResetShipRenderFlags in the first API pass; 0x498c70 runs FUN_00514490, the instant
+-- upgrade, on each ship): the ships' rules upgrade them (shiprules.lua CatUpgrade_Instant) while they are in
+-- cat_kas_upgrade, emptied two seconds later (over their 0.5 s tick)
+function K_498c70(sel)
+    SobGroup_CreateIfNotExist("cat_kas_upgrade")
+    SobGroup_SobGroupAdd("cat_kas_upgrade", sel)
+    KAS_KasUpgradeAt = Universe_GameTime()
+    if Rule_Exists("KAS_KasUpgradeClear") == 0 then Rule_AddInterval("KAS_KasUpgradeClear", 1) end
+end
+function KAS_KasUpgradeClear()
+    if Universe_GameTime() - KAS_KasUpgradeAt < 2 then return end
+    SobGroup_Clear("cat_kas_upgrade")
+    Rule_Remove("KAS_KasUpgradeClear")
+end
 
 -- ------------------------------------------------------------------ KAS.c helpers called with a run-time hash
 -- The translator turns constant-hash lookups into label strings; these handle hashes held in variables.

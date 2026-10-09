@@ -1668,7 +1668,7 @@ function F_5d98f0(TeamName)
   KAS_Team = TeamName
   KAS_ScopeKind = 1
   KAS_Scope = KAS_TeamHash(TeamName)
-  K_498c70(TeamName)  -- kasfResetShipRenderFlags
+  K_498c70(TeamName)  -- kasfShipsUpgrade
   -- kasJump(state 0xe98cf15)
   KAS_TraceJump(TeamName, "F_5d98f0", "F_5d9930")
   KASRule_Add(TeamName, "F_5d9930", "F_5d98f0")
@@ -1730,7 +1730,7 @@ function F_5d9430(TeamName)
   local p1 = 0
   KAS_ScopeKind = 1
   KAS_Scope = KAS_TeamHash(TeamName)
-  K_498c70(TeamName)  -- kasfResetShipRenderFlags
+  K_498c70(TeamName)  -- kasfShipsUpgrade
   p1 = "TaiidanMainCarrier"
   K_494750(p1)  -- kasfDockInstant
   K_491d30((-1970110140), 1)  -- kasfVarCreateSet
@@ -1947,7 +1947,7 @@ function F_5d8370(TeamName)
   KAS_Team = TeamName
   KAS_ScopeKind = 1
   KAS_Scope = KAS_TeamHash(TeamName)
-  K_498c70(TeamName)  -- kasfResetShipRenderFlags
+  K_498c70(TeamName)  -- kasfShipsUpgrade
   -- kasJump(state 0x498cf55)
   KAS_TraceJump(TeamName, "F_5d8370", "F_5d83b0")
   KASRule_Add(TeamName, "F_5d83b0", "F_5d8370")
@@ -2063,7 +2063,7 @@ function F_5d85c0(TeamName)
   KAS_Team = TeamName
   KAS_ScopeKind = 1
   KAS_Scope = KAS_TeamHash(TeamName)
-  K_498c70(TeamName)  -- kasfResetShipRenderFlags
+  K_498c70(TeamName)  -- kasfShipsUpgrade
   do return end
 end
 
@@ -2072,7 +2072,7 @@ function F_5d85f0(TeamName)
   KAS_Team = TeamName
   KAS_ScopeKind = 1
   KAS_Scope = KAS_TeamHash(TeamName)
-  K_498c70(TeamName)  -- kasfResetShipRenderFlags
+  K_498c70(TeamName)  -- kasfShipsUpgrade
   -- kasJump(state 0x5569d3)
   KAS_TraceJump(TeamName, "F_5d85f0", "F_5d8660")
   KASRule_Add(TeamName, "F_5d8660", "F_5d85f0")
@@ -2241,7 +2241,7 @@ function F_5d80f0(TeamName)
   local p1 = 0
   KAS_ScopeKind = 1
   KAS_Scope = KAS_TeamHash(TeamName)
-  K_498c70(TeamName)  -- kasfResetShipRenderFlags
+  K_498c70(TeamName)  -- kasfShipsUpgrade
   p1 = "TaiidanResourcers"
   K_492960(p1)  -- kasfGuardShips
   do return end
@@ -2253,7 +2253,7 @@ function F_5d7fd0(TeamName)
   local p1 = 0
   KAS_ScopeKind = 1
   KAS_Scope = KAS_TeamHash(TeamName)
-  K_498c70(TeamName)  -- kasfResetShipRenderFlags
+  K_498c70(TeamName)  -- kasfShipsUpgrade
   p1 = KAS_VolumeVector("Unexplored")
   K_4941a0(p1)  -- kasfMoveTo
   do return end
@@ -2301,7 +2301,7 @@ function F_5d7f90(TeamName)
   local p1 = 0
   KAS_ScopeKind = 1
   KAS_Scope = KAS_TeamHash(TeamName)
-  K_498c70(TeamName)  -- kasfResetShipRenderFlags
+  K_498c70(TeamName)  -- kasfShipsUpgrade
   p1 = "TaiidanCarrier"
   K_492960(p1)  -- kasfGuardShips
   do return end
@@ -2312,7 +2312,7 @@ function F_5d8930(TeamName)
   KAS_Team = TeamName
   KAS_ScopeKind = 1
   KAS_Scope = KAS_TeamHash(TeamName)
-  K_498c70(TeamName)  -- kasfResetShipRenderFlags
+  K_498c70(TeamName)  -- kasfShipsUpgrade
   K_4977a0(TeamName)  -- kasfSetTraderPriceScale
   -- kasJump(state 0x348ce77)
   KAS_TraceJump(TeamName, "F_5d8930", "F_5d8980")
@@ -2522,7 +2522,7 @@ function F_5d7df0(TeamName)
   KAS_Team = TeamName
   KAS_ScopeKind = 1
   KAS_Scope = KAS_TeamHash(TeamName)
-  K_498c70(TeamName)  -- kasfResetShipRenderFlags
+  K_498c70(TeamName)  -- kasfShipsUpgrade
   -- kasJump(state 0x7bd9e7b)
   KAS_TraceJump(TeamName, "F_5d7df0", "F_5d7e80")
   KASRule_Add(TeamName, "F_5d7e80", "F_5d7df0")
@@ -2597,7 +2597,7 @@ function F_5d78d0(TeamName)
   iVar1 = K_491e30(71552174)  -- kasfVarValueGet
   if (iVar1 == 0) then
     K_491d30(71552174, 1)  -- kasfVarCreateSet
-    K_498c70(TeamName)  -- kasfResetShipRenderFlags
+    K_498c70(TeamName)  -- kasfShipsUpgrade
     K_494160(0)  -- kasfTeamSwitchPlayerOwner
     K_497ed0(TeamName)
   end
@@ -2716,7 +2716,7 @@ function F_5d8fa0(TeamName)
   local iVar1 = 0
   KAS_ScopeKind = 1
   KAS_Scope = KAS_TeamHash(TeamName)
-  K_498c70(TeamName)  -- kasfResetShipRenderFlags
+  K_498c70(TeamName)  -- kasfShipsUpgrade
   K_493980(TeamName, 10)  -- kasfShipsSetDamageFactor
   iVar1 = "TaiidanDefendCruiser"
   iVar1 = K_493de0(iVar1)  -- kasfThisTeamIs
@@ -2913,7 +2913,7 @@ function F_5d8130(TeamName)
   KAS_ScopeKind = 1
   KAS_Scope = KAS_TeamHash(TeamName)
   K_4984c0(TeamName, 1)  -- kasfShipsParalyze
-  K_498c70(TeamName)  -- kasfResetShipRenderFlags
+  K_498c70(TeamName)  -- kasfShipsUpgrade
   -- kasJump(state 0x569b0c5)
   KAS_TraceJump(TeamName, "F_5d8130", "F_5d8220")
   KASRule_Add(TeamName, "F_5d8220", "F_5d8130")
@@ -3172,7 +3172,7 @@ function F_5d7d90(TeamName)
   iVar1 = K_491e30(71552177)  -- kasfVarValueGet
   if (iVar1 == 0) then
     K_491d30(71552177, 1)  -- kasfVarCreateSet
-    K_498c70(TeamName)  -- kasfResetShipRenderFlags
+    K_498c70(TeamName)  -- kasfShipsUpgrade
     K_494160(0)  -- kasfTeamSwitchPlayerOwner
     K_497ed0(TeamName)
   end
