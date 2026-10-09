@@ -15,6 +15,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import make_modules  # noqa: E402
+import make_shipcode  # noqa: E402
 
 MOD =os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = r"C:\Modding\Cataclysm-decomp\reference\cr_beast"
@@ -76,6 +77,19 @@ def patch_worker(text):
     return re.sub(r'(addAbility\(NewShipType,\s*"RepairCommand",\s*)0,', r'\g<1>1,', text)
 
 
+def patch_hw1_armour(text):
+    """Their weapons rate HW2 armour only (Unarmoured, LightArmour, ...) and do no damage to the other families
+    (setPenetration's default, 3rd argument, is 0 on theirs): stock HW1 ships (the Taiidan and Kushan) are
+    Unarmoured_hw1 / LightArmour_hw1, so Acolytes did no damage to Taiidan fighters. Stock HW1 weapons rate the
+    _hw1 families the same as their HW2 counterparts; so do these."""
+    for fam in ("Unarmoured", "LightArmour"):
+        if fam + "_hw1" in text:
+            continue
+        # {Unarmoured=1}, or {Unarmoured = 1,} -> followed by {Unarmoured_hw1=1}
+        text = re.sub(r"(\{\s*%s\s*=\s*([\d.]+)\s*,?\s*\})" % fam, r"\1, {%s_hw1=\2}" % fam, text, count=1)
+    return text
+
+
 PATCHES = {
     "ship/smt_ms_sp/smt_ms_sp.ship": patch_ms_sp,
     "ship/smt_worker/smt_worker.ship": patch_worker,
@@ -135,8 +149,48 @@ def use_our_events(ship, src, names):
 # original). Thrusters keep their ratio to the main engine. Not the Kuun-Lan: it is more agile than HW1's
 # Mothership (user), so it keeps their speed.
 SPEED_CLASS = {"scout": 490 / 1000, "interceptor": 487 / 875, "collector": 110 / 325}
+# The Worker on Gearbox's collector ratio (144) was a bit slow (user): the scout ratio (208); the original's Worker
+# runs at 0.52x an Acolyte, the interceptor ratio would be 237.
 SPEEDS = {"smt_scout": ("srecon", "scout"), "smt_acolyte": ("sacolyte", "interceptor"),
-          "smt_worker": ("sworker", "collector")}
+          "smt_worker": ("sworker", "scout")}
+
+
+# Build cost and time: Cataclysm's own (the .shp buildCost / buildTime, 1:1: RUs are Cataclysm's too, asteroids by
+# mission2level.py ru_percent), not theirs (their Acolyte cost 130 to Cataclysm's 75). Every ship of theirs that
+# tools/shipmap.tsv maps a Cataclysm Somtaaw / Beast ship to.
+def cataclysm_costs():
+    costs = {}
+    for line in list(open(os.path.join(MOD, "tools", "shipmap.tsv"), encoding="utf-8"))[1:]:
+        cols = line.rstrip("\n").split("\t")
+        if len(cols) < 3 or cols[0] not in ("RACE_SECT", "RACE_BEAST") or not cols[2] or cols[2] in costs:
+            continue
+        shp = os.path.join(r"C:\Modding\Cataclysm-decomp\extracted\big", "race_" + cols[0][5:].lower(),
+                           cols[1] + ".shp")
+        if not os.path.exists(shp):
+            continue
+        vals = {}
+        for l in open(shp, encoding="latin-1"):
+            f = l.split()
+            if len(f) >= 2 and f[0].lower() in ("buildcost", "buildtime"):
+                vals[f[0].lower()] = f[1]
+        if len(vals) == 2:
+            costs[cols[2]] = (cols[1], vals["buildcost"], vals["buildtime"])
+    return costs
+
+
+def set_costs():
+    n = 0
+    for ship, (cat, cost, time) in sorted(cataclysm_costs().items()):
+        path = os.path.join(DATA, "ship", ship, ship + ".ship")
+        if not os.path.exists(path):
+            continue
+        text = open(path, encoding="latin-1").read()
+        new = re.sub(r'(NewShipType(?:\.buildCost|\["buildCost"\])\s*=\s*)[\d.]+', r"\g<1>" + cost, text, count=1)
+        new = re.sub(r'(NewShipType(?:\.buildTime|\["buildTime"\])\s*=\s*)[\d.]+', r"\g<1>" + time, new, count=1)
+        if new != text:
+            open(path, "w", encoding="latin-1", newline="").write(new)
+            n += 1
+    print(f"  Cataclysm build cost/time on {n} ships")
 
 
 def set_speed(ship, cat, cls):
@@ -248,12 +302,18 @@ def main():
         p = os.path.join(DATA, rel)
         t = open(p, encoding="latin-1").read()
         open(p, "w", encoding="latin-1", newline="\n").write(fn(t))
+    for rel in copied:
+        if rel.endswith(".wepn"):
+            p = os.path.join(DATA, rel)
+            t = open(p, encoding="latin-1").read()
+            open(p, "w", encoding="latin-1", newline="").write(patch_hw1_armour(t))
     for ship, (ours, joints) in OUR_MODELS.items():
         use_our_model(ship, ours, joints)
     for ship, (src, names) in OUR_EVENTS.items():
         use_our_events(ship, src, names)
     for ship, (cat, cls) in SPEEDS.items():
         set_speed(ship, cat, cls)
+    set_costs()
     for root, _, files in os.walk(OVERRIDES):   # our own versions of their files (.events / .madstate)
         for fn in files:
             rel = os.path.relpath(os.path.join(root, fn), OVERRIDES)
@@ -261,6 +321,8 @@ def main():
     for rel in copied:
         if rel.endswith(".events"):
             fix_event_markers(os.path.join(DATA, rel))
+    # Cataclysm's ship rules (experience, damage slowing ships, Acolyte link) on every ship the campaign uses
+    copied += make_shipcode.install()
     copied.sort()
     # files an earlier install put in data/ that are no longer installed (git-tracked files are ours: kept)
     manifest = os.path.join(DATA, "cr_files.txt")

@@ -53,6 +53,22 @@ def arrival_camera(p, rot):
     return world(ARRIVAL_TARGET), world(ARRIVAL_EYE)
 
 
+CAT_ASTEROIDS = r"C:\Modding\Cataclysm-decomp\extracted\big\resources\asteroids"
+HW1_ASTEROIDS = r"C:\Modding\Cataclysm-decomp\reference\hwrm\HW1Campaign\resource\asteroid"
+
+
+def ru_percent(t):
+    """addAsteroid's RU percentage giving the asteroid Cataclysm's RUs (its .shp resourcevalue: Asteroid1 160,
+    Asteroid2 400, Asteroid3 1000, Asteroid4 2000): HWRM's HW1 asteroids are worth resourceValue x percent / 100,
+    with resourceValue 100 (Asteroid0: 11). Cataclysm's asteroids are about 10x HW1's; at 100% Mission 1's were
+    worth a tenth of the original's (user: resource starved)."""
+    cat = next(float(l.split()[1]) for l in open(os.path.join(CAT_ASTEROIDS, t.lower() + ".shp"), encoding="latin-1")
+               if l.lower().startswith("resourcevalue"))
+    res = os.path.join(HW1_ASTEROIDS, t.lower(), t.lower() + ".resource")
+    base = float(re.search(r"resourceValue=([\d.]+)", open(res, encoding="latin-1").read()).group(1))
+    return round(cat / base * 100)
+
+
 def pos(x, y, z):
     return (-SCALE * x, SCALE * z, SCALE * y)
 
@@ -170,7 +186,7 @@ class Level:
             L += [f'    addToSOBGroup("{m}", "{g}")' for m in members]
         L.append("")
         for t, p, rot in self.asteroids:
-            L.append(f'    addAsteroid("{t}", {vec(p)}, 100, {fmt(rot[0])}, {fmt(rot[1])}, {fmt(rot[2])}, 0)')
+            L.append(f'    addAsteroid("{t}", {vec(p)}, {ru_percent(t)}, {fmt(rot[0])}, {fmt(rot[1])}, {fmt(rot[2])}, 0)')
         for name, p, r in self.spheres:
             L.append(f'    addSphere("{name}", {vec(p)}, {fmt(r)})')
         for name, p, size in self.boxes:

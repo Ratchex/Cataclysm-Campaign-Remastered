@@ -786,11 +786,24 @@ function KAS_DisableCPUPlayers()
     end
 end
 
+-- Cataclysm's RU trickle (resource.script, every player): regenerateRUs 25 every regenerateRUrate 255 frames
+-- (+1: the check is frame & 255, at HW1's 16 frames/s: 16 s) while the player has under regenerateRUsIfUnder 400.
+KAS_RU_REGEN, KAS_RU_REGEN_UNDER, KAS_RU_REGEN_SECONDS = 25, 400, 256 / 16
+function KAS_RURegen()
+    local p = 0
+    while p < Universe_PlayerCount() do
+        local ru = Player_GetRU(p)
+        if ru < KAS_RU_REGEN_UNDER then Player_SetRU(p, ru + KAS_RU_REGEN) end
+        p = p + 1
+    end
+end
+
 function KAS_StartEngine()
     KAS_DisableCPUPlayers()
     KAS_ApplyAlliances()
     KAS_RestrictTechs()
     Rule_AddInterval("KAS_EngineTick", 0.5)
+    Rule_AddInterval("KAS_RURegen", KAS_RU_REGEN_SECONDS)
 end
 
 -- ------------------------------------------------------------------ orders and selections (Gearbox KASUtil helpers)

@@ -211,3 +211,36 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
 - Dock path waypoint (SEG) record, 64 bytes (HODOR flag test): pos f3, rot f3, UseRot u32, Tol f, Unfocus u32,
   Spd f, Check u32, Close, Player, Queue, Clip, ClearRes (u32 each). Stock collector In: Player+Queue, Player,
   ClearRes; fighter In: Player+Queue, Player, Clip+ClearRes; Out paths: no flags. HOLD_DOCK must be under ROOT_LOD[0].
+
+## Pilot experience, linking, economy (from cataclysm.exe, 2026-10-09)
+- **Experience** (FUN_005147d0, tables at 0x72bb78-0x72bce4): ship + 0x5c8 = kills per victim class (12 HW1 classes:
+  Mothership 0 ... Fighter 6, Resource 7, NonCombat 8, MonsterShip 9, Component 10, Micro 11), credited to the ship
+  that fired the killing shot (FUN_00546250; missiles credit their launcher). Score = sum(kills x weight)
+  (weights 20,8,10,9,5,3,1...); rank (ship + 0x5f8, 0-4) = how many of the killer class's 4 thresholds the score
+  strictly exceeds (fighter 1/2/3/4, corvette 2/4/6/8, frigate 3/6/12/16, destroyer 5/10/20/40, capitals
+  10/30/60/100). Rank x1.0-1.4 on weapon damage (FUN_005148f0) and speed (FUN_00514940); speed also drops with
+  damage for every ship (-0.1 <75%, -0.2 <50%, -0.4 <25%, -0.6 <10% health). Rank names strExperienceLevel0-4,
+  rank-up message strShipLevelUpNotify ("has gained a Level:"), human player only. Stars: overlayicons/expstar.lif
+  (magenta), one per rank beside the selected ship's health bar (FUN_00507630).
+- HWRM: `data/scripts/cataclysm/shiprules.lua` (custom code on every campaign ship, tools/make_shipcode.py; a ship's
+  own custom code is chained). No killer info in HWRM: one of the victim's attackers (SobGroup_GetAttackers each
+  0.5 s) gets the kill, the human's first. **Stars are off**: FX_PlayEffect is not attached to the ship (left
+  behind as it moves), and ui/ati/ati.lua only draws engine values (no per-ship icon from script; checked the
+  exe's 362 SobGroup/Player/UI/FX functions). The user wants them as real UI beside the stance icon: later.
+- **Link** (FUN_0044d3b0 command, FUN_00467b80 link, FUN_00468650 unlink): two Acolytes dock (DPT_Link point,
+  linkDistance 50) and are replaced by an sACV: health fraction = mean of theirs, kills summed (each part's saved
+  for unlink); unlink gives each part its own kills + half of what the ACV gained. ACVs are also buildable
+  (SPRSShipDepend sACV TECH_DRIVE_FIGHTER, TECH_LINK). The Link/Unlink objectives are the tutorial's.
+  HWRM: CustomCommand "Link" (Acolyte) / "Unlink" (ACV); a ship has one CustomCommand, and it shows an energy bar
+  (ati.lua auxiliaryPower). Plan (user): from Mission 3 (first kasfAllowPlayerToResearch TECH_MISSILE) the
+  Acolyte's missile volley (sacolyte.shp MissileRegenerateTime 10.375, MissileVolleyTime 1.2) takes the
+  CustomCommand and its energy bar; Link then needs another trigger.
+- **Economy**: Cataclysm asteroids are worth ~10x HW1's (resources/asteroids/*.shp resourcevalue: 11, 160, 400,
+  1000, 2000); HWRM's HW1 asteroids are 100 RU x addAsteroid's percent, so mission2level.py writes the percent that
+  gives Cataclysm's RU. RU trickle (resource.script): +25 RU every 256 frames (16 s) while under 400 RU, every
+  player (cataclysmkas.lua KAS_RURegen). Build cost/time 1:1 from the .shp (install_cr.py set_costs).
+- **Their weapons and HW1 armour**: Cataclysm Remastered's setPenetration lists HW2 families with default 0, so
+  they did no damage to stock HW1 ships (Unarmoured_hw1 / LightArmour_hw1); install_cr.py patch_hw1_armour copies
+  the HW2 value, as stock HW1 weapons do.
+- Restarts: .ship/.wepn/custom code/fx load at game start (full relaunch); level and mission scripts reload on
+  every mission start (back to the menu is enough).
