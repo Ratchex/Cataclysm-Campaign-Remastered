@@ -107,7 +107,7 @@ def install():
     copied, chains = [], {}
     for ship in sorted(info):
         folder = os.path.join(DATA, "ship", ship)
-        if not os.path.exists(os.path.join(CR, "ship", ship, ship + ".ship")):
+        if ship not in ship_variants.VARIANTS and not os.path.exists(os.path.join(CR, "ship", ship, ship + ".ship")):
             # not one of Cataclysm Remastered's: a fresh copy of the stock ship, reported every run so install_cr
             # keeps it in its manifest
             stock = os.path.join(PP, "ship", ship, ship + ".ship")   # the Players Patch's (install_cr.py PP)
