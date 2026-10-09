@@ -47,8 +47,8 @@ CAT_TICK = 0.5            -- seconds between rule updates per ship
 CAT_SHOW_STARS = 0        -- see CatShip_Update
 CAT_STAR_SCALE = CatFrom0({ 12, 8, 8, 6, 4, 2, 1, 1, 1, 1, 1, 1 })   -- star effect size by class (ship size)
 
--- Link: Cataclysm's linkDistance is 50 (x 0.35 in our scale is under a fighter's length): close enough to touch
-CAT_LINK_DIST = 40
+-- Link: Cataclysm's sacolyte.shp linkDistance 50, at our map scale (x 0.35, tools/mission2level.py SCALE)
+CAT_LINK_DIST = 50 * 0.35
 CAT_LINK_TIMEOUT = 30     -- give up if the pair has not met
 CAT_LINK_WAIT = 1.5       -- an Acolyte with no partner after this long gives up ("No Ships To Link With")
 CAT_LINK_TECH = "TECH_LINK"
@@ -69,6 +69,15 @@ function CatShip_Create(g, p, id, t)
     local rec = { g = g, p = p, t = t, cls = CatClass[t] or CAT_FIGHTER, kills = kills, rank = 0, spd = 1, dmg = 1,
                   next = 0, att = "cat_att_" .. id }
     CatShips[id] = rec
+    -- its button abilities (tools/make_abilities.py): the mission script fills cat_cmd_<name> on a press
+    rec.buttons = {}
+    for i = 1, getn(CatAbilities) do
+        local a = CatAbilities[i]
+        if a.native == 0 and strfind(", " .. a.types .. ",", ", " .. t .. ",", 1, 1) then
+            tinsert(rec.buttons, { name = a.name, grp = "cat_cmd_" .. a.name })
+            SobGroup_CreateIfNotExist("cat_cmd_" .. a.name)
+        end
+    end
     SobGroup_CreateIfNotExist(rec.att)
     SobGroup_Clear(rec.att)
     -- a ship spawned by a link/unlink takes over its pilots' kills
@@ -100,6 +109,22 @@ function CatShip_Update(g, p, id)
     -- health bar overlay (ui/ati/ati.lua) only draws engine values, so no per-ship star beside the stance icon.
     if CAT_SHOW_STARS == 1 and rec.rank > 0 and SobGroup_Selected(g) == 1 then
         FX_PlayEffect("cat_rank" .. rec.rank, g, CAT_STAR_SCALE[rec.cls] or 1)
+    end
+    -- button abilities: act on first finding ourselves in the press group, if still selected (the press group is
+    -- the selection the mission script read; checking our own selection too keeps unselected ships out)
+    for i = 1, getn(rec.buttons) do
+        local b = rec.buttons[i]
+        if SobGroup_GroupInGroup(g, b.grp) == 1 then
+            if not b.pressed then
+                b.pressed = 1
+                if SobGroup_Selected(g) == 1 then
+                    CatAbility_Run(b.name, g, p, id)
+                    if rec.gone then return end
+                end
+            end
+        else
+            b.pressed = nil
+        end
     end
     if rec.link then CatLink_Tick(rec, id, now) end
 end
@@ -171,7 +196,28 @@ function CatShip_ApplyMultipliers(rec)
 end
 
 -- ---------------------------------------------------------------------------------------------------------------
--- Link / Unlink (CustomCommand on the Acolyte / ACV)
+-- Abilities: one custom command each (tools/make_abilities.py; the engine sends it to the selected ships that have
+-- it). Its research, then its handler.
+function CatAbility_Run(name, g, p, id)
+    for i = 1, getn(CatAbilities) do
+        local a = CatAbilities[i]
+        if a.name == name then
+            if a.tech ~= "" and Player_HasResearch(p, a.tech) ~= 1 then
+                print("CATACLYSM ability " .. name .. ": " .. a.tech .. " not researched")
+                return
+            end
+            getglobal(a.handler)(g, p, id)
+            return
+        end
+    end
+end
+
+-- test of a second custom command on the Acolyte; becomes the missile volley (Mission 3)
+function CatVolley_Start(g, p, id)
+    print("CATACLYSM ability volley: ship " .. id)
+end
+
+-- Link / Unlink
 
 function CatLink_Start(g, p, id)
     local rec = CatShips[id]
@@ -185,8 +231,6 @@ function CatLink_Start(g, p, id)
     CatLink_Pair(p)
 end
 
-function CatLink_Do(g, p, id) end
-function CatLink_Finish(g, p, id) end
 
 -- pair waiting Acolytes of a player, nearest first
 function CatLink_Pair(p)
@@ -329,6 +373,3 @@ function CatUnlink_Start(g, p, id)
     SobGroup_Despawn(g)
     print("CATACLYSM link: ACV unlinked into two Acolytes")
 end
-
-function CatUnlink_Do(g, p, id) end
-function CatUnlink_Finish(g, p, id) end

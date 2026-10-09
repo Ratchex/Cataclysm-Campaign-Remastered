@@ -244,3 +244,15 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
   the HW2 value, as stock HW1 weapons do.
 - Restarts: .ship/.wepn/custom code/fx load at game start (full relaunch); level and mission scripts reload on
   every mission start (back to the menu is enough).
+- **Abilities** (tools/make_abilities.py): HWRM keeps ONE CustomCommand per ship (a second line replaces the first:
+  tested). commanduidefines.lua has 32 custom IDs (INFO_CustomStart + 0-31, stock uses 0-3), each with a taskbar
+  button and right-click name. So each ship type has one *native* ability (engine button, right-click entry, energy
+  bar, sent to exactly the selected ships) and any number of *button* abilities: our taskbar buttons call
+  MainUI_ScarEvent("CatAbility('x')"); the mission script copies the human's MainUI_CurrentSelection() into
+  cat_cmd_x and toggles button visibility (UI_SetElementVisible("NewTaskbar", ...)); ship rules act if in cat_cmd_x
+  AND SobGroup_Selected (the reported selection alone was too wide: 22 ships for a smaller selection). Button
+  abilities can't be in the engine-built right-click menu. Link works on exactly the selected Acolytes (user).
+- **Players Patch 2.3** (workshop 1190476337, extracted to Cataclysm-decomp/reference/players_patch) is the bottom
+  data layer (install_cr.py PP; Cataclysm Remastered over it; never our tracked files): strike-group formation
+  fixes, its HW1 ships for our Kushan/Taiidan (make_shipcode.py copies its .ship), familylist families merged.
+  Its HW1 rebalance comes with it for now; the target is Cataclysm's balance (user).

@@ -798,7 +798,55 @@ function KAS_RURegen()
     end
 end
 
+-- Cataclysm's button abilities (tools/make_abilities.py: those that aren't a ship's one native CustomCommand): a
+-- press puts the human's selected ships in cat_cmd_<name> for their rules (data/scripts/cataclysm/shiprules.lua,
+-- which also check the ship is still selected) and empties it a second later; a button shows only while the
+-- human's selection has a ship that can use it.
+dofilepath("data:scripts/cataclysm/abilities_gen.lua")
+CatAbilityPressed, CatAbilityShown = {}, {}
+CAT_ABILITY_HOLD = 1.0      -- over shiprules.lua CAT_TICK (0.5 s), so every selected ship sees the press
+
+function CatAbility_OwnSelection(grp)
+    SobGroup_CreateIfNotExist(grp)
+    SobGroup_Clear(grp)
+    SobGroup_FilterInclude(grp, MainUI_CurrentSelection(), "PlayerOwner", "0")
+    return grp
+end
+
+function CatAbility(name)
+    local grp = "cat_cmd_" .. name
+    SobGroup_CreateIfNotExist(grp)
+    SobGroup_Clear(grp)
+    SobGroup_SobGroupAdd(grp, CatAbility_OwnSelection("cat_cmd_own"))
+    CatAbilityPressed[name] = Universe_GameTime()
+    print("CKAS: ability " .. name .. " pressed, " .. SobGroup_Count(grp) .. " ships in the selection")
+end
+
+function CatAbilityTick()
+    local now, sel = Universe_GameTime(), CatAbility_OwnSelection("cat_sel_own")
+    for i = 1, getn(CatAbilities) do
+        local a = CatAbilities[i]
+        if a.native == 0 then
+            local t = CatAbilityPressed[a.name]
+            if t and now - t > CAT_ABILITY_HOLD then
+                SobGroup_Clear("cat_cmd_" .. a.name)
+                CatAbilityPressed[a.name] = nil
+            end
+            local show = 0
+            if SobGroup_Count(sel) > 0 and SobGroup_AreAnyOfTheseTypes(sel, a.types) == 1 and
+               (a.tech == "" or Player_HasResearch(0, a.tech) == 1) then
+                show = 1
+            end
+            if CatAbilityShown[a.name] ~= show then
+                UI_SetElementVisible("NewTaskbar", "btnCat_" .. a.name, show)
+                CatAbilityShown[a.name] = show
+            end
+        end
+    end
+end
+
 function KAS_StartEngine()
+    Rule_AddInterval("CatAbilityTick", 0.25)
     KAS_DisableCPUPlayers()
     KAS_ApplyAlliances()
     KAS_RestrictTechs()

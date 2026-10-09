@@ -1,4 +1,5 @@
-"""Install Cataclysm Remastered (workshop 2195601016, "Beast Update" v2.1) as the mod's base data layer.
+"""Install the Players Patch (below, PP) and Cataclysm Remastered (workshop 2195601016, "Beast Update" v2.1) as the
+mod's base data layers.
 
 Copies Cataclysm-decomp/reference/cr_beast (extracted with Cataclysm-decomp/tools/hw2big.py) into data/, except their
 campaign and junk, then applies PATCHES (small edits so their ships work for the Cataclysm campaign). The copied
@@ -20,6 +21,14 @@ import make_shipcode  # noqa: E402
 MOD =os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = r"C:\Modding\Cataclysm-decomp\reference\cr_beast"
 DATA = os.path.join(MOD, "data")
+
+# The Homeworld Remastered 2.3 Players Patch (workshop 1190476337, extracted with hw2big.py) under theirs: the
+# community's fixes (formations / strike groups, cross-race docking, SCAR library fixes) and its HW1 ships, which
+# our Kushan and Taiidan use (tools/make_shipcode.py copies its .ship over stock's). Cataclysm Remastered's files
+# win where both have one. Not its campaign / multiplayer levels. Its HW1 rebalance comes along for now; the target
+# is Cataclysm's balance (user), when the Kushan / Taiidan stats are converted.
+PP = r"C:\Modding\Cataclysm-decomp\reference\players_patch"
+PP_SKIP_PREFIX = ("leveldata/", "keeper.txt")
 
 # Only what their ships need (ship/subsystem/weapon/missile/art, ship sounds, race and ship-behaviour scripts):
 # not their menus/UI, their copies of the SCAR libraries (stock HWRM's are used; their scar_util.lua differed in
@@ -59,11 +68,27 @@ def patch_sp_props(text):
 MISSING_FAMILIES = ["Shipyard_Smt", "Utility_Smt", "Research_Smt", "SubSystemLarge_Smt", "Probe_Smt"]
 
 
+def family_sections(text):
+    """{section: [family names]} of a familylist.lua (buildFamily = { { name = "..." }, ... })."""
+    return {m.group(1): re.findall(r'name\s*=\s*"([^"]+)"', m.group(2))
+            for m in re.finditer(r"^(\w+)\s*=\s*\n\{(.*?)^\}", text, re.M | re.S)}
+
+
 def patch_families(text):
-    """Their Kuun-Lan builds families that the Beast Update's familylist lacks (missing family = log error)."""
+    """Their familylist, plus: families their Kuun-Lan builds that the Beast Update's lacks, and the Players Patch's
+    families theirs lacks (its ships use them; a missing family is a log error)."""
     text = text.replace("\r\n", "\n")
     add = "".join('\t{\n\t\tname = "%s",\n\t},\n' % f for f in MISSING_FAMILIES if '"%s"' % f not in text)
-    return text.replace("buildFamily =\n{\n", "buildFamily =\n{\n" + add, 1)
+    text = text.replace("buildFamily =\n{\n", "buildFamily =\n{\n" + add, 1)
+    ours = family_sections(text)
+    pp = family_sections(open(os.path.join(PP, "scripts", "familylist.lua"), encoding="latin-1").read()
+                         .replace("\r\n", "\n"))
+    for section, names in pp.items():
+        missing = [n for n in names if n not in ours.get(section, [])]
+        if missing:
+            text = text.replace(section + " =\n{\n", section + " =\n{\n" +
+                                "".join('\t{\n\t\tname = "%s",\n\t},\n' % f for f in missing), 1)
+    return text
 
 
 def patch_race(text):
@@ -286,11 +311,24 @@ def fix_event_markers(path):
 
 def main():
     copied = []
+    # our own (git-tracked) files under data/ are never overwritten by either layer
+    tracked = set(subprocess.run(["git", "ls-files", "data"], cwd=MOD, capture_output=True, text=True).stdout.split("\n"))
+    ours = {t[len("data/"):].lower() for t in tracked if t.startswith("data/")}
+    for root, _, files in os.walk(PP):   # the Players Patch first: theirs is copied over it
+        for fn in files:
+            rel = os.path.relpath(os.path.join(root, fn), PP).replace("\\", "/")
+            if rel.lower().startswith(PP_SKIP_PREFIX) or rel.lower() in ours:
+                continue
+            dst = os.path.join(DATA, rel)
+            os.makedirs(os.path.dirname(dst), exist_ok=True)
+            shutil.copyfile(os.path.join(root, fn), dst)
+            copied.append(rel)
     for root, _, files in os.walk(SRC):
         for fn in files:
             rel = os.path.relpath(os.path.join(root, fn), SRC).replace("\\", "/")
             low = rel.lower()
-            if (low.startswith(SKIP_PREFIX) and not low.startswith(KEEP_PREFIX)) or low.endswith(SKIP_SUFFIX):
+            if (low.startswith(SKIP_PREFIX) and not low.startswith(KEEP_PREFIX)) or low.endswith(SKIP_SUFFIX) \
+                    or low in ours:
                 continue
             dst = os.path.join(DATA, rel)
             os.makedirs(os.path.dirname(dst), exist_ok=True)
@@ -323,11 +361,11 @@ def main():
             fix_event_markers(os.path.join(DATA, rel))
     # Cataclysm's ship rules (experience, damage slowing ships, Acolyte link) on every ship the campaign uses
     copied += make_shipcode.install()
-    copied.sort()
+    # both layers can list a file (theirs over the patch's): once, in the last spelling
+    copied = sorted({rel.lower(): rel for rel in copied}.values())
     # files an earlier install put in data/ that are no longer installed (git-tracked files are ours: kept)
     manifest = os.path.join(DATA, "cr_files.txt")
     old = set(open(manifest).read().split("\n")) - {""} if os.path.exists(manifest) else set()
-    tracked = set(subprocess.run(["git", "ls-files", "data"], cwd=MOD, capture_output=True, text=True).stdout.split("\n"))
     removed = 0
     for rel in sorted(old - set(copied)):
         p = os.path.join(DATA, rel)
