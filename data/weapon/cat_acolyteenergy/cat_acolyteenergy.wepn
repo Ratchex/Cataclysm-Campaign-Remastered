@@ -1,0 +1,15 @@
+-- Cataclysm-HWRM: the Acolyte's Energy Cannons (sacolyte.shp GUN0/GUN1, WEAPON_PROJECTILE -> WEAPON_ENERGY with
+-- TECH_ENERGY), on the energy Acolyte variant (tools/ship_variants.py smt_acolyte_e). Cataclysm Remastered's
+-- Ksh_KineticAutoGun1 (SmallEnergyCannon bolts, their rate / accuracy / damage), made a normal weapon: theirs is a
+-- "Special Attack" that fires only while UseSpecialWeaponsInNormalAttack is on (the missiles' switch).
+-- Damage is theirs until the weapon damage conversion.
+StartWeaponConfig(NewWeaponType, "Gimble", "Missile", "SmallEnergyCannon", "Normal Only", 4200, 1600, 0, 0, 0, 0, 1, 1, 0, 0.5, 1, 2, 0, 0, 0, 0, 0.1, "Normal", 0, 0, 0);
+AddWeaponResult(NewWeaponType, "Hit", "DamageHealth", "Target", 32, 32, "");
+setPenetration(NewWeaponType, 5, 1, {Unarmoured=0.2}, {Unarmoured_hw1=0.2}, {LightArmour=0.5}, {LightArmour_hw1=0.5}, {MediumArmour=0.7}, {MoverArmour=0.25}, {PlanetKillerArmour=0}, {SubSystemArmour=0.5}, {ResArmour=0.6});
+setAccuracy(NewWeaponType, 1, {Fighter=1}, {Corvette=1}, {munition=0.2}, {Frigate=1,
+damage=1}, {SmallCapitalShip=1,
+damage=1}, {BigCapitalShip=1,
+damage=1}, {ResourceLarge=1,
+damage=1});
+setAngles(NewWeaponType, 25, 0, 0, 0, 0);
+

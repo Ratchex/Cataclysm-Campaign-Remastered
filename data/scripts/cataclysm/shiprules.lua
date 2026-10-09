@@ -328,6 +328,11 @@ end
 function CatUpgrade_Apply(rec)
     local list, armour = CatUpgrade_Pending(rec)
     for i = 1, getn(list) do rec.up[list[i]] = 1 end
+    if getn(list) > 0 then
+        local names = list[1]
+        for i = 2, getn(list) do names = names .. " " .. list[i] end
+        print("CATACLYSM upgrade: " .. rec.real .. " gets " .. names .. "; wants " .. CatVariant_Wanted(rec))
+    end
     rec.armour = armour
     rec.spd = -1                      -- re-apply the speed multiplier
     return getn(list)
@@ -369,6 +374,11 @@ function CatUpgrade_Instant(rec, id)
     CatUpgrade_Apply(rec)
     CatShip_ApplyMultipliers(rec)
     print("CATACLYSM upgrade: ship " .. id .. " (" .. rec.t .. ") upgraded (" .. why .. ")")
+    if why == "docked" and CatVariant_Wanted(rec) ~= rec.real then
+        local launch = rec.upg and 1      -- the Upgrade command docked it: the variant goes back out
+        rec.upg = nil
+        CatVariant_Swap(rec, id, launch)
+    end
 end
 
 function CatUpgrade_Tick(rec, id, now)
@@ -544,6 +554,26 @@ function CatVariant_ForNew(p, base)
     return want
 end
 
+-- the player's ship with a hangar nearest the docked ship (SobGroup_GetSobGroupDockedWithGroup found nothing for
+-- Acolytes docked in the Kuun-Lan); ship code fills from the engine's Player_Ships<p> group, as their ship scripts do
+CatCarrierTypes = { "smt_ms_sp", "smt_ms", "smt_carrier" }
+function CatVariant_NearestCarrier(rec, out)
+    local pos, best, bestd = SobGroup_GetPosition(rec.g), nil, nil
+    SobGroup_CreateIfNotExist("cat_carriers")
+    for i = 1, getn(CatCarrierTypes) do
+        SobGroup_Clear("cat_carriers")
+        SobGroup_FillShipsByType("cat_carriers", "Player_Ships" .. rec.p, CatCarrierTypes[i])
+        if SobGroup_Empty("cat_carriers") == 0 then
+            local d = CatDist(pos, SobGroup_GetPosition("cat_carriers"))
+            if not bestd or d < bestd then best, bestd = CatCarrierTypes[i], d end
+        end
+    end
+    if best then
+        SobGroup_Clear(out)
+        SobGroup_FillShipsByType(out, "Player_Ships" .. rec.p, best)
+    end
+end
+
 -- the docked ship -> its wanted type, docked in the same ship (launched again if `launch`), kills, upgrades and
 -- health carried over
 function CatVariant_Swap(rec, id, launch)
@@ -552,7 +582,14 @@ function CatVariant_Swap(rec, id, launch)
     SobGroup_CreateIfNotExist(carrier)
     SobGroup_Clear(carrier)
     SobGroup_GetSobGroupDockedWithGroup(rec.g, carrier)
-    if SobGroup_Empty(carrier) == 1 then return end
+    if SobGroup_Empty(carrier) == 1 then CatVariant_NearestCarrier(rec, carrier) end
+    if SobGroup_Empty(carrier) == 1 then
+        if not rec.swapWarned then
+            rec.swapWarned = 1
+            print("CATACLYSM variant: ship " .. id .. " docked with nothing found: no swap to " .. CatVariant_Wanted(rec))
+        end
+        return
+    end
     local want, health = CatVariant_Wanted(rec), SobGroup_HealthPercentage(rec.g)
     local up = {}
     for k, v in rec.up do up[k] = v end

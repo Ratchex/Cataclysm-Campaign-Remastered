@@ -21,11 +21,10 @@ DATA = os.path.join(MOD, "data")
 
 # variant: (base type, upgrade that calls for it, {base weapon: variant weapon}, research the build entry needs)
 VARIANTS = {
-    # Energy Cannons (TECH_ENERGY): Cataclysm Remastered's Super Acolyte pulsars on the Acolyte's two guns
-    # (damage / rate are theirs until the damage conversion)
-    "smt_acolyte_e": ("smt_acolyte", "WEAPON_ENERGY",
-                      {"Ksh_KineticAutoGun": "ksh_sec_superacolytepulsar",
-                       "Ksh_KineticAutoGun1": "ksh_sec_superacolytepulsar1"}, "TECH_ENERGY"),
+    # Energy Cannons (TECH_ENERGY): the Acolyte's normal gun becomes data/weapon/cat_acolyteenergy (their energy
+    # cannon Ksh_KineticAutoGun1, SmallEnergyCannon bolts, as a normal weapon). Their Super Acolyte pulsars were tried
+    # first: a 10 degree forward cone and 0.06 accuracy against fighters, so they hardly fired.
+    "smt_acolyte_e": ("smt_acolyte", "WEAPON_ENERGY", {"Ksh_KineticAutoGun": "cat_acolyteenergy"}, "TECH_ENERGY"),
 }
 
 
