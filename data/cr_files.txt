@@ -1369,6 +1369,9 @@ ship/smt_acolyte/smt_acolyte.mad
 ship/smt_acolyte/smt_acolyte.madstate
 ship/smt_acolyte/smt_acolyte.ship
 ship/smt_acolyte/smt_acolyte_old.ship
+ship/smt_acolyte_e/smt_acolyte_e.events
+ship/smt_acolyte_e/smt_acolyte_e.hod
+ship/smt_acolyte_e/smt_acolyte_e.ship
 ship/smt_acv/smt_acv.events
 ship/smt_acv/smt_acv.hod
 ship/smt_acv/smt_acv.ship
