@@ -1173,9 +1173,9 @@ NewTaskbar = {
 				BTN_CMD_SALCAP,		
 				BTN_CMD_CAPTURE,
 				-- Cataclysm-HWRM abilities (tools/make_abilities.py)
+				CAT_BTN_VOLLEY,
 				CAT_BTN_LINK,
 				CAT_BTN_UNLINK,
-				CAT_BTN_VOLLEY,
 				CAT_BTN_UPGRADE,
 	
 			},
