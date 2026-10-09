@@ -29,6 +29,8 @@ import sys
 
 DECOMP = r"C:\Modding\Cataclysm-decomp"
 MOD = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# Kuun-Lan modules shown per cutscene (its mission's starting modules), so a regeneration can't drop them
+NIS_MODULES = {"n01": "dockingbay,engineslower,enginesupper,lowerspine,orecanarmour"}
 sys.path.insert(0, os.path.join(DECOMP, "tools"))
 import nisread  # noqa: E402
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -626,11 +628,13 @@ def main():
     ap.add_argument("name")
     ap.add_argument("--fps", type=int, default=30)
     ap.add_argument("--placeholder", default="Kus_Scout")
-    ap.add_argument("--modules", default="", help="Kuun-Lan modules shown on it (make_modules.py keys, comma "
-                                                  "separated: the mission's starting modules)")
+    ap.add_argument("--modules", default=None, help="Kuun-Lan modules shown on it (make_modules.py keys, comma "
+                                                    "separated: the mission's starting modules; default NIS_MODULES)")
     ap.add_argument("--audit-only", action="store_true",
                     help="only write docs/nis/<name>.md (cutscenes not converted yet; nothing in data/)")
     a = ap.parse_args()
+    if a.modules is None:
+        a.modules = NIS_MODULES.get(a.name.lower(), "")
     src = os.path.join(DECOMP, "extracted", "big", "nis", a.name)
     nis = nisread.read(src + ".nis")
     shipmap = load_shipmap()

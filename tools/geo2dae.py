@@ -8,8 +8,8 @@ Coordinates: HW1 models are X up, Y right, Z forward; HODOR wants Y up, Z forwar
 (0.35 = the same factor Gearbox used for HW1 levels and ship sizes, see NOTES.md); a proper rotation, so winding
 is kept. Objects are baked into JNT[Root], except animated parts (--anim-joints: each under its own joint, driven
 by tools/mad2hwrm.py's converted .mad).
-Materials: MAT[<tex>]_SHD[ship] with image IMG[<name>_<tex>_DIFF] (id ...-image); HODOR picks up the _TEAM file next
-to the _DIFF one (SHADERS.MAP: $team R = 1 - team colour, G = 1 - stripe colour, B = 0).
+Materials: MAT[<tex>]_SHD[ship] with image IMG[<name>_<tex>_DIFF] (id ...-image); HODOR picks up the _TEAM and _STRP
+files next to the _DIFF one (masks, white = painted; HODOR stores $team R = 1 - team mask, G = 1 - stripe mask).
 
 Usage: geo2dae.py <geo> <out_dir> <name> [--scale 0.35]   (tools/build_ship.sh runs it, then HODOR)
 HODOR quirks: it must be started from Git Bash (from Python or PowerShell it spins forever), with forward-slash
@@ -65,11 +65,12 @@ def write_textures(png_dir, tex, out_dir, base, colour):
     im.save(os.path.join(out_dir, base + "_DIFF.tga"))
     if src:
         if any(m.getextrema()[1] for m in masks):
-            inv = [m.point(lambda v: 255 - v) for m in masks]
-            Image.merge("RGB", (inv[0], inv[1], Image.new("L", size, 0))).save(os.path.join(out_dir, base + "_TEAM.tga"))
-            # HODOR fills $team from separate images (SHADERS.MAP: TEAM = 1 1 1 r, STRP = 1 1 1 g, PAIN = 1 1 1 b):
-            # the stripe channel comes from <x>_STRP.tga's green, not _TEAM's (without it no ship had stripes)
-            Image.merge("RGB", (inv[1], inv[1], inv[1])).save(os.path.join(out_dir, base + "_STRP.tga"))
+            # HODOR fills $team from separate images (SHADERS.MAP: TEAM = 1 1 1 r, STRP = 1 1 1 g, PAIN = 1 1 1 b;
+            # lower case = inverted): the team mask is _TEAM's red, the stripe mask <x>_STRP.tga's green, both
+            # white = painted (HODOR inverts them; sob_ship.frag paints where the channel is 0). Inverted masks
+            # painted whole hulls (team colour everywhere, then stripe white everywhere: solid white ships, in game)
+            Image.merge("RGB", (masks[0], masks[1], Image.new("L", size, 0))).save(os.path.join(out_dir, base + "_TEAM.tga"))
+            Image.merge("RGB", (masks[1], masks[1], masks[1])).save(os.path.join(out_dir, base + "_STRP.tga"))
     return base + "_DIFF.tga"
 
 
