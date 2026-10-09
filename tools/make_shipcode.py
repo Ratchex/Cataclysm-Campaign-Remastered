@@ -83,9 +83,12 @@ def hook(ship):
     lines = [MARK,
              f'addCustomCode(NewShipType,"{GEN}","{chain[1] if chain else ""}","CatCreate_{n}","CatUpdate_{n}",'
              f'"CatDestroy_{n}","{chain[5] if chain else ship}",{interval:g})']
-    # Cataclysm abilities: one CustomCommand per ability (energy arguments as their Mimic's: an instant command)
+    # Cataclysm abilities: the ship's one native CustomCommand (tools/make_abilities.py). Energy: max, minimum to
+    # activate, drain, recharge. Their Mimic's 1000,200,0.25,2 left it toggled on and recharging after a press, so a
+    # second Link press reached only some of the selected Acolytes ("No Ships To Link With"): these abilities have no
+    # cooldown, so it drains and recharges at once. (A cooldown ability, the missile volley, will set its own.)
     for name, cid, label in make_abilities.for_ship(ship):
-        lines.append(f'addAbility(NewShipType,"CustomCommand",1,"{label}",1,0,1000,200,0.25,2,0,"{GEN}",'
+        lines.append(f'addAbility(NewShipType,"CustomCommand",1,"{label}",1,0,1000,0,1000,1000,0,"{GEN}",'
                      f'"CatCmd_{name}_Start","CatCmd_{name}_Do","CatCmd_{name}_Finish","{ship}",1.15,{cid},1)')
     open(path, "w", encoding="latin-1", newline="").write(text.rstrip("\n") + "\n\n" + "\n".join(lines) + "\n")
     return chain
