@@ -4,7 +4,7 @@ Last updated 2026-10-08 (evening). Read this first, then `C:\Modding\Cataclysm-d
 `NOTES.md` (HWRM engine rules learned in game) and `C:\Modding\Cataclysm-decomp\MODLOG.md` (reverse-engineering
 findings).
 
-## RESUME HERE (updated 2026-10-09 late; see git log for the last commit)
+## RESUME HERE (updated 2026-10-09, after the damage conversion; see git log for the last commit)
 **Console start:** run `claude` from `C:\Modding\Homeworld` (loads the project memory), then say "resume from
 Cataclysm-HWRM/HANDOFF.md". Shells: Git Bash for anything that runs HODOR (tools/build_ship.sh); `powershell -File
 launch.ps1` to launch. The user plays every test; Claude launches, reads `Bin\Release\HwRM.log` (strip NULs) and never
@@ -68,18 +68,11 @@ Missiles disabled before the upgrade (no energy spent); missiles in normal comba
    (tools/ship_variants.py, shiprules.lua CatVariant_*, data/weapon/cat_acolyteenergy) is off (VARIANTS empty).
    Untried ideas: swap in open space at the hangar exit (Link's spawn/despawn work), or only build the variant after
    the research.
-2. **Weapon damage + health conversion: model DECODED, nothing applied yet** (NOTES.md "Damage model"; survey
-   `python tools/cat_damage.py` = Cataclysm health + per-gun damage/DPS beside CR's, all mapped ships). Gearbox's own
-   HW1 -> HWRM scaling is inconsistent (health x0.5-6, shot damage x0.17-115), so the proposal is Cataclysm's values
-   1:1: health from the .shp, per-hit damage = table x DamageMult, Cataclysm fire/burst times, generated per-ship
-   weapons (cat_<ship>_gunN.wepn copying CR's visuals; CR weapons are shared between ships), rank and Energy level via
-   SobGroup_SetDamageMultiplier. **Open questions for the user** (asked 2026-10-09, not yet answered):
-   a) scope: all mapped ships at once (one scale; recommended) or the Acolyte alone scaled to CR;
-   b) accuracy: keep CR's per-class hit rolls (Cataclysm has none: bullets physically miss) or always hit;
-   c) armour upgrades (TECH_ARMOUR2/3 lower incoming damage per weapon type; HWRM has no per-ship incoming multiplier):
-      later/separately, or approximate now with max health per level;
-   d) beams: verify the collision tick rate (16 Hz assumed) before converting ion damage (per tick x lifetime);
-   e) missiles look strong 1:1 (Acolyte 420 per missile vs 220 HP Acolytes): check in the original before trusting.
+2. **Health + damage conversion: DONE** (tools/make_damage.py in install_cr; commit a018787; user: "feels good").
+   Answers: all ships, Cataclysm 1:1; CR accuracy rolls kept; armour levels later; missiles 1:1. Left: Beast ships,
+   mines, Somtaaw ramming frigate (no Cataclysm guns), armour upgrade levels (TECH_ARMOUR2/3: no per-ship incoming
+   multiplier in HWRM), the Energy upgrade's damage (could be SobGroup_SetDamageMultiplier x energy/projectile per
+   ship, now that Energy Cannons are shelved).
 3. Our own ACV model (convert sacv with build_ship.sh), ACV EMP (TECH_EMP), Mimic.
 4. Then Mission 1 against the original, the hyperspace exit (K_497290 stub), Missions 02-17.
 Open, lower priority: rank stars as UI; Fire Missiles burst (HWRM can't fire weapons from script; user: keep as-is);
