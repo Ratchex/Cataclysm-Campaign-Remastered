@@ -92,7 +92,9 @@ def texture_size(name):
 
 
 # Cataclysm missions' backgrounds: HWRM name -> (.btg, theta, phi) from the mission file's "Background" line
-BACKGROUNDS = {"cat_m01": ("mission01", 200, 0)}
+# Off: Mission 1 uses stock ez14 (user: port a sky only when no stock HWRM one fits; build_mission.py BACKGROUNDS).
+# The converted cat_m01 looked wrong in game (2026-10-09); fix it here before porting a sky that has no equivalent.
+BACKGROUNDS = {}
 
 
 def convert(btg, name, theta=0.0, phi=0.0):

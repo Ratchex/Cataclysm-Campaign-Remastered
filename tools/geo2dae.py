@@ -67,6 +67,9 @@ def write_textures(png_dir, tex, out_dir, base, colour):
         if any(m.getextrema()[1] for m in masks):
             inv = [m.point(lambda v: 255 - v) for m in masks]
             Image.merge("RGB", (inv[0], inv[1], Image.new("L", size, 0))).save(os.path.join(out_dir, base + "_TEAM.tga"))
+            # HODOR fills $team from separate images (SHADERS.MAP: TEAM = 1 1 1 r, STRP = 1 1 1 g, PAIN = 1 1 1 b):
+            # the stripe channel comes from <x>_STRP.tga's green, not _TEAM's (without it no ship had stripes)
+            Image.merge("RGB", (inv[1], inv[1], inv[1])).save(os.path.join(out_dir, base + "_STRP.tga"))
     return base + "_DIFF.tga"
 
 

@@ -367,13 +367,6 @@ art/fxlod/dmg_cloud_torpedo_combo1.lod
 art/fxlod/dmg_damage_puff_combo_missile.lod
 art/fxlod/ion_dmg_blue_combo.lod
 art/fxlod/ion_dmg_red_combo.lod
-background/cat_m01/cat_m01.hod
-background/cat_m01/cat_m01.lua
-background/cat_m01/cat_m01_extra.lua
-background/cat_m01/cat_m01_light.hod
-background/stars/cat_B01.tga
-background/stars/cat_B02.tga
-background/stars/cat_B03.tga
 badges/beast.tga
 badges/cmanaan.tga
 badges/cnabaal.tga
