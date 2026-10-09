@@ -1,65 +1,68 @@
 # Session handoff: Cataclysm → HWRM port
 
-Last updated 2026-10-08. Read this first, then `C:\Modding\Cataclysm-decomp\PORT_PLAN.md` (plan and decisions),
+Last updated 2026-10-08 (evening). Read this first, then `C:\Modding\Cataclysm-decomp\PORT_PLAN.md` (plan and decisions),
 `NOTES.md` (HWRM engine rules learned in game) and `C:\Modding\Cataclysm-decomp\MODLOG.md` (reverse-engineering
 findings).
 
-## RESUME HERE (session of 2026-10-08, last code commit 169f5ac)
-User's direction: set up each mission's units as we reach that mission, and play each part against the original.
-Done so far: the Kuun-Lan (core + module subsystems), the Worker (animations, harvest / repair), Mission 1's
-opening (both cutscenes and the fleet's arrival). Current goal: the rest of Mission 1, as the user finds differences.
+## RESUME HERE (updated 2026-10-08, last commit 0839211)
+**Console start:** run `claude` from `C:\Modding\Homeworld` (that loads the project memory), then say "resume from
+Cataclysm-HWRM/HANDOFF.md". Shells: Git Bash for anything that runs HODOR; `powershell -File launch.ps1` to launch.
+The user plays every test; Claude launches the game, reads logs and never sends input. After each test the user
+says "game closed": check with `Get-Process HomeworldRM` only for processes newer than the launch (about 18 stale
+HomeworldRM processes from crashed exits refuse to be killed until a reboot).
 
-**Pipeline now** (all in `C:\Modding\Cataclysm-HWRM`; anything that runs HODOR from Git Bash):
+User's direction: set up each mission's units as we reach that mission, and play each part against the original
+(user compares in game; one constant per tweak; offer to drop fiddly cosmetics). Done: the Kuun-Lan (core + module
+subsystems), the Worker (animations, harvest / repair), Mission 1's opening (both cutscenes, the fleet's arrival)
+and, this session, Mission 1's battle behaviour (below). Current goal: the rest of Mission 1, as the user finds
+differences; then the hyperspace exit so Mission 1 can be finished.
+
+**Pipeline** (all in `C:\Modding\Cataclysm-HWRM`):
 1. `bash tools/build_kuunlan.sh` - core (`build/ships/som_mothership`, Command Center + Resource Processing merged in:
    make_modules.py CORE_PARTS) + 11 module models (`build/ships/smt_kl_<key>`).
    Other ships: `bash tools/build_ship.sh race_sect/<ship> som_<name>` (sworker, srecon, sacolyte).
-2. `python tools/make_modules.py` - module table (MODULES, HARDPOINTS, TECH_MODULE) -> `data/subsystem/smt_kl_*`
-   (.subs + .hod) and dummy ships `data/ship/smt_kl_*_dummy` (loose/jettisoned modules; Cataclysm's
-   sMothership<Module> types map to them in `tools/shipmap.tsv`).
-3. `python tools/install_cr.py` - Cataclysm Remastered base layer (git-ignored) + patches + our models under their
-   setups (OUR_MODELS/OUR_EVENTS) + module slots appended to their `smt_ms_sp.ship`.
-4. `python tools/make_race.py` - SP build/research lists (ships need the Hangar; techs need their module).
-5. `python tools/build_mission.py 01 --intro n01` (writes `KAS_StartModules` from the .mission IncludeShips, level
-   with the arrival camera) and the cutscenes: `python tools/nis2hwrm.py n01 --modules
-   dockingbay,engineslower,enginesupper,lowerspine,orecanarmour`, `python tools/nis2hwrm.py nislet01` (each also
-   writes `docs/nis/<name>.md`; `--audit-only` for ones not wired in yet; list them in cataclysmkas.lua
-   KAS_NisAvailable). Speech strings: `python tools/build_speech.py` (speech.dat, invisible subtitles).
-6. `powershell -File launch.ps1`; the user plays; read `HwRM.log` (strip NULs). Close the game before rebuilding music.
-   Don't pipe luacheck into `head` before `&& launch`: the pipe hides its failure.
+2. `python tools/make_modules.py` - module table -> `data/subsystem/smt_kl_*` and dummy ships `data/ship/smt_kl_*_dummy`.
+3. `python tools/install_cr.py` - Cataclysm Remastered layer (git-ignored; only what their ships need: SKIP_PREFIX /
+   KEEP_PREFIX, stale files removed) + patches + our models under their setups + Gearbox-style speeds (SPEEDS) +
+   module slots on `smt_ms_sp.ship`. No CR .mad/.madstate on ships with our models unless we converted one.
+4. `python tools/make_race.py` - SP build/research lists.
+5. `python tools/build_mission.py 01 --intro n01` (level, `m01_kas.lua`, wrapper, `m01_paths.lua`) and the cutscenes:
+   `python tools/nis2hwrm.py n01 --modules dockingbay,engineslower,enginesupper,lowerspine,orecanarmour`,
+   `python tools/nis2hwrm.py nislet01`. Speech: `python tools/build_speech.py`. Music: `python tools/build_music.py`
+   (gain 0.5, confirmed; the game locks a playing track, close it first).
+6. `powershell -File launch.ps1`; read `Bin\Release\HwRM.log` (strip NULs). `python tools/luacheck.py` needs the user
+   site packages (no `-I`). Don't pipe luacheck into `head` before `&& launch`.
+Heredocs mangle backslashes and `\n` in Python edits: use the Edit tool or write a script file.
 
-**Done this session:** fix 1 (64934fb, confirmed in game: all modules show; HwRM.log "7 modules", no create
-errors): every module is in sp_build.lua (else SobGroup_CreateSubSystem refuses it), the structural ones are
-restricted 1 s after the starting modules exist (KAS_StructuralModules). Then, by the user's decision (c2b2041,
-not yet tested in game): Command Center and Resource Processing are part of the core model, not modules (on the
-Kuun-Lan in every mission; their Cataclysm types map to nothing in shipmap.tsv); Lower Engines and Lower Spine
-stay separate modules (the user chose not to merge them: Cataclysm loses the spine at Mission 4, the engines at 5).
-Confirmed in game: the core shows them, Mission 1 starts with 5 modules (HwRM.log "5 modules", 4 restricted), Workers
-unload at the core. Then (9dbac5c, confirmed in game: Acolytes dock / launch without passing through the Hangar,
-Workers unaffected): the Hangar is a ~480-unit box under the core with the DB points inside, and the paths' first
-waypoint (~315 out) was at its corner, so ships flew through it; fighter / corvette paths now start from an outer
-waypoint (geo2dae.py OUTER_APPROACH: 2400 / 2800 HW1 units out) and launches leave all the way out.
+**This session (all confirmed in game unless marked):**
+- **HWRM's skirmish AI was running the Taiidan and the Kushan** alongside the mission (unscripted attack-moves):
+  now `CPU_Enable(p, 0)` for every computer player in KAS_StartEngine (Gearbox's KAS_CPUPlayerInit). Root cause of
+  the wandering picket wings and the flank fight drifting into the main battle.
+- Allies: Cataclysm's kasfTeamSwitchPlayerOwner hands the Kushan teams to the human; here they stay on allied player 2
+  (not player-controlled, blue in the UI: `data/ui/ati/ati.lua`, stock with AlliedColour blue). 0x497ed0 =
+  kasfShipsDeleteAfterHyperspace (no-op here). Allies fight the Taiidan.
+- 0x495560 / 0x495620 = kasfShipsSelectEnemy / Friendly (human side = players 0+2 / computer), not capital/non-capital.
+- kasfUniversePause/Unpause freeze every ship (speed 0, no attacks) during Fleet Intel's briefings;
+  kasfOtherKASPause/Unpause pause other teams' rules and timers (HW1 Timer.c semantics).
+- kasfPatrolPath = plain moves point to point (`SobGroup_FollowPath` is an attack-move, COMMAND_AttackMove 20).
+- Still in place, possibly no longer needed now that the AI is off: non-player proximity sensors lose AB_Move
+  (KAS_FreezeSensorArrays); every non-player ship on defensive ROE every 5 s (KAS_TeamsDefensive).
+- Somtaaw speeds = Cataclysm maxvelocity x Gearbox's HW1 class ratio (Recon 514, Acolyte 459, Worker 144); the
+  Kuun-Lan keeps CR's (user: more agile than HW1's Mothership). User: "immediately feels correct".
+- Exit crash (heap corruption 0xc0000374 on every exit to the menu since the module dummies): NIS objects shared
+  animation channels (n01 module dummies, nislet01 beam-kill effects) -> double free. nis2hwrm gives each object its
+  own (own_channels). Found with ProcDump (`C:\Modding\tools\procdump`, NOTES.md "Debugging crashes").
+- Positions are faithful (Cataclysm x 0.35, checked against the user's screenshot of the original); perceived
+  "shorter distances" were the battles not freezing during briefings and the skirmish AI.
 
-Then the Worker (f2231c8, confirmed in game: "actually perfect"): Cataclysm's sworker.mad converted
-(tools/mad2hwrm.py; animated objects are joints via geo2dae --anim-joints): clamps open docked / close on launch
-and on n01's cues, boom out (5 deg less than Cataclysm's) before the stock HW1 harvest / repair beams, which start
-at fixed markers; hovers 45 off the rock (LatchOrientation joint); RepairCommand enabled. Build: `bash
-tools/build_ship.sh race_sect/sworker som_worker` (per-ship args in build_ship.sh), then install_cr.py; our
-.events / .madstate live in tools/overrides/.
-
-Then Mission 1's opening (all confirmed in game, last commit 169f5ac): cutscene checklist (NOTES.md "Cutscenes":
-nis2hwrm writes docs/nis/<name>.md for all 14, unknown commands stop it), unsubtitled speech plays (invisible
-subtitle `<c=ffffff></c>` on all 4762 phrases), NIS music as runtime cues, nislet01 converted (battle commands, ion
-beam timing, beam-target explosions), black between n01 / nislet01 / the mission (one frame of HUD remains), and
-the fleet's hyperspace arrival: Kuun-Lan held out of the world during the intro, `SobGroup_HyperspaceTo`
-StartPointPlayer on kasfStartLevelByHyperspacingShips, small ships docked and launched on arrival, camera point
-KAS_ArrivalCamera (mission2level ARRIVAL_*) + focus at 2200. The user dropped launching the Workers from the Hangar
-(reverted): they undock from the nose pads.
-
-To fix next, in order:
-1. Continue Mission 1 (the user's choice of what next); then other animated Somtaaw ships the same way.
-Open, lower priority: Support units (SU); Siege Cannon weapon; how many Support modules each mission starts with
-(1 for now); losing engine modules should slow the Kuun-Lan; hyperspace exit (`K_497290`); the Kuun-Lan arrives
-unrotated (HyperspaceTo ignores StartPointPlayer's -241 degree heading).
+**Next, in order:**
+1. Continue Mission 1 against the original (user's choice), then the hyperspace exit (`K_497290` is a stub) so it
+   can be completed and Mission 2 started.
+2. Then Missions 02-17 with `build_mission.py`, setting up each mission's ships as they appear.
+Open, lower priority: whether the sensor freeze / blanket defensive ROE can go; Support units (SU); Siege Cannon
+weapon; Support modules per mission (1 for now); losing engine modules should slow the Kuun-Lan; the Kuun-Lan
+arrives unrotated (HyperspaceTo ignores StartPointPlayer's -241 degree heading); uncommented API name comments in
+generated m01_kas.lua still say SelectCapital/NonCapital (kas2lua reads names from kas_api.tsv, cosmetic).
 
 **Facts from this session** (details in NOTES.md): Cataclysm's Kuun-Lan has only two Worker docks (Res0/Res1, the
 nose pads; RES2-10 in its .mex are unused). Module functions come from english.script `str*ModuleInfo` (Hangar =
