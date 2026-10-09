@@ -62,6 +62,31 @@ function CatChainTick(g, p, id, fn, interval)
     end
 end
 
+-- Weapon upgrades: upgrade ability -> the engine ability that lets that ship's "Special Attack" weapons fire in
+-- normal attacks (granted to the type by research at mission start: tools/make_race.py RUNTIME_RESEARCH), switched
+-- on per ship once it has the upgrade. Cataclysm's Acolyte gets its two missile launchers (sacolyte.shp GUN2/GUN3,
+-- StartUpgradeLevel WEAPON_MISSILE) with ORDINANCE (tools/install_cr.py patch_acolyte). (Tried and dropped: weapon
+-- subsystems. Added by script they need a ship that can build, so every Acolyte had a build menu tab; innate ones
+-- held at 0 health still fired.)
+CatUpgradeWeapons = {
+    smt_acolyte = { ORDINANCE = "AB_UseSpecialWeaponsInNormalAttack" },
+}
+
+-- every tick (the engine may reset it, e.g. on docking)
+function CatUpgradeWeapons_Tick(rec, id)
+    local w = CatUpgradeWeapons[rec.t]
+    if not w then return end
+    for ability, ab in w do
+        local on = 0
+        if rec.up[ability] then on = 1 end
+        if getglobal(ab) then SobGroup_AbilityActivate(rec.g, getglobal(ab), on) end
+        if on == 1 and not rec.weaponsOn[ability] then
+            rec.weaponsOn[ability] = 1
+            print("CATACLYSM upgrade: " .. ability .. " weapons on for ship " .. id)
+        end
+    end
+end
+
 function CatShip_Create(g, p, id, t)
     local kills = {}
     for i = 0, 11 do kills[i] = 0 end
@@ -82,6 +107,8 @@ function CatShip_Create(g, p, id, t)
     -- new ships come with the player's upgrades (Cataclysm: only ships already in service need upgrading)
     rec.up, rec.armour = {}, 0
     CatUpgrade_Apply(rec)
+    -- weapon upgrades (CatUpgradeWeapons): switched on and off by CatUpgradeWeapons_Tick
+    rec.weaponsOn = {}
     -- a ship spawned by a link/unlink takes over its pilots' kills
     for i = 1, getn(CatPending) do
         local pend = CatPending[i]
@@ -128,6 +155,7 @@ function CatShip_Update(g, p, id)
             b.pressed = nil
         end
     end
+    CatUpgradeWeapons_Tick(rec, id)
     if rec.link then CatLink_Tick(rec, id, now) end
     if rec.upg then CatUpgrade_Tick(rec, id, now) end
 end
@@ -232,12 +260,21 @@ function CatUpgrade_PlayerArmour(p)
 end
 
 -- abilities the ship lacks that its player has researched, and the armour level it can reach
+-- DEVELOPMENT ONLY: upgrades the human player counts as researched from that game time (seconds), for testing later
+-- missions' mechanics in an early one (keep empty in commits that aren't a test)
+CatDevUpgrades = {}   -- e.g. { ORDINANCE = 600 } (game time includes the opening cutscene)
+
+function CatUpgrade_Researched(p, name)
+    if p == 0 and CatDevUpgrades[name] and Universe_GameTime() >= CatDevUpgrades[name] then return 1 end
+    return Player_HasResearch(p, CatUpgradeTech[name])
+end
+
 function CatUpgrade_Pending(rec)
     local u, list = CatUpgradeType[rec.t], {}
     if not u then return list, rec.armour end
     for i = 1, getn(u.abilities) do
         local name = u.abilities[i]
-        if not rec.up[name] and Player_HasResearch(rec.p, CatUpgradeTech[name]) == 1 then tinsert(list, name) end
+        if not rec.up[name] and CatUpgrade_Researched(rec.p, name) == 1 then tinsert(list, name) end
     end
     local armour = CatUpgrade_PlayerArmour(rec.p)
     if armour > u.armour then armour = u.armour end

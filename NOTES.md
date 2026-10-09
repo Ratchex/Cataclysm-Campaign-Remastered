@@ -266,3 +266,15 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
   LINK bit (tutorial: "Upgrade Acolytes", "Link the upgraded Acolytes"). New ships come upgraded. ADRIVE_* = +0.15
   speed. Armour levels change incoming damage (base damage table 0x72b228 [weapon type][target armour]: with the
   damage conversion, not applied yet). Weapon levels (projectile -> energy ...: 0x72bb18) also not yet.
+- **Weapon upgrades** (the Acolyte's missiles, ORDINANCE): its two launchers (cat_acolytemissile on Weapon_GUN2/GUN3)
+  are "Special Attack" weapons; they fire in normal attacks only while the ship's UseSpecialWeaponsInNormalAttack
+  ability is on. Research CAT_ACOLYTE_MISSILES (tools/make_race.py RUNTIME_RESEARCH, granted at mission start)
+  gives Acolytes the ability; shiprules.lua CatUpgradeWeapons switches it per ship (SobGroup_AbilityActivate) once
+  the ship has the upgrade (confirmed: none before, missiles after, Upgrade adds them). Dead ends: weapon
+  subsystems added by SobGroup_CreateSubSystem need a ship that can build (else a fatal Lua error; and only out of
+  a hangar), which gives every Acolyte a build menu tab; innate damageable ones held at 0 health still fire (the
+  engine puts them back to activateHealthPercentage). A subsystem with timeToBuild 0 on a ship that can build it
+  crashes the game (integer divide by zero). Lua 4 call() can't protect engine calls (_ERRORMESSAGE can't be set).
+- Development switches (keep empty in commits): cataclysmkas.lua KAS_DevTechs / KAS_DevModules (research and
+  Kuun-Lan modules for testing a later mission), shiprules.lua CatDevUpgrades (upgrades counted as researched from
+  a game time; game time includes the opening cutscene).

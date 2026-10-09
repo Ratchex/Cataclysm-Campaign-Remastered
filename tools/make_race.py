@@ -42,6 +42,8 @@ def read_research():
 
 
 HANGAR = make_modules.MODULES["dockingbay"][2]   # ships need the Hangar module (Cataclysm: "We need a hangar module")
+# (research name, ship, engine ability it grants): see the research list's end
+RUNTIME_RESEARCH = [("CAT_ACOLYTE_MISSILES", "smt_acolyte", "UseSpecialWeaponsInNormalAttack")]
 
 
 def module_of(tech):
@@ -100,6 +102,15 @@ def main():
               f"\t\tDisplayPriority =\t{10 + i},", f'\t\tDescription =\t\t"{title}",',
               f"\t\tIcon =\t\t\t\t{'Icon_Build' if unlocks else 'Icon_Tech'},",
               f'\t\tTargetName =\t\t"{unlocks[0] if unlocks else "smt_ms_sp"}",', "\t},"]
+    # not Cataclysm research: engine abilities our upgrade system switches per ship (shiprules.lua), granted at
+    # mission start (cataclysmkas.lua KAS_GrantRuntimeResearch). The Acolyte's missile launchers are "Special Attack"
+    # weapons that fire in normal attacks only while UseSpecialWeaponsInNormalAttack is on.
+    for name, ship, ability in RUNTIME_RESEARCH:
+        r += ["\t{", f'\t\tName =\t\t\t\t"{name}",', '\t\tRequiredResearch =\t"",', '\t\tRequiredSubSystems =\t"",',
+              "\t\tCost =\t\t\t\t0,", "\t\tTime =\t\t\t\t1,", f'\t\tDisplayedName =\t\t"{name}",',
+              f'\t\tShortDisplayedName =\t"{name}",', "\t\tDisplayPriority =\t999,", f'\t\tDescription =\t\t"{name}",',
+              "\t\tUpgradeType =\t\tAbility,", "\t\tTargetType =\t\tShip,", f'\t\tTargetName =\t\t"{ship}",',
+              f'\t\tUpgradeName =\t\t"{ability}",', "\t\tIcon =\t\t\t\tIcon_Tech,", "\t},"]
     write(os.path.join(RACE, "scripts", "sp_research.lua"), "\n".join(r + ["}", ""]))
 
     write(os.path.join(MOD, "data", "scripts", "scar", "cataclysmtech.lua"),

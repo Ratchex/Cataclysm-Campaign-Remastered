@@ -115,9 +115,29 @@ def patch_hw1_armour(text):
     return text
 
 
+# Cataclysm's two launchers (our model's Weapon_GUN2/GUN3: tools/build_ship.sh)
+ACOLYTE_LAUNCHERS = ["Weapon_GUN2", "Weapon_GUN3"]
+
+
+def patch_acolyte(text):
+    """Cataclysm's Acolyte has missile launchers only from the Missile upgrade (sacolyte.shp GUN2/GUN3,
+    StartUpgradeLevel WEAPON_MISSILE): their innate special-attack missile goes; two cat_acolytemissile launchers
+    ("Special Attack" weapons) fire in normal attacks only while the ship's UseSpecialWeaponsInNormalAttack ability is
+    on: granted to Acolytes by research CAT_ACOLYTE_MISSILES (tools/make_race.py, given at mission start), switched on
+    per Acolyte by shiprules.lua once it has the upgrade. (Tried and dropped: weapon subsystems. Added by script they
+    need a ship that can build, so every Acolyte had a build menu tab; innate ones held at 0 health still fired.)"""
+    if "cat_acolytemissile" in text:
+        return text
+    text = re.sub(r'^(StartShipWeaponConfig\(NewShipType,\s*"Ksh_Sec_AcolyteMissile".*)$',
+                  r"-- Cataclysm-HWRM (missiles come with the Missile upgrade): \1", text, flags=re.M)
+    guns = "\n".join(f'StartShipWeaponConfig(NewShipType,"cat_acolytemissile","{j}","{j}");' for j in ACOLYTE_LAUNCHERS)
+    return text.rstrip("\n") + "\n-- Cataclysm-HWRM: missile launchers (Missile upgrade)\n" + guns + "\n"
+
+
 PATCHES = {
     "ship/smt_ms_sp/smt_ms_sp.ship": patch_ms_sp,
     "ship/smt_worker/smt_worker.ship": patch_worker,
+    "ship/smt_acolyte/smt_acolyte.ship": patch_acolyte,
     "scripts/races/somtaaw/singleplayer/props/gbx.lua": patch_sp_props,
     "scripts/familylist.lua": patch_families,
     "scripts/races/somtaaw.lua": patch_race,
@@ -335,7 +355,9 @@ def main():
             shutil.copyfile(os.path.join(root, fn), dst)
             copied.append(rel)
     for rel, src in COPIES.items():
+        os.makedirs(os.path.dirname(os.path.join(DATA, rel)), exist_ok=True)
         shutil.copyfile(os.path.join(SRC, src), os.path.join(DATA, rel))
+        copied.append(rel)
     for rel, fn in PATCHES.items():
         p = os.path.join(DATA, rel)
         t = open(p, encoding="latin-1").read()

@@ -705,11 +705,22 @@ function KAS_ApplyAlliances()
 end
 
 -- Cataclysm research is offered by the mission (kasfAllowPlayerToResearch / Purchase): lock every tech first.
+-- DEVELOPMENT ONLY: research the missions don't allow yet, unlocked for testing a later mission's mechanics
+-- (keep empty in commits that aren't a test)
+KAS_DevTechs = {}
+KAS_DevModules = {}     -- ...and the Kuun-Lan modules they need (e.g. { "smt_kl_weapons" } for TECH_MISSILE)
+
 function KAS_RestrictTechs()
     if KAS_Techs == nil then return end
     local i = 1
     while i <= getn(KAS_Techs) do
         Player_RestrictResearchOption(0, KAS_Techs[i])
+        i = i + 1
+    end
+    i = 1
+    while i <= getn(KAS_DevTechs) do
+        Player_UnrestrictResearchOption(0, KAS_DevTechs[i])
+        print("CKAS: DEV research unlocked " .. KAS_DevTechs[i])
         i = i + 1
     end
 end
@@ -724,6 +735,12 @@ function KAS_CreateStartModules()
     local i = 1
     while i <= getn(KAS_StartModules) do
         SobGroup_CreateSubSystem("KAS_KuunLan", KAS_StartModules[i])
+        i = i + 1
+    end
+    i = 1
+    while i <= getn(KAS_DevModules) do
+        SobGroup_CreateSubSystem("KAS_KuunLan", KAS_DevModules[i])
+        print("CKAS: DEV module " .. KAS_DevModules[i])
         i = i + 1
     end
     -- the structural modules have to be in the build list for SobGroup_CreateSubSystem to accept them; keep them
@@ -845,8 +862,19 @@ function CatAbilityTick()
     end
 end
 
+-- engine abilities our upgrade system switches per ship (tools/make_race.py RUNTIME_RESEARCH): granted to the human
+KAS_RuntimeResearch = { "CAT_ACOLYTE_MISSILES" }
+function KAS_GrantRuntimeResearch()
+    local i = 1
+    while i <= getn(KAS_RuntimeResearch) do
+        Player_GrantResearchOption(0, KAS_RuntimeResearch[i])
+        i = i + 1
+    end
+end
+
 function KAS_StartEngine()
     Rule_AddInterval("CatAbilityTick", 0.25)
+    KAS_GrantRuntimeResearch()
     KAS_DisableCPUPlayers()
     KAS_ApplyAlliances()
     KAS_RestrictTechs()

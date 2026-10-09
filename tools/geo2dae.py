@@ -362,8 +362,9 @@ def main():
     ap.add_argument("--dock-from", help="take the collector (Utility) dock paths from this HOD instead of RES*")
     ap.add_argument("--dock-scale", type=float, default=1.0, help="position scale for --dock-from paths")
     ap.add_argument("--hardpoint", action="append", default=[],
-                    help="extra subsystem hardpoint joint set: NAME at the origin, NAME@x,y,z (HWRM units) or "
-                         "NAME@dok:LABEL (at that .mex dock point); a trailing @flip turns it 180 degrees about Y")
+                    help="extra subsystem hardpoint joint set: NAME at the origin, NAME@x,y,z (HWRM units), "
+                         "NAME@dok:LABEL (at that .mex dock point) or NAME@gun:LABEL (at that gun point, facing its "
+                         "firing direction: weapon subsystems); a trailing @flip turns it 180 degrees about Y")
     ap.add_argument("--points-from", action="append", default=[],
                     help="another .geo whose .mex guns/engines are added (Kuun-Lan engine modules' nozzles)")
     ap.add_argument("--no-docks", action="store_true", help="no dock paths (module subsystems)")
@@ -559,6 +560,14 @@ def main():
                 rest = (0, 0, -10)
             elif o.startswith("dok:"):
                 at = conv(*dok_points[o[4:]][2])
+            elif o.startswith("gun:"):   # at a .mex gun point, facing its firing direction (weapon subsystems)
+                gun = [pt for pt in points if pt[0] == "Gun" and pt[1] == o[4:]]
+                if not gun:
+                    sys.exit(f"--hardpoint {spec}: no gun point {o[4:]}")
+                at = conv(*gun[0][2])
+                n = convn(*gun[0][3])
+                ln = math.sqrt(sum(c * c for c in n)) or 1.0
+                rest = tuple(10 * c / ln for c in n)
             else:
                 at = tuple(float(c) for c in o.split(","))
         weapons += jnode(f"JNT[{hp}_Position]", at, jnode(f"JNT[{hp}_Direction]", (0, 10, 0))
