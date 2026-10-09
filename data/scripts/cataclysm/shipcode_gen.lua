@@ -36,7 +36,6 @@ CatClass = {
     ["kus_salvagecorvette"] = 5,
     ["kus_supportfrigate"] = 4,
     ["smt_acolyte"] = 6,
-    ["smt_acolyte_e"] = 6,
     ["smt_acv"] = 5,
     ["smt_carrier"] = 2,
     ["smt_destroyer"] = 3,
@@ -102,7 +101,6 @@ CatName = {
     ["kus_salvagecorvette"] = "Salvage Corvette",
     ["kus_supportfrigate"] = "Support Frigate",
     ["smt_acolyte"] = "Acolyte",
-    ["smt_acolyte_e"] = "Acolyte",
     ["smt_acv"] = "ACV",
     ["smt_carrier"] = "Carrier",
     ["smt_destroyer"] = "Destroyer",
@@ -507,16 +505,6 @@ function CatUpdate_smt_acolyte(g, p, id)
     CatShip_Update(g, p, id)
 end
 function CatDestroy_smt_acolyte(g, p, id)
-    CatShip_Destroy(g, p, id)
-end
-
-function CatCreate_smt_acolyte_e(g, p, id)
-    CatShip_Create(g, p, id, "smt_acolyte_e")
-end
-function CatUpdate_smt_acolyte_e(g, p, id)
-    CatShip_Update(g, p, id)
-end
-function CatDestroy_smt_acolyte_e(g, p, id)
     CatShip_Destroy(g, p, id)
 end
 
