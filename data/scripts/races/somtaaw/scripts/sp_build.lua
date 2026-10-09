@@ -14,15 +14,6 @@ build =
 	},
 	{
 		Type =					Ship,
-		ThingToBuild =			"smt_acolyte_e",
-		RequiredResearch =		"TECH_DRIVE_FIGHTER & TECH_ENERGY",
-		RequiredShipSubSystems =	"Hangar",
-		DisplayPriority =		10,
-		DisplayedName =			"Acolyte",
-		Description =			"Acolyte",
-	},
-	{
-		Type =					Ship,
 		ThingToBuild =			"smt_acv",
 		RequiredResearch =		"TECH_DRIVE_FIGHTER & TECH_LINK",
 		RequiredShipSubSystems =	"Hangar",

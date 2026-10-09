@@ -280,6 +280,20 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
 - Development switches (keep empty in commits): cataclysmkas.lua KAS_DevTechs / KAS_DevModules (research and
   Kuun-Lan modules for testing a later mission), shiprules.lua CatDevUpgrades (upgrades counted as researched from
   a game time; game time includes the opening cutscene).
+- **Energy weapons** (exe FUN_00514140 / 005142e0 / 00514490, decompiled with Ghidra headless + scripts/DecompileAt.java):
+  research sets the player's weapon levels (table 0x72bb18 {tech, level}: none -> 0 PROJECTILE, TECH_ENERGY -> 1,
+  TECH_ION -> 2, TECH_PLASMA_WEAPONS -> 3, TECH_MISSILE -> 5, TECH_BIG_GUN -> 7); a ship's upgrade only moves a gun
+  from 0 to 1 (EndUpgradeLevel WEAPON_ENERGY), for 10 s (0x72b204[0]). make_upgrades.py: pseudo-ability
+  WEAPON_ENERGY on the Somtaaw/Beast types with such guns (19). **Showing it is SHELVED (user)**: a weapon change
+  needs another ship type (tools/ship_variants.py), and swapping a *docked* ship failed: SobGroup_Despawn does
+  nothing to a docked ship (the engine relaunched it), a ship spawned and DockSobGroupInstant'ed in the same tick never
+  ran its ship code, new builds count as docked inside the Kuun-Lan, SobGroup_GetSobGroupDockedWithGroup is empty for
+  the Kuun-Lan's hangar. CR's Acolyte has an energy cannon already (Ksh_KineticAutoGun1, SmallEnergyCannon bolts, a
+  "Special Attack" weapon: data/weapon/cat_acolyteenergy is it as a normal weapon); their Super Acolyte pulsar fires
+  only within 10 degrees ahead at 0.06 accuracy vs fighters. Projectile looks: data/missile/<name>/ (.miss/.hod/.events)
+  and scripts/weaponfire/<name>.wf.
+- **Group names in ship code**: the `g` a ship's custom code gets is reused for later ships once that ship's code
+  ends; act on a ship only through its own g while it lives (a list of kept names removed every Acolyte).
 - **Fire Missiles** (the Acolyte's native custom command, ORDINANCE; Link is a button ability): energy 1000, all of
   it spent on a press (the engine spends the "minimum to activate"), refilling over 20.75 s (2 x MissileRegenerate
   10.375 s; energy recharge is per second: to be confirmed in game). Each ship's native command is on only once

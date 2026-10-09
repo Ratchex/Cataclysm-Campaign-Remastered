@@ -20,7 +20,15 @@ MOD = os.path.dirname(HERE)
 DATA = os.path.join(MOD, "data")
 
 # variant: (base type, upgrade that calls for it, {base weapon: variant weapon}, research the build entry needs)
-VARIANTS = {
+# SHELVED (user, 2026-10-09): VARIANTS is empty, so nothing is built, swapped or offered; the WEAPON_ENERGY upgrade
+# is still recorded per ship (for the damage conversion). Swapping a *docked* ship failed in game: SobGroup_Despawn
+# does nothing to a docked ship (the engine relaunched the old one), a ship spawned and SobGroup_DockSobGroupInstant'ed
+# in the same tick never ran its ship code (never came out), new builds count as docked inside the Kuun-Lan (swapped
+# and hidden at once: building broke), and a group name kept after a ship's code ends is given to later ships
+# (removing by the kept name removed every Acolyte). Untried: swapping in open space at the hangar exit (as Link's
+# spawn / despawn, which work), or building the variant directly after the research (KAS_VariantBuildWatch).
+VARIANTS = {}
+SHELVED = {
     # Energy Cannons (TECH_ENERGY): the Acolyte's normal gun becomes data/weapon/cat_acolyteenergy (their energy
     # cannon Ksh_KineticAutoGun1, SmallEnergyCannon bolts, as a normal weapon). Their Super Acolyte pulsars were tried
     # first: a 10 degree forward cone and 0.06 accuracy against fighters, so they hardly fired.

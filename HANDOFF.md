@@ -62,10 +62,12 @@ the Fire Missiles bar refill time (~21 s = energy recharge is per second; ~2 s =
 Missiles disabled before the upgrade (no energy spent); missiles in normal combat again (volley = 0).
 
 **Next, in order (the Acolyte, then the rest):**
-1. **Energy Cannons** (TECH_ENERGY, weapon level 1; sacolyte.shp guns 0/1 WEAPON_PROJECTILE..WEAPON_ENERGY). Planned:
-   swap the ship for an energy-gun variant while docked (invisible in the hangar: user's point), as Link swaps ships
-   (CatSpawn + kills/health), since normal weapons can't be gated per ship and the special-weapons switch is taken
-   by the missiles. Check the ACV/Mimic the same way.
+1. **Energy Cannons: SHELVED by the user (2026-10-09)** after the in-hangar swap failed in game (NOTES.md "Weapon
+   upgrades"). What stays: the WEAPON_ENERGY upgrade, recorded per ship from the exe's weapon-level rules (19
+   Somtaaw/Beast types; make_upgrades.py), for the damage conversion to use; the variant machinery
+   (tools/ship_variants.py, shiprules.lua CatVariant_*, data/weapon/cat_acolyteenergy) is off (VARIANTS empty).
+   Untried ideas: swap in open space at the hangar exit (Link's spawn/despawn work), or only build the variant after
+   the research.
 2. **Weapon damage + health conversion** for all ships together (Cataclysm base damage table 0x72b228 [weapon type]
    [target armour level] x gun DamageMult x rank; armour levels from the upgrades), scaled like Gearbox's HW1 -> HWRM.
 3. Our own ACV model (convert sacv with build_ship.sh), ACV EMP (TECH_EMP), Mimic.

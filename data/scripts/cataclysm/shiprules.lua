@@ -148,6 +148,16 @@ function CatShip_Update(g, p, id)
     local rec = CatShips[id]
     if not rec then return end
     local now = Universe_GameTime()
+    -- a ship swapped for its variant: SobGroup_Despawn did nothing while it was docked (the engine relaunched it), so
+    -- it stays hidden and removes itself once out. Only through its own g: a group name kept after a ship's code
+    -- ends is given to other ships (a removal list of old names removed every Acolyte)
+    if rec.swapped then
+        if SobGroup_Empty(g) == 0 then
+            SobGroup_SetHidden(g, 1)
+            if SobGroup_IsDocked(g) ~= 1 then SobGroup_Despawn(g) end
+        end
+        return
+    end
     if now < rec.next then return end
     rec.next = now + CAT_TICK
     if SobGroup_Empty(g) == 1 then return end
@@ -328,11 +338,6 @@ end
 function CatUpgrade_Apply(rec)
     local list, armour = CatUpgrade_Pending(rec)
     for i = 1, getn(list) do rec.up[list[i]] = 1 end
-    if getn(list) > 0 then
-        local names = list[1]
-        for i = 2, getn(list) do names = names .. " " .. list[i] end
-        print("CATACLYSM upgrade: " .. rec.real .. " gets " .. names .. "; wants " .. CatVariant_Wanted(rec))
-    end
     rec.armour = armour
     rec.spd = -1                      -- re-apply the speed multiplier
     return getn(list)
@@ -530,6 +535,7 @@ function CatLink_Tick(rec, id, now)
     print("CATACLYSM link: two Acolytes linked into an ACV (health " .. health .. ")")
 end
 
+-- (SHELVED with tools/ship_variants.py: CatVariants is empty, so none of this runs; kept for a retry.)
 -- Ship type variants (tools/ship_variants.py, variants_gen.lua): HWRM weapons are per ship type, so a ship whose
 -- upgrades call for other weapons (WEAPON_ENERGY: the Acolyte's Energy Cannons) is swapped for its variant type
 -- while docked: invisible in the hangar. The type a ship should be: the last variant whose upgrade it has.
@@ -599,7 +605,8 @@ function CatVariant_Swap(rec, id, launch)
     if launch then pend.launchFrom = carrier end
     SobGroup_DockSobGroupInstant(new, carrier)
     SobGroup_SetHealth(new, health)
-    rec.gone = 1
+    rec.gone, rec.swapped = 1, Universe_GameTime()
+    SobGroup_SetHidden(rec.g, 1)
     SobGroup_Despawn(rec.g)
     print("CATACLYSM variant: ship " .. id .. " (" .. rec.real .. ") -> " .. want .. (launch and ", relaunching" or ""))
 end

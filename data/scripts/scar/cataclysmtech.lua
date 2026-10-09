@@ -3,4 +3,4 @@ KAS_Techs = {"TECH_ADRIVE_DESTROYER", "TECH_ADRIVE_FIGHTER", "TECH_ADRIVE_FRIGAT
 -- Kuun-Lan modules the player can never build (restricted after the starting modules are created)
 KAS_StructuralModules = {"smt_kl_engineslower", "smt_kl_enginesupper", "smt_kl_lowerspine", "smt_kl_orecanarmour"}
 -- research granted at mission start (engine abilities for ship types: RUNTIME_RESEARCH)
-KAS_RuntimeResearch = {"CAT_ACOLYTE_MISSILES", "CAT_ACOLYTE_MISSILES_E"}
+KAS_RuntimeResearch = {"CAT_ACOLYTE_MISSILES"}
