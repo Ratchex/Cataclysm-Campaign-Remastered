@@ -267,7 +267,7 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
   Mission01 runs it at start). Abilities are upgrades too: an Acolyte links only once it has the
   LINK bit (tutorial: "Upgrade Acolytes", "Link the upgraded Acolytes"). New ships come upgraded. ADRIVE_* = +0.15
   speed. Armour levels change incoming damage (base damage table 0x72b228 [weapon type][target armour]: with the
-  damage conversion, not applied yet). Weapon levels (projectile -> energy ...: 0x72bb18) also not yet.
+  damage conversion, not applied yet: "Damage model"). Weapon levels (projectile -> energy ...: 0x72bb18) also not yet.
 - **Weapon upgrades** (the Acolyte's missiles, ORDINANCE): its two launchers (cat_acolytemissile on Weapon_GUN2/GUN3)
   are "Special Attack" weapons; they fire in normal attacks only while the ship's UseSpecialWeaponsInNormalAttack
   ability is on. Research CAT_ACOLYTE_MISSILES (tools/make_race.py RUNTIME_RESEARCH, granted at mission start)
@@ -292,6 +292,22 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
   "Special Attack" weapon: data/weapon/cat_acolyteenergy is it as a normal weapon); their Super Acolyte pulsar fires
   only within 10 degrees ahead at 0.06 accuracy vs fighters. Projectile looks: data/missile/<name>/ (.miss/.hod/.events)
   and scripts/weaponfire/<name>.wf.
+- **Damage model** (decoded 2026-10-09; survey: `python tools/cat_damage.py`, every mapped ship's Cataclysm health
+  and per-gun damage/DPS next to CR's). Bullet type = FUN_0048b7c0(weapon level, GunSize), the GS_* enum (name/value
+  table at 0x889da0, also the etg race scripts' setFireEvent sound types): 0 LargeEnergyCannon, 1 LargeIon,
+  2 LargePlasmaBomb, 3 LargeProjectile, 4-7 Medium (same order), 8 MineLauncher, 9 MissleLauncher, 10-13 Small,
+  14-16 VeryLarge Energy/Ion/PlasmaBomb, 17 Laser, 18 BigGun, 19 BeastWeapon (VeryLarge projectile has no case: 3).
+  A gun uses its EndUpgradeLevel's type once upgraded (FUN_0048bb00: gun level == End and Start != End), else Start's.
+  Damage per hit (FUN_00546a20) = table 0x72b228 [type][target armour 0-2] (3 floats per row; e.g. small
+  projectile 7/4/4, small energy 22/20/14, large ion 16/14/9, missile 60/40/38) x bullet +0x138 (gun
+  DamageMult x shooter +0x33c, the rank multiplier) x the target static's per-side factor (+0x1c8[side]) x a
+  friendly-fire factor; non-ship targets use armour 0; force-field ships (FUN_005affa0) take nothing from types
+  2, 3, 6, 7, 9, 12, 13, 16 (plasma, projectile, missile). Missiles/mines (FUN_0048aac0) = table [9 / 8][armour] x
+  DamageMult x FUN_005148f0(shooter) (x ship +0x3e0 when flag 0x4000, likely Link). Beams (bullet +0x108 == 2 or 8:
+  ion, FUN_0043c900) take the full per-hit damage on every collision check while they live (BulletLifeTime, e.g. 2.3 s
+  for the Kushan ion frigate): per *tick*, not per shot; the tick rate is assumed 16 Hz (HW1), unverified. Scale:
+  Cataclysm Acolyte 220 HP / 2 guns x 7 (0.3 s, bursts 1.4 on / 1.3 off: ~24 DPS), missiles 60 x 7 = 420 each every
+  13 s; CR Acolyte 175 HP / 18 per shot; CR capital ships ~2.5x Cataclysm's health and ion beams 2600 per shot.
 - **Group names in ship code**: the `g` a ship's custom code gets is reused for later ships once that ship's code
   ends; act on a ship only through its own g while it lives (a list of kept names removed every Acolyte).
 - **Fire Missiles** (the Acolyte's native custom command, ORDINANCE; Link is a button ability): energy 1000, all of
