@@ -907,7 +907,25 @@ function KAS_VariantBuildWatch()
     end
 end
 
+-- Cataclysm's team colours (tools/make_colours.py): the 8 colour schemes into Gearbox's KAS_ColourSchemes, then each
+-- team in its mission's scheme (KAS_TeamSchemes, tools/mission2level.py: the Ships lines' colorScheme(n));
+-- kasfShipsSetColor (K_49aae0) uses the same table
+dofilepath("data:scripts/scar/cataclysmcolours.lua")
+function KAS_ApplyColourSchemes()
+    for n, s in CatColourSchemes do KAS_SetColourSchemeColours(n, s[1], s[2], s[3], s[4], s[5]) end
+    if KAS_TeamSchemes == nil then return end
+    local count = 0
+    for team, n in KAS_TeamSchemes do
+        if SobGroup_Exists(team) == 1 and SobGroup_Count(team) > 0 then
+            KAS_SetColourScheme(team, n)
+            count = count + 1
+        end
+    end
+    print("CKAS: colour schemes on " .. count .. " teams")
+end
+
 function KAS_StartEngine()
+    KAS_ApplyColourSchemes()
     Rule_AddInterval("CatAbilityTick", 0.25)
     Rule_AddInterval("KAS_VariantBuildWatch", 2)
     KAS_GrantRuntimeResearch()

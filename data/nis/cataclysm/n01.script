@@ -57,12 +57,14 @@ with smt_ms_sp
 {
     at frame 0
         invincible()
+        colourScheme({0.259, 0.424, 0.792}, {1.000, 1.000, 1.000}, "kiith somtaaw.tga")
         show()
 }
 with smt_scout1
 {
     at frame 0
         invincible()
+        colourScheme({0.259, 0.424, 0.792}, {1.000, 1.000, 1.000}, "kiith somtaaw.tga")
         hide()
     at frame 170
         speechEventActor("$2207021", 17, 2)
@@ -85,6 +87,7 @@ with smt_scout2
     at frame 0
         invincible()
         hide()
+        colourScheme({0.259, 0.424, 0.792}, {1.000, 1.000, 1.000}, "kiith somtaaw.tga")
     at frame 950
         show()
 }
@@ -92,6 +95,7 @@ with smt_scout3
 {
     at frame 0
         invincible()
+        colourScheme({0.259, 0.424, 0.792}, {1.000, 1.000, 1.000}, "kiith somtaaw.tga")
         hide()
     at frame 950
         show()
@@ -100,6 +104,7 @@ with smt_worker1
 {
     at frame 0
         invincible()
+        colourScheme({0.259, 0.424, 0.792}, {1.000, 1.000, 1.000}, "kiith somtaaw.tga")
         show()
     at frame 720
         setMADState("NIS00")
@@ -119,6 +124,7 @@ with smt_worker2
     at frame 0
         invincible()
         show()
+        colourScheme({0.259, 0.424, 0.792}, {1.000, 1.000, 1.000}, "kiith somtaaw.tga")
     at frame 5
         setMADState("NIS00")
     at frame 960

@@ -1,8 +1,44 @@
 # Session handoff: Cataclysm → HWRM port
 
-Last updated 2026-10-08 (evening). Read this first, then `C:\Modding\Cataclysm-decomp\PORT_PLAN.md` (plan and decisions),
+Last updated 2026-10-09 (late). Read this first, then `C:\Modding\Cataclysm-decomp\PORT_PLAN.md` (plan and decisions),
 `NOTES.md` (HWRM engine rules learned in game) and `C:\Modding\Cataclysm-decomp\MODLOG.md` (reverse-engineering
 findings).
+
+## RESUME HERE FIRST (2026-10-09, late): Mission 1 cosmetics detour, AWAITING THE USER'S IN-GAME VERDICT
+The user detoured from the Acolyte/ACV work to fix three Mission 1 annoyances. Last commit holds all of it (message
+starts "Mission 1 colours and background"); the game was launched for the test right before this handoff, so the
+**first thing to do: ask how it looked**, then read `Bin\Release\HwRM.log` (strip NULs) for errors.
+1. **Team colours** (tools/make_colours.py, from Cataclysm's teamcolors.script: 8 schemes, one per faction:
+   0 Somtaaw, 1 Beast, 2 Taiidan Imperialists, 3 Loyalists, 4 Manaan, 5 Pirates, 6 Naabal, 7 S'jet).
+   - teamcolour.lua per mission: written by mission2level.py (each player in its teams' most common scheme;
+     player 0 = scheme 0). Badges = CR's (install_cr KEEP_PREFIX badges/...).
+   - per group: mission files' Ships lines carry colorScheme(n) -> KAS_TeamSchemes in m<NN>_paths.lua ->
+     cataclysmkas.lua KAS_ApplyColourSchemes at KAS_StartEngine (Gearbox's KAS_SetColourScheme /
+     SobGroup_SetTeamColours). kasfShipsSetColor (K_49aae0) uses the same table.
+   - **Bug found and fixed:** m01_paths.lua never loaded (Lua 4 can't mix `name = v,` with list items in one
+     constructor; needs `;`). KAS_Paths (patrols) had been nil all along too. luacheck.py parses Lua 5 and missed it.
+   - NIS: nis2hwrm.py now converts HW1 `colorScheme N` to HWRM `colourScheme(base, stripe, badge)` (Gearbox's
+     n01r1.script uses it); before, every NIS ship had the same colours. n01 / nislet01 regenerated.
+   - Not yet: groups that get their ships later (reinforcements) keep their player's colours.
+2. **Somtaaw stripes missing:** HWRM's sob_ship.frag paints team/stripe colour then modulates by the diffuse (0.5
+   neutral); HW1 (texreg.c trBufferColorRGB) replaces painted texels. geo2dae.py now greys the diffuse under the
+   masks; all our models rebuilt (build_kuunlan.sh, build_ship.sh recon/worker/acolyte/acv; joints unchanged).
+3. **Background** (tools/make_background.py + tools/build_background.sh, NOTES-worthy, not yet in NOTES.md):
+   - HWRM backgrounds (HWBackgrounds.big, extracted to Cataclysm-decomp/reference/hwrm/bg): <name>.hod is legacy BTG
+     data (BGMS/BMSH meshes, BGSG star groups, STRF star field; format decoded in make_background.py); what is DRAWN
+     is <name>_light.hod, an ordinary HODOR model: sphere PRE_Space, shader "background", one 8888 equirect texture,
+     plus HVMD LITE (scene lights).
+   - Ours: the .btg page is equirectangular -> rendered to a 2048^2 texture (Gouraud + star bitmaps) on a UV sphere
+     (vertices through btgConvertAVert + mission theta + HW1->HWRM axes), HODOR in Git Bash, then stock ez01's LITE
+     spliced in. install_cr.py runs make_background.convert for BACKGROUNDS (cat_m01 = mission01.btg, theta 200);
+     the sky HOD comes from build/backgrounds (run build_background.sh first). m01.level uses cat_m01.
+   - Cataclysm's mission01.btg = its own orange ez01 reworked (top opened to black space, 98 glow sprites); HWRM's
+     ez01 is HW1's bluish nebula, so "same as before" in the last test meant ours was not drawn (fixed by the above).
+   - Risks: lens flare lines lost their `follow` (ez01's planet rig joint) and now have no position; lighting is
+     still ez01's (Cataclysm's mission01.hsf not converted). If the sky is invisible: winding (idx order in
+     write_sky) or UV v-flip.
+After the verdict: add the background findings to NOTES.md, then back to the queue below (ACV muzzle flashes / EMP /
+Mimic, then Mission 1 against the original).
 
 ## RESUME HERE (updated 2026-10-09, after the damage conversion; see git log for the last commit)
 **Console start:** run `claude` from `C:\Modding\Homeworld` (loads the project memory), then say "resume from

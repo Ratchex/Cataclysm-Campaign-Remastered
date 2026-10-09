@@ -23,7 +23,7 @@ import os
 import struct
 import sys
 
-from PIL import Image
+from PIL import Image, ImageChops
 
 DECOMP = r"C:\Modding\Cataclysm-decomp"
 sys.path.insert(0, os.path.join(DECOMP, "tools"))
@@ -50,12 +50,20 @@ def write_textures(png_dir, tex, out_dir, base, colour):
     n = max(64, pow2(im.width), pow2(im.height))
     size = (n, n)
     im = im.resize(size) if size != im.size else im
-    im.save(os.path.join(out_dir, base + "_DIFF.tga"))
+    masks = []
     if src:
-        masks = []
         for k in (0, 1):
             m = os.path.join(png_dir, f"{tex.lower()}_team{k}.png")
             masks.append(Image.open(m).convert("L").resize(size) if os.path.exists(m) else Image.new("L", size, 0))
+    if masks and any(m.getextrema()[1] for m in masks):
+        # HW1 (texreg.c trBufferColorRGB) replaces painted texels by the team / stripe colour, in proportion to the
+        # mask; HWRM's ship shader (sob_ship.frag) paints the colour there and then modulates it by the diffuse
+        # (0.5 neutral, darker darkens): so the diffuse goes to neutral grey under the masks, or a white stripe
+        # over Cataclysm's dark hull texels came out as hull (the Somtaaw stripes were missing)
+        paint = ImageChops.lighter(masks[0], masks[1])
+        im = Image.composite(Image.new("RGB", size, (128, 128, 128)), im, paint)
+    im.save(os.path.join(out_dir, base + "_DIFF.tga"))
+    if src:
         if any(m.getextrema()[1] for m in masks):
             inv = [m.point(lambda v: 255 - v) for m in masks]
             Image.merge("RGB", (inv[0], inv[1], Image.new("L", size, 0))).save(os.path.join(out_dir, base + "_TEAM.tga"))

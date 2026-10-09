@@ -2,7 +2,7 @@
   m<NN>.level       mission2level.py output (placeholder ships for races not built yet)
   m<NN>_kas.lua     kas2lua.py translation of the mission's code
   m<NN>.lua         wrapper: loads the KAS libraries + runtime + translation, wires OnInit like Gearbox's port
-  datfiles.lua, teamcolour.lua, and ui/mapthumbnails/campaign/cataclysm/m<NN>.dds (from the loading screen)
+  datfiles.lua, teamcolour.lua (mission2level.py / make_colours.py), and ui/mapthumbnails/campaign/cataclysm/m<NN>.dds (from the loading screen)
 Then regenerates the runtime stubs.
 
 Usage: build_mission.py <NN> [--fleet "smt_ms_sp,smt_scout*3,smt_worker*2"] [--background ez01] [--intro n01]
@@ -106,8 +106,7 @@ def main():
     run(os.path.join(HERE, "kas2lua.py"), DECOMP, f"Mission{nn}", src, os.path.join(out, f"m{nn}_kas.lua"))
     with open(os.path.join(out, f"m{nn}.lua"), "w", newline="\n") as f:
         f.write(WRAPPER.format(nn=nn, intro=a.intro, modules=", ".join(f'"{m}"' for m in start_modules(src, nn))))
-    test = os.path.join(MOD, "data", "leveldata", "campaign", "cataclysm", "m00_test")
-    shutil.copyfile(os.path.join(test, "teamcolour.lua"), os.path.join(out, "teamcolour.lua"))
+    run(os.path.join(HERE, "make_colours.py"))   # (teamcolour.lua: written by mission2level.py)
     with open(os.path.join(out, "datfiles.lua"), "w", newline="\n") as f:
         f.write(DATFILES)
     run(os.path.join(HERE, "make_dds.py"), os.path.join(src, "loading.jpg"),

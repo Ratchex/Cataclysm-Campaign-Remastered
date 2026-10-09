@@ -26,9 +26,13 @@ Usage: mission2level.py <mission_dir> <out.level> [--shipmap shipmap.tsv] [--pla
 import argparse
 import csv
 import os
+import sys
 import random
 import re
 from collections import Counter, OrderedDict
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import make_colours  # noqa: E402
 
 SCALE, RADIUS_SCALE, OUTER = 0.35, 0.175, 1.2
 
@@ -95,6 +99,7 @@ class Level:
         self.boxes = []
         self.settings, self.unconverted, self.unmapped = {}, Counter(), Counter()
         self.label_counts = Counter()
+        self.schemes, self.team_players = {}, {}   # labelled team -> its colorScheme(n) / owning player
 
     def ship_type(self, race, shiptype, owner):
         if race in ("R1", "R2"):  # HW1 generic races follow the owning player's race
@@ -116,6 +121,10 @@ class Level:
         if shiptype.lower() == "cryotray":
             owner = 0
         htype = self.ship_type(race, shiptype, owner)
+        m = re.search(r"colorScheme\((\d+)\)", ",".join(fields[8:]))
+        if m and label not in ("?", ""):
+            self.schemes[label] = int(m.group(1))
+            self.team_players[label] = owner
         base = label if label not in ("?", "") else f"{ident(shiptype)}_unlabelled"
         for _ in range(count):
             name = f"{base}{self.label_counts[base]}"
@@ -308,8 +317,16 @@ if __name__ == "__main__":
         for name, pts in lv.paths.items():
             closed = 1 if any(c.lower() == "closed" for _, _, c in pts) else 0
             coords = ", ".join(vec(p) for _, p, _ in sorted(pts))
-            f.write(f'\t["{name}"] = {{ closed = {closed}, {coords} }},\n')
+            # Lua 4: list items, then ';', then named fields (mixed with ',' the whole file failed to load)
+            f.write(f'\t["{name}"] = {{ {coords}; closed = {closed} }},\n')
         f.write("}\n")
+        # each team's Cataclysm colour scheme (cataclysmkas.lua KAS_ApplyColourSchemes; tools/make_colours.py)
+        f.write("KAS_TeamSchemes = {\n")
+        for team, n in sorted(lv.schemes.items()):
+            f.write(f'\t["{team}"] = {n},\n')
+        f.write("}\n")
+    make_colours.teamcolour(os.path.join(os.path.dirname(a.out), "teamcolour.lua"),
+                            {0: a.player_race, 1: a.enemy_race, 2: a.ally_race}, lv.schemes, lv.team_players)
     print(f"{a.out}: {len(lv.squadrons)} squadrons, {len(lv.groups)} groups, {len(lv.points)} points, "
           f"{len(lv.spheres)} spheres, {len(lv.paths)} paths; unmapped types {sum(lv.unmapped.values())}; "
           f"unconverted {dict(lv.unconverted)}")

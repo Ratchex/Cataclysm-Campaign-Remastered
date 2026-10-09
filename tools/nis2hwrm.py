@@ -31,6 +31,8 @@ DECOMP = r"C:\Modding\Cataclysm-decomp"
 MOD = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(DECOMP, "tools"))
 import nisread  # noqa: E402
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import make_colours  # noqa: E402
 
 SCALE = 0.35
 # Scene spread for models bigger than Cataclysm's at Gearbox's 0.35: 1.0 with our converted models
@@ -51,7 +53,6 @@ NIS_STATE_FIRST_FRAME = 5   # earlier state changes are moved here (frame 0 ones
 # what HWRM NIS scripts can't do), or listed here with the reason it is not converted. A command in none of these
 # stops the conversion, so nothing is lost without a line in the report.
 NOT_CONVERTED = {
-    "colorScheme": "HWRM ships use their player's team colours",
     "minimumLODSet": "HWRM picks LODs itself",
     "motionCueScale": "HW1 camera motion-cue tuning; no HWRM equivalent",
     "cameraFOV": "converted into each camera's lens (fov_events), not a script command",
@@ -475,6 +476,14 @@ def translate_script(src, objects, nisname, speech, fps, end_frame, cam_events, 
         elif cmd == "hideUniverseToggle":
             hidden_universe = not hidden_universe
             emit(f"hideUniverse({1 if hidden_universe else 0})")
+        elif cmd == "colorScheme" and cur_obj:
+            # HW1 colour scheme N (teamcolors.script: one per faction) -> HWRM NIS colourScheme(base, stripe, badge)
+            # (Gearbox's n01r1.script; without it every NIS ship had the same colours)
+            n = int(args.strip())
+            s = make_colours.read()[n]
+            badge = make_colours.FACTIONS[n][1].split("/", 1)[1]
+            rgb = lambda c: "{" + ", ".join(f"{v:.3f}" for v in c) + "}"
+            emit(f'colourScheme({rgb(s["BaseColor"])}, {rgb(s["StripeColor"])}, "{badge}")')
         elif cmd in ("hide", "show") and cur_obj:
             emit(f"{cmd}()")
         elif cmd == "meshAnimStart" and cur_obj:

@@ -18,6 +18,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import make_modules  # noqa: E402
 import make_damage  # noqa: E402
 import make_shipcode  # noqa: E402
+import make_colours  # noqa: E402
+import make_background  # noqa: E402
 import ship_variants  # noqa: E402
 
 MOD =os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -39,7 +41,8 @@ SKIP_PREFIX = ("leveldata/", "config_old.txt", "keeper.txt", "ui/", "scripts/sca
                "scripts/startingfleets/", "ai/", "badges/", "locale/", "soundscripts/", "sound/music/",
                "sound/speech/")
 # ...except these, which their ships do use (TOIcon "Flagship" etc.: a missing icon is a fatal exit)
-KEEP_PREFIX = ("ui/tacticalicons/",)
+# (and the faction badges of Cataclysm's colour schemes: tools/make_colours.py)
+KEEP_PREFIX = ("ui/tacticalicons/",) + tuple("badges/" + b for b in make_colours.BADGES)
 SKIP_SUFFIX = (".swp", ".bak")
 
 RESEARCH_HP = ('StartShipHardPointConfig(NewShipType,"Research Module","Hardpoint_GravGenerator","System","Innate",'
@@ -394,6 +397,9 @@ def main():
     copied += make_shipcode.install()
     # Cataclysm's health and weapon damage (user: all ships, Cataclysm's scale 1:1)
     copied += make_damage.apply(make_damage.plan())
+    # Cataclysm's mission backgrounds (tools/make_background.py; their light .hod is stock ez01's, 22 MB)
+    for name, (btg, theta, phi) in make_background.BACKGROUNDS.items():
+        copied += make_background.convert(os.path.join(make_background.BIG, btg + ".btg"), name, theta, phi)
     # both layers can list a file (theirs over the patch's): once, in the last spelling
     copied = sorted({rel.lower(): rel for rel in copied}.values())
     # files an earlier install put in data/ that are no longer installed (git-tracked files are ours: kept)

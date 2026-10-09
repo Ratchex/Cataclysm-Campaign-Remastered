@@ -50,6 +50,7 @@ with kus_carrier
 {
     at frame 0
         invincible()
+        colourScheme({0.890, 0.678, 0.325}, {0.596, 0.435, 0.114}, "cnabaal.tga")
         hide()
     at frame 1050
         show()
@@ -64,6 +65,7 @@ with kus_destroyer1
 {
     at frame 0
         invincible()
+        colourScheme({0.216, 0.592, 0.031}, {0.702, 0.969, 0.396}, "cmanaan.tga")
         hide()
     at frame 1050
         show()
@@ -84,6 +86,7 @@ with kus_destroyer2
 {
     at frame 0
         invincible()
+        colourScheme({0.216, 0.592, 0.031}, {0.702, 0.969, 0.396}, "cmanaan.tga")
         hide()
     at frame 1050
         show()
@@ -96,6 +99,7 @@ with kus_destroyer3
 {
     at frame 0
         invincible()
+        colourScheme({0.216, 0.592, 0.031}, {0.702, 0.969, 0.396}, "cmanaan.tga")
         hide()
     at frame 2200
         show()
@@ -106,6 +110,7 @@ with kus_ioncannonfrigate2
 {
     at frame 0
         invincible()
+        colourScheme({0.890, 0.678, 0.325}, {0.596, 0.435, 0.114}, "cnabaal.tga")
         hide()
     at frame 1050
         show()
@@ -114,6 +119,7 @@ with kus_heavycorvette1
 {
     at frame 0
         invincible()
+        colourScheme({0.784, 0.000, 0.000}, {0.000, 0.000, 1.000}, "Kushan.tga")
         hide()
     at frame 1050
         show()
@@ -128,6 +134,7 @@ with kus_heavycorvette2
 {
     at frame 0
         invincible()
+        colourScheme({0.784, 0.000, 0.000}, {0.000, 0.000, 1.000}, "Kushan.tga")
         hide()
     at frame 1050
         show()
@@ -138,6 +145,7 @@ with kus_heavycorvette3
 {
     at frame 0
         invincible()
+        colourScheme({0.784, 0.000, 0.000}, {0.000, 0.000, 1.000}, "Kushan.tga")
         hide()
     at frame 1050
         show()
@@ -146,6 +154,7 @@ with kus_ioncannonfrigate1
 {
     at frame 0
         invincible()
+        colourScheme({0.890, 0.678, 0.325}, {0.596, 0.435, 0.114}, "cnabaal.tga")
         hide()
     at frame 1050
         show()
@@ -160,6 +169,7 @@ with kus_ioncannonfrigate3
 {
     at frame 0
         invincible()
+        colourScheme({0.890, 0.678, 0.325}, {0.596, 0.435, 0.114}, "cnabaal.tga")
         health(0.05)
         show()
     at frame 975
@@ -171,6 +181,7 @@ with kus_ioncannonfrigate4
 {
     at frame 0
         invincible()
+        colourScheme({0.890, 0.678, 0.325}, {0.596, 0.435, 0.114}, "cnabaal.tga")
         hide()
     at frame 2000
         show()
@@ -181,6 +192,7 @@ with kus_ioncannonfrigate5
 {
     at frame 0
         invincible()
+        colourScheme({0.890, 0.678, 0.325}, {0.596, 0.435, 0.114}, "cnabaal.tga")
         hide()
     at frame 2000
         show()
@@ -203,6 +215,7 @@ with kus_interceptor1
 {
     at frame 0
         invincible()
+        colourScheme({0.216, 0.592, 0.031}, {0.702, 0.969, 0.396}, "cmanaan.tga")
         hide()
     at frame 1050
         show()
@@ -217,6 +230,7 @@ with kus_interceptor2
 {
     at frame 0
         invincible()
+        colourScheme({0.216, 0.592, 0.031}, {0.702, 0.969, 0.396}, "cmanaan.tga")
         hide()
     at frame 1050
         show()
@@ -231,6 +245,7 @@ with kus_interceptor3
 {
     at frame 0
         invincible()
+        colourScheme({0.216, 0.592, 0.031}, {0.702, 0.969, 0.396}, "cmanaan.tga")
         hide()
     at frame 1050
         show()
@@ -245,6 +260,7 @@ with kus_interceptor4
 {
     at frame 0
         invincible()
+        colourScheme({0.216, 0.592, 0.031}, {0.702, 0.969, 0.396}, "cmanaan.tga")
         hide()
     at frame 1050
         show()
@@ -260,6 +276,7 @@ with kus_interceptor5
 {
     at frame 0
         invincible()
+        colourScheme({0.216, 0.592, 0.031}, {0.702, 0.969, 0.396}, "cmanaan.tga")
         hide()
     at frame 1050
         show()
@@ -270,6 +287,7 @@ with kus_interceptor6
 {
     at frame 0
         invincible()
+        colourScheme({0.216, 0.592, 0.031}, {0.702, 0.969, 0.396}, "cmanaan.tga")
         hide()
     at frame 1980
         show()
@@ -280,6 +298,7 @@ with kus_interceptor7
 {
     at frame 0
         invincible()
+        colourScheme({0.784, 0.000, 0.000}, {0.000, 0.000, 1.000}, "Kushan.tga")
         hide()
     at frame 2880
         show()
@@ -292,6 +311,7 @@ with kus_interceptor8
 {
     at frame 0
         invincible()
+        colourScheme({0.784, 0.000, 0.000}, {0.000, 0.000, 1.000}, "Kushan.tga")
         hide()
     at frame 2880
         show()
@@ -304,6 +324,7 @@ with kus_interceptor9
 {
     at frame 0
         invincible()
+        colourScheme({0.784, 0.000, 0.000}, {0.000, 0.000, 1.000}, "Kushan.tga")
         hide()
     at frame 2880
         show()
@@ -316,6 +337,7 @@ with kus_interceptor10
 {
     at frame 0
         invincible()
+        colourScheme({0.784, 0.000, 0.000}, {0.000, 0.000, 1.000}, "Kushan.tga")
         hide()
     at frame 2880
         show()
@@ -328,6 +350,7 @@ with kus_interceptor11
 {
     at frame 0
         invincible()
+        colourScheme({0.784, 0.000, 0.000}, {0.000, 0.000, 1.000}, "Kushan.tga")
         hide()
     at frame 2880
         show()
@@ -340,6 +363,7 @@ with tai_carrier
 {
     at frame 0
         invincible()
+        colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga")
         hide()
     at frame 1420
         show()
@@ -352,6 +376,7 @@ with tai_destroyer
 {
     at frame 0
         invincible()
+        colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga")
         hide()
     at frame 1400
         show()
@@ -362,6 +387,7 @@ with tai_ioncannonfrigate2
 {
     at frame 0
         invincible()
+        colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga")
         hide()
     at frame 2000
         show()
@@ -380,6 +406,7 @@ with tai_ioncannonfrigate4
 {
     at frame 0
         invincible()
+        colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga")
         hide()
     at frame 1050
         show()
@@ -391,6 +418,7 @@ with tai_ioncannonfrigate1
 {
     at frame 0
         invincible()
+        colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga")
         hide()
     at frame 1050
         show()
@@ -407,6 +435,7 @@ with tai_ioncannonfrigate3
 {
     at frame 0
         invincible()
+        colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga")
         hide()
     at frame 1050
         show()
@@ -417,6 +446,7 @@ with tai_assaultfrigate1
 {
     at frame 0
         invincible()
+        colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga")
         hide()
     at frame 1050
         show()
@@ -427,6 +457,7 @@ with tai_assaultfrigate2
 {
     at frame 0
         invincible()
+        colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga")
         hide()
     at frame 1525
         show()
@@ -441,6 +472,7 @@ with tai_assaultfrigate3
 {
     at frame 0
         invincible()
+        colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga")
         hide()
     at frame 1700
         show()
@@ -451,6 +483,7 @@ with tai_interceptor1
 {
     at frame 0
         invincible()
+        colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga")
         hide()
     at frame 1000
         show()
@@ -461,6 +494,7 @@ with tai_interceptor2
 {
     at frame 0
         invincible()
+        colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga")
         hide()
     at frame 1000
         show()
@@ -471,6 +505,7 @@ with tai_interceptor3
 {
     at frame 0
         invincible()
+        colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga")
         hide()
     at frame 1000
         show()
@@ -481,6 +516,7 @@ with tai_interceptor4
 {
     at frame 0
         invincible()
+        colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga")
         hide()
     at frame 1000
         show()
@@ -489,6 +525,7 @@ with tai_interceptor5
 {
     at frame 0
         invincible()
+        colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga")
         hide()
     at frame 1000
         show()
@@ -501,6 +538,7 @@ with tai_interceptor6
 {
     at frame 0
         invincible()
+        colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga")
         hide()
     at frame 1000
         show()
@@ -509,6 +547,7 @@ with tai_interceptor7
 {
     at frame 0
         invincible()
+        colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga")
         hide()
     at frame 1770
         show()
@@ -519,6 +558,7 @@ with tai_interceptor8
 {
     at frame 0
         invincible()
+        colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga")
         hide()
     at frame 1920
         show()
@@ -531,6 +571,7 @@ with tai_interceptor9
 {
     at frame 0
         invincible()
+        colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga")
         hide()
     at frame 1770
         show()
@@ -541,6 +582,7 @@ with tai_interceptor10
 {
     at frame 0
         invincible()
+        colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga")
         hide()
     at frame 1770
         show()
@@ -551,6 +593,7 @@ with tai_interceptor11
 {
     at frame 0
         invincible()
+        colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga")
         hide()
     at frame 1770
         show()
@@ -561,6 +604,7 @@ with tai_interceptor12
 {
     at frame 0
         invincible()
+        colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga")
         hide()
     at frame 1980
         show()
@@ -575,6 +619,7 @@ with tai_interceptor13
 {
     at frame 0
         invincible()
+        colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga")
         hide()
     at frame 1980
         show()
@@ -589,6 +634,7 @@ with tai_interceptor14
 {
     at frame 0
         invincible()
+        colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga")
         hide()
     at frame 1980
         show()
@@ -605,6 +651,7 @@ with tai_interceptor15
 {
     at frame 0
         invincible()
+        colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga")
         show()
     at frame 500
         speechEventActor("$2207384", 16, 2)
@@ -619,6 +666,7 @@ with tai_interceptor16
 {
     at frame 0
         invincible()
+        colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga")
         show()
     at frame 800
         attack("kus_ioncannonfrigate3")
@@ -635,6 +683,7 @@ with tai_attackbomber1
 {
     at frame 0
         invincible()
+        colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga")
         hide()
     at frame 1830
         show()
@@ -645,6 +694,7 @@ with tai_attackbomber2
 {
     at frame 0
         invincible()
+        colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga")
         hide()
     at frame 1830
         show()
@@ -657,6 +707,7 @@ with tai_missiledestroyer1
 {
     at frame 0
         invincible()
+        colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga")
         hide()
     at frame 1700
         show()
@@ -674,6 +725,7 @@ with tai_missiledestroyer2
 {
     at frame 0
         invincible()
+        colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga")
         hide()
     at frame 2000
         show()
