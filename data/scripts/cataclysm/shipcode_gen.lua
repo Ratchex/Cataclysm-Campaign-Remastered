@@ -134,15 +134,15 @@ CatName = {
     ["tai_supportfrigate"] = "Support Frigate",
 }
 
+function CatCmd_volley_Start(g, p, id) CatAbility_Run("volley", g, p, id) end
+function CatCmd_volley_Do(g, p, id) end
+function CatCmd_volley_Finish(g, p, id) end
 function CatCmd_link_Start(g, p, id) CatAbility_Run("link", g, p, id) end
 function CatCmd_link_Do(g, p, id) end
 function CatCmd_link_Finish(g, p, id) end
 function CatCmd_unlink_Start(g, p, id) CatAbility_Run("unlink", g, p, id) end
 function CatCmd_unlink_Do(g, p, id) end
 function CatCmd_unlink_Finish(g, p, id) end
-function CatCmd_volley_Start(g, p, id) CatAbility_Run("volley", g, p, id) end
-function CatCmd_volley_Do(g, p, id) end
-function CatCmd_volley_Finish(g, p, id) end
 function CatCmd_upgrade_Start(g, p, id) CatAbility_Run("upgrade", g, p, id) end
 function CatCmd_upgrade_Do(g, p, id) end
 function CatCmd_upgrade_Finish(g, p, id) end

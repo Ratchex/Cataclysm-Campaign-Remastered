@@ -68,23 +68,35 @@ end
 -- StartUpgradeLevel WEAPON_MISSILE) with ORDINANCE (tools/install_cr.py patch_acolyte). (Tried and dropped: weapon
 -- subsystems. Added by script they need a ship that can build, so every Acolyte had a build menu tab; innate ones
 -- held at 0 health still fired.)
+-- volley = 1 would let the weapons fire only for CAT_VOLLEY_WINDOW seconds after the ship's volley command (tried);
+-- the Acolyte's fire in normal attacks, as Cataclysm's launchers do (FUN_005b3870; user: fine)
 CatUpgradeWeapons = {
-    smt_acolyte = { ORDINANCE = "AB_UseSpecialWeaponsInNormalAttack" },
+    smt_acolyte = { ORDINANCE = { ab = "AB_UseSpecialWeaponsInNormalAttack", volley = 0 } },
 }
+CAT_VOLLEY_WINDOW = 3
 
 -- every tick (the engine may reset it, e.g. on docking)
-function CatUpgradeWeapons_Tick(rec, id)
+function CatUpgradeWeapons_Tick(rec, id, now)
     local w = CatUpgradeWeapons[rec.t]
     if not w then return end
-    for ability, ab in w do
+    for ability, spec in w do
         local on = 0
-        if rec.up[ability] then on = 1 end
-        if getglobal(ab) then SobGroup_AbilityActivate(rec.g, getglobal(ab), on) end
-        if on == 1 and not rec.weaponsOn[ability] then
-            rec.weaponsOn[ability] = 1
-            print("CATACLYSM upgrade: " .. ability .. " weapons on for ship " .. id)
+        if rec.up[ability] and (spec.volley ~= 1 or (rec.volleyUntil and now < rec.volleyUntil)) then on = 1 end
+        if getglobal(spec.ab) then SobGroup_AbilityActivate(rec.g, getglobal(spec.ab), on) end
+        if on ~= (rec.weaponsOn[ability] or 0) then
+            rec.weaponsOn[ability] = on
+            print("CATACLYSM upgrade: " .. ability .. " weapons " .. on .. " on ship " .. id)
         end
     end
+end
+
+-- A ship's native command (custom command, tools/make_abilities.py) works only once the ship has the upgrade it
+-- needs, if any: otherwise the engine still spent its energy on a press the script ignored (user)
+function CatNative_Tick(rec)
+    if not rec.native or rec.native.upgrade == "" or not AB_Custom then return end
+    local on = 0
+    if rec.up[rec.native.upgrade] then on = 1 end
+    SobGroup_AbilityActivate(rec.g, AB_Custom, on)
 end
 
 function CatShip_Create(g, p, id, t)
@@ -110,6 +122,10 @@ function CatShip_Create(g, p, id, t)
     CatUpgrade_Apply(rec)
     -- weapon upgrades (CatUpgradeWeapons): switched on and off by CatUpgradeWeapons_Tick
     rec.weaponsOn = {}
+    for i = 1, getn(CatAbilities) do
+        local a = CatAbilities[i]
+        if a.native == 1 and strfind(", " .. a.types .. ",", ", " .. t .. ",", 1, 1) then rec.native = a end
+    end
     -- a ship spawned by a link/unlink takes over its pilots' kills
     for i = 1, getn(CatPending) do
         local pend = CatPending[i]
@@ -156,7 +172,8 @@ function CatShip_Update(g, p, id)
             b.pressed = nil
         end
     end
-    CatUpgradeWeapons_Tick(rec, id)
+    CatUpgradeWeapons_Tick(rec, id, now)
+    CatNative_Tick(rec)
     if rec.link then CatLink_Tick(rec, id, now) end
     CatUpgrade_Instant(rec, id)
     if rec.upg then CatUpgrade_Tick(rec, id, now) end
@@ -366,9 +383,18 @@ function CatUpgrade_Tick(rec, id, now)
     end
 end
 
--- test of a second custom command on the Acolyte; becomes the missile volley (Mission 3)
+-- Fire Missiles (strMenuSpecialFireMissilesDesc), the Acolyte's native command once it has the ORDINANCE upgrade:
+-- its energy bar is the missile cooldown (tools/make_abilities.py ENERGY). HWRM scripts can't fire weapons, so the
+-- volley opens the launchers for CAT_VOLLEY_WINDOW (CatUpgradeWeapons: one missile each) and keeps the Acolyte on its
+-- current target.
 function CatVolley_Start(g, p, id)
-    print("CATACLYSM ability volley: ship " .. id)
+    local rec = CatShips[id]
+    if rec then rec.volleyUntil = Universe_GameTime() + CAT_VOLLEY_WINDOW end
+    SobGroup_CreateIfNotExist("cat_volley_target")
+    SobGroup_Clear("cat_volley_target")
+    SobGroup_GetCommandTargets("cat_volley_target", g, COMMAND_Attack or 2)
+    if SobGroup_Empty("cat_volley_target") == 0 then SobGroup_Attack(p, g, "cat_volley_target") end
+    print("CATACLYSM ability volley: ship " .. id .. " on " .. SobGroup_Count("cat_volley_target") .. " targets")
 end
 
 -- Link / Unlink

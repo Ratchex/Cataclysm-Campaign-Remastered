@@ -280,3 +280,10 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
 - Development switches (keep empty in commits): cataclysmkas.lua KAS_DevTechs / KAS_DevModules (research and
   Kuun-Lan modules for testing a later mission), shiprules.lua CatDevUpgrades (upgrades counted as researched from
   a game time; game time includes the opening cutscene).
+- **Fire Missiles** (the Acolyte's native custom command, ORDINANCE; Link is a button ability): energy 1000, all of
+  it spent on a press (the engine spends the "minimum to activate"), refilling over 20.75 s (2 x MissileRegenerate
+  10.375 s; energy recharge is per second: to be confirmed in game). Each ship's native command is on only once
+  the ship has its upgrade (SobGroup_AbilityActivate AB_Custom: otherwise a press the script ignored still spent
+  energy). HWRM can't fire weapons or change fire rate from script, so the volley only keeps the Acolytes on their
+  target; missiles fire in normal combat as in Cataclysm. User: keep as-is for now (Cataclysm's volley dumps the
+  loaded missiles 1.2 s apart and pauses regeneration 12 s).

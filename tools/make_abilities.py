@@ -31,14 +31,28 @@ ICONS = "DATA:UI\\\\NewUI\\\\Taskbar\\\\CommandIcons\\\\"
 # the ship must have ("" none: tools/make_upgrades.py), handler in shiprules.lua, icon).
 # Labels: english.script strMenuSpecial*Desc. Icons: stock placeholders for now.
 ABILITIES = {
-    "link": (4, "Link", ["smt_acolyte"], "TECH_LINK", "LINK", "CatLink_Start", "cmd_ico_dronefrigate.dds"),
+    # the Acolyte's native command is its missile volley (strMenuSpecialFireMissilesDesc): its energy bar is the
+    # missile cooldown (ENERGY); Link is a button
+    "volley": (6, "Fire Missiles", ["smt_acolyte"], "", "ORDINANCE", "CatVolley_Start", "cmd_ico_missilevolley.dds"),
+    "link": (None, "Link", ["smt_acolyte"], "TECH_LINK", "LINK", "CatLink_Start", "cmd_ico_dronefrigate.dds"),
     "unlink": (5, "Unlink", ["smt_acv"], "", "UNLINK", "CatUnlink_Start", "cmd_ico_specialattack.dds"),
-    # a button ability on the Acolyte, testing that path; becomes the missile volley (Mission 3), which then takes
-    # the native slot (its energy bar is the cooldown) and Link becomes a button
-    "volley": (None, "Fire Missiles", ["smt_acolyte"], "", "", "CatVolley_Start", "cmd_ico_missilevolley.dds"),
     # strMenuUpgradeSectShipsDesc: every ship type with upgrades
     "upgrade": (None, "Upgrade", make_upgrades.upgradable(), "", "", "CatUpgrade_Start", "cmd_ico_repair.dds"),
 }
+
+# A native ability's energy (CustomCommand: max, minimum to activate, drain, recharge per second), the bar the engine
+# draws beside the health bar. Default: no cooldown (drains and refills at once). A cooldown ability drains at once
+# and refills over its cooldown. The volley: Cataclysm's Acolyte carries 2 missiles (sacolyte.shp GUN2/GUN3,
+# MaxMissiles 1), one regenerating every MissileRegenerateTime 10.375 s (FUN_005b0f10): full (2) in 20.75 s. The engine
+# spends the minimum to activate on a press. (Not modelled: no regeneration for MissileLagVolleyTime 12 s after a volley.)
+INSTANT = (1000, 0, 1000, 1000)
+ENERGY = {
+    "volley": (1000, 1000, 1000, round(1000 / (2 * 10.375), 1)),   # a volley spends the whole bar (both missiles)
+}
+
+
+def energy(name):
+    return ENERGY.get(name, INSTANT)
 
 
 def main():
