@@ -1176,6 +1176,7 @@ NewTaskbar = {
 				CAT_BTN_LINK,
 				CAT_BTN_UNLINK,
 				CAT_BTN_VOLLEY,
+				CAT_BTN_UPGRADE,
 	
 			},
 			

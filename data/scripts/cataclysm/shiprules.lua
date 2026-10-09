@@ -51,7 +51,6 @@ CAT_STAR_SCALE = CatFrom0({ 12, 8, 8, 6, 4, 2, 1, 1, 1, 1, 1, 1 })   -- star eff
 CAT_LINK_DIST = 50 * 0.35
 CAT_LINK_TIMEOUT = 30     -- give up if the pair has not met
 CAT_LINK_WAIT = 1.5       -- an Acolyte with no partner after this long gives up ("No Ships To Link With")
-CAT_LINK_TECH = "TECH_LINK"
 
 -- a ship's own custom code, chained under ours (tools/make_shipcode.py), keeps its own update interval
 if not CatChainNext then CatChainNext = {} end
@@ -80,6 +79,9 @@ function CatShip_Create(g, p, id, t)
     end
     SobGroup_CreateIfNotExist(rec.att)
     SobGroup_Clear(rec.att)
+    -- new ships come with the player's upgrades (Cataclysm: only ships already in service need upgrading)
+    rec.up, rec.armour = {}, 0
+    CatUpgrade_Apply(rec)
     -- a ship spawned by a link/unlink takes over its pilots' kills
     for i = 1, getn(CatPending) do
         local pend = CatPending[i]
@@ -127,6 +129,7 @@ function CatShip_Update(g, p, id)
         end
     end
     if rec.link then CatLink_Tick(rec, id, now) end
+    if rec.upg then CatUpgrade_Tick(rec, id, now) end
 end
 
 function CatShip_Destroy(g, p, id)
@@ -185,6 +188,8 @@ function CatShip_ApplyMultipliers(rec)
         rec.dmg = mult
     end
     local h, spd = SobGroup_HealthPercentage(rec.g), mult
+    -- Advanced Drive upgrades (ability bits 0-2): +0.15 (0x72af78)
+    if rec.up.ADRIVE_FIGHTER or rec.up.ADRIVE_FRIGATE or rec.up.ADRIVE_DESTROYER then spd = spd + CAT_ADRIVE_SPEED end
     if h < 0.1 then spd = spd - 0.6
     elseif h < 0.25 then spd = spd - 0.4
     elseif h < 0.5 then spd = spd - 0.2
@@ -197,18 +202,110 @@ end
 
 -- ---------------------------------------------------------------------------------------------------------------
 -- Abilities: one custom command each (tools/make_abilities.py; the engine sends it to the selected ships that have
--- it). Its research, then its handler.
+-- it). An ability that is an upgrade (Link, Unlink, EMP, ...) needs this ship to have it: Cataclysm's ships in
+-- service get a new ability only by upgrading (the tutorial: "Upgrade Acolytes", then "Link the upgraded
+-- Acolytes"); then its handler.
 function CatAbility_Run(name, g, p, id)
+    local rec = CatShips[id]
     for i = 1, getn(CatAbilities) do
         local a = CatAbilities[i]
         if a.name == name then
-            if a.tech ~= "" and Player_HasResearch(p, a.tech) ~= 1 then
-                print("CATACLYSM ability " .. name .. ": " .. a.tech .. " not researched")
+            if a.upgrade ~= "" and not (rec and rec.up[a.upgrade]) then
+                print("CATACLYSM ability " .. name .. ": ship " .. id .. " lacks the " .. a.upgrade .. " upgrade")
                 return
             end
             getglobal(a.handler)(g, p, id)
             return
         end
+    end
+end
+
+-- ---------------------------------------------------------------------------------------------------------------
+-- Upgrades (tools/make_upgrades.py, from cataclysm.exe): what a ship can be upgraded with now
+CAT_ADRIVE_SPEED = 0.15
+CAT_UPGRADE_DOCK_GRACE = 2    -- seconds before a ship sent to dock counts as given other orders (order lag)
+
+function CatUpgrade_PlayerArmour(p)
+    if Player_HasResearch(p, CatArmourTech[2]) == 1 then return 2 end
+    if Player_HasResearch(p, CatArmourTech[1]) == 1 then return 1 end
+    return 0
+end
+
+-- abilities the ship lacks that its player has researched, and the armour level it can reach
+function CatUpgrade_Pending(rec)
+    local u, list = CatUpgradeType[rec.t], {}
+    if not u then return list, rec.armour end
+    for i = 1, getn(u.abilities) do
+        local name = u.abilities[i]
+        if not rec.up[name] and Player_HasResearch(rec.p, CatUpgradeTech[name]) == 1 then tinsert(list, name) end
+    end
+    local armour = CatUpgrade_PlayerArmour(rec.p)
+    if armour > u.armour then armour = u.armour end
+    if armour < rec.armour then armour = rec.armour end
+    return list, armour
+end
+
+-- FUN_00514540: 10 s per new ability (20 for Infect), plus the time for the armour level reached, x the ship's
+-- upgradeTimeModifier
+function CatUpgrade_Time(rec, list, armour)
+    local t = 0
+    for i = 1, getn(list) do
+        if list[i] == "INFECT" then t = t + CAT_UPGRADE_TIME_INFECT else t = t + CAT_UPGRADE_TIME end
+    end
+    if armour > rec.armour then t = t + CatArmourTime[armour] end
+    return t * CatUpgradeType[rec.t].time
+end
+
+function CatUpgrade_Apply(rec)
+    local list, armour = CatUpgrade_Pending(rec)
+    for i = 1, getn(list) do rec.up[list[i]] = 1 end
+    rec.armour = armour
+    rec.spd = -1                      -- re-apply the speed multiplier
+    return getn(list)
+end
+
+-- the Upgrade command (FUN_0044de80): strike craft dock to upgrade, the rest upgrade where they are
+function CatUpgrade_Start(g, p, id)
+    local rec = CatShips[id]
+    if not rec or rec.gone or rec.upg or not CatUpgradeType[rec.t] then return end
+    local list, armour = CatUpgrade_Pending(rec)
+    if getn(list) == 0 and armour == rec.armour then return end
+    rec.upg = { time = CatUpgrade_Time(rec, list, armour), since = Universe_GameTime() }
+    if CatUpgradeType[rec.t].dock == 1 and SobGroup_IsDocked(g) ~= 1 then
+        rec.upg.dock = 1
+        SobGroup_DockSobGroupWithAny(g)
+        if not CatDockNotified or Universe_GameTime() - CatDockNotified > 2 then
+            CatDockNotified = Universe_GameTime()
+            print("CATACLYSM upgrade: Docking Ships to Upgrade")
+            if Subtitle_Message then Subtitle_Message("Docking Ships to Upgrade", 3) end
+        end
+    else
+        rec.upg.done = Universe_GameTime() + rec.upg.time
+    end
+    print("CATACLYSM upgrade: ship " .. id .. " (" .. rec.t .. ") " .. rec.upg.time .. " s")
+end
+
+function CatUpgrade_Tick(rec, id, now)
+    local u = rec.upg
+    if u.dock then
+        if SobGroup_IsDocked(rec.g) == 1 then
+            u.dock, u.launch, u.done = nil, 1, now + u.time
+        elseif now - u.since > CAT_UPGRADE_DOCK_GRACE and SobGroup_GetCurrentOrder(rec.g) ~= (COMMAND_Dock or 4) then
+            rec.upg = nil                 -- given other orders on the way: no upgrade
+            print("CATACLYSM upgrade: ship " .. id .. " cancelled")
+        end
+        return
+    end
+    if now < u.done then return end
+    rec.upg = nil
+    CatUpgrade_Apply(rec)
+    CatShip_ApplyMultipliers(rec)
+    print("CATACLYSM upgrade: ship " .. id .. " (" .. rec.t .. ") upgraded")
+    if u.launch and SobGroup_IsDocked(rec.g) == 1 then
+        SobGroup_CreateIfNotExist("cat_dockedwith")
+        SobGroup_Clear("cat_dockedwith")
+        SobGroup_GetSobGroupDockedWithGroup(rec.g, "cat_dockedwith")
+        SobGroup_Launch(rec.g, "cat_dockedwith")
     end
 end
 
@@ -222,10 +319,6 @@ end
 function CatLink_Start(g, p, id)
     local rec = CatShips[id]
     if not rec or rec.link or rec.gone then return end
-    if Player_HasResearch(p, CAT_LINK_TECH) ~= 1 then
-        print("CATACLYSM link: Linking Technology not researched")
-        return
-    end
     rec.link = { since = Universe_GameTime() }
     tinsert(CatLinkQueue, id)
     CatLink_Pair(p)

@@ -256,3 +256,13 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
   data layer (install_cr.py PP; Cataclysm Remastered over it; never our tracked files): strike-group formation
   fixes, its HW1 ships for our Kushan/Taiidan (make_shipcode.py copies its .ship), familylist families merged.
   Its HW1 rebalance comes with it for now; the target is Cataclysm's balance (user).
+- **Upgrades** (tools/make_upgrades.py reads the tables from cataclysm.exe; shiprules.lua CatUpgrade_*): ship +0x3f4
+  = ability bits (ABILITY_* enum: ADRIVE_FIGHTER 0 ... ORDINANCE 26), +0x3f0 = armour level. Research -> bits:
+  table 0x72b9e8 {tech, bits, bits2} (TechnologyType = the TECH_* strings' order minus TECH_ADVANCED_SYSTEMS:
+  TECH_ARMOUR2 = 14); ship type mask 0x72b7a0 (ShipType = english.script's ship name order, sRecon 0, sAcolyte 1);
+  armour cap 0x72b31c; times: 10 s per new ability bit (20 for INFECT), armour 10/20/30 s, x upgradeTimeModifier.
+  The Upgrade command (FUN_0044de80, a networked command) upgrades in place; UpgradeByDocking ships (strike craft)
+  dock first ("Docking Ships to Upgrade"). Abilities are upgrades too: an Acolyte links only once it has the
+  LINK bit (tutorial: "Upgrade Acolytes", "Link the upgraded Acolytes"). New ships come upgraded. ADRIVE_* = +0.15
+  speed. Armour levels change incoming damage (base damage table 0x72b228 [weapon type][target armour]: with the
+  damage conversion, not applied yet). Weapon levels (projectile -> energy ...: 0x72bb18) also not yet.
