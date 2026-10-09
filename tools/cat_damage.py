@@ -106,19 +106,26 @@ def cr_ship(name):
 
 
 races = {"RACE_SECT": "sect", "RACE_BEAST": "beast", "RACE_KUSHAN": "kushan", "RACE_TAIDAN": "taidan"}
-seen = set()
-for line in list(open(os.path.join(HERE, "shipmap.tsv"), encoding="utf-8"))[1:]:
-    c = line.rstrip("\n").split("\t")
-    if len(c) < 3 or not c[2] or c[0] not in races or c[2] in seen:
-        continue
-    seen.add(c[2])
-    h1, guns = cat_ship(races[c[0]], c[1])
-    if h1 is None:
-        continue
-    h2, weps = cr_ship(c[2])
-    print(f"{c[2]:28s} {c[1]:24s} health cat {h1:g}  cr {h2}")
-    for typ, rows, ft, bf, bw in guns:
-        print("   cat", typ, " | ".join(f"{n} {d:g} dmg {p:.1f} dps" if d is not None else n for n, d, p in rows),
-              f"(fire {ft:g} burst {bf:g}/{bw:g})")
-    for w, d, ft, b in weps:
-        print("   cr ", w, d, "fire", ft, "burst", b)
+
+
+def main():
+    seen = set()
+    for line in list(open(os.path.join(HERE, "shipmap.tsv"), encoding="utf-8"))[1:]:
+        c = line.rstrip("\n").split("\t")
+        if len(c) < 3 or not c[2] or c[0] not in races or c[2] in seen:
+            continue
+        seen.add(c[2])
+        h1, guns = cat_ship(races[c[0]], c[1])
+        if h1 is None:
+            continue
+        h2, weps = cr_ship(c[2])
+        print(f"{c[2]:28s} {c[1]:24s} health cat {h1:g}  cr {h2}")
+        for typ, rows, ft, bf, bw in guns:
+            print("   cat", typ, " | ".join(f"{n} {d:g} dmg {p:.1f} dps" if d is not None else n for n, d, p in rows),
+                  f"(fire {ft:g} burst {bf:g}/{bw:g})")
+        for w, d, ft, b in weps:
+            print("   cr ", w, d, "fire", ft, "burst", b)
+
+
+if __name__ == "__main__":
+    main()

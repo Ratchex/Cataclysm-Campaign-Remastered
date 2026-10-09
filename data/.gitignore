@@ -2707,6 +2707,7 @@
 /weapon/bst_turretedpulsarcannondriver1/bst_turretedpulsarcannondriver1.wepn
 /weapon/bst_turretedpulsarcannondriver2/bst_turretedpulsarcannondriver2.wepn
 /weapon/bst_vulcankineticturret/bst_vulcankineticturret.wepn
+/weapon/cat_tai_carrier_hw1_mothershipgun2/cat_tai_carrier_hw1_mothershipgun2.wepn
 /weapon/hgn_antishipbomblauncher/hgn_antishipbomblauncher.wepn
 /weapon/hgn_antisubsystembomblauncher/hgn_antisubsystembomblauncher.wepn
 /weapon/hgn_battlecruiserkineticburstcannon/hgn_battlecruiserkineticburstcannon.wepn
@@ -2811,6 +2812,8 @@
 /weapon/kus_cruiserion/kus_cruiserion.wepn
 /weapon/kus_defender/kus_defender.wepn
 /weapon/kus_destroyergun/kus_destroyergun.wepn
+/weapon/kus_destroyerion1/kus_destroyerion1.wepn
+/weapon/kus_destroyerion2/kus_destroyerion2.wepn
 /weapon/kus_destroyerlauncher/kus_destroyerlauncher.wepn
 /weapon/kus_destroyerlaunchervolley/kus_destroyerlaunchervolley.wepn
 /weapon/kus_drone/kus_drone.wepn
@@ -2819,6 +2822,7 @@
 /weapon/kus_hvcorvette2/kus_hvcorvette2.wepn
 /weapon/kus_hvcorvette_special1/kus_hvcorvette_special1.wepn
 /weapon/kus_hvcorvette_special2/kus_hvcorvette_special2.wepn
+/weapon/kus_hvcorvette_specialburst/kus_hvcorvette_specialburst.wepn
 /weapon/kus_interceptor/kus_interceptor.wepn
 /weapon/kus_ioncannon/kus_ioncannon.wepn
 /weapon/kus_ltcorvette/kus_ltcorvette.wepn
@@ -2945,6 +2949,7 @@
 /weapon/tai_defender/tai_defender.wepn
 /weapon/tai_defenselaser/tai_defenselaser.wepn
 /weapon/tai_destroyergun/tai_destroyergun.wepn
+/weapon/tai_destroyerion/tai_destroyerion.wepn
 /weapon/tai_destroyerlauncher/tai_destroyerlauncher.wepn
 /weapon/tai_destroyerlaunchervolley/tai_destroyerlaunchervolley.wepn
 /weapon/tai_frigatecannon/tai_frigatecannon.wepn

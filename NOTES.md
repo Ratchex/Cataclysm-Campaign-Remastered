@@ -305,7 +305,8 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
   2, 3, 6, 7, 9, 12, 13, 16 (plasma, projectile, missile). Missiles/mines (FUN_0048aac0) = table [9 / 8][armour] x
   DamageMult x FUN_005148f0(shooter) (x ship +0x3e0 when flag 0x4000, likely Link). Beams (bullet +0x108 == 2 or 8:
   ion, FUN_0043c900) take the full per-hit damage on every collision check while they live (BulletLifeTime, e.g. 2.3 s
-  for the Kushan ion frigate): per *tick*, not per shot; the tick rate is assumed 16 Hz (HW1), unverified. Scale:
+  for the Kushan ion frigate): per *tick*, not per shot; 16 ticks a second (HW1 source, Gardens of Kadesh Collision.c collCheckBeamColl: beam damage
+  applied once per original-rate update, UNIVERSE_UPDATE_RATE_ORIG 16). Scale:
   Cataclysm Acolyte 220 HP / 2 guns x 7 (0.3 s, bursts 1.4 on / 1.3 off: ~24 DPS), missiles 60 x 7 = 420 each every
   13 s; CR Acolyte 175 HP / 18 per shot; CR capital ships ~2.5x Cataclysm's health and ion beams 2600 per shot.
 - **Group names in ship code**: the `g` a ship's custom code gets is reused for later ships once that ship's code
@@ -317,3 +318,12 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
   energy). HWRM can't fire weapons or change fire rate from script, so the volley only keeps the Acolytes on their
   target; missiles fire in normal combat as in Cataclysm. User: keep as-is for now (Cataclysm's volley dumps the
   loaded missiles 1.2 s apart and pauses regeneration 12 s).
+- **Health and damage conversion** (tools/make_damage.py, run by install_cr.py; user, 2026-10-09: all ships,
+  Cataclysm's scale 1:1, CR's accuracy rolls kept, armour levels later; confirmed in game: "feels good"). Health =
+  .shp maxhealth. Per ship, Cataclysm DPS (table x DamageMult over FireTime / burst duty; beams per hit x 16 x
+  BulletLifeTime) / HWRM DPS of its weapons (ship configs + innate turret subsystems; SpawnWeaponFire followed to the
+  weapon holding the damage) = a factor on those weapons' damage; setPenetration flattened to 1 for every family.
+  Shared weapons with different factors: per-ship copies (cat_<ship>_<weapon>, via ship configs only). Originals read
+  from the source layers, never data/ (no double scaling). Our cat_* weapons carry Cataclysm's values (Acolyte
+  missile 420). Not converted: Beast ships, mines, Somtaaw ramming frigate (no Cataclysm guns), armour levels, the
+  Energy upgrade's damage. Beam tick confirmed 16/s (HW1 Collision.c).

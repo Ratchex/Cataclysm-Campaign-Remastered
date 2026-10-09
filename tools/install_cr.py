@@ -16,6 +16,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import make_modules  # noqa: E402
+import make_damage  # noqa: E402
 import make_shipcode  # noqa: E402
 import ship_variants  # noqa: E402
 
@@ -388,6 +389,8 @@ def main():
     ship_variants.write_lua()
     # Cataclysm's ship rules (experience, damage slowing ships, Acolyte link) on every ship the campaign uses
     copied += make_shipcode.install()
+    # Cataclysm's health and weapon damage (user: all ships, Cataclysm's scale 1:1)
+    copied += make_damage.apply(make_damage.plan())
     # both layers can list a file (theirs over the patch's): once, in the last spelling
     copied = sorted({rel.lower(): rel for rel in copied}.values())
     # files an earlier install put in data/ that are no longer installed (git-tracked files are ours: kept)
