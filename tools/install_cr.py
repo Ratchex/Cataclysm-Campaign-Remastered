@@ -17,6 +17,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import make_modules  # noqa: E402
 import make_shipcode  # noqa: E402
+import ship_variants  # noqa: E402
 
 MOD =os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = r"C:\Modding\Cataclysm-decomp\reference\cr_beast"
@@ -381,6 +382,10 @@ def main():
     for rel in copied:
         if rel.endswith(".events"):
             fix_event_markers(os.path.join(DATA, rel))
+    # weapon-upgrade variants (tools/ship_variants.py), from their base ship as installed above
+    for variant in ship_variants.VARIANTS:
+        copied += ship_variants.build(variant)
+    ship_variants.write_lua()
     # Cataclysm's ship rules (experience, damage slowing ships, Acolyte link) on every ship the campaign uses
     copied += make_shipcode.install()
     # both layers can list a file (theirs over the patch's): once, in the last spelling

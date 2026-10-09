@@ -100,10 +100,12 @@ function CatNative_Tick(rec)
 end
 
 function CatShip_Create(g, p, id, t)
+    local real = t
+    t = (CatVariantBase and CatVariantBase[t]) or t      -- a variant (variants_gen.lua) is its base type here
     local kills = {}
     for i = 0, 11 do kills[i] = 0 end
-    local rec = { g = g, p = p, t = t, cls = CatClass[t] or CAT_FIGHTER, kills = kills, rank = 0, spd = 1, dmg = 1,
-                  next = 0, att = "cat_att_" .. id }
+    local rec = { g = g, p = p, t = t, real = real, cls = CatClass[t] or CAT_FIGHTER, kills = kills, rank = 0,
+                  spd = 1, dmg = 1, next = 0, att = "cat_att_" .. id }
     CatShips[id] = rec
     -- its button abilities (tools/make_abilities.py): the mission script fills cat_cmd_<name> on a press
     rec.buttons = {}
@@ -132,6 +134,9 @@ function CatShip_Create(g, p, id, t)
         if SobGroup_GroupInGroup(g, pend.group) == 1 then
             for c = 0, 11 do kills[c] = pend.kills[c] end
             rec.parts = pend.parts
+            if pend.up then                       -- a variant swap: the same ship, already upgraded
+                rec.up, rec.armour, rec.launchFrom = pend.up, pend.armour, pend.launchFrom
+            end
             tremove(CatPending, i)
             CatShip_UpdateRank(rec, 0)
             break
@@ -177,6 +182,14 @@ function CatShip_Update(g, p, id)
     if rec.link then CatLink_Tick(rec, id, now) end
     CatUpgrade_Instant(rec, id)
     if rec.upg then CatUpgrade_Tick(rec, id, now) end
+    if rec.gone then return end
+    if rec.launchFrom and SobGroup_IsDocked(g) == 1 then
+        SobGroup_Launch(g, rec.launchFrom)
+        rec.launchFrom = nil
+    end
+    if not rec.upg and CatVariant_Wanted(rec) ~= rec.real and SobGroup_IsDocked(g) == 1 then
+        CatVariant_Swap(rec, id, nil)
+    end
 end
 
 function CatShip_Destroy(g, p, id)
@@ -376,6 +389,10 @@ function CatUpgrade_Tick(rec, id, now)
     CatShip_ApplyMultipliers(rec)
     print("CATACLYSM upgrade: ship " .. id .. " (" .. rec.t .. ") upgraded")
     if u.launch and SobGroup_IsDocked(rec.g) == 1 then
+        if CatVariant_Wanted(rec) ~= rec.real then
+            CatVariant_Swap(rec, id, 1)           -- the variant launches once docked in its place
+            return
+        end
         SobGroup_CreateIfNotExist("cat_dockedwith")
         SobGroup_Clear("cat_dockedwith")
         SobGroup_GetSobGroupDockedWithGroup(rec.g, "cat_dockedwith")
@@ -503,6 +520,53 @@ function CatLink_Tick(rec, id, now)
     print("CATACLYSM link: two Acolytes linked into an ACV (health " .. health .. ")")
 end
 
+-- Ship type variants (tools/ship_variants.py, variants_gen.lua): HWRM weapons are per ship type, so a ship whose
+-- upgrades call for other weapons (WEAPON_ENERGY: the Acolyte's Energy Cannons) is swapped for its variant type
+-- while docked: invisible in the hangar. The type a ship should be: the last variant whose upgrade it has.
+function CatVariant_Wanted(rec)
+    local list, want = CatVariants and CatVariants[rec.t], rec.t
+    if list then
+        for i = 1, getn(list) do
+            if rec.up[list[i].upgrade] then want = list[i].type end
+        end
+    end
+    return want
+end
+
+-- the type a new ship of player p should be built as (Unlink): the variant once its upgrade is researched
+function CatVariant_ForNew(p, base)
+    local list, want = CatVariants and CatVariants[base], base
+    if list then
+        for i = 1, getn(list) do
+            if CatUpgrade_Researched(p, list[i].upgrade) == 1 then want = list[i].type end
+        end
+    end
+    return want
+end
+
+-- the docked ship -> its wanted type, docked in the same ship (launched again if `launch`), kills, upgrades and
+-- health carried over
+function CatVariant_Swap(rec, id, launch)
+    CatSerial = CatSerial + 1
+    local carrier = "cat_carrier" .. CatSerial
+    SobGroup_CreateIfNotExist(carrier)
+    SobGroup_Clear(carrier)
+    SobGroup_GetSobGroupDockedWithGroup(rec.g, carrier)
+    if SobGroup_Empty(carrier) == 1 then return end
+    local want, health = CatVariant_Wanted(rec), SobGroup_HealthPercentage(rec.g)
+    local up = {}
+    for k, v in rec.up do up[k] = v end
+    local new = CatSpawn(rec.p, want, SobGroup_GetPosition(carrier), rec.kills, rec.parts)
+    local pend = CatPending[getn(CatPending)]
+    pend.up, pend.armour = up, rec.armour
+    if launch then pend.launchFrom = carrier end
+    SobGroup_DockSobGroupInstant(new, carrier)
+    SobGroup_SetHealth(new, health)
+    rec.gone = 1
+    SobGroup_Despawn(rec.g)
+    print("CATACLYSM variant: ship " .. id .. " (" .. rec.real .. ") -> " .. want .. (launch and ", relaunching" or ""))
+end
+
 function CatLink_Remove(rec)
     rec.gone = 1
     rec.link = nil
@@ -542,7 +606,7 @@ function CatUnlink_Start(g, p, id)
     end
     for k = 1, 2 do
         local side = (k * 2 - 3) * CAT_LINK_DIST
-        local new = CatSpawn(p, "smt_acolyte", { pos[1] + side, pos[2], pos[3] }, kills[k], nil)
+        local new = CatSpawn(p, CatVariant_ForNew(p, "smt_acolyte"), { pos[1] + side, pos[2], pos[3] }, kills[k], nil)
         SobGroup_SetHealth(new, health)
     end
     rec.gone = 1

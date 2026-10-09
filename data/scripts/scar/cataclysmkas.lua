@@ -862,8 +862,8 @@ function CatAbilityTick()
     end
 end
 
--- engine abilities our upgrade system switches per ship (tools/make_race.py RUNTIME_RESEARCH): granted to the human
-KAS_RuntimeResearch = { "CAT_ACOLYTE_MISSILES" }
+-- engine abilities our upgrade system switches per ship (tools/make_race.py RUNTIME_RESEARCH, KAS_RuntimeResearch in
+-- cataclysmtech.lua): granted to the human
 function KAS_GrantRuntimeResearch()
     local i = 1
     while i <= getn(KAS_RuntimeResearch) do
@@ -872,8 +872,44 @@ function KAS_GrantRuntimeResearch()
     end
 end
 
+-- Ship type variants (tools/ship_variants.py, variants_gen.lua): a weapon-upgrade copy of a type. Mission scripts
+-- selecting the base type get its variants too (KAS_FillShipsByType); once a variant's research is done the build
+-- list offers it instead of the base (KAS_VariantBuildWatch), unless the mission has the base's construction off.
+dofilepath("data:scripts/cataclysm/variants_gen.lua")
+KAS_ConstructionOff = {}
+
+function KAS_FillShipsByType(n, src, t)
+    SobGroup_FillShipsByType(n, src, t)
+    local v = CatVariants and CatVariants[t]
+    if v == nil then return end
+    SobGroup_CreateIfNotExist("KAS_VariantTemp")
+    local i = 1
+    while i <= getn(v) do
+        SobGroup_Clear("KAS_VariantTemp")
+        SobGroup_FillShipsByType("KAS_VariantTemp", src, v[i].type)
+        SobGroup_SobGroupAdd(n, "KAS_VariantTemp")
+        i = i + 1
+    end
+end
+
+function KAS_VariantBuildWatch()
+    for base, list in CatVariants do
+        local i, upgraded = 1, nil
+        while i <= getn(list) do
+            if Player_HasResearch(0, list[i].tech) == 1 then upgraded = list[i].type end
+            i = i + 1
+        end
+        if upgraded then
+            Player_RestrictBuildOption(0, base)
+            if KAS_ConstructionOff[base] then Player_RestrictBuildOption(0, upgraded)
+            else Player_UnrestrictBuildOption(0, upgraded) end
+        end
+    end
+end
+
 function KAS_StartEngine()
     Rule_AddInterval("CatAbilityTick", 0.25)
+    Rule_AddInterval("KAS_VariantBuildWatch", 2)
     KAS_GrantRuntimeResearch()
     KAS_DisableCPUPlayers()
     KAS_ApplyAlliances()
@@ -1235,7 +1271,7 @@ end
 function K_495690(n, o, shipType)                                                                   -- kasfShipsSelectType
     local src = KAS_SelSrc(n, o)
     SobGroup_Clear(n)
-    SobGroup_FillShipsByType(n, src, KAS_HWRMType(shipType))
+    KAS_FillShipsByType(n, src, KAS_HWRMType(shipType))
     return SobGroup_Count(n)
 end
 
@@ -1426,7 +1462,9 @@ end
 function K_4980c0(shipType, race, on)
     local t = KAS_ShipTypes[strlower(shipType)]
     if t == nil then return end
+    KAS_ConstructionOff[t] = (on == 0) or nil     -- KAS_VariantBuildWatch follows it for the variants
     if on ~= 0 then Player_UnrestrictBuildOption(0, t) else Player_RestrictBuildOption(0, t) end
+    KAS_VariantBuildWatch()
 end
 
 -- 0x497290(flag, destination): end-of-mission hyperspace ("Hiigara", "~ End of Mission").
