@@ -174,6 +174,7 @@ function CatShip_Adopt(rec, g, now)
             for c = 0, 11 do rec.kills[c] = pend.kills[c] end
             rec.parts = pend.parts
             rec.hold, rec.pin = pend.hold, pend.pin
+            rec.ghost = pend.ghost
             if pend.linking then                  -- standing in for the Link clip (CatLink_Pose)
                 rec.linking = pend.linking
                 tinsert(pend.linking.recs, rec)
@@ -258,6 +259,11 @@ function CatShip_Update(g, p, id)
     -- health bar overlay (ui/ati/ati.lua) only draws engine values, so no per-ship star beside the stance icon.
     if CAT_SHOW_STARS == 1 and rec.rank > 0 and SobGroup_Selected(g) == 1 then
         FX_PlayEffect("cat_rank" .. rec.rank, g, CAT_STAR_SCALE[rec.cls] or 1)
+    end
+    -- collisions back on after a Mimic's transformation (CatMimic_Swap)
+    if rec.ghost and now >= rec.ghost then
+        rec.ghost = nil
+        SobGroup_SetGhost(g, 0)
     end
     -- a Mimic becoming its disguise once the shell has formed (CatMimic_As)
     if rec.mimicSwap and now >= rec.mimicSwap.t then
@@ -1000,6 +1006,9 @@ end
 -- on the Mimic, the swap CAT_MIMIC_SWAP later (Cataclysm stops drawing the Mimic at 0.94 s), cat_mimic_tail_<target>
 -- on the disguise; Unmimic swaps at once, cat_mimic_out_<target> on the Mimic.
 CAT_MIMIC_SWAP = 1.0     -- make_mimicfx.py SWAP; two ship updates (CAT_TICK)
+-- no collisions while the old and new ship overlap (user: they pushed each other apart before the old one went):
+-- the Mimic from the press, the new ship until the shell has played out (1.25 s, then the next update)
+CAT_MIMIC_GHOST = 1.5
 CAT_MIMIC_FXTEST = 0     -- DEVELOPMENT: also the stock Keeper mesh effect (does a mesh effect show at all?)
 
 function CatNoop(g, p, id, name)
@@ -1023,6 +1032,9 @@ function CatMimic_Swap(g, p, id, shiptype, say)
     local new = CatSpawn(p, shiptype, pos, rec.kills, rec.parts)
     local pend = CatPending[getn(CatPending)]
     pend.up, pend.armour = up, rec.armour
+    pend.ghost = Universe_GameTime() + CAT_MIMIC_GHOST
+    SobGroup_SetGhost(g, 1)
+    SobGroup_SetGhost(new, 1)
     if getn(m) == 9 then CatPlace(new, pos, m) end
     SobGroup_SetHealth(new, health)
     -- hidden at once and despawned until it is gone (CatShip_Update rec.swapped): a single SobGroup_Despawn left the
@@ -1048,6 +1060,7 @@ function CatMimic_As(g, p, id, name)
         if d.button == name then
             if rec.real == d.type then return end
             CatSay(165, g, p)
+            SobGroup_SetGhost(g, 1)
             local was = CatDisguise_Of(rec.real)
             if was then FX_PlayEffect("cat_mimic_out_" .. was.target, g, 1) end
             FX_PlayEffect("cat_mimic_in_" .. d.target, g, 1)
