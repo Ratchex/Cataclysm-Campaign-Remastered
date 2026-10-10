@@ -43,6 +43,7 @@ SKIP_PREFIX = ("leveldata/", "config_old.txt", "keeper.txt", "ui/", "scripts/sca
 # ...except these, which their ships do use (TOIcon "Flagship" etc.: a missing icon is a fatal exit)
 # (and the faction badges of Cataclysm's colour schemes: tools/make_colours.py)
 KEEP_PREFIX = ("ui/tacticalicons/",) + tuple("badges/" + b for b in make_colours.BADGES)
+CATSPEECH_LINE = 'dofilepath("data:soundscripts/cataclysm/catspeech.lua")   -- Cataclysm-HWRM: Somtaaw voices'
 SKIP_SUFFIX = (".swp", ".bak")
 
 RESEARCH_HP = ('StartShipHardPointConfig(NewShipType,"Research Module","Hardpoint_GravGenerator","System","Innate",'
@@ -389,6 +390,14 @@ def main():
     for rel in copied:
         if rel.endswith(".events"):
             fix_event_markers(os.path.join(DATA, rel))
+    # Cataclysm's Somtaaw voices: the Players Patch speech logic loads our redirect (data/soundscripts/cataclysm/
+    # catspeech.lua; the voice folders come from tools/make_unitspeech.py)
+    for fn in ("commands.lua", "status.lua", "chatter.lua"):
+        path = os.path.join(DATA, "soundscripts", "speechlogic", fn)
+        if os.path.exists(path):
+            text = open(path, encoding="latin-1").read()
+            if CATSPEECH_LINE not in text:
+                open(path, "a", encoding="latin-1", newline="").write("\n" + CATSPEECH_LINE + "\n")
     # weapon-upgrade variants (tools/ship_variants.py), from their base ship as installed above
     for variant in ship_variants.VARIANTS:
         copied += ship_variants.build(variant)
