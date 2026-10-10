@@ -11,7 +11,15 @@ SECT=C:/Modding/Cataclysm-decomp/extracted/big/race_sect
 GLOW=C:/Modding/Cataclysm-decomp/reference/cr_main/ship/smt_ms_sp/smt_ms_sp.hod
 for spec in $(python tools/make_modules.py --list-builds); do
     key=${spec%%=*}; cat=${spec#*=}
-    GEO2DAE_ARGS="--no-docks --glow-from $GLOW --engines-from $GLOW --engines-scale 0.909" bash tools/build_ship.sh "race_sect/$cat" "smt_kl_$key" | tail -1
+    MODARGS="--no-docks --glow-from $GLOW --engines-from $GLOW --engines-scale 0.909"
+    # on the Kuun-Lan: recentred, its hardpoint at its centre (HWRM draws a subsystem's health bar at its hardpoint:
+    # at the shared origin every bar sat in the middle of the ship); Support already sits on its dock points
+    ORIGIN=""; [ "$key" != support ] && ORIGIN="--origin auto"
+    GEO2DAE_ARGS="$MODARGS $ORIGIN" bash tools/build_ship.sh "race_sect/$cat" "smt_kl_$key" | tail -1
+    # loose (jettisoned modules, NIS dummies): in the Kuun-Lan's frame, placed where the Kuun-Lan is
+    if [ -n "$ORIGIN" ]; then
+        GEO2DAE_ARGS="$MODARGS" bash tools/build_ship.sh "race_sect/$cat" "smt_kl_${key}_dummy" | tail -1
+    fi
 done
 HARDPOINTS="Hardpoint_Research $(python tools/make_modules.py --list-hardpoints)" \
 GEO2DAE_ARGS="--glow-from $GLOW --engines-from $GLOW --engines-scale 0.909 --dock-from C:/Modding/Cataclysm-decomp/reference/cr_beast/ship/smt_ms/smt_ms.hod --dock-scale 0.909 \

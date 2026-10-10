@@ -50,10 +50,20 @@ RESEARCH_HP = ('StartShipHardPointConfig(NewShipType,"Research Module","Hardpoin
                '"Damageable","HW1_ResearchModule","","","","","","","","");')
 
 
+TO_MOTHERSHIP = "\n".join(f"NewShipType.{k}={v}" for k, v in (
+    ("TODistanceFade0", 14000), ("TODistanceDisappear0", 12000), ("TODistanceFade1", 5500),
+    ("TODistanceDisappear1", 5000), ("TODistanceFade2", 12000), ("TODistanceDisappear2", 35000)))
+
+
 def patch_ms_sp(text):
     """Cataclysm researches without building a research module: innate HW1 research module on the unused
     Hardpoint_GravGenerator of their single-player Kuun-Lan (after LoadModel, as hardpoints must be; their
     multiplayer model, see COPIES, has no Hardpoint_Generic5-7)."""
+    # its tactical overlay icon: theirs has no TODistance* (engine defaults: it vanished zooming out before the
+    # Workers' did, user); stock HW1 kus_mothership's
+    if "TODistanceFade0" not in text:
+        assert 'NewShipType.TOIcon="Flagship"' in text
+        text = text.replace('NewShipType.TOIcon="Flagship"', 'NewShipType.TOIcon="Flagship"\n' + TO_MOTHERSHIP, 1)
     if "HW1_ResearchModule" in text:
         return text
     return text.replace("LoadModel(NewShipType, 1);",

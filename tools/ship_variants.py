@@ -57,6 +57,11 @@ DISGUISES = {
 # the lines of a .ship that belong to its model (they come from the target's)
 MODEL_LINES = re.compile(r"^\s*(setEngineTrail|setEngineBurn|setEngineGlow|NewShipType\.trailLinger|"
                          r'NewShipType\["trailLinger"\])\b.*$', re.M)
+# a disguise also takes its model's level-of-detail settings: the Mimic's (upLOD 500 / 750 / 2500, minLOD 0.25) are
+# for a model with several LODs, and a one-LOD target vanished past the first switch (user: "disappear when you zoom
+# out")
+LOD_LINES = re.compile(r'^\s*NewShipType(\.|\[")(upLOD|downLOD|minLOD|meshRenderLimit|SMRepresentation|'
+                       r'minimumZoomFactor)\b.*$', re.M)
 
 
 def base_of(ship):
@@ -78,8 +83,10 @@ def build_disguise(variant):
     btext = open(os.path.join(bsrc, base + ".ship"), encoding="latin-1").read()
     ttext = open(os.path.join(tsrc, target + ".ship"), encoding="latin-1").read()
     engine = "\n".join(m.group(0).strip() for m in MODEL_LINES.finditer(ttext))
-    text = MODEL_LINES.sub("", btext).rstrip("\n") + \
-        f"\n-- Cataclysm-HWRM (ship_variants.py): a Mimic disguised as {target}: its model's engine\n" + engine + "\n"
+    lod = "\n".join(m.group(0).strip() for m in LOD_LINES.finditer(ttext))
+    text = LOD_LINES.sub("", MODEL_LINES.sub("", btext)).rstrip("\n") + \
+        f"\n-- Cataclysm-HWRM (ship_variants.py): a Mimic disguised as {target}: its model's engine and LODs\n" + \
+        engine + "\n" + lod + "\n"
     open(os.path.join(dst, variant + ".ship"), "w", encoding="latin-1", newline="").write(text)
     written.append(f"ship/{variant}/{variant}.ship")
     for ext in (".hod", ".mad", ".events", ".madstate"):

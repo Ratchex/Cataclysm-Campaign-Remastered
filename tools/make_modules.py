@@ -4,7 +4,8 @@ smothership<module>.shp/.geo:
   data/ship/smt_kl_<key>_dummy/...                       the same module as a loose ship: jettisoned modules, and
                                                          Cataclysm's sMothership<Module> ship types in levels/NIS
 Models: tools/build_kuunlan.sh (core + modules, HODOR) into build/ships/. All modules share the Kuun-Lan's frame
-(Cataclysm docks them at the origin; Support modules at SUPPORT1-12), so the hardpoints sit at the origin.
+(Cataclysm docks them at the origin; Support modules at SUPPORT1-12). Each non-Support module is recentred on its
+hardpoint (HWRM draws its health bar there); its loose dummy keeps the shared frame.
 
 What each module does (Cataclysm english.script str*ModuleInfo): research modules list their techs (TECH_MODULE,
 used by make_race.py for RequiredSubSystems = the module's typeString); the Hangar is required to build ships;
@@ -45,8 +46,15 @@ MODULES = {
 CORE_PARTS = {"command": "sMothershipCommand", "engineering": "sMothershipEngineering"}
 
 # hardpoint joints on the core (geo2dae.py --hardpoint specs; the Support model sits on the port side of the
-# spine, its pair partner turned about Y)
-HARDPOINTS = {k: [f"Hardpoint_KL_{k}"] for k in MODULES if k != "support"}
+# spine, its pair partner turned about Y). The others at their module's centre, where tools/build_kuunlan.sh
+# recentred the module (geo2dae.py --origin auto -> origin.txt): HWRM draws a subsystem's health bar at its
+# hardpoint (at the shared origin, every module's bar sat in the middle of the Kuun-Lan: user)
+def _origin(key):
+    p = os.path.join(BUILD, f"smt_kl_{key}", "origin.txt")
+    return "@" + open(p).read().strip() if os.path.exists(p) else ""
+
+
+HARDPOINTS = {k: [f"Hardpoint_KL_{k}" + _origin(k)] for k in MODULES if k != "support"}
 HARDPOINTS["support"] = [f"Hardpoint_KL_support{n}@dok:SUPPORT{n}" + ("@flip" if n % 2 == 0 else "")
                          for n in range(1, 13)]
 
@@ -259,7 +267,9 @@ def main():
         dummy = name + "_dummy"
         fields["name"] = dummy
         write(os.path.join(MOD, "data", "ship", dummy, dummy + ".ship"), DUMMY.format(**fields))
-        shutil.copyfile(hod, os.path.join(MOD, "data", "ship", dummy, dummy + ".hod"))
+        # the loose module: its unshifted build (in the Kuun-Lan's frame) if the subsystem's was recentred
+        loose = os.path.join(BUILD, dummy, dummy + ".hod")
+        shutil.copyfile(loose if os.path.exists(loose) else hod, os.path.join(MOD, "data", "ship", dummy, dummy + ".hod"))
     print(f"{len(MODULES)} Kuun-Lan modules: subsystems smt_kl_* and dummy ships smt_kl_*_dummy")
 
 

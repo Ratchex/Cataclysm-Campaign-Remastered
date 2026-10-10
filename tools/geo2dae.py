@@ -528,6 +528,9 @@ def main():
     ap.add_argument("--engines-from", help="engine look from this old-format HOD (Cataclysm Remastered's smt_ms_sp.hod): "
                                            "its ETSH shape on our .mex nozzles")
     ap.add_argument("--engines-scale", type=float, default=1.0, help="size scale for --engines-from shapes")
+    ap.add_argument("--origin", help="recentre the model on x,y,z (HWRM units) or 'auto' (its bounding box centre), "
+                                     "written to <out_dir>/origin.txt: a Kuun-Lan module on a hardpoint there "
+                                     "(HWRM draws a subsystem's health bar at its hardpoint)")
     a = ap.parse_args()
     if a.glow_from:
         load_glow_maps(a.glow_from, os.path.join(os.path.dirname(os.path.abspath(a.out_dir)), "_glow_cache",
@@ -599,6 +602,18 @@ def main():
                                   {"mat": mat, "png_dir": png_dir, "tris": []})["tris"].append(
                     ([conv(*q) for q in pos], [convn(*q) for q in nrm], uv))
 
+    if a.origin:   # recentred: the model's point o is its origin (o: HWRM units, written to origin.txt)
+        if a.origin == "auto":
+            vs = [v for g in groups.values() for t in g["tris"] for v in t[0]]
+            o = tuple((min(v[k] for v in vs) + max(v[k] for v in vs)) / 2 for k in range(3))
+        else:
+            o = tuple(float(c) for c in a.origin.split(","))
+        for g in groups.values():
+            g["tris"] = [([tuple(v[k] - o[k] for k in range(3)) for v in p], n, uv) for p, n, uv in g["tris"]]
+        conv0 = conv
+        conv = lambda x, y, z: tuple(c - o[k] for k, c in enumerate(conv0(x, y, z)))
+        with open(os.path.join(a.out_dir, "origin.txt"), "w") as f:
+            f.write(",".join(f"{c:.4f}" for c in o) + "\n")
     images, materials, effects, geoms, nodes = [], [], [], [], []
     joint_kids = {i: [] for i in frames}   # animated object -> its mesh / marker / child joint nodes
     done_mats = set()
