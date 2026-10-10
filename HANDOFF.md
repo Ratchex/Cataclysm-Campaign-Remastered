@@ -99,8 +99,10 @@ Missiles disabled before the upgrade (no energy spent); missiles in normal comba
    trying units outside the missions. ACV muzzle flashes and balance done. **Mimic disguises DONE (2026-10-10,
    user-tested, NOTES.md "The Mimic"):** Mimic button opens a menu of 7 disguises shown on the Mimic's own model (one
    joint each, madstate), with Cataclysm's transformation shell (mesh effects), untargetable while disguised; it keeps
-   flying. Research: Fighter Drive + Holographic Emitter. Left: Mimic kamikaze (kamikazeDamage 1000, blast 275,
-   Quantum Explosive Charge; line 167), asteroid / crate disguises, MCV frigate disguises, Advanced Sensors
+   flying. Research: Fighter Drive + Holographic Emitter. **Kamikaze DONE (2026-10-10, user-tested, NOTES.md
+   "Kamikaze"):** its attack is a kamikaze of about 1000 through HWRM's own (health x3.33, MimicArmour), scream
+   line 167. Left: the Quantum Explosive Charge multiplier (value not found), asteroid / crate disguises, MCV
+   (frigate disguises, kamikaze 2500, its own 167 takes), Advanced Sensors
    detection, Unmimic shown only on disguised Mimics (now on every Mimic), dropping the unused disguise ship types
    (smt_mimic_<target>, still built by install_cr / make_shipcode); ACV EMP (TECH_EMP). Also done: Kuun-Lan module health bars (modules recentred on their hardpoints),
    its tactical overlay distances (stock kus_mothership).

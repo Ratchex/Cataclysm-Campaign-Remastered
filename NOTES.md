@@ -298,6 +298,29 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
 - Our models have one LOD: the .ship's upLOD / downLOD (made for CR's models) left them invisible zooming out;
   install_cr.py use_our_model removes them (minLOD 1).
 
+## Kamikaze (2026-10-10, confirmed in game)
+- Cataclysm (FUN_0043a980): a rammer deals kamikazeDamage[its type] (tactics.script: Mimic 1000, Acolyte 400, ACV
+  1000, Worker 1000, MCV 2500...), x the Quantum Explosive Charge multiplier once upgraded (FUN_005b9980: ship
+  +0x770; never assigned in the decompiled code, value unknown). Death blast (FUN_00545f00): radius
+  blastRadiusShockWave x ship radius (x1.33 for the big variant), damage blastRadiusDamage x (1 - d/R) x 0.5 (0.75):
+  for a Mimic about 6 units, only the ship rammed.
+- HWRM: its own Kamikaze order (button, hotkey, right-click) deals about the rammer's current health x 7.5
+  (tuning.lua CollisionInfo; the kamikazeArmourFamilyDamageMultiplier list goes by the TARGET's family: raising the
+  Mimic's own family x5 changed nothing). To a script a kamikaze is just COMMAND_Attack; IsDoingAbility(AB_Kamikaze)
+  is 1 for every ship, even idle; a ship mid-kamikaze can stop getting custom-code updates. Close to Cataclysm's for
+  the armed fighters on armoured targets (Acolyte about 385 vs 400), so theirs is HWRM's.
+- The Mimic (tools/make_mimicarmour.py): health x3.33 (40 -> 133) so HWRM's hit is about 1000 in one blow, and its
+  own armour family MimicArmour taking x3.33 from every weapon (setPenetration: its Unarmoured value, else the
+  default, x3.33; stock HW2 weapons our ships use are copied in for it) and as a ram target, so it dies to the same
+  fire. A damaged Mimic hits for less (user: a good quirk). Its attack is a kamikaze: CanAttack kamikaze styles on
+  every family (its own numbers: the collector's 1, 5, 2 took attack orders away) and the ship rules reissue an attack
+  order as SobGroup_Kamikaze (shiprules.lua CatKamikaze_Tick). Line 167 (four takes) instead of HWRM's attack
+  acknowledgement (catspeech.lua CatSpeech_SilentAttack). Only the Mimic and MCV have kamikaze lines.
+- Tried and dropped: script top-up on the target at the Mimic's death (worked, but the damage showed in two parts).
+- Unit barks pick a random Cataclysm take (KAS_SpeechBark: {takes, stride, base}, a take exists if it has a duration);
+  announcer lines with several takes are random sample containers (tools/make_unitspeech.py write_fleet, as CR's
+  Beast announcer: <event>/<event>.lua + <event>_<n>.wav). The Kuun-Lan said "Bridge" every time.
+
 ## Pilot experience, linking, economy (from cataclysm.exe, 2026-10-09)
 - **Experience** (FUN_005147d0, tables at 0x72bb78-0x72bce4): ship + 0x5c8 = kills per victim class (12 HW1 classes:
   Mothership 0 ... Fighter 6, Resource 7, NonCombat 8, MonsterShip 9, Component 10, Micro 11), credited to the ship
