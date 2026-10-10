@@ -2,6 +2,7 @@
 dofilepath("data:scripts/cataclysm/abilities_gen.lua")
 dofilepath("data:scripts/cataclysm/upgrades_gen.lua")
 dofilepath("data:scripts/cataclysm/variants_gen.lua")
+dofilepath("data:scripts/cataclysm/kamikaze_gen.lua")
 dofilepath("data:scripts/cataclysm/shiprules.lua")
 
 CatClass = {

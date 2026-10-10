@@ -261,6 +261,7 @@ function CatShip_Update(g, p, id)
         FX_PlayEffect("cat_rank" .. rec.rank, g, CAT_STAR_SCALE[rec.cls] or 1)
     end
     if rec.real == "smt_mimic" then CatMimic_Tick(rec, g, id, now) end
+    if CatKamikazeDamage and CatKamikazeDamage[rec.t] then CatKamikaze_Tick(rec, g, id) end
     -- button abilities: act on first finding ourselves in the press group, if still selected (the press group is
     -- the selection the mission script read; checking our own selection too keeps unselected ships out)
     for i = 1, getn(rec.buttons) do
@@ -299,6 +300,7 @@ function CatShip_Destroy(g, p, id)
     CatShips[id] = nil
     if rec.gone or rec.linking then return end   -- linked or unlinked away, not killed
     if rec.link then CatLink_Cancel(rec, id) end
+    if rec.kamiTargets then CatKamikaze_Died(rec, g, id) end
     CatShip_CreditKill(rec)
 end
 
@@ -1046,6 +1048,52 @@ function CatUnmimic_Start(g, p, id, name)
     FX_StartEvent(g, "MimicOut_" .. rec.disguise.target)
     print("CATACLYSM mimic: ship " .. id .. " drops its " .. rec.disguise.target .. " disguise")
     rec.disguise = nil
+end
+
+-- ---------------------------------------------------------------------------------------------------------------
+-- Kamikaze (Cataclysm FUN_0043a980; tools/make_kamikaze.py): a ship that rams its target does kamikazeDamage[its
+-- type] (CatKamikazeDamage). TEST: what HWRM's own Kamikaze order looks like to a script (its order number, whether
+-- the rammer dies at the target, the damage HWRM deals): logged, nothing changed yet.
+function CatKamikaze_Tick(rec, g, id)
+    local order = SobGroup_GetCurrentOrder(g)
+    if not rec.kamiGrp then
+        rec.kamiGrp = "cat_kami_" .. id
+        SobGroup_CreateIfNotExist(rec.kamiGrp)
+    end
+    SobGroup_Clear(rec.kamiGrp)
+    if order ~= (COMMAND_Idle or 0) and order ~= (COMMAND_Move or 1) then
+        SobGroup_GetCommandTargets(rec.kamiGrp, g, order)
+    end
+    local n = SobGroup_Count(rec.kamiGrp)
+    if order ~= rec.kamiOrder then
+        print("CATACLYSM kamikaze test: ship " .. id .. " (" .. rec.real .. ") order " .. (rec.kamiOrder or -1) ..
+              " -> " .. order .. ", " .. n .. " targets")
+        rec.kamiOrder = order
+    end
+    rec.kamiPos = SobGroup_GetPosition(g)
+    if n > 0 then
+        rec.kamiTargets = rec.kamiTargets or ("cat_kamit_" .. id)
+        SobGroup_CreateIfNotExist(rec.kamiTargets)
+        SobGroup_Clear(rec.kamiTargets)
+        SobGroup_SobGroupAdd(rec.kamiTargets, rec.kamiGrp)
+        rec.kamiTargetPos = SobGroup_GetPosition(rec.kamiTargets)
+        rec.kamiTargetHealth = SobGroup_CurrentHealthTotal(rec.kamiTargets)
+    end
+end
+
+function CatKamikaze_Died(rec, g, id)
+    local here = rec.kamiPos
+    if SobGroup_Empty(g) == 0 then here = SobGroup_GetPosition(g) end
+    local d, h = -1, -1
+    if SobGroup_Empty(rec.kamiTargets) == 0 then
+        local t = SobGroup_GetPosition(rec.kamiTargets)
+        local dx, dy, dz = t[1] - here[1], t[2] - here[2], t[3] - here[3]
+        d = sqrt(dx * dx + dy * dy + dz * dz)
+        h = SobGroup_CurrentHealthTotal(rec.kamiTargets)
+    end
+    print("CATACLYSM kamikaze test: ship " .. id .. " (" .. rec.real .. ") died, order " .. (rec.kamiOrder or -1) ..
+          ", " .. floor(d) .. " from its target, target health " .. floor(rec.kamiTargetHealth or -1) .. " -> " ..
+          floor(h) .. " (Cataclysm: -" .. CatKamikazeDamage[rec.t] .. ")")
 end
 
 function CatUnlink_Start(g, p, id)
