@@ -1,6 +1,6 @@
 -- Cataclysm-HWRM: the Processor's repair beam cone (tools/make_procbeam.py; on its Beam<i>_Cone joints, aimed by
--- its madstate). A mesh effect: the thin cone mesh with stock repair_beam's look
--- (the Worker's repair beam, user: as close to it as can be): its texture (faded toward the tip), its 5 s colour cycle,
+-- its madstate). A mesh effect: the thin cone mesh on stock fx_harvest with stock
+-- repair_beam's look (the Worker's repair beam, user: as close to it as can be): its texture, its 5 s colour cycle,
 -- its blending and lighting.
 fx = {
 style = "STYLE_RING",
@@ -26,7 +26,7 @@ property_17 = { name = "Billboard", type = "VARTYPE_BOOL", value = 0, },
 property_18 = { name = "AlternateFOV", type = "VARTYPE_BOOL", value = 0, },
 property_19 = { name = "SelfIlluminated", type = "VARTYPE_BOOL", value = 0, },
 property_20 = { name = "Blending", type = "VARTYPE_INT", value = 4, },
-property_21 = { name = "Texture", type = "VARTYPE_STRING", value = "DATA:ART/FX/TEXTURES/CAT_PROCBEAM.TGA", },
+property_21 = { name = "Texture", type = "VARTYPE_STRING", value = "DATA:ART/FX/REPAIR_FX/REPAIR_BEAM/FX_REPAIRBEAM_DIFF.TGA", },
 property_22 = { name = "Mesh", type = "VARTYPE_STRING", value = "DATA:ART/FX/CAT_PROCBEAM/CAT_PROCBEAM.HOD", },
 property_23 = { name = "SortOrder", type = "VARTYPE_INT", value = 2, },
 property_24 = { name = "RandomBitmap", type = "VARTYPE_BOOL", value = 0, },

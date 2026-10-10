@@ -40,6 +40,11 @@ CONE_LEN = 1400.0         # twProcessorAutoRepairDistance 4000 x 0.35 (shiprules
 CONE_R0, CONE_R1 = 2.0, 44.0   # twProcessorAutoRepairBeamWidth 250 x 0.35 wide at full range: very thin
 BANDS = (500.0, 950.0, 1400.0)  # cone lengths (shiprules.lua CAT_PROC_BANDS): the shortest that reaches the target
 SEGS = 16
+# the mesh is built MESH_LEN long (the events scale it to each band): stock fx_harvest's animation is in mesh units
+# (pulse rings 100 apart, ripples ~13), so a shorter mesh shows the Worker's beam's few rings, not 14 of them
+MESH_LEN = 350.0
+RINGS = 120               # rings along the cone: fx_harvest moves vertices (ripples, rings) and lights them
+V_REPEAT = 3.0            # texture repeats along the cone (it scrolls along V)
 # seconds per sweep (one way) at a stock ion turret's rates (kus_destroyerion1 maxAzimuthSpeed 35, maxDeclinationSpeed
 # 20 degrees a second; user: move like the destroyer's ion turret); shiprules.lua turns at the same rates
 SWEEP_YAW = 90.0 / 35
@@ -100,22 +105,30 @@ def fl(v):
 
 def write_dae():
     """A thin cone along +Z (the marker's axis: a -Z one rested pointing into the hull, calibration 2026-10-10), both
-    windings (seen from inside and out); U runs along it (the texture fades toward the tip), V around."""
+    windings (seen from inside and out), on stock fx_harvest (the shader of stock repair_beam / the Worker's repair
+    beam, user: as close to it as can be; it scrolls the texture along V, ripples the cone and runs pulse rings down
+    it). V runs along it, U around; the fade toward the tip is in the vertex colours (the texture scrolls)."""
     os.makedirs(BUILD, exist_ok=True)
-    pos, nrm, uv, tris = [], [], [], []
-    for ring, (z, rad) in enumerate(((0.0, CONE_R0), (CONE_LEN, CONE_R1))):
+    k_mesh = MESH_LEN / CONE_LEN
+    pos, nrm, uv, col, tris = [], [], [], [], []
+    for ring in range(RINGS + 1):
+        f = ring / RINGS
+        z, rad = MESH_LEN * f, (CONE_R0 + (CONE_R1 - CONE_R0) * f) * k_mesh
+        c = max(0.0, 1 - f / 0.9) ** 1.2          # black over the last tenth (a bright tip read as a searchlight)
         for k in range(SEGS + 1):
             a = 2 * math.pi * k / SEGS
             pos.append((rad * math.cos(a), rad * math.sin(a), z))
             nrm.append((math.cos(a), math.sin(a), 0.0))
-            uv.append((0.02 + 0.93 * ring, k / SEGS))   # U stops short of the texture's edges
+            uv.append((k / SEGS, f * V_REPEAT))
+            col.append((c, c, c, c))
     n = SEGS + 1
-    for k in range(SEGS):
-        a, b, c, d = k, k + 1, n + k, n + k + 1
-        tris += [(a, c, b), (b, c, d), (a, b, c), (b, d, c)]
+    for ring in range(RINGS):
+        for k in range(SEGS):
+            a, b, c, d = ring * n + k, ring * n + k + 1, (ring + 1) * n + k, (ring + 1) * n + k + 1
+            tris += [(a, c, b), (b, c, d), (a, b, c), (b, d, c)]
     name = "fx_procbeam"
     g = f"MULT[{name}_0]"
-    mat = "MAT[procbeam]_SHD[fx]"
+    mat = "MAT[procbeam]_SHD[fx_harvest]"
     img = f"IMG[{name}_DIFF]"
     dae = f'''<?xml version="1.0" encoding="utf-8"?>
 <COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
@@ -130,7 +143,7 @@ def write_dae():
 <effect id="{mat}-fx" name="{mat}"><profile_COMMON><technique sid="standard"><phong><diffuse><texture texture="{img}-image" texcoord="CHANNEL0"/></diffuse></phong></technique></profile_COMMON></effect>
 </library_effects>
 <library_geometries>
-<geometry id="{g}" name="{g}"><mesh><source id="{g}-pos"><float_array id="{g}-pos-a" count="{3 * len(pos)}">{" ".join(fl(p) for p in pos)}</float_array><technique_common><accessor source="#{g}-pos-a" count="{len(pos)}" stride="3"><param name="X" type="float"/><param name="Y" type="float"/><param name="Z" type="float"/></accessor></technique_common></source><source id="{g}-nrm"><float_array id="{g}-nrm-a" count="{3 * len(nrm)}">{" ".join(fl(p) for p in nrm)}</float_array><technique_common><accessor source="#{g}-nrm-a" count="{len(nrm)}" stride="3"><param name="X" type="float"/><param name="Y" type="float"/><param name="Z" type="float"/></accessor></technique_common></source><source id="{g}-uv0"><float_array id="{g}-uv0-a" count="{2 * len(uv)}">{" ".join(fl(p) for p in uv)}</float_array><technique_common><accessor source="#{g}-uv0-a" count="{len(uv)}" stride="2"><param name="S" type="float"/><param name="T" type="float"/></accessor></technique_common></source><vertices id="{g}-v"><input semantic="POSITION" source="#{g}-pos"/></vertices><triangles count="{len(tris)}" material="{mat}"><input semantic="VERTEX" offset="0" source="#{g}-v"/><input semantic="NORMAL" offset="0" source="#{g}-nrm"/><input semantic="TEXCOORD" offset="0" set="0" source="#{g}-uv0"/><p>{" ".join(str(i) for t in tris for i in t)}</p></triangles></mesh></geometry>
+<geometry id="{g}" name="{g}"><mesh><source id="{g}-pos"><float_array id="{g}-pos-a" count="{3 * len(pos)}">{" ".join(fl(p) for p in pos)}</float_array><technique_common><accessor source="#{g}-pos-a" count="{len(pos)}" stride="3"><param name="X" type="float"/><param name="Y" type="float"/><param name="Z" type="float"/></accessor></technique_common></source><source id="{g}-nrm"><float_array id="{g}-nrm-a" count="{3 * len(nrm)}">{" ".join(fl(p) for p in nrm)}</float_array><technique_common><accessor source="#{g}-nrm-a" count="{len(nrm)}" stride="3"><param name="X" type="float"/><param name="Y" type="float"/><param name="Z" type="float"/></accessor></technique_common></source><source id="{g}-col"><float_array id="{g}-col-a" count="{4 * len(col)}">{" ".join(fl(p) for p in col)}</float_array><technique_common><accessor source="#{g}-col-a" count="{len(col)}" stride="4"><param name="R" type="float"/><param name="G" type="float"/><param name="B" type="float"/><param name="A" type="float"/></accessor></technique_common></source><source id="{g}-uv0"><float_array id="{g}-uv0-a" count="{2 * len(uv)}">{" ".join(fl(p) for p in uv)}</float_array><technique_common><accessor source="#{g}-uv0-a" count="{len(uv)}" stride="2"><param name="S" type="float"/><param name="T" type="float"/></accessor></technique_common></source><vertices id="{g}-v"><input semantic="POSITION" source="#{g}-pos"/></vertices><triangles count="{len(tris)}" material="{mat}"><input semantic="VERTEX" offset="0" source="#{g}-v"/><input semantic="NORMAL" offset="0" source="#{g}-nrm"/><input semantic="TEXCOORD" offset="0" set="0" source="#{g}-uv0"/><input semantic="COLOR" offset="0" set="0" source="#{g}-col"/><p>{" ".join(str(i) for t in tris for i in t)}</p></triangles></mesh></geometry>
 </library_geometries>
 <library_visual_scenes><visual_scene id="scene" name="scene">
 <node name="ROOT_LOD[0]" id="ROOT_LOD[0]" sid="ROOT_LOD[0]E"><translate sid="translate">0 0 0</translate>
@@ -145,30 +158,13 @@ def write_dae():
 '''
     with open(os.path.join(BUILD, name + ".dae"), "w", encoding="utf-8", newline="\n") as f:
         f.write(dae)
-    fade_texture(os.path.join(BUILD, name + "_DIFF.tga"))
-    print(f"{BUILD}/{name}.dae: cone {CONE_LEN:g} long, radius {CONE_R0:g} -> {CONE_R1:g}, {len(tris)} triangles")
-
-
-def fade_texture(path):
-    """Stock HWRM's repair beam texture (fx_repairbeam_diff.tga, its teal-green noise as it is: user, as close to the
-    Worker's repair beam, stock repair_beam, as it can be) stretched along the cone (U), fading toward the tip and
-    black over its last tenth (the mesh's U stops short of 1: a wrapped tip showed the bright base, a white end like
-    a searchlight). Added (Blending 4, as stock), so black is see-through."""
-    w, h = 512, 128
-    src = Image.open(STOCK_TEX).convert("RGB").resize((w, h))
-    im = Image.new("RGBA", (w, h))
-    for x in range(w):
-        u = x / (w - 1)
-        v = max(0.0, 1 - u / 0.9) ** 1.2
-        for y in range(h):
-            r, g, b = src.getpixel((x, y))
-            im.putpixel((x, y), (int(r * v), int(g * v), int(b * v), 255))
-    im.save(path)
+    Image.open(STOCK_TEX).convert("RGBA").save(os.path.join(BUILD, name + "_DIFF.tga"))
+    print(f"{BUILD}/{name}.dae: cone {MESH_LEN:g} long (scaled to the bands), {RINGS} rings, {len(tris)} triangles")
 
 
 FX = '''-- Cataclysm-HWRM: the Processor's repair beam cone (tools/make_procbeam.py; on its Beam<i>_Cone joints, aimed by
--- its madstate). A mesh effect: the thin cone mesh with stock repair_beam's look
--- (the Worker's repair beam, user: as close to it as can be): its texture (faded toward the tip), its 5 s colour cycle,
+-- its madstate). A mesh effect: the thin cone mesh on stock fx_harvest with stock
+-- repair_beam's look (the Worker's repair beam, user: as close to it as can be): its texture, its 5 s colour cycle,
 -- its blending and lighting.
 fx = {
 style = "STYLE_RING",
@@ -194,7 +190,7 @@ property_17 = { name = "Billboard", type = "VARTYPE_BOOL", value = 0, },
 property_18 = { name = "AlternateFOV", type = "VARTYPE_BOOL", value = 0, },
 property_19 = { name = "SelfIlluminated", type = "VARTYPE_BOOL", value = 0, },
 property_20 = { name = "Blending", type = "VARTYPE_INT", value = 4, },
-property_21 = { name = "Texture", type = "VARTYPE_STRING", value = "DATA:ART/FX/TEXTURES/CAT_PROCBEAM.TGA", },
+property_21 = { name = "Texture", type = "VARTYPE_STRING", value = "DATA:ART/FX/REPAIR_FX/REPAIR_BEAM/FX_REPAIRBEAM_DIFF.TGA", },
 property_22 = { name = "Mesh", type = "VARTYPE_STRING", value = "DATA:ART/FX/CAT_PROCBEAM/CAT_PROCBEAM.HOD", },
 property_23 = { name = "SortOrder", type = "VARTYPE_INT", value = 2, },
 property_24 = { name = "RandomBitmap", type = "VARTYPE_BOOL", value = 0, },
@@ -215,10 +211,12 @@ def install():
     os.makedirs(os.path.join(fx, "cat_procbeam"), exist_ok=True)
     os.makedirs(os.path.join(fx, "textures"), exist_ok=True)
     shutil.copyfile(hod, os.path.join(fx, "cat_procbeam", "cat_procbeam.hod"))
-    fade_texture(os.path.join(fx, "textures", "cat_procbeam.tga"))
     with open(os.path.join(fx, "cat_procbeam.lua"), "w", newline="\n") as f:
         f.write(FX)
-    print("installed data/art/fx/cat_procbeam.lua, cat_procbeam/cat_procbeam.hod, textures/cat_procbeam.tga")
+    old = os.path.join(fx, "textures", "cat_procbeam.tga")
+    if os.path.exists(old):
+        os.remove(old)
+    print("installed data/art/fx/cat_procbeam.lua, cat_procbeam/cat_procbeam.hod")
 
 
 ANIM = ("    ProcBeam{i}_{b} = {{ name = \"ProcBeam{i}_{b}\", length = 1, loop = 1, parent = \"\", minimum = 0, "
@@ -237,7 +235,7 @@ def patch_events(path=None):
     for i in range(BEAMS):
         for b, length in enumerate(BANDS, 1):
             anims += ANIM.format(i=i, b=b)
-            events += EVENT.format(i=i, b=b, s=length / CONE_LEN)
+            events += EVENT.format(i=i, b=b, s=length / MESH_LEN)
     for table, add in (("animations", anims), ("events", events)):
         m = re.search(table + r"\s*=\s*\{", text)
         assert m, f"{path}: no {table} table"

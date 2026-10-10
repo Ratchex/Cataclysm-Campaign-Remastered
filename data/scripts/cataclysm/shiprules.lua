@@ -1277,8 +1277,10 @@ CAT_PROC_BEAMS = {          -- origin (HWRM units, our model) and side (x direct
 CAT_PROC_BANDS = { 500, 950, 1400 }   -- the cone's lengths (make_procbeam.py BANDS): the shortest that reaches
 CAT_PROC_LEVELS = 255                 -- yaw / pitch steps over -45..45 degrees (8 bits each)
 CAT_PROC_AIM_TRACE = 0                -- 1: log each message
-CAT_PROC_TURN_TRACE = 1               -- 1: log each update of a turret with a target (want / angle / rate, dt, heading)
+CAT_PROC_TURN_TRACE = 0               -- 1: log each update of a turret with a target (want / angle / rate, dt, heading)
 CAT_PROC_CALIBRATE = 0                -- 1: fixed poses to read the turret's signs off in game (CatProcessor_Tick)
+CAT_PROC_FLASH = "ion_repairflash"    -- on a ship a cone reaches (stock healbeam.wf hitfx; user: nothing on the target)
+CAT_PROC_FLASH_EVERY = 0.9            -- seconds (its Duration 0.95: FX_PlayEffect doesn't follow the ship, so short)
 CAT_PROC_BEAM_DELAY = 1.0             -- seconds after a beam takes a target before its cone shows
 CAT_PROC_AIM_EVERY = 0                -- seconds between a turret's messages while it turns (0: every update)
 CAT_PROC_YAW_SPEED = 35               -- degrees a second (kus_destroyerion1 maxAzimuthSpeed; make_procbeam.py)
@@ -1356,6 +1358,10 @@ function CatProcBeam_Aim(rec, g, i, t, o, r, u, f, now, dt)
             band = 3
             if n <= CAT_PROC_BANDS[1] then band = 1 elseif n <= CAT_PROC_BANDS[2] then band = 2 end
             if now - tu.since < CAT_PROC_BEAM_DELAY then band = 0 end   -- the cone shows a second after the beam starts
+            if band > 0 and now >= (tu.flash or 0) then
+                tu.flash = now + CAT_PROC_FLASH_EVERY
+                FX_PlayEffect(CAT_PROC_FLASH, CatShips[t].g, 1)
+            end
             if CAT_PROC_AIM_TRACE == 1 then
                 rec.aimWhy = "target " .. t .. " side " .. side .. " v(r,u,f) " .. floor(vx) .. "," .. floor(vy) .. "," ..
                              floor(vz) .. " want " .. floor(wy) .. "," .. floor(wp)
