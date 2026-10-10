@@ -14,7 +14,7 @@ OUT="$MOD/build/ships/$NAME"
 HODOR="C:/Program Files (x86)/Steam/steamapps/common/Homeworld 347380/GBXTools/HODOR"
 # Animated ships: their Cataclysm .mad objects become joints (geo2dae --anim-joints) driven by a converted .mad
 # (tools/mad2hwrm.py -> build/ships/<name>/<name>.mad, installed by install_cr.py), plus effect marker joints.
-ANIM=""; TRIM=""; CLIPS=""; ANIM_SRC=""
+ANIM=""; TRIM=""; CLIPS=""; ANIM_SRC=""; PROCBEAM=""
 case "$NAME" in
   som_worker)
     ANIM="Jackbase,Jackhamr,Blade(1),Blade(2),Blade(3),DockClmp(1),DockClmp(2),DockClmp(3),DockClmp(4)"
@@ -34,10 +34,11 @@ case "$NAME" in
     CLIPS="JackOut,JackSpin,JackClose,DockOpen,DockClose,BladesSpin"
     ;;
   som_processor)
-    # its four lateral repair beams (dock points Repair0-3, two each side, straight out: shiprules.lua
-    # CAT_PROC_BEAMS) as heal weapons for the ordered repair (install_cr.py repair_order)
-    GEO2DAE_ARGS="$GEO2DAE_ARGS --weapon Repair0@dok:REPAIR0@-1,0,0 --weapon Repair1@dok:REPAIR1@-1,0,0"
-    GEO2DAE_ARGS="$GEO2DAE_ARGS --weapon Repair2@dok:REPAIR2@1,0,0 --weapon Repair3@dok:REPAIR3@1,0,0"
+    # its four lateral repair beams (dock points REPAIR0-3, two each side, facing out: shiprules.lua CAT_PROC_BEAMS)
+    # as script-aimed turrets carrying the beam cone; their aim clips: tools/make_procbeam.py --mad (below)
+    GEO2DAE_ARGS="$GEO2DAE_ARGS --turret Beam0@dok:REPAIR0@-90 --turret Beam1@dok:REPAIR1@-90"
+    GEO2DAE_ARGS="$GEO2DAE_ARGS --turret Beam2@dok:REPAIR2@90 --turret Beam3@dok:REPAIR3@90"
+    PROCBEAM=1
     ;;
   som_mothership)
     # the command module's gravity generator spins (smothershipcommand.mad GravRotate: a full turn every 12 s, looped
@@ -75,6 +76,9 @@ python "$MOD/tools/geo2dae.py" "$GEO" "$OUT" "$NAME" $GEO2DAE_ARGS $(for h in $H
 grep -v -e '^X*$' -e 'Building LMIP' "$OUT/hodor.log" | sed 's/^/  /'
 [ -s "$OUT/$NAME.hod" ] || { echo "HODOR did not write $OUT/$NAME.hod"; exit 1; }
 echo "build/ships/$NAME/$NAME.hod: $(stat -c %s "$OUT/$NAME.hod") bytes"
+if [ -n "$PROCBEAM" ]; then
+  python "$MOD/tools/make_procbeam.py" --mad "$OUT/$NAME.mad"
+fi
 if [ -n "$ANIM" ]; then
   ASRC="${ANIM_SRC:-$SRC}"
   python "$MOD/tools/mad2hwrm.py" "C:/Modding/Cataclysm-decomp/extracted/big/$ASRC.mad" "$(geo "$ASRC")" "$OUT/$NAME.mad" \

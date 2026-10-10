@@ -195,7 +195,6 @@ function CatShip_Update(g, p, id)
     local now = Universe_GameTime()
     CatSession(now)
     if getn(CatLinkSwaps) > 0 then CatLinkSwap_Tick(now) end
-    if CatBeamCount > 0 then CatBeam_Sweep(now) end
     local rec = CatShips[id]
     if not rec then return end
     if not rec.adopted and SobGroup_Empty(g) == 0 then CatShip_Adopt(rec, g, now) end
@@ -1122,59 +1121,6 @@ function CatGated_Tick(rec)
     end
 end
 
--- Repair beams (data/art/fx/cat_repairbeam.lua): a beam effect between two volumes, at the beam's origin and the
--- target (FX_PlayEffectBetweenPoints; it stays where it was spawned, so it is re-spawned once either end moves).
--- Each beam is refreshed by its ship's update (every 0.5 s); one not refreshed for 1.2 s (repair over, ship gone)
--- is stopped by CatBeam_Sweep.
-CatBeams = {}
-CatBeamCount = 0
-CAT_BEAM_MOVE = 64          -- re-spawn once an end has moved this far (squared: 8 units)
-
-function CatBeam_Set(key, o, tp, scale, now)
-    local b = CatBeams[key]
-    if not b then
-        b = {}
-        CatBeams[key] = b
-        CatBeamCount = CatBeamCount + 1
-    end
-    if b.h then
-        local d1 = (b.o[1] - o[1]) * (b.o[1] - o[1]) + (b.o[2] - o[2]) * (b.o[2] - o[2]) + (b.o[3] - o[3]) * (b.o[3] - o[3])
-        local d2 = (b.t[1] - tp[1]) * (b.t[1] - tp[1]) + (b.t[2] - tp[2]) * (b.t[2] - tp[2]) + (b.t[3] - tp[3]) * (b.t[3] - tp[3])
-        if d1 > CAT_BEAM_MOVE or d2 > CAT_BEAM_MOVE then
-            FX_StopEffect(b.h)
-            b.h = nil
-        end
-    end
-    if not b.h then
-        Volume_Delete(key .. "a")
-        Volume_AddSphere(key .. "a", o, 1)
-        Volume_Delete(key .. "b")
-        Volume_AddSphere(key .. "b", tp, 1)
-        b.h = FX_PlayEffectBetweenPoints("cat_repairbeam", key .. "a", key .. "b", scale)
-        if CAT_REPAIR_TRACE == 1 then print("CATACLYSM beam " .. key .. ": effect " .. tostring(b.h)) end
-        b.o, b.t = o, tp
-    end
-    b.seen = now
-end
-
-function CatBeam_Off(key)
-    local b = CatBeams[key]
-    if not b then return end
-    if b.h then FX_StopEffect(b.h) end
-    Volume_Delete(key .. "a")
-    Volume_Delete(key .. "b")
-    CatBeams[key] = nil
-    CatBeamCount = CatBeamCount - 1
-end
-
-function CatBeam_Sweep(now)
-    local old = {}
-    for k, b in CatBeams do
-        if now - b.seen > 1.2 then tinsert(old, k) end
-    end
-    for i = 1, getn(old) do CatBeam_Off(old[i]) end
-end
-
 -- The ordered repair (the Worker's and Processor's RepairCommand: install_cr.py repair_order). HWRM heals only by
 -- latching onto the target's repair point (RepairByLatchingCommand), which flew the repairer onto the target and
 -- dragged it along (user: "jank"). Its non-latching form (4th argument 1) approaches the target, faces it (the
@@ -1192,7 +1138,6 @@ CAT_REPAIR_SIZE = { smt_ms_sp = 600, smt_processor = 116, smt_rammingfrigate = 5
                     smt_acv = 9, smt_acolyte = 8, smt_scout = 6 }
 CAT_REPAIR_STILL = 5        -- slower than this: sitting still
 CAT_REPAIR_IDLE = 3         -- seconds sitting still with nothing to heal before the order ends
-CAT_PROC_BEAM = 2.5
 CAT_REPAIR_TRACE = 1        -- TEST: log the ordered repair each second
 
 function CatRepair_Tick(rec, g, id, now)
@@ -1296,6 +1241,77 @@ CAT_PROC_TRACE = 0          -- 1: log each heal step
 CAT_PROC_BEAMS = {          -- origin (HWRM units, our model) and side (x direction) of Repair0-3 (sprocessor.mex)
     { -97.7, 25.4, -78.1, -1 }, { -106.7, -28.0, 6.3, -1 }, { 106.7, -28.0, 6.3, 1 }, { 97.7, 25.4, -78.1, 1 } }
 
+-- The beam cones (tools/make_procbeam.py: the cone on each beam's turret joints, aimed by smt_processor.madstate).
+-- Each beam's state goes to the madstate as a 14-bit message (beam, band, yaw, pitch) when it changes: a bit is a
+-- switch to one of the two of NIS00-02 the madstate is not in (it can't read this script's globals).
+CAT_PROC_BANDS = { 500, 950, 1400 }   -- the cone's lengths (make_procbeam.py BANDS): the shortest that reaches
+CAT_PROC_LEVELS = 31                  -- yaw / pitch steps over -45..45 degrees
+CAT_PROC_AIM_TRACE = 1                -- TEST: log each message
+
+function CatProcBeam_Aim(rec, g, i, t, o, r, u, f)
+    local band, yq, pq = 0, 0, 0
+    if t then
+        local tp = SobGroup_GetPosition(CatShips[t].g)
+        local v = { tp[1] - o[1], tp[2] - o[2], tp[3] - o[3] }
+        local vx = v[1] * r[1] + v[2] * r[2] + v[3] * r[3]
+        local vy = v[1] * u[1] + v[2] * u[2] + v[3] * u[3]
+        local vz = v[1] * f[1] + v[2] * f[2] + v[3] * f[3]
+        local side = CAT_PROC_BEAMS[i][4]
+        -- the beam's own frame (geo2dae --turret: _Base turned 90 degrees about up, +Z out of its side)
+        local lx, ly, lz = -side * vz, vy, side * vx
+        local n = sqrt(lx * lx + ly * ly + lz * lz)
+        if n > 1 then
+            local yaw = atan2(lx, lz)                    -- Lua 4: degrees
+            local pitch = asin(-ly / n)
+            yq = CatProcBeam_Level(yaw)
+            pq = CatProcBeam_Level(pitch)
+            band = 3
+            if n <= CAT_PROC_BANDS[1] then band = 1 elseif n <= CAT_PROC_BANDS[2] then band = 2 end
+        end
+    end
+    rec.aim = rec.aim or {}
+    local last = rec.aim[i]
+    if last and last[1] == band and (band == 0 or (last[2] == yq and last[3] == pq)) then return end
+    rec.aim[i] = { band, yq, pq }
+    local bits = {}
+    CatProcBeam_Bits(bits, i - 1, 2)
+    CatProcBeam_Bits(bits, band, 2)
+    CatProcBeam_Bits(bits, yq, 5)
+    CatProcBeam_Bits(bits, pq, 5)
+    if not rec.madSym then                               -- first: a sync switch (no bit)
+        rec.madSym = 0
+        SobGroup_SetMadState(g, "NIS00")
+    end
+    for k = 1, getn(bits) do
+        local sym = rec.madSym + 1 + bits[k]
+        if sym >= 3 then sym = sym - 3 end
+        rec.madSym = sym
+        SobGroup_SetMadState(g, "NIS0" .. sym)
+    end
+    if CAT_PROC_AIM_TRACE == 1 then
+        print("CATACLYSM procbeam " .. rec.g .. " beam " .. (i - 1) .. ": band " .. band .. ", yaw " .. yq .. ", pitch " .. pq)
+    end
+end
+
+function CatProcBeam_Level(a)
+    local q = floor((a + 45) / 90 * CAT_PROC_LEVELS + 0.5)
+    if q < 0 then q = 0 elseif q > CAT_PROC_LEVELS then q = CAT_PROC_LEVELS end
+    return q
+end
+
+function CatProcBeam_Bits(bits, v, count)
+    for k = count - 1, 0, -1 do
+        local p = 1
+        for j = 1, k do p = p * 2 end
+        if v >= p then
+            tinsert(bits, 1)
+            v = v - p
+        else
+            tinsert(bits, 0)
+        end
+    end
+end
+
 function CatProcessor_InBeam(t, o, d, p, me, ordered)
     local trec = CatShips[t]
     if t == me or not trec or trec.gone or trec.p ~= p or SobGroup_Empty(trec.g) == 1 then return nil end
@@ -1361,7 +1377,7 @@ function CatProcessor_Tick(rec, g, id, now)
                       " (max " .. mx .. ", dt " .. dt .. ") now " .. SobGroup_HealthPercentage(tg))
             end
         end
-        if t then CatBeam_Set("cat_rb_" .. id .. "_" .. i, o, SobGroup_GetPosition(CatShips[t].g), CAT_PROC_BEAM, now) end   -- after the heal
+        CatProcBeam_Aim(rec, g, i, t, o, r, u, f)   -- after the heal
     end
 end
 

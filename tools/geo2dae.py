@@ -523,6 +523,10 @@ def main():
                     help="extra weapon hardpoint Weapon_NAME (_Position / _Direction / _Rest / _Muzzle): "
                          "NAME@x,y,z@dx,dy,dz (HWRM units, firing along d) or NAME@dok:LABEL@dx,dy,dz (at that "
                          ".mex dock point): the Worker's and Processor's repair beams")
+    ap.add_argument("--turret", action="append", default=[],
+                    help="script-aimed effect turret NAME@dok:LABEL@YAW: joints NAME_Base (at that .mex dock point, "
+                         "turned YAW degrees about up, so its +Z points that way) > NAME_Yaw > NAME_Pitch > NAME_Cone "
+                         "(the effect marker); tools/make_procbeam.py animates _Yaw / _Pitch (the Processor's beams)")
     ap.add_argument("--latch", help="LatchOrientation joint at x,y,z (HWRM units): the point a collector puts on "
                                     "the asteroid's surface while harvesting")
     ap.add_argument("--glow-from", help="old-format HOD whose GLOW textures (Cataclysm texture names) become our "
@@ -832,6 +836,14 @@ def main():
                 at = tuple(float(c) for c in o.split(","))
         weapons += jnode(f"JNT[{hp}_Position]", at, jnode(f"JNT[{hp}_Direction]", (0, 10, 0))
                          + jnode(f"JNT[{hp}_Rest]", rest))
+    for spec in a.turret:   # script-aimed effect turrets: _Base (facing out) > _Yaw > _Pitch > _Cone (the marker)
+        name, where, yaw = spec.split("@")
+        if where[4:] not in dok_points:
+            sys.exit(f"--turret {spec}: no dock point {where[4:]}")
+        cone = jnode(f"JNT[{name}_Cone]", (0, 0, 0))
+        weapons += jnode(f"JNT[{name}_Base]", conv(*dok_points[where[4:]][2]),
+                         jnode(f"JNT[{name}_Yaw]", (0, 0, 0), jnode(f"JNT[{name}_Pitch]", (0, 0, 0), cone)),
+                         rot=(0.0, float(yaw), 0.0))
     for spec in a.weapon:   # extra weapon hardpoints (weapon_nodes' layout)
         name, where, d = spec.split("@")
         if where.startswith("dok:"):

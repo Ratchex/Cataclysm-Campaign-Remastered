@@ -581,6 +581,9 @@ def main():
     # the Mimic's transformation effects as events on the Mimic and its disguises (tools/make_mimicfx.py)
     import make_mimicfx
     make_mimicfx.patch_all_events()
+    # the Processor's repair beam cones as events on its beam turret joints (tools/make_procbeam.py)
+    import make_procbeam
+    make_procbeam.patch_events()
     # Cataclysm's ship rules (experience, damage slowing ships, Acolyte link) on every ship the campaign uses
     copied += make_shipcode.install()
     # Cataclysm's health and weapon damage (user: all ships, Cataclysm's scale 1:1)
