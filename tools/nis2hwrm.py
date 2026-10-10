@@ -94,8 +94,11 @@ BEAM_KILL_FX, BEAM_KILL_SCALE, BEAM_KILL_SUFFIX = "death_generic_fighter", 0.75,
 # (<target>_wreck, same type and path) shows and dies there instead.
 MISSILE_SHIPS = ("missiledestroyer",)
 WRECK_SUFFIX = "_wreck"
-# per cutscene: haltAttack() at this frame instead (user: nislet01's ion frigate beam ran on too long)
-HALT_AT = {("nislet01", "tai_ioncannonfrigate1"): 1520}
+WRECK_AWAY = 100000.0   # HWRM units the double is held off (along Y) until a frame before its death
+# per cutscene: haltAttack() at this frame instead
+# (nislet01's ion frigate: its 4 s beam, ordered at 1404 and charging 2 s, ends by itself about 1584, just before
+# the 1591 camera cut; halted mid-beam its warbling sound looped on: user)
+HALT_AT = {("nislet01", "tai_ioncannonfrigate1"): 1600}
 # per cutscene: an object's path moved by this many HWRM units along another object's up axis at a frame (user:
 # nislet01's top Taiidan interceptor clipped into the Kushan destroyer it loops round)
 PATH_OFFSET = {("nislet01", "tai_interceptor13"): ("kus_destroyer1", 2560, 20.0)}
@@ -689,15 +692,20 @@ def main():
         seen_[typ] = seen_.get(typ, 0) + 1
         by_key[typ if counts[typ] == 1 else f"{typ}{seen_[typ]}"] = o
 
-    def own_channels(new_key, src_key):
+    def own_channels(new_key, src_key, away_until=None):
         """A copy of another object's channels under the new object's names: HWRM frees each object's channels
         when the NIS ends, so two objects on the same channels freed them twice (heap corruption 0xc0000374,
-        found as a crash on every exit to the menu; ProcDump stack in MotionNode / MotionFollower)."""
+        found as a crash on every exit to the menu; ProcDump stack in MotionNode / MotionFollower).
+        away_until: seconds before which the copy is held WRECK_AWAY off (a hidden ship still has a hull: a double
+        on the same spot took its original's shots and the missiles at it; user: the destroyers stopped firing)."""
         tl, ch, _ = object_channels[src_key]
         out = []
         for c in ("translateX", "translateY", "translateZ", "rotateX", "rotateY", "rotateZ"):
             out.append(f"{new_key}_{c}")
-            anim.append(channel(out[-1], list(zip(tl, ch[c])), fps))
+            vals = ch[c]
+            if away_until is not None and c == "translateY":
+                vals = [v + (WRECK_AWAY if t < away_until else 0) for t, v in zip(tl, vals)]
+            anim.append(channel(out[-1], list(zip(tl, vals)), fps))
         return out
 
     for o, (kind, typ) in kept:
@@ -746,12 +754,15 @@ def main():
 
     # explosion effect objects for targets that die under a beam (beam_kills), on the target's own channels
     hidden_deaths = beam_kills(src + ".script", objects, fps)
-    for target, (_, kind_) in hidden_deaths.items():
+    for target, (dframe, kind_) in hidden_deaths.items():
         start = object_channels[target][2]
         if kind_ == "missile":
             typ_ = object_types[target]
+            away = own_channels(target + WRECK_SUFFIX, target, away_until=(dframe - 1) / fps)
+            wstart = struct.unpack("<6d", start)
+            wstart = struct.pack("<6d", wstart[0], wstart[1] + WRECK_AWAY, *wstart[2:])
             folw.append(lstr(target + WRECK_SUFFIX) + lstr("HW1") + lstr("ship") + lstr(typ_)
-                        + b"".join(lstr(n) for n in own_channels(target + WRECK_SUFFIX, target)) + start + b" ZYX")
+                        + b"".join(lstr(n) for n in away) + wstart + b" ZYX")
             continue
         folw.append(lstr(target + BEAM_KILL_SUFFIX) + lstr("HW1") + lstr("effect") + lstr(BEAM_KILL_FX)
                     + b"".join(lstr(n) for n in own_channels(target + BEAM_KILL_SUFFIX, target)) + start + b" ZYX")
