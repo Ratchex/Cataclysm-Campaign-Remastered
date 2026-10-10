@@ -2,6 +2,6 @@
 CatAbilities = {
     { name = "volley", native = 1, label = "Fire Missiles", types = "smt_acolyte", tech = "", upgrade = "ORDINANCE", handler = "CatVolley_Start" },
     { name = "link", native = 0, label = "Link", types = "smt_acolyte", tech = "TECH_LINK", upgrade = "LINK", handler = "CatLink_Start" },
-    { name = "unlink", native = 1, label = "Unlink", types = "smt_acv", tech = "", upgrade = "UNLINK", handler = "CatUnlink_Start" },
+    { name = "unlink", native = 0, label = "Unlink", types = "smt_acv", tech = "", upgrade = "UNLINK", handler = "CatUnlink_Start" },
     { name = "upgrade", native = 0, label = "Upgrade", types = "bst_acolyte, bst_acv, bst_attackbomber, bst_carrier, bst_cloakedfighter, bst_cruisemissile, bst_heavycorvette, bst_heavycruiser, bst_hivefrigate, bst_ionarrayfrigate, bst_missilecorvette, bst_mothership, bst_multibeamfrigate, bst_multiguncorvette, bst_rammingfrigate, kus_gravwellgenerator, kus_salvagecorvette, smt_acolyte, smt_acv, smt_carrier, smt_destroyer, smt_dreadnought, smt_hivefrigate, smt_mimic, smt_ms_sp, smt_multibeamfrigate, smt_processor, smt_rammingfrigate, smt_scout, smt_sentinel, smt_worker, tai_gravwellgenerator, tai_proximitysensor, tai_salvagecorvette", tech = "", upgrade = "", handler = "CatUpgrade_Start" },
 }

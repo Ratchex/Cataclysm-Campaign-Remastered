@@ -2,6 +2,7 @@
 CAT_BTN_VOLLEY = GetCommandButton("btnCat_volley", "Fire Missiles", nil, "DATA:UI\\NewUI\\Taskbar\\CommandIcons\\cmd_ico_missilevolley.dds", "MainUI_UserEventData( eCustomActivate, 6 );", "MainUI_UserEventData( eCustomDeActivate, 6 );")
 CAT_BTN_LINK = GetCommandButton("btnCat_link", "Link", nil, "DATA:UI\\NewUI\\Taskbar\\CommandIcons\\cmd_ico_dronefrigate.dds", "MainUI_ScarEvent( \"CatAbility('link')\" )")
 CAT_BTN_LINK[1].drawText = 0
-CAT_BTN_UNLINK = GetCommandButton("btnCat_unlink", "Unlink", nil, "DATA:UI\\NewUI\\Taskbar\\CommandIcons\\cmd_ico_specialattack.dds", "MainUI_UserEventData( eCustomActivate, 5 );", "MainUI_UserEventData( eCustomDeActivate, 5 );")
+CAT_BTN_UNLINK = GetCommandButton("btnCat_unlink", "Unlink", nil, "DATA:UI\\NewUI\\Taskbar\\CommandIcons\\cmd_ico_specialattack.dds", "MainUI_ScarEvent( \"CatAbility('unlink')\" )")
+CAT_BTN_UNLINK[1].drawText = 0
 CAT_BTN_UPGRADE = GetCommandButton("btnCat_upgrade", "Upgrade", nil, "DATA:UI\\NewUI\\Taskbar\\CommandIcons\\cmd_ico_repair.dds", "MainUI_ScarEvent( \"CatAbility('upgrade')\" )")
 CAT_BTN_UPGRADE[1].drawText = 0

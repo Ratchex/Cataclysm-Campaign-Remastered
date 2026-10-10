@@ -269,10 +269,4 @@ CustomCommandDefinitions =
         activateButtonName = "btnCat_volley",
         rightClickDisplayName = "Fire Missiles",
     },
-    -- Cataclysm-HWRM (tools/make_abilities.py)
-    {
-        commandID = INFO_CustomStart + 5,
-        activateButtonName = "btnCat_unlink",
-        rightClickDisplayName = "Unlink",
-    },
 }

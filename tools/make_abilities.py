@@ -35,7 +35,7 @@ ABILITIES = {
     # missile cooldown (ENERGY); Link is a button
     "volley": (6, "Fire Missiles", ["smt_acolyte"], "", "ORDINANCE", "CatVolley_Start", "cmd_ico_missilevolley.dds"),
     "link": (None, "Link", ["smt_acolyte"], "TECH_LINK", "LINK", "CatLink_Start", "cmd_ico_dronefrigate.dds"),
-    "unlink": (5, "Unlink", ["smt_acv"], "", "UNLINK", "CatUnlink_Start", "cmd_ico_specialattack.dds"),
+    "unlink": (None, "Unlink", ["smt_acv"], "", "UNLINK", "CatUnlink_Start", "cmd_ico_specialattack.dds"),
     # strMenuUpgradeSectShipsDesc: every ship type with upgrades
     "upgrade": (None, "Upgrade", make_upgrades.upgradable(), "", "", "CatUpgrade_Start", "cmd_ico_repair.dds"),
 }
