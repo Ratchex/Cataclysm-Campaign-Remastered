@@ -1177,13 +1177,17 @@ end
 
 -- The ordered repair (the Worker's and Processor's RepairCommand: install_cr.py repair_order). HWRM heals only by
 -- latching onto the target's repair point (RepairByLatchingCommand), which flew the repairer onto the target and
--- dragged it along (user: "jank"). Its non-latching form (4th argument 1) picks the target, approaches and faces it
--- and holds off at range (data/scripts/attack/*_catrepair.lua) but never heals (log: doing 1, repairing group
--- empty). So this script heals: the Worker's beam from its jackhammer tip (sworker.shp repairDistance 1500 x 0.525,
--- cone 120), the Processor's from its side beams (CatProcessor_Tick, ordered targets first); the order ends once
--- every target is healed.
+-- dragged it along (user: "jank"). Its non-latching form (4th argument 1) approaches the target, faces it (the
+-- Processor turns its side) and holds off (data/scripts/attack/*_catrepair.lua) but never heals, and keeps the
+-- target to itself (SobGroup_GetCommandTargets: nothing). So, as Cataclysm (HW1 RepairCorvette.c refuelRepairShips:
+-- stop in range, face the target, beam it while it is in the beam's angle): the Worker beams the damaged friendly
+-- most nearly ahead (sworker.shp repairDistance 1500 x 0.525, repairCone 120), the Processor its side beams
+-- (CatProcessor_Tick); the order ends once it sits still with nothing to heal.
 CAT_WORKER_RANGE = 790
 CAT_WORKER_TIP = { 0, 28.5, 0 }
+CAT_WORKER_CONE = 0.5       -- cos(sworker.shp repairCone 120 / 2)
+CAT_REPAIR_STILL = 5        -- slower than this: sitting still
+CAT_REPAIR_IDLE = 3         -- seconds sitting still with nothing to heal before the order ends
 CAT_WORKER_BEAM = 1         -- beam effect scale (sworker.shp repairBeamWidth 100; the Processor's 250)
 CAT_PROC_BEAM = 2.5
 CAT_REPAIR_TRACE = 1        -- TEST: log the ordered repair each second
@@ -1191,68 +1195,66 @@ CAT_REPAIR_TRACE = 1        -- TEST: log the ordered repair each second
 function CatRepair_Tick(rec, g, id, now)
     local dt = now - (rec.repLast or now)
     rec.repLast = now
-    rec.ordered = nil
-    if not rec.up.REPAIR or SobGroup_IsDoingAbility(g, AB_Repair) ~= 1 then return end
-    local out = "cat_repairtargets"
-    SobGroup_CreateIfNotExist(out)
-    SobGroup_Clear(out)
-    SobGroup_GetCommandTargets(out, g, COMMAND_Repair)
-    if SobGroup_Empty(out) == 1 then
-        local found = nil
-        local names = { "COMMAND_Attack", "COMMAND_Guard", "COMMAND_MoveToSob", "COMMAND_Dock", "COMMAND_Salvage",
-                        "COMMAND_Capture", "COMMAND_Resource" }
-        local line = "order " .. tostring(SobGroup_GetCurrentOrder(g)) .. ", COMMAND_Repair " .. tostring(COMMAND_Repair)
-        for i = 1, getn(names) do
-            local c = getglobal(names[i])
-            if c then
-                SobGroup_Clear(out)
-                SobGroup_GetCommandTargets(out, g, c)
-                local n = SobGroup_Count(out)
-                line = line .. ", " .. names[i] .. " " .. c .. ": " .. n
-                if n > 0 and not found then found = names[i] end
-            end
-        end
-        if CAT_REPAIR_TRACE == 1 and now >= (rec.repDiag or 0) then
-            rec.repDiag = now + 1
-            print("CATACLYSM repair " .. id .. " targets: " .. line)
-        end
-        if not found then return end
-        SobGroup_Clear(out)
-        SobGroup_GetCommandTargets(out, g, getglobal(found))
-    end
-    rec.ordered = {}
-    local damaged, healing, bo, bt = 0, nil, nil, nil
-    for k, trec in CatShips do
-        if k ~= id and not trec.gone and trec.p == rec.p and SobGroup_Empty(trec.g) == 0
-                and SobGroup_GroupInGroup(trec.g, out) == 1 then
-            rec.ordered[k] = 1
-            if SobGroup_HealthPercentage(trec.g) < 0.999 then
-                damaged = damaged + 1
-                if rec.t == "smt_worker" and not healing then healing, bo, bt = CatRepair_WorkerBeam(rec, g, k) end
-            end
-        end
-    end
-    if damaged == 0 then                            -- all healed: the order is done
-        SobGroup_Stop(rec.p, g)
-        rec.ordered = nil
+    if not rec.up.REPAIR or SobGroup_IsDoingAbility(g, AB_Repair) ~= 1 then
+        rec.repT, rec.repIdle = nil, nil
         return
     end
-    if healing and dt > 0 then
-        local tg = CatShips[healing].g
-        local rate = CAT_PROC_RATE
-        if CatShips[healing].t == "smt_ms_sp" then rate = 35 end
-        local h = SobGroup_HealthPercentage(tg) + rate * dt / SobGroup_MaxHealthTotal(tg)
-        if h > 1 then h = 1 end
-        SobGroup_SetHealth(tg, h)
+    local busy = nil
+    if rec.t == "smt_processor" then
+        -- its side beams heal (CatProcessor_Tick); the order only turns its side to the target
+        for i = 1, 4 do
+            if rec.beams and rec.beams[i] then busy = 1 end
+        end
+    else
+        -- HWRM keeps the order's target to itself (SobGroup_GetCommandTargets: nothing for COMMAND_Repair or any
+        -- other order), but its order turns the Worker to face it: the beam takes the damaged friendly ship most
+        -- nearly ahead within range, as Cataclysm's beam took what was in its cone
+        local t = rec.repT
+        if t and not CatRepair_InWorkerBeam(rec, g, id, t) then t = nil end
+        if not t or now >= (rec.repScan or 0) then
+            rec.repScan = now + CAT_TICK
+            local best
+            for k, _ in CatShips do
+                local score = CatRepair_InWorkerBeam(rec, g, id, k)
+                if score and (not best or score > best) then t, best = k, score end
+            end
+        end
+        rec.repT = t
+        if t then
+            busy = 1
+            local tg = CatShips[t].g
+            if dt > 0 then
+                local rate = CAT_PROC_RATE
+                if CatShips[t].t == "smt_ms_sp" then rate = 35 end
+                local h = SobGroup_HealthPercentage(tg) + rate * dt / SobGroup_MaxHealthTotal(tg)
+                if h > 1 then h = 1 end
+                SobGroup_SetHealth(tg, h)
+            end
+            CatBeam_Set("cat_rb_" .. id .. "_w", rec.repO, SobGroup_GetPosition(tg), CAT_WORKER_BEAM, now)   -- after the heal
+        end
     end
-    if healing then CatBeam_Set("cat_rb_" .. id .. "_w", bo, bt, CAT_WORKER_BEAM, now) end   -- after the heal
+    -- the order is done once it sits still with nothing to heal (HWRM never ends it: it never latches)
+    if busy or SobGroup_GetActualSpeed(g) > CAT_REPAIR_STILL then
+        rec.repIdle = nil
+    elseif not rec.repIdle then
+        rec.repIdle = now
+    elseif now - rec.repIdle > CAT_REPAIR_IDLE then
+        SobGroup_Stop(rec.p, g)
+        rec.repIdle = nil
+    end
     if CAT_REPAIR_TRACE == 1 and now >= (rec.repTrace or 0) then
         rec.repTrace = now + 1
-        print("CATACLYSM repair " .. id .. " (" .. rec.t .. "): " .. damaged .. " damaged targets, healing " .. (healing or "none"))
+        print("CATACLYSM repair " .. id .. " (" .. rec.t .. "): healing " .. (rec.repT or "none") .. ", busy " ..
+              (busy or 0) .. ", speed " .. SobGroup_GetActualSpeed(g))
     end
 end
 
-function CatRepair_WorkerBeam(rec, g, t)
+-- a damaged friendly ship within the Worker's beam range and cone: how nearly ahead it is (rec.repO: the beam's
+-- origin, its jackhammer tip)
+function CatRepair_InWorkerBeam(rec, g, id, t)
+    local trec = CatShips[t]
+    if t == id or not trec or trec.gone or trec.p ~= rec.p or SobGroup_Empty(trec.g) == 1 then return nil end
+    if SobGroup_HealthPercentage(trec.g) >= 0.999 then return nil end
     local m = SobGroup_GetCoordSys(g)
     if getn(m) ~= 9 then return nil end
     local pos = SobGroup_GetPosition(g)
@@ -1260,11 +1262,15 @@ function CatRepair_WorkerBeam(rec, g, t)
     local b = CAT_WORKER_TIP
     local o = { pos[1] + r[1] * b[1] + u[1] * b[2] + f[1] * b[3], pos[2] + r[2] * b[1] + u[2] * b[2] + f[2] * b[3],
                 pos[3] + r[3] * b[1] + u[3] * b[2] + f[3] * b[3] }
-    local tp = SobGroup_GetPosition(CatShips[t].g)
+    local tp = SobGroup_GetPosition(trec.g)
     local v = { tp[1] - o[1], tp[2] - o[2], tp[3] - o[3] }
     local dist = sqrt(v[1] * v[1] + v[2] * v[2] + v[3] * v[3])
-    if dist > CAT_WORKER_RANGE then return nil end   -- no cone: HWRM's order, not Cataclysm's, parks the Worker
-    return t, o, tp
+    if dist > CAT_WORKER_RANGE then return nil end
+    local dot = 1
+    if dist >= 1 then dot = (v[1] * f[1] + v[2] * f[2] + v[3] * f[3]) / dist end
+    if dot < CAT_WORKER_CONE then return nil end
+    rec.repO = o
+    return dot
 end
 
 -- The Processor's automatic repair beams (Cataclysm FUN_005bedd0 / 005beae0, tweak.script twProcessorAutoRepair*):
@@ -1314,15 +1320,14 @@ function CatProcessor_Tick(rec, g, id, now)
                     pos[3] + r[3] * b[1] + u[3] * b[2] + f[3] * b[3] }
         local d = { r[1] * b[4], r[2] * b[4], r[3] * b[4] }
         local t = rec.beams[i]
-        if t and not CatProcessor_InBeam(t, o, d, rec.p, id, rec.ordered) then
+        if t and not CatProcessor_InBeam(t, o, d, rec.p, id) then
             taken[t], t = nil, nil
         end
         if not t and scan then                       -- the nearest damaged friendly in this beam
             local best
             for k, _ in CatShips do
                 if not taken[k] then
-                    local dist = CatProcessor_InBeam(k, o, d, rec.p, id, rec.ordered)
-                    if dist and rec.ordered and rec.ordered[k] then dist = dist - 100000 end
+                    local dist = CatProcessor_InBeam(k, o, d, rec.p, id)
                     if dist and (not best or dist < best) then t, best = k, dist end
                 end
             end
