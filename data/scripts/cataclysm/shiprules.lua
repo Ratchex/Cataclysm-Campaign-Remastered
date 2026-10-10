@@ -1237,26 +1237,31 @@ CAT_PROC_BANDS = { 500, 950, 1400 }   -- the cone's lengths (make_procbeam.py BA
 CAT_PROC_LEVELS = 63                  -- yaw / pitch steps over -45..45 degrees (6 bits each)
 CAT_PROC_AIM_TRACE = 0                -- 1: log each message
 CAT_PROC_CALIBRATE = 0                -- 1: fixed poses to read the turret's signs off in game (CatProcessor_Tick)
-CAT_PROC_AIM_EASE = 1.0               -- seconds the tracking point takes to follow its target
+CAT_PROC_AIM_WINDOW = 2.0             -- seconds of target positions averaged: the tracking point trails by 1 s
+CAT_PROC_BEAM_DELAY = 1.0             -- seconds after a beam takes a target before its cone shows
 CAT_PROC_AIM_EVERY = 0.25             -- a beam's aim is sent at most this often (the turret keeps turning between)
 
 function CatProcBeam_Aim(rec, g, i, t, o, r, u, f, now, dt)
     local band, yq, pq = 0, 0, 0
     rec.aimF = rec.aimF or {}
     if t then
-        -- a tracking point eased toward the target in the world (user: the turret smoothly tracks a point the
-        -- target drives); a new target snaps it
+        -- the tracking point: the average of the target's positions over the last CAT_PROC_AIM_WINDOW seconds,
+        -- so it trails the target by half that (user: a buffer averaging the points, 1 s behind); a new target
+        -- starts a new buffer
         local tp = SobGroup_GetPosition(CatShips[t].g)
         local sm = rec.aimF[i]
         if not sm or sm.t ~= t then
-            sm = { t = t, p = { tp[1], tp[2], tp[3] } }
+            sm = { t = t, since = now, buf = {} }
             rec.aimF[i] = sm
-        else
-            local k = dt / CAT_PROC_AIM_EASE
-            if k > 1 then k = 1 end
-            sm.p = CatLerp(sm.p, tp, k)
         end
-        local v = { sm.p[1] - o[1], sm.p[2] - o[2], sm.p[3] - o[3] }
+        tinsert(sm.buf, { now, tp[1], tp[2], tp[3] })
+        while getn(sm.buf) > 1 and now - sm.buf[1][1] > CAT_PROC_AIM_WINDOW do tremove(sm.buf, 1) end
+        local ax, ay, az = 0, 0, 0
+        for k = 1, getn(sm.buf) do
+            ax, ay, az = ax + sm.buf[k][2], ay + sm.buf[k][3], az + sm.buf[k][4]
+        end
+        local nb = getn(sm.buf)
+        local v = { ax / nb - o[1], ay / nb - o[2], az / nb - o[3] }
         local vx = v[1] * r[1] + v[2] * r[2] + v[3] * r[3]
         local vy = v[1] * u[1] + v[2] * u[2] + v[3] * u[3]
         local vz = v[1] * f[1] + v[2] * f[2] + v[3] * f[3]
@@ -1275,6 +1280,7 @@ function CatProcBeam_Aim(rec, g, i, t, o, r, u, f, now, dt)
             pq = CatProcBeam_Level(pitch)
             band = 3
             if n <= CAT_PROC_BANDS[1] then band = 1 elseif n <= CAT_PROC_BANDS[2] then band = 2 end
+            if now - sm.since < CAT_PROC_BEAM_DELAY then band = 0 end   -- the cone shows a second after the beam starts
         end
     end
     rec.aim = rec.aim or {}

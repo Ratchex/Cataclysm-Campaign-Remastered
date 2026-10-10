@@ -5,15 +5,15 @@
 -- its dock paths use the DockPath ones). 16 bits a message: beam (2), band (2: 0 off, 1-3 the cone's length),
 -- yaw (6), pitch (6: 0-63 over -45..45 degrees). Messages are sent whole within one script update; the Clock clip's
 -- time tells updates apart, so a message cut short (a lost bit) is dropped at the next update.
--- Aim: clip Yaw<i> / Pitch<i> sweeps -45..45 over 0..4 s and back over 4..8 s; a turn plays the half that goes
--- the right way from the current angle and pauses at the new one (22.5 degrees a second, user: slower), so the
+-- Aim: clip Yaw<i> / Pitch<i> sweeps -45..45 over 0..3 s and back over 3..6 s; a turn plays the half that goes
+-- the right way from the current angle and pauses at the new one (30 degrees a second: user), so the
 -- engine moves it smoothly between the script's updates. The clip is not restarted (a restart may show its rest
 -- pose for a frame): it is moved to the current angle on the right half and its pause point set.
 
 SMT_PROCESSOR_P = {}
 SMT_PROCESSOR_RANGE = 45
 SMT_PROCESSOR_LEVELS = 63
-SMT_PROCESSOR_SWEEP = 4     -- seconds per sweep one way (make_procbeam.py SWEEP): 22.5 degrees a second
+SMT_PROCESSOR_SWEEP = 3     -- seconds per sweep one way (make_procbeam.py SWEEP): 30 degrees a second
 
 SMT_PROCESSOR_Angle = function(ship, clip)
     if(isAnimRunning(ship, clip) == 0) then
