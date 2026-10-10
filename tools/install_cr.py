@@ -525,6 +525,9 @@ def main():
     copied += make_shipcode.install()
     # Cataclysm's health and weapon damage (user: all ships, Cataclysm's scale 1:1)
     copied += make_damage.apply(make_damage.plan())
+    # the Mimic's kamikaze through HWRM's own: more health, more damage taken (tools/make_mimicarmour.py)
+    import make_mimicarmour
+    copied += [f"weapon/{w}" for w in make_mimicarmour.install()]
     # Cataclysm's mission backgrounds (tools/make_background.py; their light .hod is stock ez01's, 22 MB)
     for name, (btg, theta, phi) in make_background.BACKGROUNDS.items():
         copied += make_background.convert(os.path.join(make_background.BIG, btg + ".btg"), name, theta, phi)

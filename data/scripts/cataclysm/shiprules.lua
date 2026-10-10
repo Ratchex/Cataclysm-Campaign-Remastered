@@ -261,7 +261,7 @@ function CatShip_Update(g, p, id)
         FX_PlayEffect("cat_rank" .. rec.rank, g, CAT_STAR_SCALE[rec.cls] or 1)
     end
     if rec.real == "smt_mimic" then CatMimic_Tick(rec, g, id, now) end
-    if CatKamikazeTopUp[rec.t] and CatKamikazeDamage[rec.t] then CatKamikaze_Tick(rec, g, id) end
+    if CatKamikazeScream[rec.t] then CatKamikaze_Tick(rec, g, id) end
     -- button abilities: act on first finding ourselves in the press group, if still selected (the press group is
     -- the selection the mission script read; checking our own selection too keeps unselected ships out)
     for i = 1, getn(rec.buttons) do
@@ -300,7 +300,6 @@ function CatShip_Destroy(g, p, id)
     CatShips[id] = nil
     if rec.gone or rec.linking then return end   -- linked or unlinked away, not killed
     if rec.link then CatLink_Cancel(rec, id) end
-    if rec.kamiTargets then CatKamikaze_Died(rec, g, id) end
     CatShip_CreditKill(rec)
 end
 
@@ -1052,71 +1051,16 @@ function CatUnmimic_Start(g, p, id, name)
 end
 
 -- ---------------------------------------------------------------------------------------------------------------
--- Kamikaze (Cataclysm FUN_0043a980; tools/make_kamikaze.py): a ship that rams its target does kamikazeDamage[its
--- type] (CatKamikazeDamage), x CAT_KAMIKAZE_CHARGE once it has the Quantum Explosive Charge (FUN_005b9980: ship
--- +0x770, value not found: a placeholder). HWRM's own Kamikaze order flies the ship in, destroys it at the target and
--- deals its own damage (the rammer's health x tuning.lua kamikazeDamageMultiplier 7 x an armour factor: about 200
--- from a Mimic). A script can't tell that order from an attack (COMMAND_Attack either way; IsDoingAbility AB_Kamikaze
--- is 1 for every ship, even idle), except on a ship with no guns: its attack order is a kamikaze. So HWRM's damage
--- stays (close to Cataclysm's for the armed fighters on armoured targets: Acolyte about 385 against 400), and an
--- unarmed rammer with a Cataclysm value far above HWRM's (the Mimic) deals the difference when it dies at its
--- target. Line 167 (the pilot's last words) as an unarmed ship's attack starts.
--- Cataclysm's blast (blastRadiusDamage) reaches about 6 units for a Mimic: only the ship rammed; not modelled.
-CAT_KAMIKAZE_CHARGE = 1.5   -- PLACEHOLDER: Cataclysm's multiplier not found
-CAT_KAMIKAZE_REACH = 1000   -- died this close to its target's centre (frigates: 448, 562 in game)...
-CAT_KAMIKAZE_HIT = 100      -- ...and the target lost this much since its last update: HWRM's own hit (a Mimic's:
-                            -- its health x 7, 280-306 in game; the armour factor goes by the target's family)
-CatKamikazeTopUp = { smt_mimic = 1 }   -- unarmed rammers dealt Cataclysm's damage less HWRM's
+-- Kamikaze: HWRM's own Kamikaze order and damage (about the rammer's health x 7.5). The Mimic's is Cataclysm's 1000
+-- through its health and armour (tools/make_mimicarmour.py). A script can't tell a kamikaze from an attack (both
+-- COMMAND_Attack; IsDoingAbility AB_Kamikaze is 1 for every ship), except on a ship with no guns: the Mimic's
+-- attack is its kamikaze, so its pilot's last words (line 167) as it starts.
+CatKamikazeScream = { smt_mimic = 1 }
 
 function CatKamikaze_Tick(rec, g, id)
-    local order = SobGroup_GetCurrentOrder(g)
-    if not rec.kamiGrp then
-        rec.kamiGrp, rec.kamiTargets = "cat_kami_" .. id, "cat_kamit_" .. id
-        SobGroup_CreateIfNotExist(rec.kamiGrp)
-        SobGroup_CreateIfNotExist(rec.kamiTargets)
-    end
-    local attacking = order == (COMMAND_Attack or 2)
+    local attacking = SobGroup_GetCurrentOrder(g) == (COMMAND_Attack or 2)
     if attacking and not rec.kamiAttack then CatSay(167, g, rec.p) end
     rec.kamiAttack = attacking
-    if not attacking then
-        SobGroup_Clear(rec.kamiTargets)
-        return
-    end
-    SobGroup_Clear(rec.kamiGrp)
-    SobGroup_GetCommandTargets(rec.kamiGrp, g, COMMAND_Attack or 2)
-    if SobGroup_Empty(rec.kamiGrp) == 0 then
-        SobGroup_Clear(rec.kamiTargets)
-        SobGroup_SobGroupAdd(rec.kamiTargets, rec.kamiGrp)
-        rec.kamiTargetHealth = SobGroup_CurrentHealthTotal(rec.kamiTargets)
-    end
-    rec.kamiPos, rec.kamiSpeed, rec.kamiTime = SobGroup_GetPosition(g), SobGroup_GetActualSpeed(g), Universe_GameTime()
-end
-
-function CatKamikaze_Died(rec, g, id)
-    if not rec.kamiAttack or SobGroup_Empty(rec.kamiTargets) == 1 or not rec.kamiPos then return end
-    -- where it died if the engine still has it, else where it was at its last update, flying on at its speed
-    -- (straight at the target) for at most one update: a ship mid-kamikaze can stop getting updates (in game the
-    -- last one was minutes old)
-    local here, fly = rec.kamiPos, rec.kamiSpeed * min(Universe_GameTime() - rec.kamiTime, CAT_TICK or 0.5)
-    if SobGroup_Empty(g) == 0 then here, fly = SobGroup_GetPosition(g), 0 end
-    local t = SobGroup_GetPosition(rec.kamiTargets)
-    local dx, dy, dz = t[1] - here[1], t[2] - here[2], t[3] - here[3]
-    local d = sqrt(dx * dx + dy * dy + dz * dz) - fly
-    -- HWRM's hit is already in the target's health here: a hit is a ship dying near its target as that drops
-    local now = SobGroup_CurrentHealthTotal(rec.kamiTargets)
-    local lost = (rec.kamiTargetHealth or now) - now
-    if d > CAT_KAMIKAZE_REACH or lost < CAT_KAMIKAZE_HIT then
-        print("CATACLYSM kamikaze: ship " .. id .. " (" .. rec.real .. ") died " .. floor(d) .. " from its target, " ..
-              "which lost " .. floor(lost) .. ": no hit")
-        return
-    end
-    -- Cataclysm's damage, less what HWRM dealt (all the target lost since the last update: combat too, a little)
-    local dmg = CatKamikazeDamage[rec.t]
-    if rec.up.EXPLOSIVE_CHARGE then dmg = dmg * CAT_KAMIKAZE_CHARGE end
-    local add = dmg - lost
-    if add > 0 then SobGroup_TakeDamageAbsolute(rec.kamiTargets, add) end
-    print("CATACLYSM kamikaze: ship " .. id .. " (" .. rec.real .. ") hit (" .. floor(d) .. "): HWRM " .. floor(lost) ..
-          " + " .. floor(add) .. ", target health " .. floor(SobGroup_CurrentHealthTotal(rec.kamiTargets)))
 end
 
 function CatUnlink_Start(g, p, id)
