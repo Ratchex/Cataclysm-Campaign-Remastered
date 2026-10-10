@@ -1136,8 +1136,6 @@ CAT_JACK_OUT = 2.3          -- sworker.mad JackOut: 2.267 s; the cone shows once
 -- how far a ship's hull is from its centre (its model's repair points, geo2dae.py; the Kuun-Lan with its modules)
 CAT_REPAIR_SIZE = { smt_ms_sp = 600, smt_processor = 116, smt_rammingfrigate = 56, smt_worker = 27, smt_mimic = 11,
                     smt_acv = 9, smt_acolyte = 8, smt_scout = 6 }
-CAT_REPAIR_STILL = 5        -- slower than this: sitting still
-CAT_REPAIR_IDLE = 3         -- seconds sitting still with nothing to heal before the order ends
 CAT_REPAIR_TRACE = 1        -- TEST: log the ordered repair each second
 
 function CatRepair_Tick(rec, g, id, now)
@@ -1181,15 +1179,6 @@ function CatRepair_Tick(rec, g, id, now)
                 SobGroup_SetHealth(tg, h)
             end
         end
-    end
-    -- the order is done once it sits still with nothing to heal (HWRM never ends it: it never latches)
-    if busy or SobGroup_GetActualSpeed(g) > CAT_REPAIR_STILL then
-        rec.repIdle = nil
-    elseif not rec.repIdle then
-        rec.repIdle = now
-    elseif now - rec.repIdle > CAT_REPAIR_IDLE then
-        SobGroup_Stop(rec.p, g)
-        rec.repIdle = nil
     end
     if CAT_REPAIR_TRACE == 1 and now >= (rec.repTrace or 0) then
         rec.repTrace = now + 1
@@ -1242,15 +1231,14 @@ CAT_PROC_BEAMS = {          -- origin (HWRM units, our model) and side (x direct
     { -97.7, 25.4, -78.1, -1 }, { -106.7, -28.0, 6.3, -1 }, { 106.7, -28.0, 6.3, 1 }, { 97.7, 25.4, -78.1, 1 } }
 
 -- The beam cones (tools/make_procbeam.py: the cone on each beam's turret joints, aimed by smt_processor.madstate).
--- Each beam's state goes to the madstate as a 14-bit message (beam, band, yaw, pitch) when it changes: a bit is a
+-- Each beam's state goes to the madstate as a 16-bit message (beam, band, yaw, pitch) when it changes: a bit is a
 -- switch to one of the two of NIS00-02 the madstate is not in (it can't read this script's globals).
 CAT_PROC_BANDS = { 500, 950, 1400 }   -- the cone's lengths (make_procbeam.py BANDS): the shortest that reaches
-CAT_PROC_LEVELS = 31                  -- yaw / pitch steps over -45..45 degrees
+CAT_PROC_LEVELS = 63                  -- yaw / pitch steps over -45..45 degrees (6 bits each)
 CAT_PROC_AIM_TRACE = 0                -- 1: log each message
 CAT_PROC_CALIBRATE = 0                -- 1: fixed poses to read the turret's signs off in game (CatProcessor_Tick)
 CAT_PROC_AIM_EASE = 1.0               -- seconds the tracking point takes to follow its target
-CAT_PROC_AIM_HOLD = 1.0               -- a change under CAT_PROC_AIM_JUMP steps is sent only after this long
-CAT_PROC_AIM_JUMP = 3                 -- steps (about 3 degrees each) sent at once
+CAT_PROC_AIM_EVERY = 0.25             -- a beam's aim is sent at most this often (the turret keeps turning between)
 
 function CatProcBeam_Aim(rec, g, i, t, o, r, u, f, now, dt)
     local band, yq, pq = 0, 0, 0
@@ -1294,10 +1282,8 @@ function CatProcBeam_Aim(rec, g, i, t, o, r, u, f, now, dt)
     if not t then rec.aimF[i] = nil end
     if last and last[1] == band then
         if band == 0 then return end
-        -- small changes only once CAT_PROC_AIM_HOLD seconds have passed (no dithering between neighbouring steps)
-        local dy, dp = abs(yq - last[2]), abs(pq - last[3])
-        if dy == 0 and dp == 0 then return end
-        if dy < CAT_PROC_AIM_JUMP and dp < CAT_PROC_AIM_JUMP and now - last[4] < CAT_PROC_AIM_HOLD then return end
+        if yq == last[2] and pq == last[3] then return end
+        if now - last[4] < CAT_PROC_AIM_EVERY then return end
     end
     rec.aim[i] = { band, yq, pq, now }
     CatProcBeam_Send(rec, g, i - 1, band, yq, pq)
@@ -1308,8 +1294,8 @@ function CatProcBeam_Send(rec, g, beam, band, yq, pq)
     local bits = {}
     CatProcBeam_Bits(bits, beam, 2)
     CatProcBeam_Bits(bits, band, 2)
-    CatProcBeam_Bits(bits, yq, 5)
-    CatProcBeam_Bits(bits, pq, 5)
+    CatProcBeam_Bits(bits, yq, 6)
+    CatProcBeam_Bits(bits, pq, 6)
     if not rec.madSym then                               -- first: a sync switch (no bit)
         rec.madSym = 0
         SobGroup_SetMadState(g, "NIS00")

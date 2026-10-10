@@ -38,7 +38,7 @@ CONE_LEN = 1400.0         # twProcessorAutoRepairDistance 4000 x 0.35 (shiprules
 CONE_R0, CONE_R1 = 2.0, 44.0   # twProcessorAutoRepairBeamWidth 250 x 0.35 wide at full range: very thin
 BANDS = (500.0, 950.0, 1400.0)  # cone lengths (shiprules.lua CAT_PROC_BANDS): the shortest that reaches the target
 SEGS = 16
-SWEEP = 2.0               # seconds per sweep (one way): 45 degrees a second (user: the cone was twitchy at 90)
+SWEEP = 4.0               # seconds per sweep (one way): 22.5 degrees a second (user: 90, then 45 too fast)
 STOCK_TEX = "C:/Modding/Cataclysm-decomp/reference/hwrm/Homeworld2/art/fx/repair_fx/repair_beam/fx_repairbeam_diff.tga"
 CLOCK = 100000.0
 
