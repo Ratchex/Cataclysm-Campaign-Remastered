@@ -1181,11 +1181,10 @@ end
 -- Processor turns its side) and holds off (data/scripts/attack/*_catrepair.lua) but never heals, and keeps the
 -- target to itself (SobGroup_GetCommandTargets: nothing). So, as Cataclysm (HW1 RepairCorvette.c refuelRepairShips:
 -- stop in range, face the target, beam it while it is in the beam's angle): the Worker beams the damaged friendly
--- most nearly ahead (sworker.shp repairDistance 1500 x 0.525, repairCone 120), the Processor its side beams
+-- nearest to it (sworker.shp repairDistance 1500 x 0.525; no cone: CatRepair_InWorkerBeam), the Processor its side beams
 -- (CatProcessor_Tick); the order ends once it sits still with nothing to heal.
 CAT_WORKER_RANGE = 790
-CAT_WORKER_TIP = { 0, 28.5, 0 }
-CAT_WORKER_CONE = 0.5       -- cos(sworker.shp repairCone 120 / 2)
+CAT_REPAIR_SIZE = { smt_ms_sp = 600 }   -- range measured to the centre: the Kuun-Lan's hull is far from it
 CAT_REPAIR_STILL = 5        -- slower than this: sitting still
 CAT_REPAIR_IDLE = 3         -- seconds sitting still with nothing to heal before the order ends
 CAT_PROC_BEAM = 2.5
@@ -1207,8 +1206,8 @@ function CatRepair_Tick(rec, g, id, now)
         end
     else
         -- HWRM keeps the order's target to itself (SobGroup_GetCommandTargets: nothing for COMMAND_Repair or any
-        -- other order), but its order turns the Worker to face it: the beam takes the damaged friendly ship most
-        -- nearly ahead within range, as Cataclysm's beam took what was in its cone
+        -- other order), but its order parks the Worker beside it: the beam takes the nearest damaged friendly ship
+        -- within range
         local t = rec.repT
         if t and not CatRepair_InWorkerBeam(rec, g, id, t) then t = nil end
         if not t or now >= (rec.repScan or 0) then
@@ -1261,28 +1260,20 @@ function CatRepair_Cone(rec, g, on)
     end
 end
 
--- a damaged friendly ship within the Worker's beam range and cone: how nearly ahead it is (rec.repO: the beam's
--- origin, its jackhammer tip)
+-- a damaged friendly ship within the Worker's beam range: its score, higher for nearer. No cone: HWRM's order
+-- parks the Worker beside its target in no particular heading (user: with Cataclysm's 120 degree cone it only
+-- repaired facing away or from below), so the nearest damaged friendly, normally the order's target, is healed.
 function CatRepair_InWorkerBeam(rec, g, id, t)
     local trec = CatShips[t]
     if t == id or not trec or trec.gone or trec.p ~= rec.p or SobGroup_Empty(trec.g) == 1 then return nil end
     if SobGroup_HealthPercentage(trec.g) >= 0.999 then return nil end
-    local m = SobGroup_GetCoordSys(g)
-    if getn(m) ~= 9 then return nil end
     local pos = SobGroup_GetPosition(g)
-    local r, u, f = CatCol(m, 0), CatCol(m, 1), CatCol(m, 2)
-    local b = CAT_WORKER_TIP
-    local o = { pos[1] + r[1] * b[1] + u[1] * b[2] + f[1] * b[3], pos[2] + r[2] * b[1] + u[2] * b[2] + f[2] * b[3],
-                pos[3] + r[3] * b[1] + u[3] * b[2] + f[3] * b[3] }
     local tp = SobGroup_GetPosition(trec.g)
-    local v = { tp[1] - o[1], tp[2] - o[2], tp[3] - o[3] }
+    local v = { tp[1] - pos[1], tp[2] - pos[2], tp[3] - pos[3] }
     local dist = sqrt(v[1] * v[1] + v[2] * v[2] + v[3] * v[3])
-    if dist > CAT_WORKER_RANGE then return nil end
-    local dot = 1
-    if dist >= 1 then dot = (v[1] * f[1] + v[2] * f[2] + v[3] * f[3]) / dist end
-    if dot < CAT_WORKER_CONE then return nil end
-    rec.repO = o
-    return dot
+    local reach = CAT_WORKER_RANGE + (CAT_REPAIR_SIZE[trec.t] or 0)
+    if dist > reach then return nil end
+    return reach - dist
 end
 
 -- The Processor's automatic repair beams (Cataclysm FUN_005bedd0 / 005beae0, tweak.script twProcessorAutoRepair*):
