@@ -482,6 +482,15 @@ def patch_speech_logic():
             if taiidan not in text:
                 raise SystemExit(f"{src}: raceHelper changed; patch_speech_logic needs updating")
             text = text.replace(taiidan, taiidan + '\n\telseif (Race_ID[currentRace] == "Somtaaw") then\n\t\treturn "cat_fleet"', 1)
+        if fn == "chatter.lua":
+            # the repair order's line was a speechFile entry, which the engine plays itself in the stock support pilot
+            # voice (user: the repair lines were still HW2's): now a handler routed like the others (catspeech.lua
+            # CatSpeech_CommandRepair; Cataclysm's "Repairs underway.", 146)
+            old = ('speechFile = "COMMAND_STARTEDREPAIRS",\n\t\tactor = { NameSupportPilot, NumSupportPilots }')
+            text = text.replace("\r\n", "\n")
+            if old not in text:
+                raise SystemExit(f"{src}: CE_CMD_REPAIR changed; patch_speech_logic needs updating")
+            text = text.replace(old, 'customFnc = {"CatSpeech_CommandRepair", F_SS}', 1)
         open(dst, "w", encoding="latin-1", newline="").write(CATSPEECH_LINE + "\n" + text)
 
 

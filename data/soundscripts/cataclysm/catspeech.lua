@@ -143,4 +143,12 @@ if CatSpeech_Loaded == nil then
         end
         return nil
     end
+
+    -- a repair order given (chatter.lua CE_CMD_REPAIR, a speechFile entry the engine played in the stock support
+    -- pilot voice; install_cr.py makes it call this): routed like the handlers, so a Somtaaw ship says Cataclysm's
+    -- "Repairs underway." and other races play the stock line as before
+    function CatSpeech_CommandRepair(shipname, targetname)
+        CatSpeech_Ship = shipname or ""
+        CatSpeech_Play("COMMAND_STARTEDREPAIRS", NameSupportPilot, NumSupportPilots, Frequency_Command)
+    end
 end
