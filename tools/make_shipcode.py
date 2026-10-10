@@ -33,7 +33,9 @@ TICK = 0.5   # shiprules.lua CAT_TICK
 # CatPin, CAT_PIN_TICK); their rules still tick every TICK
 FAST = {"smt_acolyte": 0.05,
         # repair beams follow their ships (shiprules.lua CatRepair_Tick / CatProcessor_Tick run on every update)
-        "smt_worker": 0.05, "smt_processor": 0.05}
+        "smt_worker": 0.05, "smt_processor": 0.05,
+        # the ram's charge, grapple and push (shiprules.lua CatRam_Tick)
+        "smt_rammingfrigate": 0.05}
 
 CLASSES = ["Mothership", "HeavyCruiser", "Carrier", "Destroyer", "Frigate", "Corvette", "Fighter", "Resource",
            "NonCombat", "MonsterShip", "Component", "Micro"]

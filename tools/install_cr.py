@@ -204,7 +204,18 @@ def patch_acolyte(text):
     return text.rstrip("\n") + "\n-- Cataclysm-HWRM: missile launchers (Missile upgrade)\n" + guns + "\n"
 
 
+def patch_rammingfrigate(text):
+    """Cataclysm's ram grapples onto a target's salvage points (user: the points resourcers dock to when salvaging;
+    Cataclysm lines up far more loosely than HWRM could from script): HWRM's own salvage-capture latch, ordered by
+    shiprules.lua CatRam_Tick when it attacks (SobGroup_SalvageSobGroup; stock kus_salvagecorvette's SalCapCommand)."""
+    if '"SalCapCommand"' in text:
+        return text
+    return (text.rstrip("\n") +
+            '\naddAbility(NewShipType,"SalCapCommand",1,500,0,0);   -- Cataclysm-HWRM: the ram\'s latch\n')
+
+
 PATCHES = {
+    "ship/smt_rammingfrigate/smt_rammingfrigate.ship": patch_rammingfrigate,
     "ship/smt_ms_sp/smt_ms_sp.ship": patch_ms_sp,
     "ship/smt_worker/smt_worker.ship": patch_worker,
     "ship/smt_processor/smt_processor.ship": patch_processor,
