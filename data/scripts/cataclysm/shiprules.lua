@@ -139,7 +139,9 @@ function CatShip_Create(g, p, id, t)
     rec.buttons = {}
     for i = 1, getn(CatAbilities) do
         local a = CatAbilities[i]
-        if a.native == 0 and strfind(", " .. a.types .. ",", ", " .. t .. ",", 1, 1) then
+        -- on its own type too: a disguise (smt_mimic_<target>) has Unmimic, which its base smt_mimic lacks
+        if a.native == 0 and (strfind(", " .. a.types .. ",", ", " .. t .. ",", 1, 1) or
+                              strfind(", " .. a.types .. ",", ", " .. real .. ",", 1, 1)) then
             tinsert(rec.buttons, { name = a.name, grp = "cat_cmd_" .. a.name })
             SobGroup_CreateIfNotExist("cat_cmd_" .. a.name)
         end
@@ -267,6 +269,8 @@ function CatShip_Update(g, p, id)
                 if SobGroup_Selected(g) == 1 then
                     CatAbility_Run(b.name, g, p, id)
                     if rec.gone then return end
+                else
+                    print("CATACLYSM ability " .. b.name .. ": ship " .. id .. " pressed but no longer selected")
                 end
             end
         else
@@ -1000,6 +1004,10 @@ function CatMimic_Swap(g, p, id, shiptype, say)
     SobGroup_SetHealth(new, health)
     rec.gone = 1
     SobGroup_Despawn(g)
+    -- the new ship takes the old one's place in the selection (cataclysmkas.lua CatMimicTick): otherwise the next
+    -- menu press found nothing selected until the player reselected (user)
+    SobGroup_CreateIfNotExist("cat_reselect")
+    SobGroup_SobGroupAdd("cat_reselect", new)
     print("CATACLYSM mimic: ship " .. id .. " (" .. rec.real .. ") -> " .. shiptype)
 end
 

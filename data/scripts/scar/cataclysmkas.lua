@@ -838,6 +838,15 @@ CatDisguiseCount = {}
 
 function CatMimicTick()
     if CatDisguises == nil then return end
+    -- swapped Mimics (shiprules.lua CatMimic_Swap) rejoin the selection with the rest of it
+    SobGroup_CreateIfNotExist("cat_reselect")
+    if SobGroup_Empty("cat_reselect") == 0 then
+        local sel = CatAbility_OwnSelection("cat_reselect_sel")
+        SobGroup_SobGroupAdd(sel, "cat_reselect")
+        SobGroup_SelectSobGroup(sel)
+        print("CKAS: mimic reselected, " .. SobGroup_Count(sel) .. " ships")
+        SobGroup_Clear("cat_reselect")
+    end
     for i = 1, getn(CatDisguises) do
         local d, grp = CatDisguises[i], "cat_disg_" .. i
         SobGroup_CreateIfNotExist(grp)
