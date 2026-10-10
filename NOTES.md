@@ -369,8 +369,20 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
     game clock goes back (CatSession);
   - SobGroup_GetCoordSys: 9 numbers **row by row**, columns = right, up, forward (Matrix3_GetVector3FromCol, only in
     the mission script state; checked with a tilted ship in range.lua); SobGroup_SetTransform takes the same;
+  - **Our models' +X is the engine's LEFT**: a point at model (x, y, z) is at pos - x*right + y*up + z*forward
+    (calibration screenshots of the Processor's beam cones, 2026-10-10). Scripts placing things by model
+    coordinates negate x (shiprules.lua CAT_PROC_BEAMS).
   - madstate: only the engine's own state names reach <SHIP>_<State>_OnSet (NIS00-02, DockPathOpen4 /
-    DockPathClosed4 are spare on a fighter).
+    DockPathClosed4 are spare on a fighter). A madstate runs in its own Lua state: no globals shared with ship
+    scripts either way (probe, 2026-10-10), but each SobGroup_SetMadState runs its OnSet at once, so a script can
+    send it bits (shiprules.lua CatProcBeam_Send, smt_processor.madstate). Joint aim from a script: a clip that
+    sweeps the joint, played toward the new angle and paused there (setTime / setPauseTime).
+  - Effect cones on script-aimed joints (tools/make_procbeam.py): the cone mesh is built along -Z; the yaw / pitch
+    signs come from a calibration (CAT_PROC_CALIBRATE: fixed poses, read off screenshots), not from first
+    principles (three guesses failed).
+  - The repair order: HWRM heals only by latching (RepairByLatchingCommand); SobGroup_GetCommandTargets returns
+    nothing for COMMAND_Repair (or any order) and SobGroup_GetSobGroupRepairingGroup nothing; heal weapons never
+    fire at friendlies. Ours: a non-latching RepairCommand positions the ship, shiprules.lua CatRepair_Tick heals.
 - **Unit test range** (campaign entry 1, leveldata/campaign/cataclysm/range): Kuun-Lan with every module, Acolytes,
   ACVs, Workers, a Recon, asteroids, Taiidan targets; all research granted (range.lua RANGE_GRANT_ALL).
 - **Economy**: Cataclysm asteroids are worth ~10x HW1's (resources/asteroids/*.shp resourcevalue: 11, 160, 400,
