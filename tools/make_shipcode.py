@@ -103,14 +103,14 @@ def hook(ship):
 def install():
     """Hook every mapped ship; returns the data/ paths of stock ships copied in (rel, '/' separated)."""
     info = ship_info()
-    for variant in list(ship_variants.VARIANTS) + list(ship_variants.DISGUISES):   # built by install_cr.py
+    for variant in ship_variants.VARIANTS:   # built by install_cr.py
         base = ship_variants.base_of(variant)
         if base in info and os.path.exists(os.path.join(DATA, "ship", variant, variant + ".ship")):
             info[variant] = info[base]
     copied, chains = [], {}
     for ship in sorted(info):
         folder = os.path.join(DATA, "ship", ship)
-        if ship not in ship_variants.VARIANTS and ship not in ship_variants.DISGUISES and not os.path.exists(os.path.join(CR, "ship", ship, ship + ".ship")):
+        if ship not in ship_variants.VARIANTS and not os.path.exists(os.path.join(CR, "ship", ship, ship + ".ship")):
             # not one of Cataclysm Remastered's: a fresh copy of the stock ship, reported every run so install_cr
             # keeps it in its manifest
             stock = os.path.join(PP, "ship", ship, ship + ".ship")   # the Players Patch's (install_cr.py PP)

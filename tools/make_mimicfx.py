@@ -129,7 +129,7 @@ def patch_events(path):
     if "MimicIn_" in text:
         return
     anims, events = "", ""
-    for _, target, _, _ in sorted(ship_variants.DISGUISES.values()):
+    for target in sorted(ship_variants.DISGUISES):
         for name, fx, length in ((f"MimicIn_{target}", f"cat_mimic_in_{target}", PHASE_TIME),
                                  (f"MimicOut_{target}", f"cat_mimic_out_{target}", PHASE_TIME),
                                  (f"MimicTail_{target}", f"cat_mimic_tail_{target}", PHASE_TIME - SWAP)):
@@ -144,7 +144,7 @@ def patch_events(path):
 
 
 def patch_all_events():
-    for ship in ["smt_mimic"] + sorted(ship_variants.DISGUISES):
+    for ship in ["smt_mimic"]:
         path = os.path.join(MOD, "data", "ship", ship, ship + ".events")
         if not os.path.exists(path):
             with open(path, "w", newline="\n") as f:
@@ -158,7 +158,7 @@ def main():
     Image.new("RGBA", (8, 8), (255, 255, 255, 255)).save(os.path.join(tex, "cat_white.tga"))
     rm = radius(MIMIC)
     k = SWAP / PHASE_TIME                     # how far the shell has formed at the swap
-    for variant, (_, target, _, _) in sorted(ship_variants.DISGUISES.items()):
+    for target in sorted(ship_variants.DISGUISES):
         rt = radius(CATACLYSM_MODEL[target])
         s0 = SHELL * max(rt, rm) / rt          # the sphere, as a scale of the target's model
         at_swap = s0 + (1 - s0) * k
@@ -181,6 +181,6 @@ def main():
 
 if __name__ == "__main__":
     if "--list-builds" in sys.argv:      # for tools/build_mimicfx.sh
-        print(" ".join(f"{t}={CATACLYSM_MODEL[t]}" for _, t, _, _ in ship_variants.DISGUISES.values()))
+        print(" ".join(f"{t}={CATACLYSM_MODEL[t]}" for t in ship_variants.DISGUISES))
     else:
         main()

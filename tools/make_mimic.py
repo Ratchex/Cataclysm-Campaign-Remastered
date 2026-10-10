@@ -28,7 +28,7 @@ BODY = "MimicBody"
 def targets():
     """[(target, colour scheme)] in state order (NIS01...)."""
     states = ship_variants.disguise_states()
-    return sorted(((t, sc) for _, t, _, sc in ship_variants.DISGUISES.values()), key=lambda x: states[x[0]])
+    return sorted(((t, sc) for t, (_, sc) in ship_variants.DISGUISES.items()), key=lambda x: states[x[0]])
 
 
 def joint(target):

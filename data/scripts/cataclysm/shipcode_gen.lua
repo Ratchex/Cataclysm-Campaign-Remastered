@@ -42,13 +42,6 @@ CatClass = {
     ["smt_dreadnought"] = 1,
     ["smt_hivefrigate"] = 4,
     ["smt_mimic"] = 6,
-    ["smt_mimic_bst_acolyte"] = 6,
-    ["smt_mimic_kus_attackbomber"] = 6,
-    ["smt_mimic_kus_interceptor"] = 6,
-    ["smt_mimic_smt_acolyte"] = 6,
-    ["smt_mimic_tai_attackbomber"] = 6,
-    ["smt_mimic_tai_defender"] = 6,
-    ["smt_mimic_tai_interceptor"] = 6,
     ["smt_ms_sp"] = 0,
     ["smt_multibeamfrigate"] = 4,
     ["smt_processor"] = 7,
@@ -114,13 +107,6 @@ CatName = {
     ["smt_dreadnought"] = "Dreadnought",
     ["smt_hivefrigate"] = "Hive Frigate",
     ["smt_mimic"] = "Mimic",
-    ["smt_mimic_bst_acolyte"] = "Mimic",
-    ["smt_mimic_kus_attackbomber"] = "Mimic",
-    ["smt_mimic_kus_interceptor"] = "Mimic",
-    ["smt_mimic_smt_acolyte"] = "Mimic",
-    ["smt_mimic_tai_attackbomber"] = "Mimic",
-    ["smt_mimic_tai_defender"] = "Mimic",
-    ["smt_mimic_tai_interceptor"] = "Mimic",
     ["smt_ms_sp"] = "Command Ship",
     ["smt_multibeamfrigate"] = "Multibeam Frigate",
     ["smt_processor"] = "Processor",
@@ -611,97 +597,6 @@ function CatUpdate_smt_mimic(g, p, id)
     CatShip_Update(g, p, id)
 end
 function CatDestroy_smt_mimic(g, p, id)
-    if Destroy_Mimic then Destroy_Mimic(g, p, id) end
-    CatShip_Destroy(g, p, id)
-end
-
-function CatCreate_smt_mimic_bst_acolyte(g, p, id)
-    if Create_Mimic then Create_Mimic(g, p, id) end
-    CatShip_Create(g, p, id, "smt_mimic_bst_acolyte")
-end
-function CatUpdate_smt_mimic_bst_acolyte(g, p, id)
-    CatChainTick(g, p, id, Update_Mimic, 1.15)
-    CatShip_Update(g, p, id)
-end
-function CatDestroy_smt_mimic_bst_acolyte(g, p, id)
-    if Destroy_Mimic then Destroy_Mimic(g, p, id) end
-    CatShip_Destroy(g, p, id)
-end
-
-function CatCreate_smt_mimic_kus_attackbomber(g, p, id)
-    if Create_Mimic then Create_Mimic(g, p, id) end
-    CatShip_Create(g, p, id, "smt_mimic_kus_attackbomber")
-end
-function CatUpdate_smt_mimic_kus_attackbomber(g, p, id)
-    CatChainTick(g, p, id, Update_Mimic, 1.15)
-    CatShip_Update(g, p, id)
-end
-function CatDestroy_smt_mimic_kus_attackbomber(g, p, id)
-    if Destroy_Mimic then Destroy_Mimic(g, p, id) end
-    CatShip_Destroy(g, p, id)
-end
-
-function CatCreate_smt_mimic_kus_interceptor(g, p, id)
-    if Create_Mimic then Create_Mimic(g, p, id) end
-    CatShip_Create(g, p, id, "smt_mimic_kus_interceptor")
-end
-function CatUpdate_smt_mimic_kus_interceptor(g, p, id)
-    CatChainTick(g, p, id, Update_Mimic, 1.15)
-    CatShip_Update(g, p, id)
-end
-function CatDestroy_smt_mimic_kus_interceptor(g, p, id)
-    if Destroy_Mimic then Destroy_Mimic(g, p, id) end
-    CatShip_Destroy(g, p, id)
-end
-
-function CatCreate_smt_mimic_smt_acolyte(g, p, id)
-    if Create_Mimic then Create_Mimic(g, p, id) end
-    CatShip_Create(g, p, id, "smt_mimic_smt_acolyte")
-end
-function CatUpdate_smt_mimic_smt_acolyte(g, p, id)
-    CatChainTick(g, p, id, Update_Mimic, 1.15)
-    CatShip_Update(g, p, id)
-end
-function CatDestroy_smt_mimic_smt_acolyte(g, p, id)
-    if Destroy_Mimic then Destroy_Mimic(g, p, id) end
-    CatShip_Destroy(g, p, id)
-end
-
-function CatCreate_smt_mimic_tai_attackbomber(g, p, id)
-    if Create_Mimic then Create_Mimic(g, p, id) end
-    CatShip_Create(g, p, id, "smt_mimic_tai_attackbomber")
-end
-function CatUpdate_smt_mimic_tai_attackbomber(g, p, id)
-    CatChainTick(g, p, id, Update_Mimic, 1.15)
-    CatShip_Update(g, p, id)
-end
-function CatDestroy_smt_mimic_tai_attackbomber(g, p, id)
-    if Destroy_Mimic then Destroy_Mimic(g, p, id) end
-    CatShip_Destroy(g, p, id)
-end
-
-function CatCreate_smt_mimic_tai_defender(g, p, id)
-    if Create_Mimic then Create_Mimic(g, p, id) end
-    CatShip_Create(g, p, id, "smt_mimic_tai_defender")
-end
-function CatUpdate_smt_mimic_tai_defender(g, p, id)
-    CatChainTick(g, p, id, Update_Mimic, 1.15)
-    CatShip_Update(g, p, id)
-end
-function CatDestroy_smt_mimic_tai_defender(g, p, id)
-    if Destroy_Mimic then Destroy_Mimic(g, p, id) end
-    CatShip_Destroy(g, p, id)
-end
-
-function CatCreate_smt_mimic_tai_interceptor(g, p, id)
-    if Create_Mimic then Create_Mimic(g, p, id) end
-    CatShip_Create(g, p, id, "smt_mimic_tai_interceptor")
-end
-function CatUpdate_smt_mimic_tai_interceptor(g, p, id)
-    CatChainTick(g, p, id, Update_Mimic, 1.15)
-    CatShip_Update(g, p, id)
-end
-function CatDestroy_smt_mimic_tai_interceptor(g, p, id)
     if Destroy_Mimic then Destroy_Mimic(g, p, id) end
     CatShip_Destroy(g, p, id)
 end

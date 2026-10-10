@@ -351,7 +351,7 @@ def use_our_model(ship, ours, joints):
     for theirs, mine in joints.items():
         text = re.sub(r'"%s"' % theirs, '"%s"' % mine, text)
     # our models have one level of detail: their LOD switches (made for theirs) left ours invisible past the first
-    # (user: the Mimic vanished zooming out), as on the disguises (ship_variants.py LOD_LINES)
+    # (user: the Mimic vanished zooming out)
     text = re.sub(r'^\s*NewShipType(\.|\[")(upLOD|downLOD)\b.*\n', "", text, flags=re.M)
     text = re.sub(r'^(\s*NewShipType(?:\.|\[")minLOD(?:"\])?\s*=\s*)[\d.]+', r"\g<1>1", text, flags=re.M)
 
@@ -516,8 +516,7 @@ def main():
     # weapon-upgrade variants (tools/ship_variants.py), from their base ship as installed above
     for variant in ship_variants.VARIANTS:
         copied += ship_variants.build(variant)
-    # the Mimic: their CustomCommand (a random one of three disguises) gives way to our Mimic menu, then the
-    # disguises (tools/ship_variants.py DISGUISES) from the Mimic as installed above
+    # the Mimic: their CustomCommand (a random one of three disguises) gives way to our Mimic menu
     mimic = os.path.join(DATA, "ship", "smt_mimic", "smt_mimic.ship")
     if os.path.exists(mimic):
         text = open(mimic, encoding="latin-1").read()
@@ -530,8 +529,6 @@ def main():
         text = re.sub(r'^addAbility\(NewShipType,\s*"CanAttack".*$', MIMIC_ATTACK.replace("\\", "\\\\"), text,
                       flags=re.M)
         open(mimic, "w", encoding="latin-1", newline="").write(text)
-    for variant in ship_variants.DISGUISES:
-        copied += ship_variants.build_disguise(variant)
     ship_variants.write_lua()
     # the Mimic's transformation effects as events on the Mimic and its disguises (tools/make_mimicfx.py)
     import make_mimicfx

@@ -43,16 +43,19 @@ ABILITIES = {
     # button each, MENU below), "unmimic" drops the disguise (ship_variants.py DISGUISES, shiprules.lua CatMimic_*)
     "mimic": (None, "Mimic", ["smt_mimic"], "", "MIMIC", "CatNoop", "cmd_ico_cloak.dds"),
     # (the Mimic shows its disguises on itself: shiprules.lua CatMimic_*; the disguise types are no longer used)
-    "unmimic": (None, "Unmimic", sorted(ship_variants.DISGUISES) + ["smt_mimic"], "", "", "CatUnmimic_Start",
+    "unmimic": (None, "Unmimic", ["smt_mimic"], "", "", "CatUnmimic_Start",
                 "cmd_ico_cancel.dds"),
 }
 # disguise buttons, shown while the Mimic menu is open: all the Mimic button's icon (user), told apart by their labels
 DISGUISE_ICON = "cmd_ico_cloak.dds"
 MENU = {}       # ability -> the menu it is in ("mimic": shown only while the Mimic menu is open)
-for variant, (_, target, label, _) in sorted(ship_variants.DISGUISES.items()):
+for target, (label, _) in sorted(ship_variants.DISGUISES.items()):
     ABILITIES[f"mimic_{target}"] = (None, f"Mimic: {label}", ["smt_mimic"], "", "MIMIC", "CatMimic_As", DISGUISE_ICON)
     MENU[f"mimic_{target}"] = "mimic"
 OPENS = {"mimic": "mimic"}   # ability -> the menu its button opens / closes (no ship action)
+# ability -> a SobGroup the selection must share a ship with for its button to show (kept by the ship rules: the
+# disguised Mimics, shiprules.lua CatMimic_*; user: Unmimic showed on every Mimic)
+GROUP = {"unmimic": "cat_disguised"}
 
 # A native ability's energy (CustomCommand: max, minimum to activate, drain, recharge per second), the bar the engine
 # draws beside the health bar. Default: no cooldown (drains and refills at once). A cooldown ability drains at once
@@ -112,11 +115,11 @@ def main():
            "CatAbilities = {"]
     for name, (cid, label, types, tech, upgrade, handler, _) in ABILITIES.items():
         # with their variants and disguises (tools/ship_variants.py): the mission script shows buttons by type
-        types = types + [v for v in list(ship_variants.VARIANTS) + list(ship_variants.DISGUISES)
+        types = types + [v for v in ship_variants.VARIANTS
                          if ship_variants.base_of(v) in types and v not in types]
         gen.append(f'    {{ name = "{name}", native = {0 if cid is None else 1}, label = "{label}", '
                    f'types = "{", ".join(types)}", tech = "{tech}", upgrade = "{upgrade}", handler = "{handler}", '
-                   f'menu = "{MENU.get(name, "")}", opens = "{OPENS.get(name, "")}" }},')
+                   f'menu = "{MENU.get(name, "")}", opens = "{OPENS.get(name, "")}", group = "{GROUP.get(name, "")}" }},')
     gen.append("}")
     with open(os.path.join(MOD, "data", "scripts", "cataclysm", "abilities_gen.lua"), "w", newline="\n") as f:
         f.write("\n".join(gen) + "\n")

@@ -856,6 +856,16 @@ function CatAbility(name)
     print("CKAS: ability " .. name .. " pressed, " .. SobGroup_Count(grp) .. " ships in the selection")
 end
 
+-- 1 if the selection shares a ship with the named group (abilities_gen.lua group: the disguised Mimics)
+function CatAbility_SelectionIn(sel, grp)
+    SobGroup_CreateIfNotExist(grp)
+    SobGroup_CreateIfNotExist("cat_sel_in")
+    SobGroup_Clear("cat_sel_in")
+    SobGroup_FillIntersect("cat_sel_in", sel, grp)
+    if SobGroup_Empty("cat_sel_in") == 0 then return 1 end
+    return 0
+end
+
 function CatAbilityTick()
     local now, sel = Universe_GameTime(), CatAbility_OwnSelection("cat_sel_own")
     -- a menu closes once the selection has nothing that could open it
@@ -876,7 +886,8 @@ function CatAbilityTick()
             end
             local show = 0
             if SobGroup_Count(sel) > 0 and SobGroup_AreAnyOfTheseTypes(sel, a.types) == 1 and
-               (a.tech == "" or Player_HasResearch(0, a.tech) == 1) and (a.menu == "" or CatMenuOpen[a.menu]) then
+               (a.tech == "" or Player_HasResearch(0, a.tech) == 1) and (a.menu == "" or CatMenuOpen[a.menu]) and
+               (a.group == nil or a.group == "" or CatAbility_SelectionIn(sel, a.group) == 1) then
                 show = 1
             end
             if CatAbilityShown[a.name] ~= show then

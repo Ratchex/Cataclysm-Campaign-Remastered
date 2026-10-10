@@ -1022,10 +1022,25 @@ function CatMimic_Tick(rec, g, id, now)
         SobGroup_SetMadState(g, m.d.state)
         FX_StartEvent(g, "MimicTail_" .. m.d.target)
         rec.disguise = m.d
+        CatMimic_Disguised(rec, 1)
         CatSay(168, g, rec.p)                 -- "Disguise assumed."
         print("CATACLYSM mimic: ship " .. id .. " disguised as " .. m.d.target)
     end
     if rec.disguise then SobGroup_MakeUntargeted(g) end
+end
+
+-- the disguised Mimics, for the mission script's Unmimic button (abilities_gen.lua group cat_disguised)
+function CatMimic_Disguised(rec, on)
+    SobGroup_CreateIfNotExist("cat_disguised")
+    if on == 1 then
+        SobGroup_SobGroupAdd("cat_disguised", rec.g)
+    else
+        SobGroup_CreateIfNotExist("cat_disguised_left")
+        SobGroup_Clear("cat_disguised_left")
+        SobGroup_FillSubstract("cat_disguised_left", "cat_disguised", rec.g)
+        SobGroup_Clear("cat_disguised")
+        SobGroup_SobGroupAdd("cat_disguised", "cat_disguised_left")
+    end
 end
 
 -- a Mimic menu button (mimic_<target>): become that disguise
@@ -1048,6 +1063,7 @@ function CatUnmimic_Start(g, p, id, name)
     FX_StartEvent(g, "MimicOut_" .. rec.disguise.target)
     print("CATACLYSM mimic: ship " .. id .. " drops its " .. rec.disguise.target .. " disguise")
     rec.disguise = nil
+    CatMimic_Disguised(rec, 0)
 end
 
 -- ---------------------------------------------------------------------------------------------------------------

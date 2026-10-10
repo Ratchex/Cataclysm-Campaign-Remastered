@@ -103,8 +103,7 @@ Missiles disabled before the upgrade (no energy spent); missiles in normal comba
    "Kamikaze"):** its attack is a kamikaze of about 1000 through HWRM's own (health x3.33, MimicArmour), scream
    line 167. Left: the Quantum Explosive Charge multiplier (value not found), asteroid / crate disguises, MCV
    (frigate disguises, kamikaze 2500, its own 167 takes), Advanced Sensors
-   detection, Unmimic shown only on disguised Mimics (now on every Mimic), dropping the unused disguise ship types
-   (smt_mimic_<target>, still built by install_cr / make_shipcode); ACV EMP (TECH_EMP). Also done: Kuun-Lan module health bars (modules recentred on their hardpoints),
+   detection; ACV EMP (TECH_EMP). (Unmimic shows only for disguised Mimics: the ship rules' cat_disguised group.) Also done: Kuun-Lan module health bars (modules recentred on their hardpoints),
    its tactical overlay distances (stock kus_mothership).
 4. Then Mission 1 against the original, the hyperspace exit (K_497290 stub), Missions 02-17.
 Open, lower priority: rank stars as UI; Fire Missiles burst (HWRM can't fire weapons from script; user: keep as-is);
