@@ -165,7 +165,7 @@ end
 CAT_PENDING_LIFE = 5
 function CatShip_Adopt(rec, g, now)
     rec.adopted = 1
-    if rec.real == "smt_mimic" then SobGroup_SetMadState(g, "Mimic") end   -- its disguises hidden (CatMimic_As)
+    if rec.real == "smt_mimic" then rec.mimicHide = 2 end   -- its disguises hidden (CatShip_Update, CatMimic_As)
     local i = 1
     while i <= getn(CatPending) do
         local pend = CatPending[i]
@@ -261,6 +261,13 @@ function CatShip_Update(g, p, id)
     -- health bar overlay (ui/ati/ati.lua) only draws engine values, so no per-ship star beside the stance icon.
     if CAT_SHOW_STARS == 1 and rec.rank > 0 and SobGroup_Selected(g) == 1 then
         FX_PlayEffect("cat_rank" .. rec.rank, g, CAT_STAR_SCALE[rec.cls] or 1)
+    end
+    -- a new Mimic's disguise parts hidden: on its first two updates (TEST: is the first too early?)
+    if rec.mimicHide then
+        SobGroup_SetMadState(g, "Mimic")
+        print("CATACLYSM mimic: ship " .. id .. " madstate Mimic (" .. rec.mimicHide .. ")")
+        rec.mimicHide = rec.mimicHide - 1
+        if rec.mimicHide == 0 then rec.mimicHide = nil end
     end
     -- collisions back on after a Mimic's transformation (CatMimic_Swap)
     if rec.ghost and now >= rec.ghost then

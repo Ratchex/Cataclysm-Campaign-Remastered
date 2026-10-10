@@ -2,11 +2,13 @@
 -- --body MimicBody, --part Disguise_<target>); shiprules.lua shows one at a time (SobGroup_SetMadState).
 -- TEST: one disguise (kus_attackbomber).
 SMT_MIMIC_Mimic_OnSet = function(ship)
+    print("SMT_MIMIC madstate: Mimic")
     setJointVisible(ship, "MimicBody", 1)
     setJointVisible(ship, "Disguise_kus_attackbomber", 0)
 end
 
 SMT_MIMIC_Disguise_kus_attackbomber_OnSet = function(ship)
+    print("SMT_MIMIC madstate: Disguise_kus_attackbomber")
     setJointVisible(ship, "MimicBody", 0)
     setJointVisible(ship, "Disguise_kus_attackbomber", 1)
 end
