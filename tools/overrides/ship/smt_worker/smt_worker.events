@@ -6,6 +6,18 @@ effects =
 {
     animations =
     {
+        -- Cataclysm-HWRM: its death (it had none: no explosion when it died, user), stock kus_resourcecollector's
+        -- effects on Root (our model lacks its top_00... markers)
+        animationDeath =
+        {
+            name = "Death",
+            length = 2,
+            loop = 0,
+            parent = "",
+            minimum = 0,
+            maximum = 0,
+            markers = {""}
+        },
         animation1 =
         {
             name = "Resourcing",
@@ -29,6 +41,32 @@ effects =
     },
     events =
     {
+        death1 =
+        {
+            { "anim", "Death" },
+            { "animtime", "0" },
+            { "marker", "Root" },
+            { "fx", "dmg_cloud_explosion_large" },
+            { "sound", "EXPLOSION/SMALL/ETG_EXPLODE_SMALL_PLASMA" },
+            { "fx_scale", "1.25" },
+        },
+        death2 =
+        {
+            { "anim", "Death" },
+            { "animtime", "0.3" },
+            { "marker", "Root" },
+            { "fx", "dmg_cloud_explosion_large" },
+            { "fx_scale", "1.75" },
+        },
+        death3 =
+        {
+            { "anim", "Death" },
+            { "animtime", "0.6" },
+            { "marker", "Root" },
+            { "fx", "dmg_cloud_main_explosion_combo" },
+            { "sound", "EXPLOSION/MEDIUM/ETG_EXPLODE_MEDIUM_FIREY" },
+            { "fx_scale", "4" },
+        },
         harvestingbeam1 =
         {
             { "anim", "Resourcing" },

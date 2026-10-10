@@ -1092,11 +1092,14 @@ end
 
 function CatKamikaze_Died(rec, g, id)
     if not rec.kamiAttack or SobGroup_Empty(rec.kamiTargets) == 1 or not rec.kamiPos then return end
-    local here = rec.kamiPos
+    -- where it died if the engine still has it, else where it was at its last update, flying on at its speed
+    -- (straight at the target) for at most one update: a ship mid-kamikaze can stop getting updates (in game the
+    -- last one was minutes old, every death counted as a hit)
+    local here, fly = rec.kamiPos, rec.kamiSpeed * min(Universe_GameTime() - rec.kamiTime, CAT_TICK or 0.5)
+    if SobGroup_Empty(g) == 0 then here, fly = SobGroup_GetPosition(g), 0 end
     local t = SobGroup_GetPosition(rec.kamiTargets)
     local dx, dy, dz = t[1] - here[1], t[2] - here[2], t[3] - here[3]
-    -- from where it was at its last update, flying on at its speed since (straight at the target)
-    local d = sqrt(dx * dx + dy * dy + dz * dz) - rec.kamiSpeed * (Universe_GameTime() - rec.kamiTime)
+    local d = sqrt(dx * dx + dy * dy + dz * dz) - fly
     local dmg = CatKamikazeDamage[rec.t]
     if rec.up.EXPLOSIVE_CHARGE then dmg = dmg * CAT_KAMIKAZE_CHARGE end
     dmg = dmg - CAT_KAMIKAZE_HWRM
