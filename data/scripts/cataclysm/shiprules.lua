@@ -1233,36 +1233,32 @@ CAT_PROC_BEAMS = {          -- origin (HWRM units, our model) and side (x direct
 -- The beam cones (tools/make_procbeam.py: the cone on each beam's turret joints, aimed by smt_processor.madstate).
 -- The turrets move like a stock ion turret (kus_destroyerion1: AnimatedTurret, 35 degrees a second in yaw, 20 in
 -- pitch, 10 % of that when pointing at the target; user: copy the destroyer's ion turret): this script turns each
--- turret's angles toward the target's current position at those rates, slowing as it closes in, and sends the angle
--- it will have reached by the next message (CAT_PROC_AIM_EVERY ahead) so the madstate's clip, running at the full
--- rate, keeps moving. A message: beam (2 bits), band (2), yaw (8), pitch (8), each bit a switch to one of the two
+-- turret's angles toward the target's current position at those rates, slowing as it closes in, and sends its
+-- angle on every update; the madstate poses the clip at it (letting the clip play toward the angle lagged seconds
+-- behind in game: the engine plays the clips slower than their times say). A message: beam (2 bits), band (2), yaw (8), pitch (8), each bit a switch to one of the two
 -- of NIS00-02 the madstate is not in (it can't read this script's globals).
 CAT_PROC_BANDS = { 500, 950, 1400 }   -- the cone's lengths (make_procbeam.py BANDS): the shortest that reaches
 CAT_PROC_LEVELS = 255                 -- yaw / pitch steps over -45..45 degrees (8 bits each)
 CAT_PROC_AIM_TRACE = 0                -- 1: log each message
 CAT_PROC_CALIBRATE = 0                -- 1: fixed poses to read the turret's signs off in game (CatProcessor_Tick)
 CAT_PROC_BEAM_DELAY = 1.0             -- seconds after a beam takes a target before its cone shows
-CAT_PROC_AIM_EVERY = 0.1              -- seconds between a turret's messages while it turns
+CAT_PROC_AIM_EVERY = 0                -- seconds between a turret's messages while it turns (0: every update)
 CAT_PROC_YAW_SPEED = 35               -- degrees a second (kus_destroyerion1 maxAzimuthSpeed; make_procbeam.py)
 CAT_PROC_PITCH_SPEED = 20             -- (maxDeclinationSpeed)
 CAT_PROC_FINE = 0.1                   -- speedMultiplierWhenPointingAtTarget
 CAT_PROC_FINE_ANGLE = 5               -- degrees off the target below which the turret eases to the fine rate
 
--- one axis of a turret: the new angle and the angle to send (where it will be CAT_PROC_AIM_EVERY from now)
+-- one axis of a turret: its new angle, turned toward want at speed (easing to the fine rate near it)
 function CatProcBeam_Turn(cur, want, speed, dt)
     local e = want - cur
     local ae = abs(e)
-    if ae < 0.01 then return want, want end
+    if ae < 0.01 then return want end
     local k = ae / CAT_PROC_FINE_ANGLE
     if k < CAT_PROC_FINE then k = CAT_PROC_FINE elseif k > 1 then k = 1 end
-    local rate = speed * k
-    local step = rate * dt
-    local ahead = rate * (dt + CAT_PROC_AIM_EVERY)
+    local step = speed * k * dt
     if step > ae then step = ae end
-    if ahead > ae then ahead = ae end
-    local sg = 1
-    if e < 0 then sg = -1 end
-    return cur + sg * step, cur + sg * ahead
+    if e < 0 then step = -step end
+    return cur + step
 end
 
 function CatProcBeam_Aim(rec, g, i, t, o, r, u, f, now, dt)
@@ -1303,10 +1299,9 @@ function CatProcBeam_Aim(rec, g, i, t, o, r, u, f, now, dt)
     else
         tu.t = nil
     end
-    local sy, sp
-    tu.yaw, sy = CatProcBeam_Turn(tu.yaw, wy, CAT_PROC_YAW_SPEED, dt)
-    tu.pitch, sp = CatProcBeam_Turn(tu.pitch, wp, CAT_PROC_PITCH_SPEED, dt)
-    local yq, pq = CatProcBeam_Level(sy), CatProcBeam_Level(sp)
+    tu.yaw = CatProcBeam_Turn(tu.yaw, wy, CAT_PROC_YAW_SPEED, dt)
+    tu.pitch = CatProcBeam_Turn(tu.pitch, wp, CAT_PROC_PITCH_SPEED, dt)
+    local yq, pq = CatProcBeam_Level(tu.yaw), CatProcBeam_Level(tu.pitch)
     rec.aim = rec.aim or {}
     local last = rec.aim[i]
     if last then
