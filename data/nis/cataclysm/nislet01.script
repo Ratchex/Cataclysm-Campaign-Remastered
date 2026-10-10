@@ -76,7 +76,9 @@ with kus_destroyer1
     at frame 2550
         speechEventActor("$2207378", 16, 2)
     at frame 2580
+    at frame 2514
         attack("tai_missiledestroyer1")
+    at frame 2580
     at frame 2750
         haltAttack()
     at frame 2820

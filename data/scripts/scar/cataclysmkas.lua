@@ -1254,8 +1254,8 @@ end
 
 -- ================================================================== Mission01 API (stubs implemented)
 -- Distances in KAS code are HW1 units; HWRM levels are scaled by mission2level.py SCALE (Gearbox's 0.35 x MAP_SPREAD
--- 1.4: a bigger map, ships unchanged). Keep the two equal.
-KAS_WorldScale = 0.49
+-- 1.5: a bigger map, ships unchanged). Keep the two equal.
+KAS_WorldScale = 0.525
 
 function KAS_Dist(d) return d * KAS_WorldScale end
 

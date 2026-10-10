@@ -82,7 +82,7 @@ TRANSLATED = ["fadeSet", "fadeTo", "wideScreenIn", "wideScreenOut", "musicVolume
 DEATHS = {"deathDamage": "deathCannon", "deathProjectile": "deathPlasma", "deathBeam": "deathBeam"}
 # NIS object type (substring) -> seconds its HWRM weapon charges before firing: attack() is ordered that much early.
 # Ion cannons: tai/kus_ioncannon.wepn beam anticipation 2 s (+ margin).
-ATTACK_LEAD = {"ioncannonfrigate": 2.2}
+ATTACK_LEAD = {"ioncannonfrigate": 2.2, "kus_destroyer": 2.2}   # (the Kushan destroyer: its ion cannons too, user)
 # ... and seconds its haltAttack() is put off (the beam stops at once in HWRM; nislet01's ion frigate beam cut off on
 # screen: 0.5 s was a little long in game)
 HALT_DELAY = {"ioncannonfrigate": 0.25}

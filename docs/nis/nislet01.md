@@ -541,7 +541,7 @@ None.
 | 2520 | 84.0s | tai_interceptor14 | `attack RACE_KUSHAN\kStandardDestroyer (1)` | translated: attack("kus_destroyer1") |
 | 2550 | 85.0s | kus_destroyer1 | `fleetSpeechEvent ( 705 + 4096 + 536870912 )` | speech $2207378 (Fleet Command, 2.8s, unsubtitled: invisible subtitle): speechEventActor |
 | 2550 | 85.0s | tai_interceptor13 | `haltAttack` | translated: haltAttack() |
-| 2580 | 86.0s | kus_destroyer1 | `attack RACE_TAIDAN\tMissileDestroyer (1)` | translated: attack("tai_missiledestroyer1") |
+| 2580 | 86.0s | kus_destroyer1 | `attack RACE_TAIDAN\tMissileDestroyer (1)` | translated: attack("tai_missiledestroyer1") at frame 2514 (2.2s early: HWRM weapon charge time) |
 | 2580 | 86.0s | tai_interceptor14 | `haltAttack` | translated: haltAttack() |
 | 2620 | 87.3s | tai_missiledestroyer2 | `fleetSpeechEvent ( 704 + 4096 + 536870912 )` | speech $2207377 (Fleet Command, 1.8s, unsubtitled: invisible subtitle): speechEventActor |
 | 2700 | 90.0s | kus_ioncannonfrigate1 | `hide` | translated: hide() |

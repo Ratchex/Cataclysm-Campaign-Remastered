@@ -36,7 +36,7 @@ import make_colours  # noqa: E402
 
 # Gearbox's HW1 factor (0.35, ship models too) spread out: the maps felt cramped and slow with ships, speeds, sensors
 # and the camera at Cataclysm's proportions (user, Missions 1-2: bigger map, ships / camera / UI unchanged)
-MAP_SPREAD = 1.4
+MAP_SPREAD = 1.5
 SCALE = 0.35 * MAP_SPREAD
 RADIUS_SCALE, OUTER = SCALE / 2, 1.2
 
