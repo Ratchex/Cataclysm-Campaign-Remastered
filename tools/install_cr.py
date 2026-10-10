@@ -311,6 +311,42 @@ def use_our_model(ship, ours, joints):
     open(path, "w", encoding="latin-1", newline="").write(text)
 
 
+SPEECH_SHIP_ARG = {"StatusSubsystem": 1, "CommandConstructionComplete": 1}   # handlers whose ship is not the 1st arg
+SPEECH_EARLY_OUT = {   # Somtaaw ships: Cataclysm's per-ship-type Fleet Command line instead of the stock logic
+    "CommandConstructionComplete": "if CatSpeech_IsSomtaaw({s}) ~= nil and CatSpeech_Built({s}) ~= nil then return end",
+    "StatusShipDestroyed": "if CatSpeech_IsSomtaaw({s}) ~= nil and CatSpeech_Destroyed({s}) ~= nil then return end",
+}
+
+
+def patch_speech_logic():
+    """Cataclysm's Somtaaw voices (data/soundscripts/cataclysm/catspeech.lua, voices from tools/make_unitspeech.py):
+    the speech logic environment refuses redefined global functions ("Cannot overwrite function") and lacks getn, so
+    Players Patch's speechlogic files are edited from their pristine copy: catspeech.lua loaded first, every handler
+    stores its ship in CatSpeech_Ship, playSpeechActor(Linked) calls go through CatSpeech_Play(Linked), and
+    construction-complete / ship-destroyed first try Cataclysm's per-ship announcement."""
+    for fn in ("commands.lua", "status.lua", "chatter.lua"):
+        src = os.path.join(PP, "soundscripts", "speechlogic", fn)
+        dst = os.path.join(DATA, "soundscripts", "speechlogic", fn)
+        if not os.path.exists(src):
+            continue
+        text = open(src, encoding="latin-1").read()
+        text = re.sub(r"\bplaySpeechActorLinked\s*\(", "CatSpeech_PlayLinked(", text)
+        text = re.sub(r"\bplaySpeechActor\s*\(", "CatSpeech_Play(", text)
+
+        def handler(m):
+            name, params = m.group(1), [p.strip() for p in m.group(2).split(",") if p.strip()]
+            if not re.match(r"(Command|Status|Chatter|BattleChat)", name) or name.endswith("_Init"):
+                return m.group(0)
+            k = SPEECH_SHIP_ARG.get(name, 0)
+            ship = params[k] if k < len(params) and params[k] != "temp" and name != "StatusBattleMomentum" else '""'
+            out = m.group(0) + f"\n\tCatSpeech_Ship = {ship} or \"\"   -- Cataclysm-HWRM (catspeech.lua)"
+            if name in SPEECH_EARLY_OUT:
+                out += "\n\t" + SPEECH_EARLY_OUT[name].format(s=ship)
+            return out
+        text = re.sub(r"^function\s+(\w+)\s*\(([^)]*)\)", handler, text, flags=re.M)
+        open(dst, "w", encoding="latin-1", newline="").write(CATSPEECH_LINE + "\n" + text)
+
+
 def fix_event_markers(path):
     """Events naming a marker joint their model lacks are fatal ("No valid markers for event", rendermodel);
     their mimics and Beast Swarmer do this. Drop those marker lines so the effect plays at the ship's root."""
@@ -390,14 +426,7 @@ def main():
     for rel in copied:
         if rel.endswith(".events"):
             fix_event_markers(os.path.join(DATA, rel))
-    # Cataclysm's Somtaaw voices: the Players Patch speech logic loads our redirect (data/soundscripts/cataclysm/
-    # catspeech.lua; the voice folders come from tools/make_unitspeech.py)
-    for fn in ("commands.lua", "status.lua", "chatter.lua"):
-        path = os.path.join(DATA, "soundscripts", "speechlogic", fn)
-        if os.path.exists(path):
-            text = open(path, encoding="latin-1").read()
-            if CATSPEECH_LINE not in text:
-                open(path, "a", encoding="latin-1", newline="").write("\n" + CATSPEECH_LINE + "\n")
+    patch_speech_logic()
     # weapon-upgrade variants (tools/ship_variants.py), from their base ship as installed above
     for variant in ship_variants.VARIANTS:
         copied += ship_variants.build(variant)
