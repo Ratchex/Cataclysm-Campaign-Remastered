@@ -537,9 +537,6 @@ def main():
     copied += make_shipcode.install()
     # Cataclysm's health and weapon damage (user: all ships, Cataclysm's scale 1:1)
     copied += make_damage.apply(make_damage.plan())
-    # cutscene-only ship types (tools/make_nisships.py: nislet01's missile destroyer)
-    import make_nisships
-    copied += make_nisships.install()
     # the Mimic's kamikaze through HWRM's own: more health, more damage taken (tools/make_mimicarmour.py)
     import make_mimicarmour
     copied += [f"weapon/{w}" for w in make_mimicarmour.install()]

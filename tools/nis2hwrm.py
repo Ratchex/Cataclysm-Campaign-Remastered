@@ -86,21 +86,6 @@ ATTACK_LEAD = {"ioncannonfrigate": 2.2}
 # ... and seconds its haltAttack() is put off (the beam stops at once in HWRM; nislet01's ion frigate beam cut off on
 # screen: 0.5 s was a little long in game)
 HALT_DELAY = {"ioncannonfrigate": 0.25}
-# explosion for a target that "dies" under such a beam (beam_kills): stock HW1 fighter death effect
-BEAM_KILL_FX, BEAM_KILL_SCALE, BEAM_KILL_SUFFIX = "death_generic_fighter", 0.75, "_explosion"
-# per cutscene: an object's ship type replaced (tools/make_nisships.py: nislet01's missile destroyer firing missiles
-# that fly straight in, as Cataclysm's did; HWRM's swung out in a big loop: user)
-NIS_TYPES = {("nislet01", "tai_missiledestroyer1"): "tai_missiledestroyer_nis"}
-# per cutscene: an object taken out of the scene from a frame (its path dropped REMOVE_DROP below, then it dies there,
-# out of shot): nislet01's hidden interceptor, kept alive for the ion frigate's beam, once that has fired (else the
-# frigate fired on at it through the rest of the cutscene: user)
-REMOVE_AFTER = {("nislet01", "kus_interceptor4"): 1590}
-REMOVE_DROP = -3000.0
-# per cutscene: haltAttack() at this frame instead
-# (nislet01's ion frigate: its 4 s beam, ordered at 1404 and charging 2 s, ends by itself about 1584, just before
-# the 1591 camera cut; halted mid-beam its warbling sound looped on: user)
-# None: no haltAttack (user: let it end by itself; its low warble is the beam's own sound)
-HALT_AT = {("nislet01", "tai_ioncannonfrigate1"): None}
 # per cutscene: an object's path moved by this many HWRM units along another object's up axis at a frame (user:
 # nislet01's top Taiidan interceptor clipped into the Kushan destroyer it loops round)
 PATH_OFFSET = {("nislet01", "tai_interceptor13"): ("kus_destroyer1", 2560, 20.0)}
@@ -399,48 +384,7 @@ def speech_lookup():
     return events
 
 
-def beam_kills(src, objects, fps):
-    """{target key: death frame} for NIS objects that die while a HALT_DELAY ship (a beam) is attacking them: an
-    HWRM beam stops when its target dies (nislet01's ion frigate cut off as the interceptor blew up, though HW1's
-    kept firing into space), so such a death becomes hide() + an explosion effect object on the target's path (the
-    hidden ship stays the target until haltAttack)."""
-    lines = [l.split(";")[0].split("//")[0].strip() for l in open(src, encoding="latin-1").read().splitlines()]
-    cur, t, attacks, deaths = None, 0, [], {}
-    for l in lines:
-        if not l or l.startswith("#"):
-            continue
-        m = re.match(r"with\s+(.+)$", l)
-        if m:
-            cur = objects.get(object_key(m.group(1)))
-            continue
-        if l == "}":
-            cur = None
-            continue
-        m = re.match(r"at\s+frame\s+(\d+)", l)
-        if m:
-            t = int(m.group(1))
-            continue
-        m = re.match(r"(\w+)\s*(.*)$", l)
-        if not m:                                          # "{"
-            continue
-        cmd = COMMANDS.get(m.group(1).lower(), m.group(1))
-        if cur and cmd == "attack" and any(k in cur.lower() for k in HALT_DELAY):
-            attacks.append([cur, objects.get(object_key(m.group(2).strip())), t, None])
-        elif cur and cmd == "haltAttack":
-            for a_ in attacks:
-                if a_[0] == cur and a_[3] is None:
-                    a_[3] = t
-        elif cur and cmd in DEATHS:
-            deaths[cur] = t
-    out = {}
-    for ship, target, t0, t1 in attacks:
-        d = deaths.get(target)
-        if target and d is not None and t0 <= d <= (t1 if t1 is not None else 10 ** 9):
-            out[target] = d
-    return out
-
-
-def translate_script(src, objects, nisname, speech, fps, end_frame, cam_events, teleports, hidden_deaths=None):
+def translate_script(src, objects, nisname, speech, fps, end_frame, cam_events, teleports):
     """HW1 NIS script -> HWRM NIS script. Returns (text, speech ids used, runtime cues, report rows).
     Report rows: (frame, object, HW1 command, what became of it)."""
     lines = [l.split(";")[0].split("//")[0].rstrip() for l in open(src, encoding="latin-1").read().splitlines()]
@@ -536,14 +480,6 @@ def translate_script(src, objects, nisname, speech, fps, end_frame, cam_events, 
                 note(f'translated: attack("{target}") at frame {frame} ({lead}s early: HWRM weapon charge time)')
                 continue
             emit(f'attack("{target}")')
-        elif cmd == "haltAttack" and cur_obj and (nisname.lower(), cur_obj) in HALT_AT:
-            frame = HALT_AT[(nisname.lower(), cur_obj)]
-            if frame is None:
-                note("dropped: HALT_AT None (the beam ends by itself)")
-                continue
-            cur_list.extend([f"    at frame {frame}", "        haltAttack()", f"    at frame {cur_time}"])
-            note(f"translated: haltAttack() at frame {frame} (HALT_AT: this cutscene's beam timing)")
-            continue
         elif cmd == "haltAttack" and cur_obj:
             delay = next((s_ for k_, s_ in HALT_DELAY.items() if k_ in cur_obj.lower()), 0)
             if delay:
@@ -552,14 +488,6 @@ def translate_script(src, objects, nisname, speech, fps, end_frame, cam_events, 
                 note(f"translated: haltAttack() at frame {frame} ({delay}s late: the beam keeps firing off-screen)")
                 continue
             emit("haltAttack()")
-        elif cmd in DEATHS and cur_obj and cur_obj in (hidden_deaths or {}):
-            # a beam is still on it (beam_kills): hidden, with its explosion effect object, so the beam fires on
-            emit("hide()")
-            out_obj.setdefault(cur_obj + BEAM_KILL_SUFFIX, []).extend(
-                [f"    at frame {cur_time}", f"        triggerEffect({BEAM_KILL_SCALE})"])
-            note(f"translated: hide() + {BEAM_KILL_FX} effect (a beam is still firing at it: HWRM beams stop when "
-                 f"their target dies)")
-            continue
         elif cmd in DEATHS and cur_obj:
             emit(f'death("{DEATHS[cmd]}")')
         elif cmd == "health" and cur_obj:
@@ -633,17 +561,12 @@ def translate_script(src, objects, nisname, speech, fps, end_frame, cam_events, 
         cues.append((end_frame + 1, "noui", ""))
     else:
         out.append("    fadeTo(0, 1)")
-    for (nis_, key_), frame_ in REMOVE_AFTER.items():
-        if nis_ == nisname.lower() and key_ in out_obj:   # out of the scene (main(): its path dropped): dies there
-            out_obj[key_] += [f"    at frame {frame_ + 5}", '        death("deathCannon")']
     for key, body in out_obj.items():
         if key == "#drop" or not any(not b.strip().startswith("at frame") for b in body):
             continue
         # every NIS ship invincible (Gearbox's HW1 conversions): attack() fires real weapons, deaths are scripted
         # and death() still kills an invincible ship (their n07 Tai_AssaultFrigate3)
-        if key.endswith(BEAM_KILL_SUFFIX):
-            pass
-        elif body and body[0].strip() == "at frame 0":
+        if body and body[0].strip() == "at frame 0":
             body = body[:1] + ["        invincible()"] + body[1:]
         else:
             body = ["    at frame 0", "        invincible()"] + body
@@ -713,11 +636,6 @@ def main():
                                                                pose(o, ts_[i_ + 1], False)[0]) > TELEPORT:
                 teleports.setdefault(key, []).append((round(ts_[i_] * fps), round(ts_[i_ + 1] * fps)))
         poses = [pose(o, te, False) for _, te in st]
-        gone = REMOVE_AFTER.get((a.name.lower(), key))
-        if gone is not None:
-            poses = [((p_[0][0], p_[0][1] + (REMOVE_DROP if t_ * fps >= gone else 0), p_[0][2]), p_[1])
-                     for p_, (t_, _) in zip(poses, st)]
-            print(f"  {key}: out of the scene from frame {gone}")
         off = PATH_OFFSET.get((a.name.lower(), key))
         if off:
             ref, frame_, dist_ = off
@@ -736,8 +654,7 @@ def main():
             anim.append(channel(nm, list(zip(tlist, chans[c])), fps))
         start = struct.pack("<6d", *(chans[c][0] for c in ("translateX", "translateY", "translateZ",
                                                             "rotateX", "rotateY", "rotateZ")))
-        folw.append(lstr(key) + lstr("HW1") + lstr(kind) + lstr(NIS_TYPES.get((a.name.lower(), key), typ))
-                    + b"".join(lstr(n) for n in names)
+        folw.append(lstr(key) + lstr("HW1") + lstr(kind) + lstr(typ) + b"".join(lstr(n) for n in names)
                     + start + b" ZYX")
         object_channels[key] = (tlist, chans, start)
         # Cataclysm's Kuun-Lan carries its modules; HWRM NIS objects have no subsystems, so each module is a dummy
@@ -747,13 +664,6 @@ def main():
                 mtyp = f"smt_kl_{m}_dummy"
                 folw.append(lstr(f"{key}_{m}") + lstr("HW1") + lstr(kind) + lstr(mtyp)
                             + b"".join(lstr(n) for n in own_channels(f"{key}_{m}", key)) + start + b" ZYX")
-
-    # explosion effect objects for targets that die under a beam (beam_kills), on the target's own channels
-    hidden_deaths = beam_kills(src + ".script", objects, fps)
-    for target in hidden_deaths:
-        start = object_channels[target][2]
-        folw.append(lstr(target + BEAM_KILL_SUFFIX) + lstr("HW1") + lstr("effect") + lstr(BEAM_KILL_FX)
-                    + b"".join(lstr(n) for n in own_channels(target + BEAM_KILL_SUFFIX, target)) + start + b" ZYX")
 
     # One HWRM camera per HW1 shot, switched with cameraCut() like Gearbox's scripts: HWRM interpolates camera
     # keys at the render frame rate, so a cut inside one camera path shows in-between frames.
@@ -793,7 +703,7 @@ def main():
             + chunk(b"FOLW", struct.pack("<I", len(folw)) + b"".join(folw))
             + chunk(b"CMRA", struct.pack("<I", len(cmra)) + b"".join(cmra)))
     text, used, cues, report, ends_black = translate_script(src + ".script", objects, a.name, speech_lookup(), fps,
-                                                            nframes + 2, cam_events, teleports, hidden_deaths)
+                                                            nframes + 2, cam_events, teleports)
     write_report(a.name, report, dropped, fps)
     if a.audit_only:
         todo = [r for r in report if r[3].startswith(("NOT CONVERTED", "NO LINE"))]

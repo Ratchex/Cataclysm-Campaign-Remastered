@@ -464,9 +464,6 @@
 /missile/tai_missile/tai_missile.events
 /missile/tai_missile/tai_missile.miss
 /missile/tai_missilevolley/tai_missilevolley.miss
-/missile/tai_nismissile/tai_nismissile.events
-/missile/tai_nismissile/tai_nismissile.hod
-/missile/tai_nismissile/tai_nismissile.miss
 /missile/tur_smallmissile/tur_smallmissile.events
 /missile/vgr_heavymissile/vgr_heavymissile.events
 /missile/vgr_heavymissile/vgr_heavymissile.miss
@@ -994,7 +991,6 @@
 /scripts/weaponfire/tai_mineforced/tai_mineforced.wf
 /scripts/weaponfire/tai_missile/tai_missile.wf
 /scripts/weaponfire/tai_missilevolley/tai_missilevolley.wf
-/scripts/weaponfire/tai_nismissile/tai_nismissile.wf
 /scripts/weaponfire/tur_smallmissile/tur_smallmissile.wf
 /scripts/weaponfire/vanaarjetbeam/vanaarjetbeam.wf
 /scripts/weaponfire/vgr_hw1heavymissile/vgr_hw1heavymissile.wf
@@ -1535,10 +1531,6 @@
 /ship/tai_missiledestroyer/singleplayer/props/default.lua
 /ship/tai_missiledestroyer/tai_missiledestroyer.lua
 /ship/tai_missiledestroyer/tai_missiledestroyer.ship
-/ship/tai_missiledestroyer_nis/tai_missiledestroyer_nis.events
-/ship/tai_missiledestroyer_nis/tai_missiledestroyer_nis.hod
-/ship/tai_missiledestroyer_nis/tai_missiledestroyer_nis.lua
-/ship/tai_missiledestroyer_nis/tai_missiledestroyer_nis.ship
 /ship/tai_mothership/singleplayer/props/default.lua
 /ship/tai_mothership/tai_mothership.lua
 /ship/tai_mothership/tai_mothership.ship
@@ -2722,7 +2714,6 @@
 /weapon/bst_turretedpulsarcannondriver1/bst_turretedpulsarcannondriver1.wepn
 /weapon/bst_turretedpulsarcannondriver2/bst_turretedpulsarcannondriver2.wepn
 /weapon/bst_vulcankineticturret/bst_vulcankineticturret.wepn
-/weapon/cat_nis_tailauncher/cat_nis_tailauncher.wepn
 /weapon/cat_tai_carrier_hw1_mothershipgun2/cat_tai_carrier_hw1_mothershipgun2.wepn
 /weapon/hgn_antishipbomblauncher/hgn_antishipbomblauncher.wepn
 /weapon/hgn_antisubsystembomblauncher/hgn_antisubsystembomblauncher.wepn

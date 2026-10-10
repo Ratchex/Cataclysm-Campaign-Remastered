@@ -265,14 +265,7 @@ with kus_interceptor4
     at frame 1050
         show()
     at frame 1500
-        hide()
-    at frame 1595
         death("deathCannon")
-}
-with kus_interceptor4_explosion
-{
-    at frame 1500
-        triggerEffect(0.75)
 }
 with kus_interceptor5
 {
@@ -428,6 +421,9 @@ with tai_ioncannonfrigate1
     at frame 1404
         attack("kus_interceptor4")
     at frame 1470
+    at frame 1540
+    at frame 1548
+        haltAttack()
     at frame 1540
 }
 with tai_ioncannonfrigate3
