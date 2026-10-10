@@ -86,7 +86,7 @@ def write_textures(png_dir, tex, out_dir, base, colour):
     return base + "_DIFF.tga"
 
 
-FX_TILE = 256                                  # --fx-mesh: atlas cell size per texture page
+FX_TILE = 128                                  # --fx-mesh: atlas cell size per texture page
 GLOW_BOOST = 1.35                             # diffuse multiplier under a full glow mask
 GLOW_KEEP = re.compile(r"smo_eng(up|lwr)_")    # engine module textures: their glow is right as is
 
@@ -657,7 +657,9 @@ def main():
         colour = (d & 0xFF, d >> 8 & 0xFF, d >> 16 & 0xFF)
         base = f"{a.name}_{key}"
         img = f"IMG[{base}_DIFF]"   # RODOH's layout: id IMG[x]-image, name IMG[x]_FMT[..]; HODOR crashes otherwise
-        mname = f"MAT[{key}]_SHD[ship]"
+        # an effect mesh: HODOR's effect shader (the ship shader ignored the effect's colour: no fade; hw2Shader, the
+        # Keeper meshes', lost the texture through HODOR)
+        mname = f"MAT[{key}]_SHD[{'fx' if a.fx_mesh else 'ship'}]"
         if key not in done_mats:   # one material per texture, shared by the root and the animated parts
             done_mats.add(key)
             tga = write_textures(g["png_dir"], g["mat"]["texture"], a.out_dir, base, colour)
