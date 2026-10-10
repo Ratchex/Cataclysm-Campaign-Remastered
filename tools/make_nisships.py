@@ -57,10 +57,15 @@ def install():
     text, n = re.subn(r'"Missile","Tai_Missile"', f'"Missile","{MISSILE}"', text, count=1)
     assert n, f"{BASE_WEAPON}: no Tai_Missile"
     written.append(write(f"weapon/{WEAPON}/{WEAPON}.wepn", text.encode("latin-1")))
-    # the missile
-    msrc = os.path.join(DATA, "missile", BASE_MISSILE)
-    for fn in os.listdir(msrc):
-        data = open(os.path.join(msrc, fn), "rb").read()
+    # the missile: ours (data/) or the stock one; its model only in stock (without it its engine trail read a null
+    # model: access violation in EngineTrailStatic::getTweaks)
+    files = {}
+    for d in (os.path.join(STOCK_HW2, "missile", BASE_MISSILE), os.path.join(DATA, "missile", BASE_MISSILE)):
+        for fn in os.listdir(d) if os.path.isdir(d) else []:
+            files[fn.lower()] = os.path.join(d, fn)            # data/'s copies over stock's
+    assert BASE_MISSILE + ".hod" in files, f"{BASE_MISSILE}: no model"
+    for fn, path in sorted(files.items()):
+        data = open(path, "rb").read()
         if fn.endswith(".miss"):
             text = data.decode("latin-1")
             for k, v in MISSILE_TUNING.items():
