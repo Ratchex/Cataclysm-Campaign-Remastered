@@ -195,6 +195,11 @@ OUR_MODELS = {
                             "Weapon_Gun3": "Weapon_GUN3"}),
     # its body and its disguises as joints, one shown at a time (tools/overrides/ship/smt_mimic/smt_mimic.madstate)
     "smt_mimic": ("som_mimic", {}),
+    # their four hull guns on Cataclysm's four gun points (any pairing: their positions differ from ours)
+    "smt_processor": ("som_processor", {"Weapon_TopLeft": "Weapon_GUN0", "Weapon_TopRight": "Weapon_GUN2",
+                                        "Weapon_BotLeft": "Weapon_GUN3", "Weapon_BotRight": "Weapon_GUN1"}),
+    # (their ion beam's hardpoint isn't on ours: Cataclysm's has no gun)
+    "smt_rammingfrigate": ("som_rammingfrigate", {}),
 }
 
 
@@ -226,11 +231,13 @@ def use_our_events(ship, src, names):
 # 110/325). Their setups ran 1.3-1.9x Cataclysm's pace for some ships (user: distances felt shorter than the
 # original). Thrusters keep their ratio to the main engine. Not the Kuun-Lan: it is more agile than HW1's
 # Mothership (user), so it keeps their speed.
-SPEED_CLASS = {"scout": 490 / 1000, "interceptor": 487 / 875, "collector": 110 / 325}
+SPEED_CLASS = {"scout": 490 / 1000, "interceptor": 487 / 875, "collector": 110 / 325,
+               "frigate": 206 / 325}   # (tai_assaultfrigate 206 / tStandardFrigate 325)
 # The Worker on Gearbox's collector ratio (144) was a bit slow (user): the scout ratio (208); the original's Worker
 # runs at 0.52x an Acolyte, the interceptor ratio would be 237.
 SPEEDS = {"smt_scout": ("srecon", "scout"), "smt_acolyte": ("sacolyte", "interceptor"),
-          "smt_worker": ("sworker", "scout"), "smt_acv": ("sacv", "interceptor"), "smt_mimic": ("smimic", "interceptor")}
+          "smt_worker": ("sworker", "scout"), "smt_acv": ("sacv", "interceptor"), "smt_mimic": ("smimic", "interceptor"),
+          "smt_rammingfrigate": ("srammingfrigate", "frigate"), "smt_processor": ("sprocessor", "collector")}
 
 
 # Build cost and time: Cataclysm's own (the .shp buildCost / buildTime, 1:1: RUs are Cataclysm's too, asteroids by

@@ -39,6 +39,13 @@ case "$NAME" in
     CLIPS="GravRotate"
     GEO2DAE_ARGS="$GEO2DAE_ARGS --anim-joints $ANIM --anim-geo $(geo $ANIM_SRC)"
     ;;
+  som_rammingfrigate)
+    # its ram: the nose collapses on impact and recovers (RamCollapse / RamRecover), the afterburner ignites and fires
+    # on the charge (AftBurnIgnite / AftBurnFiring / CancelAftBurn): srammingfrigate.mad
+    ANIM="RammingFrigate,RammingFrigateNose,GunHousing,Gun"
+    GEO2DAE_ARGS="$GEO2DAE_ARGS --anim-joints $ANIM"
+    CLIPS="RamCollapse,RamRecover,AftBurnIgnite,AftBurnFiring,CancelAftBurn"
+    ;;
   som_acolyte)
     # the whole body is a joint too: Link / Unlink slide it along its up axis (sacolyte.mad; NOTES.md "Link")
     ANIM="LightInterceptor,LightInterceptorWrist(1),LightInterceptorWrist(2),LightInterceptorGuns"
