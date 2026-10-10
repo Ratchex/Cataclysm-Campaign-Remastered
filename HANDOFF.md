@@ -97,11 +97,12 @@ Missiles disabled before the upgrade (no energy spent); missiles in normal comba
 3. **DONE (2026-10-09):** our ACV model (som_acv from sacv), the Acolyte's animations (combat wings, Link / Unlink
    with Cataclysm's clips; NOTES.md "Link / Unlink animation"), and the **Unit test range** (campaign entry 1) for
    trying units outside the missions. ACV muzzle flashes and balance done. **Mimic disguises DONE (2026-10-10,
-   user-tested):** Mimic button opens a menu of disguises (tools/ship_variants.py DISGUISES: each its own ship type,
-   the Mimic swapped in place and kept selected, painted in the target's colours, untargetable; Unmimic swaps back;
-   lines 165/166). Research: Fighter Drive + Holographic Emitter. Left: Mimic kamikaze (kamikazeDamage 1000, blast
-   275, Quantum Explosive Charge; line 167), asteroid / crate disguises, MCV frigate disguises, Advanced Sensors
-   detection; ACV EMP (TECH_EMP). Also done: Kuun-Lan module health bars (modules recentred on their hardpoints),
+   user-tested, NOTES.md "The Mimic"):** Mimic button opens a menu of 7 disguises shown on the Mimic's own model (one
+   joint each, madstate), with Cataclysm's transformation shell (mesh effects), untargetable while disguised; it keeps
+   flying. Research: Fighter Drive + Holographic Emitter. Left: Mimic kamikaze (kamikazeDamage 1000, blast 275,
+   Quantum Explosive Charge; line 167), asteroid / crate disguises, MCV frigate disguises, Advanced Sensors
+   detection, Unmimic shown only on disguised Mimics (now on every Mimic), dropping the unused disguise ship types
+   (smt_mimic_<target>, still built by install_cr / make_shipcode); ACV EMP (TECH_EMP). Also done: Kuun-Lan module health bars (modules recentred on their hardpoints),
    its tactical overlay distances (stock kus_mothership).
 4. Then Mission 1 against the original, the hyperspace exit (K_497290 stub), Missions 02-17.
 Open, lower priority: rank stars as UI; Fire Missiles burst (HWRM can't fire weapons from script; user: keep as-is);

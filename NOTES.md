@@ -269,6 +269,35 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
   Spd f, Check u32, Close, Player, Queue, Clip, ClearRes (u32 each). Stock collector In: Player+Queue, Player,
   ClearRes; fighter In: Player+Queue, Player, Clip+ClearRes; Out paths: no flags. HOLD_DOCK must be under ROOT_LOD[0].
 
+## The Mimic (2026-10-10, confirmed in game)
+- Cataclysm (FUN_005b8d70 mode 0 unmimic / 1 ship / 2 asteroid; state machine at ship +0x760, FUN_005b8f30): a phase
+  runs 1 -> 0 (mimic) or 0 -> 1 by 0.05 per universe update (16/s: 1.25 s), after a random 0-0.86 s delay. The
+  target's model is drawn as a shell (FUN_004b5c90 / 004b5aa0): every vertex pushed out from the centre onto a sphere
+  of R = 1.2 x max(target radius, Mimic radius) by the phase, material faded by it; the Mimic's own model is drawn
+  while the phase > 0.25. Mimicked, the ship draws the target's model (FUN_005b9640) and takes its stats for display.
+- Ours: one ship. Its model (tools/build_mimic.sh, make_mimic.py; geo2dae.py --body / --part) holds joint MimicBody
+  and Disguise_<target> per disguise (Cataclysm's model of the target, its faction colours baked: a team colour
+  scheme repaints the whole ship). Its .madstate shows one joint (setJointVisible) per state, set by
+  shiprules.lua (SobGroup_SetMadState). A swap to another ship type (the first version) stopped the ship, lost its
+  orders and needed collisions off and reselection: no engine call sets a ship's speed or reads a move destination.
+- SobGroup_SetMadState passes on only the engine's state names: custom names never reach the madstate, and of the
+  NIS states only NIS00-02 (stock madstates define no more; NIS03+ were dropped). Mimic: NIS00 itself, NIS01-02 and
+  DockPathOpen1-5 the disguises (dock path states: the engine sets them only on ships with dock paths). A madstate
+  ran only with a .mad present (tools/make_static_mad.py: one still clip).
+- Untargetable: SobGroup_MakeUntargeted takes one argument and sets nothing on the ship (HWRM
+  luasobgroupactions.cpp): it removes the ship from every other ship's current attack targets, once. Called every
+  ship update while disguised; stopping lets it be targeted again. SobGroup_SetGhost (collisions off) didn't stop
+  targeting.
+- The shell: mesh effects (STYLE_RING, UseMesh; tools/make_mimicfx.py, build_mimicfx.sh). An effect mesh must be one
+  mesh with one material: a ship model (many meshes on joints) drew nothing; with the ship shader it ignored the
+  effect's colour (no fade), so shader fx and the model's texture pages packed into one atlas (geo2dae.py --fx-mesh).
+  Additive and self-lit like the Keeper's phase meshes, fading by colour. FX_PlayEffect leaves an effect where the
+  ship was: started as the ship's events (FX_StartEvent, MimicIn_ / MimicOut_ / MimicTail_<target> on Root) they
+  follow it. Mimic: MimicIn_ on the press, the model switched 1 s later (two ship updates) under MimicTail_; Unmimic
+  switches at once under MimicOut_.
+- Our models have one LOD: the .ship's upLOD / downLOD (made for CR's models) left them invisible zooming out;
+  install_cr.py use_our_model removes them (minLOD 1).
+
 ## Pilot experience, linking, economy (from cataclysm.exe, 2026-10-09)
 - **Experience** (FUN_005147d0, tables at 0x72bb78-0x72bce4): ship + 0x5c8 = kills per victim class (12 HW1 classes:
   Mothership 0 ... Fighter 6, Resource 7, NonCombat 8, MonsterShip 9, Component 10, Micro 11), credited to the ship
