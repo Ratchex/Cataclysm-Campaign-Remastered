@@ -17,6 +17,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import make_modules  # noqa: E402
 import make_damage  # noqa: E402
+import make_kamikaze  # noqa: E402
 import make_shipcode  # noqa: E402
 import make_colours  # noqa: E402
 import make_background  # noqa: E402
@@ -157,6 +158,7 @@ PATCHES = {
     "scripts/races/somtaaw/singleplayer/props/gbx.lua": patch_sp_props,
     "scripts/familylist.lua": patch_families,
     "scripts/races/somtaaw.lua": patch_race,
+    "scripts/tuning.lua": make_kamikaze.patch_tuning,   # HWRM's kamikaze damage off: Cataclysm's from the ship rules
 }
 
 # Their single-player Kuun-Lan model is an old 20 MB export that fails the HWRM mesh loader ("Unknown mesh
@@ -194,6 +196,8 @@ HW1SHIPS = r"C:\Modding\Cataclysm-decomp\reference\hwrm\HW1Ships\ship"
 OUR_EVENTS = {
     "smt_acolyte": (os.path.join(HW1SHIPS, "kus_interceptor", "kus_interceptor.events"),
                     {"Weapon_Gun0": "Weapon_GUN0", "Weapon_Gun1": "Weapon_GUN1"}),
+    # theirs had no death events: no explosion (user)
+    "smt_mimic": (os.path.join(HW1SHIPS, "kus_interceptor", "kus_interceptor.events"), {}),
 }
 
 

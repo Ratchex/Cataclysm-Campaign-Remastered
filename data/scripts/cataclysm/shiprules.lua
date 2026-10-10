@@ -1023,6 +1023,7 @@ function CatMimic_Tick(rec, g, id, now)
         SobGroup_SetMadState(g, m.d.state)
         FX_StartEvent(g, "MimicTail_" .. m.d.target)
         rec.disguise = m.d
+        CatSay(168, g, rec.p)                 -- "Disguise assumed."
         print("CATACLYSM mimic: ship " .. id .. " disguised as " .. m.d.target)
     end
     if rec.disguise then SobGroup_MakeUntargeted(g) end
@@ -1052,48 +1053,57 @@ end
 
 -- ---------------------------------------------------------------------------------------------------------------
 -- Kamikaze (Cataclysm FUN_0043a980; tools/make_kamikaze.py): a ship that rams its target does kamikazeDamage[its
--- type] (CatKamikazeDamage). TEST: what HWRM's own Kamikaze order looks like to a script (its order number, whether
--- the rammer dies at the target, the damage HWRM deals): logged, nothing changed yet.
+-- type] (CatKamikazeDamage), x CAT_KAMIKAZE_CHARGE once it has the Quantum Explosive Charge (FUN_005b9980: ship
+-- +0x770, value not found: a placeholder). HWRM's own Kamikaze order flies the ship in and destroys it at the
+-- target (to a script: an attack order, COMMAND_Attack, with the ability AB_Kamikaze running); its own damage
+-- (rammer health x 7 x armour, about 200 for a Mimic) is off (tuning.lua, make_kamikaze.py) and ours is dealt when a
+-- ship dies in a kamikaze within CAT_KAMIKAZE_REACH of its target. Line 167 (the pilot's last words) as it starts.
+-- Cataclysm's blast (blastRadiusDamage) reaches about 6 units for a Mimic: only the ship rammed; not modelled.
+CAT_KAMIKAZE_CHARGE = 1.5   -- PLACEHOLDER: Cataclysm's multiplier not found
+CAT_KAMIKAZE_REACH = 300    -- died this close to its target (centres): a hit (in game 3-86 for Mimics)
+
 function CatKamikaze_Tick(rec, g, id)
     local order = SobGroup_GetCurrentOrder(g)
+    local kami = 0
+    if AB_Kamikaze then kami = SobGroup_IsDoingAbility(g, AB_Kamikaze) end
     if not rec.kamiGrp then
-        rec.kamiGrp = "cat_kami_" .. id
+        rec.kamiGrp, rec.kamiTargets = "cat_kami_" .. id, "cat_kamit_" .. id
         SobGroup_CreateIfNotExist(rec.kamiGrp)
+        SobGroup_CreateIfNotExist(rec.kamiTargets)
     end
-    SobGroup_Clear(rec.kamiGrp)
-    if order ~= (COMMAND_Idle or 0) and order ~= (COMMAND_Move or 1) then
-        SobGroup_GetCommandTargets(rec.kamiGrp, g, order)
-    end
-    local n = SobGroup_Count(rec.kamiGrp)
-    if order ~= rec.kamiOrder then
-        print("CATACLYSM kamikaze test: ship " .. id .. " (" .. rec.real .. ") order " .. (rec.kamiOrder or -1) ..
-              " -> " .. order .. ", " .. n .. " targets")
+    if order ~= rec.kamiOrder or kami ~= rec.kamiAbility then
+        print("CATACLYSM kamikaze: ship " .. id .. " (" .. rec.real .. ") order " .. order .. ", kamikaze " .. kami)
         rec.kamiOrder = order
     end
+    if kami == 1 and rec.kamiAbility ~= 1 then CatSay(167, g, rec.p) end
+    rec.kamiAbility = kami
     rec.kamiPos = SobGroup_GetPosition(g)
-    if n > 0 then
-        rec.kamiTargets = rec.kamiTargets or ("cat_kamit_" .. id)
-        SobGroup_CreateIfNotExist(rec.kamiTargets)
+    if kami == 1 then
+        SobGroup_Clear(rec.kamiGrp)
+        SobGroup_GetCommandTargets(rec.kamiGrp, g, COMMAND_Attack or 2)
+        if SobGroup_Empty(rec.kamiGrp) == 0 then
+            SobGroup_Clear(rec.kamiTargets)
+            SobGroup_SobGroupAdd(rec.kamiTargets, rec.kamiGrp)
+        end
+    else
         SobGroup_Clear(rec.kamiTargets)
-        SobGroup_SobGroupAdd(rec.kamiTargets, rec.kamiGrp)
-        rec.kamiTargetPos = SobGroup_GetPosition(rec.kamiTargets)
-        rec.kamiTargetHealth = SobGroup_CurrentHealthTotal(rec.kamiTargets)
     end
 end
 
 function CatKamikaze_Died(rec, g, id)
+    if rec.kamiAbility ~= 1 or SobGroup_Empty(rec.kamiTargets) == 1 then return end
     local here = rec.kamiPos
     if SobGroup_Empty(g) == 0 then here = SobGroup_GetPosition(g) end
-    local d, h = -1, -1
-    if SobGroup_Empty(rec.kamiTargets) == 0 then
-        local t = SobGroup_GetPosition(rec.kamiTargets)
-        local dx, dy, dz = t[1] - here[1], t[2] - here[2], t[3] - here[3]
-        d = sqrt(dx * dx + dy * dy + dz * dz)
-        h = SobGroup_CurrentHealthTotal(rec.kamiTargets)
-    end
-    print("CATACLYSM kamikaze test: ship " .. id .. " (" .. rec.real .. ") died, order " .. (rec.kamiOrder or -1) ..
-          ", " .. floor(d) .. " from its target, target health " .. floor(rec.kamiTargetHealth or -1) .. " -> " ..
-          floor(h) .. " (Cataclysm: -" .. CatKamikazeDamage[rec.t] .. ")")
+    local t = SobGroup_GetPosition(rec.kamiTargets)
+    local dx, dy, dz = t[1] - here[1], t[2] - here[2], t[3] - here[3]
+    local d = sqrt(dx * dx + dy * dy + dz * dz)
+    local dmg = CatKamikazeDamage[rec.t]
+    if rec.up.EXPLOSIVE_CHARGE then dmg = dmg * CAT_KAMIKAZE_CHARGE end
+    local before = SobGroup_CurrentHealthTotal(rec.kamiTargets)
+    if d <= CAT_KAMIKAZE_REACH then SobGroup_TakeDamageAbsolute(rec.kamiTargets, dmg) end
+    print("CATACLYSM kamikaze: ship " .. id .. " (" .. rec.real .. ") died " .. floor(d) .. " from its target: " ..
+          ((d <= CAT_KAMIKAZE_REACH and ("hit, " .. dmg .. " damage, health " .. floor(before) .. " -> " ..
+          floor(SobGroup_CurrentHealthTotal(rec.kamiTargets)))) or "missed"))
 end
 
 function CatUnlink_Start(g, p, id)
