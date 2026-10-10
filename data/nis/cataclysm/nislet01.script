@@ -80,6 +80,16 @@ with kus_destroyer1
     at frame 2750
         haltAttack()
     at frame 2820
+        hide()
+}
+with kus_destroyer1_wreck
+{
+    at frame 0
+        invincible()
+        colourSchemeTrail({0.216, 0.592, 0.031}, {0.702, 0.969, 0.396}, "cmanaan.tga", {0.702, 0.969, 0.396}, "")
+        hide()
+    at frame 2820
+        show()
         death("deathCannon")
 }
 with kus_destroyer2
@@ -427,7 +437,7 @@ with tai_ioncannonfrigate1
         attack("kus_interceptor4")
     at frame 1470
     at frame 1540
-    at frame 1548
+    at frame 1520
         haltAttack()
     at frame 1540
 }

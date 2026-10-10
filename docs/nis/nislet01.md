@@ -475,7 +475,7 @@ None.
 | 1470 | 49.0s | tai_ioncannonfrigate1 | `attack RACE_KUSHAN\kHeavyInterceptor (4)` | translated: attack("kus_interceptor4") at frame 1404 (2.2s early: HWRM weapon charge time) |
 | 1500 | 50.0s | kus_interceptor4 | `deathDamage` | translated: hide() + death_generic_fighter effect (a beam is still firing at it: HWRM beams stop when their target dies) |
 | 1525 | 50.8s | tai_assaultfrigate2 | `show` | translated: show() |
-| 1540 | 51.3s | tai_ioncannonfrigate1 | `haltAttack` | translated: haltAttack() at frame 1548 (0.25s late: the beam keeps firing off-screen) |
+| 1540 | 51.3s | tai_ioncannonfrigate1 | `haltAttack` | translated: haltAttack() at frame 1520 (HALT_AT: this cutscene's beam ended sooner) |
 | 1550 | 51.7s | kus_interceptor1 | `attack RACE_TAIDAN\tIonCannonFrigate (4)` | translated: attack("tai_ioncannonfrigate4") |
 | 1550 | 51.7s | kus_interceptor2 | `attack RACE_TAIDAN\tIonCannonFrigate (4)` | translated: attack("tai_ioncannonfrigate4") |
 | 1550 | 51.7s | kus_interceptor3 | `attack RACE_TAIDAN\tIonCannonFrigate (4)` | translated: attack("tai_ioncannonfrigate4") |
@@ -552,7 +552,7 @@ None.
 | 2761 | 92.0s | tai_interceptor12 | `hide` | translated: hide() |
 | 2761 | 92.0s | tai_interceptor13 | `hide` | translated: hide() |
 | 2761 | 92.0s | tai_interceptor14 | `hide` | translated: hide() |
-| 2820 | 94.0s | kus_destroyer1 | `deathDamage` | translated: death("deathCannon") |
+| 2820 | 94.0s | kus_destroyer1 | `deathDamage` | translated: hide() + its double kus_destroyer1_wreck dies there (missiles still fly at it: HWRM missiles drop a dead target) |
 | 2880 | 96.0s | kus_ioncannonfrigate5 | `show` | translated: show() |
 | 2880 | 96.0s | kus_interceptor7 | `show` | translated: show() |
 | 2880 | 96.0s | kus_interceptor8 | `show` | translated: show() |
