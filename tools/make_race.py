@@ -76,9 +76,24 @@ def cataclysm_names():
     return out
 
 
+def cataclysm_tech_text():
+    """Cataclysm's research names (english.script strTECH_<x>: "HOLOGRAPHIC EMITTER") title-cased, and the Somtaaw
+    descriptions (strR1TECH_<x>info: what it unlocks and does; HW1 \\n line breaks kept, quotes escaped)."""
+    names, info = {}, {}
+    for line in open(os.path.join(DECOMP, "extracted", "big", "english.script"), encoding="latin-1"):
+        m = re.match(r"str(TECH_\w+)\s+(\S.*?)\s*$", line)
+        if m and m.group(1) not in names:
+            names[m.group(1)] = " ".join(w if w in ACRONYMS or "." in w else w.capitalize() for w in m.group(2).split())
+        m = re.match(r"strR1(TECH_\w+?)info\s+(\S.*?)\s*$", line)
+        if m:
+            info[m.group(1)] = m.group(2).replace('"', '\\"')
+    return names, info
+
+
 def main():
     techs, tech_dep, ship_dep = read_research()
     names = cataclysm_names()
+    tech_names, tech_info = cataclysm_tech_text()
     rows = csv.DictReader(open(os.path.join(MOD, "tools", "shipmap.tsv"), encoding="utf-8"), delimiter="\t")
     ships = [(r["ship"].lower(), r["hwrm"]) for r in rows
              if r["race"] == "RACE_SECT" and r["hwrm"] and not r["ship"].lower().startswith("smothership")]
@@ -124,11 +139,14 @@ def main():
     for i, (t, secs) in enumerate(sorted(techs.items())):
         req = " & ".join(tech_dep.get(t.lower(), []))
         unlocks = [converted[c] for c, deps in ship_dep.items() if t in deps and c in converted]
-        title = t[5:].replace("_", " ").title()
+        # Cataclysm's own name and description (user: "Mimic" / "Drive Fighter" didn't say what builds a Mimic;
+        # Cataclysm: "Holographic Emitter", "Fighter Drive", each with what it unlocks)
+        title = tech_names.get(t) or t[5:].replace("_", " ").title()
+        desc = tech_info.get(t) or title
         r += ["\t{", f'\t\tName =\t\t\t\t"{t}",', f'\t\tRequiredResearch =\t"{req}",',
               f'\t\tRequiredSubSystems =\t"{module_of(t)}",', f"\t\tCost =\t\t\t\t{secs * COST_PER_SECOND},",
               f"\t\tTime =\t\t\t\t{secs},", f'\t\tDisplayedName =\t\t"{title}",', f'\t\tShortDisplayedName =\t"{title}",',
-              f"\t\tDisplayPriority =\t{10 + i},", f'\t\tDescription =\t\t"{title}",',
+              f"\t\tDisplayPriority =\t{10 + i},", f'\t\tDescription =\t\t"{desc}",',
               f"\t\tIcon =\t\t\t\t{'Icon_Build' if unlocks else 'Icon_Tech'},",
               # the Kuun-Lan for all: a tech aimed at the ship it unlocks (ACV for TECH_LINK) was missing from the
               # research list while the player had none of that ship (user: Link couldn't be researched in the range)
