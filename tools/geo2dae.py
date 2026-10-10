@@ -86,7 +86,8 @@ def write_textures(png_dir, tex, out_dir, base, colour):
     return base + "_DIFF.tga"
 
 
-GLOW_BOOST = 1.35                              # diffuse multiplier under a full glow mask
+FX_TILE = 256                                  # --fx-mesh: atlas cell size per texture page
+GLOW_BOOST = 1.35                             # diffuse multiplier under a full glow mask
 GLOW_KEEP = re.compile(r"smo_eng(up|lwr)_")    # engine module textures: their glow is right as is
 
 
@@ -605,10 +606,37 @@ def main():
                                   {"mat": mat, "png_dir": png_dir, "tris": []})["tris"].append(
                     ([conv(*q) for q in pos], [convn(*q) for q in nrm], uv))
 
-    if a.fx_mesh:   # one mesh, one plain white material (an effect mesh: HWRM drew nothing of a ship's many meshes)
-        groups = {(-1, "fxwhite"): {"mat": {"texture": None, "diffuse": 0xFFFFFF}, "png_dir": "",
-                                    "tris": [t for g in groups.values() for t in g["tris"]]}}
+    if a.fx_mesh:
+        # one mesh, one material (an effect mesh: HWRM drew nothing of a ship's many meshes), its texture an atlas of
+        # the model's texture pages (as written for a ship, colours baked), UVs moved into each page's cell (clamped
+        # to the page: these models don't wrap)
+        keys = sorted(groups)
+        side = math.ceil(math.sqrt(len(keys)))
+        size = pow2(side * FX_TILE)
+        cell = size // side
+        atlas = Image.new("RGB", (size, size))
+        tris, clamped = [], 0
+        for i, k in enumerate(keys):
+            g = groups[k]
+            d = g["mat"]["diffuse"]
+            tga = write_textures(g["png_dir"], g["mat"]["texture"], a.out_dir, f"fxtile{i}",
+                                 (d & 0xFF, d >> 8 & 0xFF, d >> 16 & 0xFF))
+            atlas.paste(Image.open(os.path.join(a.out_dir, tga)).convert("RGB").resize((cell, cell)),
+                        ((i % side) * cell, (i // side) * cell))
+            os.remove(os.path.join(a.out_dir, tga))
+            x0, y0 = (i % side) * cell / size, (i // side) * cell / size
+            for p, n, uv in g["tris"]:
+                out = []
+                for u, v in uv:
+                    cu, cv = min(max(u, 0.0), 1.0), min(max(v, 0.0), 1.0)
+                    clamped += (cu, cv) != (u, v)
+                    out.append((x0 + cu * cell / size, 1 - (y0 + (1 - cv) * cell / size)))
+                tris.append((p, n, out))
+        atlas.save(os.path.join(a.out_dir, "fxatlas.png"))
+        groups = {(-1, "fxatlas"): {"mat": {"texture": "fxatlas", "diffuse": 0xFFFFFF}, "png_dir": a.out_dir,
+                                    "tris": tris}}
         frames = {}
+        print(f"--fx-mesh: {len(keys)} texture pages in a {size} atlas, {clamped} UVs clamped")
     if a.origin:   # recentred: the model's point o is its origin (o: HWRM units, written to origin.txt)
         if a.origin == "auto":
             vs = [v for g in groups.values() for t in g["tris"] for v in t[0]]

@@ -6,8 +6,8 @@ larger of the two ships' radii, by the phase (at 1 a sphere, at 0 the model), it
 Mimic's own model is drawn while the phase is above 0.25; at 0 the shell is the target's model.
 
 HWRM can't move a model's vertices from script, so the shell is a mesh effect (STYLE_RING with UseMesh: the Keeper's
-phase effects): the target's model, lit, translucent in one colour (an effect mesh takes one texture; Cataclysm's
-models have many), scaled from R / (target radius) to 1. shiprules.lua plays them and swaps the ship:
+phase effects): the target's model as one mesh (an effect mesh shows one mesh's material: its texture pages in
+one atlas, tools/geo2dae.py --fx-mesh), additive and self-lit like the Keeper's (it fades by colour), scaled from R / (target radius) to 1. shiprules.lua plays them and swaps the ship:
   cat_mimic_in_<target>    on the Mimic when it starts: the shell shrinks and fades in over 1.25 s; the swap to the
                            disguise is at CAT_MIMIC_SWAP (1 s, two ship updates; Cataclysm drops the Mimic's model
                            at 0.94 s)
@@ -38,8 +38,8 @@ BIG = r"C:\Modding\Cataclysm-decomp\extracted\big"
 PHASE_TIME = 20 / 16      # 1 / 0.05 updates at 16 a second
 SHELL = 1.2               # _DAT_0087813c
 SWAP = 1.0                # shiprules.lua CAT_MIMIC_SWAP
-COLOUR = (0.8, 0.88, 1.0)  # the shell's tint (one colour: see above)
-ALPHA = 0.85              # the shell's opacity when formed
+COLOUR = (1.0, 1.0, 1.0)  # the shell's tint over its texture
+ALPHA = 0.85              # the shell's brightness when formed (additive, as the Keeper's: it fades by colour)
 MIMIC = "race_sect/smimic"
 # Cataclysm's model of each disguise target (its Taiidan and Kushan fighters are the HW1 heavy ones)
 CATACLYSM_MODEL = {
@@ -84,8 +84,8 @@ property_15 = {{ name = "UseDepthSort", type = "VARTYPE_BOOL", value = 0, }},
 property_16 = {{ name = "Loop", type = "VARTYPE_BOOL", value = 0, }},
 property_17 = {{ name = "Billboard", type = "VARTYPE_BOOL", value = 0, }},
 property_18 = {{ name = "AlternateFOV", type = "VARTYPE_BOOL", value = 0, }},
-property_19 = {{ name = "SelfIlluminated", type = "VARTYPE_BOOL", value = 0, }},
-property_20 = {{ name = "Blending", type = "VARTYPE_INT", value = 1, }},
+property_19 = {{ name = "SelfIlluminated", type = "VARTYPE_BOOL", value = 1, }},
+property_20 = {{ name = "Blending", type = "VARTYPE_INT", value = 2, }},
 property_21 = {{ name = "Texture", type = "VARTYPE_STRING", value = "DATA:ART/FX/TEXTURES/CAT_WHITE.TGA", }},
 property_22 = {{ name = "Mesh", type = "VARTYPE_STRING", value = "{mesh}", }},
 property_23 = {{ name = "SortOrder", type = "VARTYPE_INT", value = 0, }},
@@ -106,7 +106,7 @@ def curve(points):
 
 def colours(points):
     """TIMECOLOUR entries {t, r, g, b, a}."""
-    return " ".join(f"entry_{i:02d} = {{ {t:.4f}, {COLOUR[0]}, {COLOUR[1]}, {COLOUR[2]}, {a:.4f}, }},"
+    return " ".join(f"entry_{i:02d} = {{ {t:.4f}, {COLOUR[0] * a:.4f}, {COLOUR[1] * a:.4f}, {COLOUR[2] * a:.4f}, 1, }},"
                     for i, (t, a) in enumerate(points))
 
 
