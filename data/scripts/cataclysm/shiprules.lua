@@ -259,6 +259,14 @@ function CatShip_Update(g, p, id)
     if CAT_SHOW_STARS == 1 and rec.rank > 0 and SobGroup_Selected(g) == 1 then
         FX_PlayEffect("cat_rank" .. rec.rank, g, CAT_STAR_SCALE[rec.cls] or 1)
     end
+    -- a Mimic becoming its disguise once the shell has formed (CatMimic_As)
+    if rec.mimicSwap and now >= rec.mimicSwap.t then
+        local s = rec.mimicSwap
+        rec.mimicSwap = nil
+        local new = CatMimic_Swap(g, p, id, s.type)
+        if new then FX_PlayEffect(s.tail, new, 1) end
+        if rec.gone then return end
+    end
     -- button abilities: act on first finding ourselves in the press group, if still selected (the press group is
     -- the selection the mission script read; checking our own selection too keeps unselected ships out)
     for i = 1, getn(rec.buttons) do
@@ -987,13 +995,27 @@ end
 -- (tools/ship_variants.py DISGUISES: the Mimic's stats, the target's model); the Mimic is swapped for it in place,
 -- keeping health, kills and upgrades, and back on Unmimic. The mission script paints it and makes it untargetable
 -- (cataclysmkas.lua CatMimicTick). Lines: 165 "Roger, holographic projectors on.", 166 "Holographic field collapsed."
+-- The transformation (Cataclysm FUN_005b8f30, 1.25 s): the target's model as a shell shrinking out of a sphere and
+-- fading in, then the real model; Unmimic the reverse. Mesh effects (tools/make_mimicfx.py): cat_mimic_in_<target>
+-- on the Mimic, the swap CAT_MIMIC_SWAP later (Cataclysm stops drawing the Mimic at 0.94 s), cat_mimic_tail_<target>
+-- on the disguise; Unmimic swaps at once, cat_mimic_out_<target> on the Mimic.
+CAT_MIMIC_SWAP = 1.0     -- make_mimicfx.py SWAP; two ship updates (CAT_TICK)
+
 function CatNoop(g, p, id, name)
 end
 
+function CatDisguise_Of(shiptype)
+    for i = 1, getn(CatDisguises) do
+        if CatDisguises[i].type == shiptype then return CatDisguises[i] end
+    end
+    return nil
+end
+
+-- the ship swapped for shiptype in place; returns the new ship's group
 function CatMimic_Swap(g, p, id, shiptype, say)
     local rec = CatShips[id]
     if not rec or rec.gone or SobGroup_Empty(g) == 1 or rec.real == shiptype then return end
-    CatSay(say, g, p)
+    if say then CatSay(say, g, p) end
     local pos, health, m = SobGroup_GetPosition(g), SobGroup_HealthPercentage(g), SobGroup_GetCoordSys(g)
     local up = {}
     for k, v in rec.up do up[k] = v end
@@ -1012,20 +1034,35 @@ function CatMimic_Swap(g, p, id, shiptype, say)
     SobGroup_CreateIfNotExist("cat_reselect")
     SobGroup_SobGroupAdd("cat_reselect", new)
     print("CATACLYSM mimic: ship " .. id .. " (" .. rec.real .. ") -> " .. shiptype)
+    return new
 end
 
--- a Mimic menu button (mimic_<target>): become that disguise
+-- a Mimic menu button (mimic_<target>): become that disguise. From another disguise its shell dissolves as the new
+-- one forms (Cataclysm runs the two one after the other)
 function CatMimic_As(g, p, id, name)
+    local rec = CatShips[id]
+    if not rec or rec.gone or rec.mimicSwap or SobGroup_Empty(g) == 1 then return end
     for i = 1, getn(CatDisguises) do
-        if CatDisguises[i].button == name then
-            CatMimic_Swap(g, p, id, CatDisguises[i].type, 165)
+        local d = CatDisguises[i]
+        if d.button == name then
+            if rec.real == d.type then return end
+            CatSay(165, g, p)
+            local was = CatDisguise_Of(rec.real)
+            if was then FX_PlayEffect("cat_mimic_out_" .. was.target, g, 1) end
+            FX_PlayEffect("cat_mimic_in_" .. d.target, g, 1)
+            rec.mimicSwap = { t = Universe_GameTime() + CAT_MIMIC_SWAP - 0.01, type = d.type,
+                              tail = "cat_mimic_tail_" .. d.target }
             return
         end
     end
 end
 
 function CatUnmimic_Start(g, p, id, name)
-    CatMimic_Swap(g, p, id, "smt_mimic", 166)
+    local rec = CatShips[id]
+    if not rec or rec.mimicSwap then return end
+    local was = CatDisguise_Of(rec.real)
+    local new = CatMimic_Swap(g, p, id, "smt_mimic", 166)
+    if new and was then FX_PlayEffect("cat_mimic_out_" .. was.target, new, 1) end
 end
 
 function CatUnlink_Start(g, p, id)
