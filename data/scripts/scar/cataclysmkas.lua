@@ -1597,6 +1597,9 @@ end
 function K_4980c0(shipType, race, on)
     local t = KAS_ShipTypes[strlower(shipType)]
     if t == nil then return end
+    -- a Kuun-Lan module: our sMothership<Module> type is its loose dummy ship (cutscenes); the build option is the
+    -- module subsystem (user: Mission 1 offered the modules it turns off)
+    if strsub(t, -6) == "_dummy" then t = strsub(t, 1, -7) end
     KAS_ConstructionOff[t] = (on == 0) or nil     -- KAS_VariantBuildWatch follows it for the variants
     if on ~= 0 then Player_UnrestrictBuildOption(0, t) else Player_RestrictBuildOption(0, t) end
     KAS_VariantBuildWatch()
