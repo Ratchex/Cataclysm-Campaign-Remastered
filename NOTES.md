@@ -87,9 +87,17 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
     CPU forever with no output; not the environment, stdio, cwd, console or error mode (all tested).
   - Forward-slash paths only. Textures: square power of two, >= 64 px, or it loops forever building mips.
   - Image id `IMG[<x>_DIFF]-image`, name `IMG[<x>_DIFF]_FMT[DXT1]`, effect `<diffuse><texture texture="IMG[..]-image">`;
-    other ids segfault it. A `<x>_TEAM.tga` next to `<x>_DIFF.tga` is picked up automatically (R = 1 - team
-    colour, G = 1 - stripe).
-  - RODOH only reads HW2 Classic HODs (does nothing on HWRM ones).
+    other ids segfault it. HODOR picks up `<x>_TEAM.tga` / `_STRP.tga` / `_PAIN.tga` next to `<x>_DIFF.tga` into
+    the $team texture (SHADERS.MAP), but **team masks went wrong three ways in game** (whole hulls blue, then
+    white, stripes never right): our models now **bake the Somtaaw colours into the DIFF** instead (geo2dae.py
+    write_textures: Cataclysm's own formula, HW1 texreg.c trBufferColorRGB: texel x (1 - mask) + colour x mask,
+    team then stripe; Somtaaw scalar 1, colpick.script has curves for the Taiidan only). Confirmed in game: grey
+    hulls, blue panels, white stripes. Only the Somtaaw player uses these models. Stale _TEAM/_STRP files next to
+    a DIFF are deleted (HODOR would pick them up).
+  - RODOH only reads HW2 Classic HODs (does nothing on HWRM ones). The .hod texture data is one compressed POOL
+    chunk (u32 3518, packed size, unpacked size = all LMIPs' DXT data in order; not zlib / QuickLZ 1 or 3).
+  - Kuun-Lan modules reach the game through `make_modules.py` (data/subsystem, data/ship/*_dummy), not
+    install_cr.py: build_kuunlan.sh runs it at the end (a rebuild once never reached the game).
 - HW1 model space is X up, Y right, Z forward; HWRM = 0.35 * (-y, x, z) (proper rotation, winding kept: HW1
   polygons are already counter-clockwise around their face normal). 0.35 matches Gearbox's Kus_Carrier size.
 - Stats: scale Cataclysm .shp values by Gearbox's ratios for the HW1 Kushan mothership (speed x0.96, health
@@ -108,6 +116,21 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
 - `StartShipWeaponConfig`'s 4th argument names the firing **animation** in the .events (stock: the weapon joint's
   name, e.g. kus_interceptor `Weapon_Gun0`), whose events give the muzzle flash/sound.
 - `NewShipType.upLOD/downLOD` switch to LOD 1: a LOD-0-only model vanishes at distance with them.
+
+## Backgrounds (2026-10-09, confirmed in game)
+- User: use a stock HWRM / HW2RM sky; port one only when none fits. tools/build_mission.py BACKGROUNDS maps each
+  Cataclysm mission to a stock sky: 01 -> **ez14** (orange haze, bright core, arc above), 13 -> **ez08** (HW1's
+  almost exactly). Found by rendering Cataclysm's mission<NN>.btg and HW1's ez<NN>.btg (reference/hw1classic/btg)
+  the same way (make_background.render_page) and comparing per pixel at every rotation, then by eye. Cataclysm's
+  own btg/ez<NN>.btg are its repaints, not HW1's. Most Cataclysm mission skies are new art: decide per mission.
+  HWRM can't rotate a sky (Cataclysm's theta 200 is lost).
+- Stock skies: HWBackgrounds.big background/<name>/ (ez01-16 HW1, m01-15 HW2): <name>_light.hod (what is drawn),
+  <name>.lua (lens flares), <name>_extra.lua (sun god rays, ship gamma, bloom, env), _hq_ cube maps. A loose
+  data/background/ez14/ez14_extra.lua overrides the stock one: ours dims the god rays (rayExposure 0.735 -> 0.5)
+  and raises the bloom threshold 0.68 -> 0.855 (ez10-12's; ez14's low threshold bloomed the whole bright sky).
+  Cataclysm has no bloom; the user watches it.
+- Our converted sky (tools/make_background.py, BTG -> textured sphere + stock ez01 LITE) looked wrong in game and
+  is off (BACKGROUNDS = {}); the BTG / HWRM .hod format notes stay in its docstring.
 
 ## Mission start: the fleet's hyperspace arrival (confirmed in game, Mission01)
 - kasfStartLevelByHyperspacingShips (all 17 missions) = exe SP flow state 9: the fleet arrives at StartPointPlayer.
