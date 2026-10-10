@@ -3,8 +3,7 @@
 tai_missiledestroyer_nis: the Taiidan missile destroyer whose launchers fire tai_nismissile, a Taiidan missile
 that turns and speeds up at once. HWRM's (a 0.75 s engine and 1 s turn ramp) left the fixed launchers' missiles
 swinging out in a big loop before they came round to the target; in Cataclysm's nislet01 they fly straight in
-(user). Gameplay's missile destroyers keep the stock missile. Missile types load by their race's Prefix (TAI_): one
-named cat_... was never found ("WEAPON FIRE ERROR: Could not load weapon fire", then an access violation).
+(user). Gameplay's missile destroyers keep the stock missile.
 
 install() returns the data/ paths written (install_cr.py's manifest: generated, not committed).
 """
@@ -21,7 +20,7 @@ SHIP, BASE = "tai_missiledestroyer_nis", "tai_missiledestroyer"
 LAUNCHERS = ("Tai_DestroyerLauncher",)   # (the volley tubes fire special attacks only)
 WEAPON, MISSILE, BASE_WEAPON, BASE_MISSILE = "cat_nis_tailauncher", "tai_nismissile", "tai_destroyerlauncher", "tai_missile"
 # the missile: straight at its target from launch
-# (each brake time below its accel time: HWRM rejects a missile otherwise, "Could not load weapon fire" and a crash)
+# (each brake time below its accel time, as HWRM requires of ships and missiles)
 MISSILE_TUNING = {"rotationMaxSpeed": 1000, "rotationAccelTime": 0.1, "rotationBrakeTime": 0.05,
                   "mainEngineAccelTime": 0.15, "mainEngineBrakeTime": 0.1,
                   "thrusterAccelTime": 0.15, "thrusterBrakeTime": 0.1}
@@ -70,6 +69,10 @@ def install():
             text = re.sub(r'(NewShipType\.weaponName\s*=\s*)"[^"]*"', r'\1"%s"' % WEAPON, text)
             data = text.encode("latin-1")
         written.append(write(f"missile/{MISSILE}/{MISSILE}{os.path.splitext(fn)[1]}", data))
+    # ...and its weapon fire (scripts/weaponfire/<name>.wf: hit effects and sounds): a weapon's fire name is looked up
+    # there, not among the missiles (without it "Could not load weapon fire" and an access violation)
+    wf = open(os.path.join(DATA, "scripts", "weaponfire", BASE_MISSILE, BASE_MISSILE + ".wf"), "rb").read()
+    written.append(write(f"scripts/weaponfire/{MISSILE}/{MISSILE}.wf", wf))
     print(f"  cutscene ships: {SHIP} ({MISSILE}: turns at once)")
     return written
 

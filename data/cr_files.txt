@@ -992,6 +992,7 @@ scripts/weaponfire/tai_extmissile/tai_extmissile.wf
 scripts/weaponfire/tai_mineforced/tai_mineforced.wf
 scripts/weaponfire/tai_missile/tai_missile.wf
 scripts/weaponfire/tai_missilevolley/tai_missilevolley.wf
+scripts/weaponfire/tai_nismissile/tai_nismissile.wf
 scripts/weaponfire/tur_smallmissile/tur_smallmissile.wf
 scripts/weaponfire/vanaarjetbeam/vanaarjetbeam.wf
 scripts/weaponfire/vgr_hw1heavymissile/vgr_hw1heavymissile.wf
