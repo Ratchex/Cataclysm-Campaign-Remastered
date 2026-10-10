@@ -1,13 +1,14 @@
 -- Cataclysm-HWRM: the Mimic's model holds its body and its disguises (tools/build_ship.sh som_mimic: geo2dae.py
 -- --body MimicBody, --part Disguise_<target>); shiprules.lua shows one at a time (SobGroup_SetMadState).
--- TEST: one disguise (kus_attackbomber).
-SMT_MIMIC_Mimic_OnSet = function(ship)
+-- SobGroup_SetMadState passes on only the engine's state names, so the numbered NIS states (as the Acolyte's Link):
+-- NIS00 the Mimic itself, NIS01... its disguises (custom names never reached the madstate). TEST: one disguise.
+SMT_MIMIC_NIS00_OnSet = function(ship)
     print("SMT_MIMIC madstate: Mimic")
     setJointVisible(ship, "MimicBody", 1)
     setJointVisible(ship, "Disguise_kus_attackbomber", 0)
 end
 
-SMT_MIMIC_Disguise_kus_attackbomber_OnSet = function(ship)
+SMT_MIMIC_NIS01_OnSet = function(ship)
     print("SMT_MIMIC madstate: Disguise_kus_attackbomber")
     setJointVisible(ship, "MimicBody", 0)
     setJointVisible(ship, "Disguise_kus_attackbomber", 1)

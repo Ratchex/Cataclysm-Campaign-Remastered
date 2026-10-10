@@ -264,8 +264,8 @@ function CatShip_Update(g, p, id)
     end
     -- a new Mimic's disguise parts hidden: on its first two updates (TEST: is the first too early?)
     if rec.mimicHide then
-        SobGroup_SetMadState(g, "Mimic")
-        print("CATACLYSM mimic: ship " .. id .. " madstate Mimic (" .. rec.mimicHide .. ")")
+        SobGroup_SetMadState(g, "NIS00")
+        print("CATACLYSM mimic: ship " .. id .. " madstate NIS00 (" .. rec.mimicHide .. ")")
         rec.mimicHide = rec.mimicHide - 1
         if rec.mimicHide == 0 then rec.mimicHide = nil end
     end
@@ -278,7 +278,7 @@ function CatShip_Update(g, p, id)
     if rec.mimicSwap and now >= rec.mimicSwap.t and rec.mimicSwap.joint then
         local s = rec.mimicSwap
         rec.mimicSwap = nil
-        SobGroup_SetMadState(g, "Disguise_" .. s.joint)
+        SobGroup_SetMadState(g, CAT_MIMIC_JOINTS[s.joint])
         FX_StartEvent(g, s.tail)
         SobGroup_SetGhost(g, 1)               -- TEST: untargeted (MakeUntargeted can't be undone: one argument only)
         rec.disguise = s.joint
@@ -1031,7 +1031,7 @@ CAT_MIMIC_SWAP = 1.0     -- make_mimicfx.py SWAP; two ship updates (CAT_TICK)
 CAT_MIMIC_GHOST = 1.5
 -- TEST: disguises shown on the Mimic itself (its model's Disguise_<target> joint, smt_mimic.madstate) instead of a
 -- ship swap: the same ship, keeping its speed and orders
-CAT_MIMIC_JOINTS = { kus_attackbomber = 1 }
+CAT_MIMIC_JOINTS = { kus_attackbomber = "NIS01" }   -- its mad state (NIS00: the Mimic)
 CAT_MIMIC_FXTEST = 0     -- DEVELOPMENT: also the stock Keeper mesh effect (does a mesh effect show at all?)
 
 function CatNoop(g, p, id, name)
@@ -1141,7 +1141,7 @@ function CatUnmimic_Start(g, p, id, name)
     if not rec or rec.mimicSwap then return end
     if rec.disguise then                      -- TEST: a disguise on the Mimic itself (CAT_MIMIC_JOINTS)
         CatSay(166, g, p)
-        SobGroup_SetMadState(g, "Mimic")
+        SobGroup_SetMadState(g, "NIS00")
         FX_StartEvent(g, "MimicOut_" .. rec.disguise)
         SobGroup_SetGhost(g, 0)
         print("CATACLYSM mimic: ship " .. id .. " drops its " .. rec.disguise .. " disguise")
