@@ -1247,8 +1247,9 @@ CAT_PROC_BEAMS = {          -- origin (HWRM units, our model) and side (x direct
 CAT_PROC_BANDS = { 500, 950, 1400 }   -- the cone's lengths (make_procbeam.py BANDS): the shortest that reaches
 CAT_PROC_LEVELS = 31                  -- yaw / pitch steps over -45..45 degrees
 CAT_PROC_AIM_TRACE = 0                -- 1: log each message
-CAT_PROC_AIM_EASE = 0.35              -- seconds the aim takes to follow its target
-CAT_PROC_AIM_HOLD = 0.5               -- a one-step change is sent only after this long
+CAT_PROC_AIM_EASE = 1.0               -- seconds the aim takes to follow its target (user: 0.35 still twitchy)
+CAT_PROC_AIM_HOLD = 1.0               -- a change under CAT_PROC_AIM_JUMP steps is sent only after this long
+CAT_PROC_AIM_JUMP = 3                 -- steps (about 3 degrees each) sent at once
 
 function CatProcBeam_Aim(rec, g, i, t, o, r, u, f, now, dt)
     local band, yq, pq = 0, 0, 0
@@ -1289,10 +1290,10 @@ function CatProcBeam_Aim(rec, g, i, t, o, r, u, f, now, dt)
     if not t then rec.aimF[i] = nil end
     if last and last[1] == band then
         if band == 0 then return end
-        -- one step only once it has held CAT_PROC_AIM_HOLD seconds (no dithering between neighbouring steps)
+        -- small changes only once CAT_PROC_AIM_HOLD seconds have passed (no dithering between neighbouring steps)
         local dy, dp = abs(yq - last[2]), abs(pq - last[3])
         if dy == 0 and dp == 0 then return end
-        if dy <= 1 and dp <= 1 and now - last[4] < CAT_PROC_AIM_HOLD then return end
+        if dy < CAT_PROC_AIM_JUMP and dp < CAT_PROC_AIM_JUMP and now - last[4] < CAT_PROC_AIM_HOLD then return end
     end
     rec.aim[i] = { band, yq, pq, now }
     local bits = {}

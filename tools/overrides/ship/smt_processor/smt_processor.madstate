@@ -5,19 +5,20 @@
 -- its dock paths use the DockPath ones). 14 bits a message: beam (2), band (2: 0 off, 1-3 the cone's length),
 -- yaw (5), pitch (5: 0-31 over -45..45 degrees). Messages are sent whole within one script update; the Clock clip's
 -- time tells updates apart, so a message cut short (a lost bit) is dropped at the next update.
--- Aim: clip Yaw<i> / Pitch<i> sweeps -45..45 over 0..1 s and back over 1..2 s; a turn plays the half that goes
--- the right way from the current angle and pauses at the new one (90 degrees a second), so the engine moves it
+-- Aim: clip Yaw<i> / Pitch<i> sweeps -45..45 over 0..2 s and back over 2..4 s; a turn plays the half that goes
+-- the right way from the current angle and pauses at the new one (45 degrees a second), so the engine moves it
 -- smoothly between the script's updates.
 
 SMT_PROCESSOR_P = {}
 SMT_PROCESSOR_RANGE = 45
 SMT_PROCESSOR_LEVELS = 31
+SMT_PROCESSOR_SWEEP = 2     -- seconds per sweep one way (make_procbeam.py SWEEP): 45 degrees a second
 
 SMT_PROCESSOR_Angle = function(ship, clip)
     if(isAnimRunning(ship, clip) == 0) then
         return 0
     end
-    local t = getTime(ship, clip)
+    local t = getTime(ship, clip) / SMT_PROCESSOR_SWEEP
     if(t <= 1) then
         return -SMT_PROCESSOR_RANGE + 2 * SMT_PROCESSOR_RANGE * t
     end
@@ -44,8 +45,8 @@ SMT_PROCESSOR_Aim = function(ship, clip, target)
         stopAnim(ship, clip)
     end
     startAnim(ship, clip)
-    setTime(ship, clip, t0)
-    setPauseTime(ship, clip, t1)
+    setTime(ship, clip, t0 * SMT_PROCESSOR_SWEEP)
+    setPauseTime(ship, clip, t1 * SMT_PROCESSOR_SWEEP)
 end
 
 SMT_PROCESSOR_Value = function(bits, first, count)

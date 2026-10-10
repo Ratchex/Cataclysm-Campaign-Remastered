@@ -9,8 +9,8 @@ one of the two states it is not in, and the madstate (tools/overrides/ship/smt_p
 decodes them and plays the beam's yaw / pitch clip toward the new angle, pausing it there.
 
   --mad OUT   the aim clips for the model's Beam<i>_Yaw / Beam<i>_Pitch joints (geo2dae.py --turret): Yaw<i> /
-              Pitch<i> sweep -RANGE..+RANGE over 0..1 s and back over 1..2 s (a turn either way plays forward,
-              TURN degrees a second); Clock (still, very long) is the madstate's clock
+              Pitch<i> sweep -RANGE..+RANGE over 0..SWEEP s and back (a turn either way plays forward,
+              45 degrees a second); Clock (still, very long) is the madstate's clock
   --dae       the cone mesh (one mesh, one material, the fx shader) into build/ships/fx_procbeam/ for HODOR
   (none)      install: the cone .hod, the effect (data/art/fx/cat_procbeam.lua), its texture
 Events: patch_events() (install_cr.py) adds ProcBeam<i>_<band> to the Processor's .events: the cone on Beam<i>_Cone,
@@ -38,6 +38,8 @@ CONE_LEN = 1400.0         # twProcessorAutoRepairDistance 4000 x 0.35 (shiprules
 CONE_R0, CONE_R1 = 2.0, 44.0   # twProcessorAutoRepairBeamWidth 250 x 0.35 wide at full range: very thin
 BANDS = (500.0, 950.0, 1400.0)  # cone lengths (shiprules.lua CAT_PROC_BANDS): the shortest that reaches the target
 SEGS = 16
+SWEEP = 2.0               # seconds per sweep (one way): 45 degrees a second (user: the cone was twitchy at 90)
+STOCK_TEX = "C:/Modding/Cataclysm-decomp/reference/hwrm/Homeworld2/art/fx/repair_fx/repair_beam/fx_repairbeam_diff.tga"
 CLOCK = 100000.0
 
 
@@ -65,10 +67,10 @@ def write_mad(out):
         njref += 1
 
     r = math.radians(RANGE)
-    sweep = [(0.0, -r), (1.0, r), (2.0, -r)]
+    sweep = [(0.0, -r), (SWEEP, r), (2 * SWEEP, -r)]
     for i in range(BEAMS):
-        clip(f"Yaw{i}", f"Beam{i}_Yaw", "Y", sweep, 2.0)
-        clip(f"Pitch{i}", f"Beam{i}_Pitch", "X", sweep, 2.0)
+        clip(f"Yaw{i}", f"Beam{i}_Yaw", "Y", sweep, 2 * SWEEP)
+        clip(f"Pitch{i}", f"Beam{i}_Pitch", "X", sweep, 2 * SWEEP)
     clip("Clock", "Beam0_Cone", "Z", [(0.0, 0.0), (CLOCK, 0.0)], CLOCK)
     body = (b"MAD " + chunk(b"NAME", b"Homeworld2 MAD File") + chunk(b"VERS", bytes([4, 1, 0, 0]))
             + chunk(b"INFO", struct.pack("<5I", FPS, len(marks), len(curves), njref, 6 * njref))
@@ -134,19 +136,23 @@ def write_dae():
 
 
 def fade_texture(path):
-    """White, fading along U (base to tip), a little brighter along the cone's axis line."""
-    w, h = 128, 16
+    """Stock HWRM's repair cone texture (its green energy noise, fx_repairbeam_diff.tga: user, reuse the stock
+    repair look), stretched along the cone (U) and fading toward the tip."""
+    w, h = 256, 64
+    src = Image.open(STOCK_TEX).convert("RGB").resize((w, h))
     im = Image.new("RGBA", (w, h))
     for x in range(w):
-        v = (1 - x / (w - 1)) ** 1.6
+        v = (1 - x / (w - 1)) ** 0.9             # the fade, gentle: the cone reads most of its length
         for y in range(h):
-            c = int(255 * v)
-            im.putpixel((x, y), (c, c, c, c))
+            r, g, b = src.getpixel((x, y))
+            k = 1.8 * v                              # the noise brightened (the stock texture is dark)
+            c = (int(r * k + 25 * v), int(g * k + 45 * v), int(b * k + 35 * v))
+            im.putpixel((x, y), (min(255, c[0]), min(255, c[1]), min(255, c[2]), int(255 * v)))
     im.save(path)
 
 
 FX = '''-- Cataclysm-HWRM: the Processor's repair beam cone (tools/make_procbeam.py; on its Beam<i>_Cone joints, aimed by
--- its madstate). A mesh effect: the thin cone mesh, tinted repair green, fading toward the tip (its texture).
+-- its madstate). A mesh effect: the thin cone mesh with stock HWRM's repair cone texture, fading toward the tip, slowly spinning.
 fx = {
 style = "STYLE_RING",
 properties = {
@@ -154,8 +160,8 @@ property_00 = { name = "Radius", type = "VARTYPE_ARRAY_TIMEFLOAT", value = { 0, 
 property_01 = { name = "Offset", type = "VARTYPE_ARRAY_TIMEVECTOR3", value = { entry_00 = { 0, 0, 0, 0, }, entry_01 = { 1, 0, 0, 0, }, }, },
 property_02 = { name = "SpinX", type = "VARTYPE_ARRAY_TIMEFLOAT", value = { 0, 0, 1, 0, }, },
 property_03 = { name = "SpinY", type = "VARTYPE_ARRAY_TIMEFLOAT", value = { 0, 0, 1, 0, }, },
-property_04 = { name = "SpinZ", type = "VARTYPE_ARRAY_TIMEFLOAT", value = { 0, 0, 1, 0, }, },
-property_05 = { name = "Colour", type = "VARTYPE_ARRAY_TIMECOLOUR", value = { entry_00 = { 0, 0.35, 1, 0.5, 0.7, }, entry_01 = { 1, 0.35, 1, 0.5, 0.7, }, }, },
+property_04 = { name = "SpinZ", type = "VARTYPE_ARRAY_TIMEFLOAT", value = { 0, 0.25, 1, 0.25, }, },
+property_05 = { name = "Colour", type = "VARTYPE_ARRAY_TIMECOLOUR", value = { entry_00 = { 0, 1, 1, 1, 1, }, entry_01 = { 1, 1, 1, 1, 1, }, }, },
 property_06 = { name = "RadiusEpsilon", type = "VARTYPE_FLOAT", value = 0, },
 property_07 = { name = "RateEpsilon", type = "VARTYPE_FLOAT", value = 0, },
 property_08 = { name = "SpinEpsilonX", type = "VARTYPE_FLOAT", value = 0, },
