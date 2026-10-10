@@ -116,6 +116,25 @@ def write_clip(files, out, rate):
     return False
 
 
+def write_fleet(fleet_dir, key, variants, rate, ce):
+    """An announcer line: every Cataclysm recording of it, played at random (user: selecting the Kuun-Lan always said
+    "Bridge"). One recording: <key>.wav, flat as stock "fleet"; more: <key>/<key>.lua (a random sample container, as
+    Cataclysm Remastered's Beast announcer) + <key>_<n>.wav. True if anything was written."""
+    variants = [f for f in variants if all(os.path.exists(os.path.join(SPEECH, x)) for x in f)]
+    if len(variants) == 1:
+        return write_clip(variants[0], os.path.join(fleet_dir, key.lower() + ".wav"), rate)
+    if not variants:
+        return False
+    d = os.path.join(fleet_dir, key.lower())
+    os.makedirs(d, exist_ok=True)
+    for k, files in enumerate(variants):
+        write_clip(files, os.path.join(d, f"{key.lower()}_{k + 1}.wav"), rate)
+    with open(os.path.join(d, key.lower() + ".lua"), "w", newline="\n") as f:
+        f.write("-- Cataclysm-HWRM: Cataclysm speech event %d (tools/make_unitspeech.py)\n"
+                "version = 4\nrandSampContainer = 1\n" % ce)
+    return True
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--rate", type=int, default=44100)
@@ -173,14 +192,14 @@ def main():
     fleet = {}
     for key, (ce, v) in FLEET.items():
         variants = rows.get((ce, v))
-        if variants and write_clip(variants[0], os.path.join(fleet_dir, key.lower() + ".wav"), a.rate):
+        if variants and write_fleet(fleet_dir, key, variants, a.rate, ce):
             fleet[key] = key
     per_type, var_of = {}, {}
     for prefix, ce in PER_TYPE.items():
         for v, cat in enumerate(types):
             if cat in hwrm and rows.get((ce, v)):
                 key = f"{prefix}_{cat[1:].upper()}"
-                if write_clip(rows[(ce, v)][0], os.path.join(fleet_dir, key.lower() + ".wav"), a.rate):
+                if write_fleet(fleet_dir, key, rows[(ce, v)], a.rate, ce):
                     for name in hwrm[cat]:
                         # module dummy ships share their subsystem's name minus _dummy
                         for alias in {name, name[:-len("_dummy")] if name.endswith("_dummy") else name}:
@@ -192,7 +211,7 @@ def main():
     for sub, v in MODULES.items():
         if rows.get((MODULE_ONLINE, v)):
             key = "CAT_MODULE_" + sub[len("smt_kl_"):].upper()
-            if write_clip(rows[(MODULE_ONLINE, v)][0], os.path.join(fleet_dir, key.lower() + ".wav"), a.rate):
+            if write_fleet(fleet_dir, key, rows[(MODULE_ONLINE, v)], a.rate, MODULE_ONLINE):
                 modules[sub] = key
     tech_line = {make_upgrades.TECHS[v]: v for (e, v) in rows if e == TECH_LINE and v < len(make_upgrades.TECHS)}
 
