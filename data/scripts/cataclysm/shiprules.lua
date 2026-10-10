@@ -1188,7 +1188,6 @@ CAT_WORKER_TIP = { 0, 28.5, 0 }
 CAT_WORKER_CONE = 0.5       -- cos(sworker.shp repairCone 120 / 2)
 CAT_REPAIR_STILL = 5        -- slower than this: sitting still
 CAT_REPAIR_IDLE = 3         -- seconds sitting still with nothing to heal before the order ends
-CAT_WORKER_BEAM = 1         -- beam effect scale (sworker.shp repairBeamWidth 100; the Processor's 250)
 CAT_PROC_BEAM = 2.5
 CAT_REPAIR_TRACE = 1        -- TEST: log the ordered repair each second
 
@@ -1197,6 +1196,7 @@ function CatRepair_Tick(rec, g, id, now)
     rec.repLast = now
     if not rec.up.REPAIR or SobGroup_IsDoingAbility(g, AB_Repair) ~= 1 then
         rec.repT, rec.repIdle = nil, nil
+        CatRepair_Cone(rec, g, nil)
         return
     end
     local busy = nil
@@ -1220,6 +1220,7 @@ function CatRepair_Tick(rec, g, id, now)
             end
         end
         rec.repT = t
+        CatRepair_Cone(rec, g, t)
         if t then
             busy = 1
             local tg = CatShips[t].g
@@ -1230,7 +1231,6 @@ function CatRepair_Tick(rec, g, id, now)
                 if h > 1 then h = 1 end
                 SobGroup_SetHealth(tg, h)
             end
-            CatBeam_Set("cat_rb_" .. id .. "_w", rec.repO, SobGroup_GetPosition(tg), CAT_WORKER_BEAM, now)   -- after the heal
         end
     end
     -- the order is done once it sits still with nothing to heal (HWRM never ends it: it never latches)
@@ -1246,6 +1246,18 @@ function CatRepair_Tick(rec, g, id, now)
         rec.repTrace = now + 1
         print("CATACLYSM repair " .. id .. " (" .. rec.t .. "): healing " .. (rec.repT or "none") .. ", busy " ..
               (busy or 0) .. ", speed " .. SobGroup_GetActualSpeed(g))
+    end
+end
+
+-- the Worker's look while it heals: its jack out and the static repair cone from the tip (smt_worker.madstate
+-- NIS02 / DockPathOpen1), not a beam to the target (user: the beam is just the mechanic)
+function CatRepair_Cone(rec, g, on)
+    if on and not rec.repCone then
+        SobGroup_SetMadState(g, "NIS02")
+        rec.repCone = 1
+    elseif not on and rec.repCone then
+        SobGroup_SetMadState(g, "DockPathOpen1")
+        rec.repCone = nil
     end
 end
 

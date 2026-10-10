@@ -108,6 +108,19 @@ SMT_WORKER_RepairEnd_OnSet = function(ship)
     setState(ship, "RepairEnd", 1)
 end
 
+-- SCRIPTED REPAIR (shiprules.lua CatRepair_Tick heals; HWRM's own repair states never come, its order doesn't
+-- latch): SobGroup_SetMadState passes on only engine state names, so NIS02 = jack out and repair cone on,
+-- DockPathOpen1 = cone off and jack back (the Worker has no dock paths of its own)
+SMT_WORKER_NIS02_OnSet = function(ship)
+    SMT_WORKER_Swap(ship, "JackClose", "JackOut")
+    startEffect(ship, "Repairing")
+end
+
+SMT_WORKER_DockPathOpen1_OnSet = function(ship)
+    endEffect(ship, "Repairing")
+    SMT_WORKER_Swap(ship, "JackOut", "JackClose")
+end
+
 -- CAPTURING: the jack, as Cataclysm Remastered's extend / retract ----------------
 SMT_WORKER_CaptureActive_OnSet = function(ship)
     setState(ship, "CaptureActive", 0)
