@@ -112,6 +112,18 @@ def patch_race(text):
     return re.sub(r'^(Tags = "(?:(?!race_gbx_hwrmc)[^"])*)"', r'\1,race_gbx_hwrmc"', text, count=1, flags=re.M)
 
 
+def patch_processor(text):
+    """An ordered repair (user: Cataclysm's Processor only repaired what drifted into its beams; here also on order:
+    shiprules.lua CatProcessor_* runs the automatic beams): the Worker's RepairCommand at Cataclysm's repair rate
+    (tweak.script twRepairRate 30 / s). Both only once it has the Repair upgrade (shiprules.lua CatGated)."""
+    if '"RepairCommand"' in text:
+        return text
+    return text.replace('addAbility(NewShipType, "RetireAbility", 1, 1);',
+                        'addAbility(NewShipType, "RetireAbility", 1, 1);\n'
+                        'addAbility(NewShipType,"RepairCommand",1,500,30,0,"",{SuperCap="18"},{Flagship="18"});'
+                        '   -- Cataclysm-HWRM', 1)
+
+
 def patch_worker(text):
     """Cataclysm's Worker repairs; their RepairCommand was disabled. (How far off it harvests is set by the
     model's LatchOrientation joint, not by the Harvest ability: tools/build_ship.sh --latch.) No NLIPS (its icon
@@ -163,6 +175,7 @@ def patch_acolyte(text):
 PATCHES = {
     "ship/smt_ms_sp/smt_ms_sp.ship": patch_ms_sp,
     "ship/smt_worker/smt_worker.ship": patch_worker,
+    "ship/smt_processor/smt_processor.ship": patch_processor,
     "ship/smt_acolyte/smt_acolyte.ship": patch_acolyte,
     "scripts/races/somtaaw/singleplayer/props/gbx.lua": patch_sp_props,
     "scripts/familylist.lua": patch_families,
@@ -237,7 +250,7 @@ SPEED_CLASS = {"scout": 490 / 1000, "interceptor": 487 / 875, "collector": 110 /
 # runs at 0.52x an Acolyte, the interceptor ratio would be 237.
 SPEEDS = {"smt_scout": ("srecon", "scout"), "smt_acolyte": ("sacolyte", "interceptor"),
           "smt_worker": ("sworker", "scout"), "smt_acv": ("sacv", "interceptor"), "smt_mimic": ("smimic", "interceptor"),
-          "smt_rammingfrigate": ("srammingfrigate", "frigate"), "smt_processor": ("sprocessor", "collector")}
+          "smt_rammingfrigate": ("srammingfrigate", "frigate"), "smt_processor": ("sprocessor", "scout")}   # (the Workers' ratio, user)
 
 
 # Build cost and time: Cataclysm's own (the .shp buildCost / buildTime, 1:1: RUs are Cataclysm's too, asteroids by
