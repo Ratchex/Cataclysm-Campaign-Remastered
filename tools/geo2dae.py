@@ -519,6 +519,10 @@ def main():
                          "frame; pointing along its +Z, or turned by those HWRM degrees, Z*Y*X) or NAME@gun:LABEL "
                          "(at that .mex gun point, pointing forward) or NAME@x,y,z (fixed, HWRM units, pointing "
                          "forward)")
+    ap.add_argument("--weapon", action="append", default=[],
+                    help="extra weapon hardpoint Weapon_NAME (_Position / _Direction / _Rest / _Muzzle): "
+                         "NAME@x,y,z@dx,dy,dz (HWRM units, firing along d) or NAME@dok:LABEL@dx,dy,dz (at that "
+                         ".mex dock point): the Worker's and Processor's repair beams")
     ap.add_argument("--latch", help="LatchOrientation joint at x,y,z (HWRM units): the point a collector puts on "
                                     "the asteroid's surface while harvesting")
     ap.add_argument("--glow-from", help="old-format HOD whose GLOW textures (Cataclysm texture names) become our "
@@ -828,6 +832,22 @@ def main():
                 at = tuple(float(c) for c in o.split(","))
         weapons += jnode(f"JNT[{hp}_Position]", at, jnode(f"JNT[{hp}_Direction]", (0, 10, 0))
                          + jnode(f"JNT[{hp}_Rest]", rest))
+    for spec in a.weapon:   # extra weapon hardpoints (weapon_nodes' layout)
+        name, where, d = spec.split("@")
+        if where.startswith("dok:"):
+            if where[4:] not in dok_points:
+                sys.exit(f"--weapon {spec}: no dock point {where[4:]}")
+            at = conv(*dok_points[where[4:]][2])
+        else:
+            at = tuple(float(c) for c in where.split(","))
+        n = tuple(float(c) for c in d.split(","))
+        ln = math.sqrt(sum(c * c for c in n)) or 1.0
+        n = tuple(c / ln for c in n)
+        up = (0.0, 1.0, 0.0) if abs(n[1]) < 0.9 else (1.0, 0.0, 0.0)
+        base = f"Weapon_{name}"
+        weapons += jnode(f"JNT[{base}_Position]", at, jnode(f"JNT[{base}_Direction]", tuple(10 * c for c in up))
+                         + jnode(f"JNT[{base}_Rest]", tuple(10 * c for c in n))
+                         + jnode(f"JNT[{base}_Muzzle]", tuple(0.1 * c for c in n)))
     # effect markers (.events "marker"): plain joints, the effect pointing along the joint's +Z
     by_obj = {main_objs[i]["name"]: i for i in frames} if frames else {}
     for spec in a.marker:

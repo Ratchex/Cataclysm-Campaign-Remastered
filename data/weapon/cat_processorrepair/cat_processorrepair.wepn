@@ -1,0 +1,13 @@
+-- Cataclysm-HWRM: one of the Processor's four lateral repair beams (dock points Repair0-3, straight out each side;
+-- tweak.script twProcessorAutoRepairDistance 4000 x 0.35 = 1400, cone 90, twRepairRate 30 / s) as a heal weapon
+-- for its ordered repair (install_cr.py repair_order; the automatic beams: shiprules.lua CatProcessor_Tick).
+-- A 1 s beam every second at -30 = 30 health a second per beam.
+StartWeaponConfig(NewWeaponType,"Gimble","InstantHit","HealBeam","Normal",0,1400,0,1,0,0,1,1,1,1,0,0,1,0,90,90,0.1,"Normal",1,0,0);
+AddWeaponResult(NewWeaponType,"Hit","DamageHealth","Target",-30,-30,"");
+setPenetration(NewWeaponType,5,1,
+{PlanetKillerArmour=0},
+{SwarmerArmor=0.10},
+{SpaceMineArmor=1}, { MimicArmour = 3.3333 });
+setAccuracy(NewWeaponType,1);
+setAngles(NewWeaponType,0,-45,45,-45,45);
+setFireMultFactor(NewWeaponType, 1.0);

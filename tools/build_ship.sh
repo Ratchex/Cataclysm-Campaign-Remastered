@@ -29,7 +29,15 @@ case "$NAME" in
     # at scale 1 (stock kus_resourcecollector's beam marker to its LatchOrientation plane), scaled 1.3 in
     # smt_worker.events. Cataclysm held 400 HW1 units (140) off, far beyond the stock cone.
     GEO2DAE_ARGS="$GEO2DAE_ARGS --latch 0,28.5,44.8"
+    # its repair beam as a heal weapon from the tip (install_cr.py repair_order: ranged, no latching)
+    GEO2DAE_ARGS="$GEO2DAE_ARGS --weapon Repair@$TIP@0,0,1"
     CLIPS="JackOut,JackSpin,JackClose,DockOpen,DockClose,BladesSpin"
+    ;;
+  som_processor)
+    # its four lateral repair beams (dock points Repair0-3, two each side, straight out: shiprules.lua
+    # CAT_PROC_BEAMS) as heal weapons for the ordered repair (install_cr.py repair_order)
+    GEO2DAE_ARGS="$GEO2DAE_ARGS --weapon Repair0@dok:REPAIR0@-1,0,0 --weapon Repair1@dok:REPAIR1@-1,0,0"
+    GEO2DAE_ARGS="$GEO2DAE_ARGS --weapon Repair2@dok:REPAIR2@1,0,0 --weapon Repair3@dok:REPAIR3@1,0,0"
     ;;
   som_mothership)
     # the command module's gravity generator spins (smothershipcommand.mad GravRotate: a full turn every 12 s, looped
