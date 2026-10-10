@@ -247,6 +247,31 @@ def set_costs():
     print(f"  Cataclysm build cost/time on {n} ships")
 
 
+# Engine trails from another of our ships: Cataclysm's sacv.shp gives each of the ACV's two engines the Acolyte's
+# trail (trailWidth 12, trailHeight 6, as sacolyte.shp); CR's ACV trails were tuned for their model (width 7.5,
+# length 22: far too bright on ours, user)
+TRAIL_FROM = {"smt_acv": "smt_acolyte"}
+
+
+def set_trails():
+    for ship, src in TRAIL_FROM.items():
+        path = os.path.join(DATA, "ship", ship, ship + ".ship")
+        spath = os.path.join(DATA, "ship", src, src + ".ship")
+        if not (os.path.exists(path) and os.path.exists(spath)):
+            continue
+        m = re.search(r"^setEngineTrail\(NewShipType,\s*\d+\s*,(.*?)\)\s*;?\s*$", open(spath, encoding="latin-1").read(), re.M)
+        if not m:
+            raise SystemExit(f"{spath}: no setEngineTrail to copy")
+        model = open(os.path.join(DATA, "ship", ship, ship + ".hod"), "rb").read()
+        nozzles = len(set(re.findall(rb"EngineNozzle\d+", model)))
+        text = open(path, encoding="latin-1").read()
+        text = re.sub(r"^(setEngineTrail\()", r"-- Cataclysm-HWRM (set_trails): \1", text, flags=re.M)
+        lines = "".join(f"setEngineTrail(NewShipType, {k},{m.group(1)});\n" for k in range(nozzles))
+        text = text.rstrip("\n") + f"\n-- Cataclysm-HWRM: {src}'s trail on each of our {nozzles} nozzles (as Cataclysm)\n" + lines
+        open(path, "w", encoding="latin-1", newline="").write(text)
+        print(f"  {ship}: {src}'s engine trail on {nozzles} nozzles")
+
+
 def set_speed(ship, cat, cls):
     shp = os.path.join(r"C:\Modding\Cataclysm-decomp\extracted\big\race_sect", cat + ".shp")
     v = next(float(l.split()[1]) for l in open(shp, encoding="latin-1") if l.lower().startswith("maxvelocity"))
@@ -427,6 +452,7 @@ def main():
     for ship, (cat, cls) in SPEEDS.items():
         set_speed(ship, cat, cls)
     set_costs()
+    set_trails()
     for root, _, files in os.walk(OVERRIDES):   # our own versions of their files (.events / .madstate)
         for fn in files:
             rel = os.path.relpath(os.path.join(root, fn), OVERRIDES)

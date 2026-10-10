@@ -62,8 +62,23 @@ def write(path, text):
         f.write(text)
 
 
+ACRONYMS = {"ACV", "MCV", "EMP"}
+
+
+def cataclysm_names():
+    """Cataclysm's English ship names (english.script str<type>, upper case: "RAMMING FRIGATE", "ACV") by lower-case
+    type, title-cased except acronyms (user: "Acv" / "Hivefrigate" from our ship names looked wrong)."""
+    out = {}
+    for line in open(os.path.join(DECOMP, "extracted", "big", "english.script"), encoding="latin-1"):
+        m = re.match(r"str(s[A-Za-z]+)\s+([A-Z][A-Z .\-']*?)\s*$", line)
+        if m and m.group(1).lower() not in out:
+            out[m.group(1).lower()] = " ".join(w if w in ACRONYMS else w.capitalize() for w in m.group(2).split())
+    return out
+
+
 def main():
     techs, tech_dep, ship_dep = read_research()
+    names = cataclysm_names()
     rows = csv.DictReader(open(os.path.join(MOD, "tools", "shipmap.tsv"), encoding="utf-8"), delimiter="\t")
     ships = [(r["ship"].lower(), r["hwrm"]) for r in rows
              if r["race"] == "RACE_SECT" and r["hwrm"] and not r["ship"].lower().startswith("smothership")]
@@ -72,7 +87,7 @@ def main():
          "Ship = 0", "SubSystem = 1", "build =", "{"]
     for prio, (cat, ship) in enumerate(ships):
         req = " & ".join(ship_dep.get(cat, []))
-        name = ship.split("_", 1)[1].title()
+        name = names.get(cat) or ship.split("_", 1)[1].title()
         b += ["\t{", "\t\tType =\t\t\t\t\tShip,", f'\t\tThingToBuild =\t\t\t"{ship}",',
               f'\t\tRequiredResearch =\t\t"{req}",',
               f'\t\tRequiredShipSubSystems =\t"{"" if ship == "smt_worker" else HANGAR}",',
