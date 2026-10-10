@@ -9,8 +9,10 @@ one of the two states it is not in, and the madstate (tools/overrides/ship/smt_p
 decodes them and plays the beam's yaw / pitch clip toward the new angle, pausing it there.
 
   --mad OUT   the aim clips for the model's Beam<i>_Yaw / Beam<i>_Pitch joints (geo2dae.py --turret): Yaw<i> /
-              Pitch<i> sweep -RANGE..+RANGE over 0..SWEEP s and back (a turn either way plays forward,
-              45 degrees a second); Clock (still, very long) is the madstate's clock
+              Pitch<i> sweep -RANGE..+RANGE and back (a turn either way plays forward) once per speed tier,
+              TIERS of them, each TIER_STEP times slower than the last from the ion turret's rate (the madstate
+              plays the tier nearest a moving turret's speed toward its next angle); Clock (still, very long)
+              is the madstate's clock
   --dae       the cone mesh (one mesh, one material, the fx shader) into build/ships/fx_procbeam/ for HODOR
   (none)      install: the cone .hod, the effect (data/art/fx/cat_procbeam.lua), its texture
 Events: patch_events() (install_cr.py) adds ProcBeam<i>_<band> to the Processor's .events: the cone on Beam<i>_Cone,
@@ -42,6 +44,8 @@ SEGS = 16
 # 20 degrees a second; user: move like the destroyer's ion turret); shiprules.lua turns at the same rates
 SWEEP_YAW = 90.0 / 35
 SWEEP_PITCH = 90.0 / 20
+TIERS = 9                 # speed tiers (smt_processor.madstate SMT_PROCESSOR_TIERS / _STEP: keep them the same)
+TIER_STEP = 1.5
 STOCK_TEX = "C:/Modding/Cataclysm-decomp/reference/hwrm/Homeworld2/art/fx/repair_fx/repair_beam/fx_repairbeam_diff.tga"
 CLOCK = 100000.0
 
@@ -70,9 +74,17 @@ def write_mad(out):
         njref += 1
 
     r = math.radians(RANGE)
+    def tiers(sweep):
+        keys, t = [(0.0, -r)], 0.0
+        for k in range(TIERS):
+            s = sweep * TIER_STEP ** k
+            keys += [(t + s, r), (t + 2 * s, -r)]
+            t += 2 * s
+        return keys, t
+
     for i in range(BEAMS):
-        clip(f"Yaw{i}", f"Beam{i}_Yaw", "Y", [(0.0, -r), (SWEEP_YAW, r), (2 * SWEEP_YAW, -r)], 2 * SWEEP_YAW)
-        clip(f"Pitch{i}", f"Beam{i}_Pitch", "X", [(0.0, -r), (SWEEP_PITCH, r), (2 * SWEEP_PITCH, -r)], 2 * SWEEP_PITCH)
+        clip(f"Yaw{i}", f"Beam{i}_Yaw", "Y", *tiers(SWEEP_YAW))
+        clip(f"Pitch{i}", f"Beam{i}_Pitch", "X", *tiers(SWEEP_PITCH))
     clip("Clock", "Beam0_Cone", "Z", [(0.0, 0.0), (CLOCK, 0.0)], CLOCK)
     body = (b"MAD " + chunk(b"NAME", b"Homeworld2 MAD File") + chunk(b"VERS", bytes([4, 1, 0, 0]))
             + chunk(b"INFO", struct.pack("<5I", FPS, len(marks), len(curves), njref, 6 * njref))

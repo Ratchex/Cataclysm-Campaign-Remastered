@@ -6,20 +6,70 @@
 -- yaw (8), pitch (8: 0-255 over -45..45 degrees), check (4: shiprules.lua CatProcBeam_Check; a message that fails
 -- it is dropped and the rest of that update ignored). Messages are sent whole within one script update; the Clock clip's
 -- time tells updates apart, so a message cut short (a lost bit) is dropped at the next update.
--- Aim: clip Yaw<i> / Pitch<i> sweeps -45..45 (make_procbeam.py); the script turns the turret itself (like a stock
--- ion turret) and sends its angle on every update, and the clip is posed there (time set, clip paused).
--- Letting the clip play toward a new angle lagged seconds behind in game (the engine plays them slower).
+-- Aim: clip Yaw<i> / Pitch<i> sweeps -45..45 and back once per speed tier (make_procbeam.py); the script turns
+-- the turret itself (like a stock ion turret) and sends its angle as it changes. A turret standing still is posed
+-- at it (time set, clip paused). A moving one (its speed from its last two angles over the Clock clip's time, so
+-- the engine's own playback rate cancels out) plays the slowest tier at least as fast as it, from its angle toward
+-- where that speed takes it by the next message, so it moves between the script's updates (10 a second) instead of
+-- stepping (user: it doesn't update smoothly).
 
 SMT_PROCESSOR_P = {}
 SMT_PROCESSOR_RANGE = 45
 SMT_PROCESSOR_LEVELS = 255
 SMT_PROCESSOR_SWEEP = { Yaw = 90 / 35, Pitch = 90 / 20 }   -- seconds per sweep one way (make_procbeam.py)
+SMT_PROCESSOR_TIERS = 9                                     -- (make_procbeam.py TIERS, TIER_STEP)
+SMT_PROCESSOR_STEP = 1.5
+SMT_PROCESSOR_STALE = 0.6                                   -- clock seconds after which a last angle is too old
 
-SMT_PROCESSOR_Aim = function(ship, clip, sweep, target)
-    local t = (target + SMT_PROCESSOR_RANGE) / (2 * SMT_PROCESSOR_RANGE) * sweep
+-- a clip time on tier k's sweep (k 0: the ion turret's rate) at angle a, going up (dir 1) or down (dir -1)
+SMT_PROCESSOR_Time = function(sweep, k, dir, a)
+    local t, s = 0, sweep
+    for j = 1, k do
+        t = t + 2 * s
+        s = s * SMT_PROCESSOR_STEP
+    end
+    local f = (a + SMT_PROCESSOR_RANGE) / (2 * SMT_PROCESSOR_RANGE)
+    if(dir > 0) then
+        return t + f * s
+    end
+    return t + s + (1 - f) * s
+end
+
+SMT_PROCESSOR_Aim = function(ship, p, clip, sweep, target)
     if(isAnimRunning(ship, clip) == 0) then
         startAnim(ship, clip)
     end
+    local last = p.last[clip]
+    p.last[clip] = { target, p.clock }
+    local v, dt = 0, 0
+    if(last ~= nil) then
+        dt = p.clock - last[2]
+        if(dt > 0 and dt < SMT_PROCESSOR_STALE) then
+            v = (target - last[1]) / dt
+        end
+    end
+    if(v ~= 0) then
+        local dir, sp = 1, v
+        if(v < 0) then
+            dir, sp = -1, -v
+        end
+        local k, rate = 0, 2 * SMT_PROCESSOR_RANGE / sweep
+        while(k + 1 < SMT_PROCESSOR_TIERS and rate / SMT_PROCESSOR_STEP >= sp) do
+            k = k + 1
+            rate = rate / SMT_PROCESSOR_STEP
+        end
+        local to = target + v * dt                         -- where it will be by the next message
+        if(to > SMT_PROCESSOR_RANGE) then
+            to = SMT_PROCESSOR_RANGE
+        elseif(to < -SMT_PROCESSOR_RANGE) then
+            to = -SMT_PROCESSOR_RANGE
+        end
+        unpauseAnim(ship, clip)
+        setTime(ship, clip, SMT_PROCESSOR_Time(sweep, k, dir, target))
+        setPauseTime(ship, clip, SMT_PROCESSOR_Time(sweep, k, dir, to))
+        return
+    end
+    local t = SMT_PROCESSOR_Time(sweep, 0, 1, target)
     -- frozen at the angle: unpaused, set and paused again within this call, so no frame plays in between. (Only a
     -- pause point a hair after the angle, as before, was sometimes skipped: the clip played on through its sweep
     -- until the next message snapped it back, user: still oscillating with both ships stopped. A pause point at the
@@ -65,14 +115,14 @@ SMT_PROCESSOR_Message = function(ship, p)
         end
         p.band[beam] = band
     end
-    SMT_PROCESSOR_Aim(ship, "Yaw" .. beam, SMT_PROCESSOR_SWEEP.Yaw, yaw)
-    SMT_PROCESSOR_Aim(ship, "Pitch" .. beam, SMT_PROCESSOR_SWEEP.Pitch, pitch)
+    SMT_PROCESSOR_Aim(ship, p, "Yaw" .. beam, SMT_PROCESSOR_SWEEP.Yaw, yaw)
+    SMT_PROCESSOR_Aim(ship, p, "Pitch" .. beam, SMT_PROCESSOR_SWEEP.Pitch, pitch)
 end
 
 SMT_PROCESSOR_Symbol = function(ship, sym)
     local p = SMT_PROCESSOR_P[ship]
     if(p == nil) then
-        p = { bits = {}, n = 0, band = {} }
+        p = { bits = {}, n = 0, band = {}, last = {} }
         SMT_PROCESSOR_P[ship] = p
     end
     if(isAnimRunning(ship, "Clock") == 0) then

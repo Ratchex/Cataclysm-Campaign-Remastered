@@ -1379,12 +1379,18 @@ function CatProcBeam_Aim(rec, g, i, t, o, r, u, f, now, dt)
     local yq, pq = CatProcBeam_Level(tu.yaw), CatProcBeam_Level(tu.pitch)
     rec.aim = rec.aim or {}
     local last = rec.aim[i]
+    local moved = 1
     if last then
-        -- unchanged: sent again each second all the same (a dropped message can't leave a cone stuck)
-        if last[1] == band and last[2] == yq and last[3] == pq and now - last[4] < 1 then return end
+        -- unchanged: sent again each second all the same (a dropped message can't leave a cone stuck), and once
+        -- on the update after it stops (the madstate plays a moving turret on toward its next angle; this tells it
+        -- the turret has settled, and it freezes the clip there)
+        if last[1] == band and last[2] == yq and last[3] == pq then
+            moved = nil
+            if last[5] ~= 1 and now - last[4] < 1 then return end
+        end
         if last[1] == band and now - last[4] < CAT_PROC_AIM_EVERY then return end
     end
-    rec.aim[i] = { band, yq, pq, now }
+    rec.aim[i] = { band, yq, pq, now, moved }
     CatProcBeam_Send(rec, g, i - 1, band, yq, pq)
 end
 
