@@ -94,7 +94,8 @@ BEAM_KILL_FX, BEAM_KILL_SCALE, BEAM_KILL_SUFFIX = "death_generic_fighter", 0.75,
 # (<target>_wreck, same type and path) shows and dies there instead.
 MISSILE_SHIPS = ("missiledestroyer",)
 WRECK_SUFFIX = "_wreck"
-WRECK_AWAY = 100000.0   # HWRM units the double is held off (along Y) until a frame before its death
+WRECK_AWAY = -3000.0   # HWRM units the double is held off (along Y: below) until a frame before its death (100000, far
+#                         outside the world, went with an ion frigate that never fired in game)
 # per cutscene: haltAttack() at this frame instead
 # (nislet01's ion frigate: its 4 s beam, ordered at 1404 and charging 2 s, ends by itself about 1584, just before
 # the 1591 camera cut; halted mid-beam its warbling sound looped on: user)
