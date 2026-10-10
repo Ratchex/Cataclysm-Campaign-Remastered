@@ -19,7 +19,7 @@ research =
 		DisplayPriority =	10,
 		Description =		"Adrive Destroyer",
 		Icon =				Icon_Build,
-		TargetName =		"smt_dreadnought",
+		TargetName =		"smt_ms_sp",
 	},
 	{
 		Name =				"TECH_ADRIVE_FIGHTER",
@@ -188,7 +188,7 @@ research =
 		DisplayPriority =	23,
 		Description =		"Drive Destroyer",
 		Icon =				Icon_Build,
-		TargetName =		"smt_destroyer",
+		TargetName =		"smt_ms_sp",
 	},
 	{
 		Name =				"TECH_DRIVE_FIGHTER",
@@ -201,7 +201,7 @@ research =
 		DisplayPriority =	24,
 		Description =		"Drive Fighter",
 		Icon =				Icon_Build,
-		TargetName =		"smt_acolyte",
+		TargetName =		"smt_ms_sp",
 	},
 	{
 		Name =				"TECH_DRIVE_FRIGATE",
@@ -214,7 +214,7 @@ research =
 		DisplayPriority =	25,
 		Description =		"Drive Frigate",
 		Icon =				Icon_Build,
-		TargetName =		"smt_multibeamfrigate",
+		TargetName =		"smt_ms_sp",
 	},
 	{
 		Name =				"TECH_EMP",
@@ -240,7 +240,7 @@ research =
 		DisplayPriority =	27,
 		Description =		"Energy",
 		Icon =				Icon_Build,
-		TargetName =		"smt_dreadnought",
+		TargetName =		"smt_ms_sp",
 	},
 	{
 		Name =				"TECH_EXPLOSIVE_CHARGE",
@@ -344,7 +344,7 @@ research =
 		DisplayPriority =	35,
 		Description =		"Ion",
 		Icon =				Icon_Build,
-		TargetName =		"smt_multibeamfrigate",
+		TargetName =		"smt_ms_sp",
 	},
 	{
 		Name =				"TECH_LINK",
@@ -357,7 +357,7 @@ research =
 		DisplayPriority =	36,
 		Description =		"Link",
 		Icon =				Icon_Build,
-		TargetName =		"smt_acv",
+		TargetName =		"smt_ms_sp",
 	},
 	{
 		Name =				"TECH_MEDIUM_GUNS",
@@ -383,7 +383,7 @@ research =
 		DisplayPriority =	38,
 		Description =		"Micro Ship",
 		Icon =				Icon_Build,
-		TargetName =		"smt_hivefrigate",
+		TargetName =		"smt_ms_sp",
 	},
 	{
 		Name =				"TECH_MIMIC",
@@ -396,7 +396,7 @@ research =
 		DisplayPriority =	39,
 		Description =		"Mimic",
 		Icon =				Icon_Build,
-		TargetName =		"smt_mimic",
+		TargetName =		"smt_ms_sp",
 	},
 	{
 		Name =				"TECH_MISSILE",
@@ -409,7 +409,7 @@ research =
 		DisplayPriority =	40,
 		Description =		"Missile",
 		Icon =				Icon_Build,
-		TargetName =		"smt_destroyer",
+		TargetName =		"smt_ms_sp",
 	},
 	{
 		Name =				"TECH_PHASED_TELEMETRY",
@@ -513,7 +513,7 @@ research =
 		DisplayPriority =	48,
 		Description =		"Support Systems",
 		Icon =				Icon_Build,
-		TargetName =		"smt_carrier",
+		TargetName =		"smt_ms_sp",
 	},
 	{
 		Name =				"TECH_TARGETING_SYSTEMS",

@@ -4,7 +4,7 @@ Their race and ships are used as they are; for the campaign the build list and r
   races/somtaaw/scripts/sp_build.lua     every Somtaaw ship mapped in shipmap.tsv, gated by SPRSShipDepend
   races/somtaaw/scripts/sp_research.lua  every SPRSTECH_* tech: Time = Cataclysm's research seconds (HW1
                                          ResearchAPI.c TimeToComplete), prerequisites from SPRSTechDepend ("&"),
-                                         TargetName = first ship it unlocks; Cost: see COST_PER_SECOND
+                                         TargetName = the Kuun-Lan (all: see main); Cost: see COST_PER_SECOND
   scripts/scar/cataclysmtech.lua         KAS_Techs, for kasfAllowPlayerToResearch/Purchase gating
 (their singleplayer/props/gbx.lua points path_build/path_research here: install_cr.py patch)
 
@@ -130,7 +130,9 @@ def main():
               f"\t\tTime =\t\t\t\t{secs},", f'\t\tDisplayedName =\t\t"{title}",', f'\t\tShortDisplayedName =\t"{title}",',
               f"\t\tDisplayPriority =\t{10 + i},", f'\t\tDescription =\t\t"{title}",',
               f"\t\tIcon =\t\t\t\t{'Icon_Build' if unlocks else 'Icon_Tech'},",
-              f'\t\tTargetName =\t\t"{unlocks[0] if unlocks else "smt_ms_sp"}",', "\t},"]
+              # the Kuun-Lan for all: a tech aimed at the ship it unlocks (ACV for TECH_LINK) was missing from the
+              # research list while the player had none of that ship (user: Link couldn't be researched in the range)
+              '\t\tTargetName =\t\t"smt_ms_sp",', "\t},"]
     # not Cataclysm research: engine abilities our upgrade system switches per ship (shiprules.lua), granted at
     # mission start (cataclysmkas.lua KAS_GrantRuntimeResearch). The Acolyte's missile launchers are "Special Attack"
     # weapons that fire in normal attacks only while UseSpecialWeaponsInNormalAttack is on.
