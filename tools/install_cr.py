@@ -344,6 +344,13 @@ def patch_speech_logic():
                 out += "\n\t" + SPEECH_EARLY_OUT[name].format(s=ship)
             return out
         text = re.sub(r"^function\s+(\w+)\s*\(([^)]*)\)", handler, text, flags=re.M)
+        # the race's own announcer, as theirs for the Vaygr / Taiidan (Cataclysm Remastered did the same for its
+        # Kuun-Lan / Beast): Somtaaw -> "cat_fleet" (player:racelist.lua written at mission start, cataclysmkas.lua)
+        taiidan = 'elseif (Race_ID[currentRace] == "Taiidan" or Race_ID[currentRace] == "2x_Taiidan") then\n\t\treturn NameEmperor'
+        if fn == "commands.lua":
+            if taiidan not in text:
+                raise SystemExit(f"{src}: raceHelper changed; patch_speech_logic needs updating")
+            text = text.replace(taiidan, taiidan + '\n\telseif (Race_ID[currentRace] == "Somtaaw") then\n\t\treturn "cat_fleet"', 1)
         open(dst, "w", encoding="latin-1", newline="").write(CATSPEECH_LINE + "\n" + text)
 
 

@@ -19,25 +19,17 @@ if CatSpeech_Loaded == nil then
     CatSpeech_Loaded = 1
     CatSpeech_Ship = ""
     dofilepath("data:soundscripts/cataclysm/catspeech_gen.lua")   -- CatSpeech_Folders / _Lines / _Fleet / _Type
-    CatSpeech_Announcers = { FLEET = 1, MAKAAN = 1, EMPEROR = 1 }   -- raceHelper()'s actors
+    CatSpeech_Announcers = { FLEET = 1, MAKAAN = 1, EMPEROR = 1, CAT_FLEET = 1 }   -- raceHelper()'s actors
 
-    -- the last ship the logic reported was Somtaaw: decides events without a ship (research complete, build paused,
-    -- hyperspace ...). The handlers fire for the local player's ships; Race_ID / currentRace don't help in the
-    -- campaign (Players Patch writes player:racelist.lua only from skirmish setup, so its default list has no Somtaaw)
-    CatSpeech_LastSmt = nil
-
+    -- a Somtaaw ship; or, without a ship, the player's race (Race_ID from player:racelist.lua, written at mission
+    -- start by cataclysmkas.lua SpeechRaceHelper)
     function CatSpeech_IsSomtaaw(ship)
         if ship ~= nil and ship ~= "" then
             local p = strsub(strupper(ship), 1, 4)
             if p == "SMT_" or p == "SOM_" then
-                CatSpeech_LastSmt = 1
                 return 1
             end
-            CatSpeech_LastSmt = nil
             return nil
-        end
-        if CatSpeech_LastSmt ~= nil then
-            return 1
         end
         if Race_ID ~= nil and currentRace ~= nil and Race_ID[currentRace] == "Somtaaw" then
             return 1
@@ -61,7 +53,22 @@ if CatSpeech_Loaded == nil then
         return nil
     end
 
+    -- raceHelper() returned the Somtaaw announcer (patched in by install_cr.py): always Cataclysm's Fleet Command
+    function CatSpeech_IsCatFleet(actor)
+        if actor ~= nil and strupper(actor) == "CAT_FLEET" then
+            return 1
+        end
+        return nil
+    end
+
     function CatSpeech_Play(event, actor, count, freq)
+        if CatSpeech_IsCatFleet(actor) ~= nil then
+            local key = strupper(event)
+            if CatSpeech_Fleet[key] ~= nil then
+                return playSpeechActor(CatSpeech_Fleet[key], "cat_fleet", 0, freq)
+            end
+            return 0
+        end
         if CatSpeech_IsSomtaaw(CatSpeech_Ship) == nil then
             return playSpeechActor(event, actor, count, freq)
         end
@@ -73,6 +80,13 @@ if CatSpeech_Loaded == nil then
     end
 
     function CatSpeech_PlayLinked(event, actor, count, freq, link)
+        if CatSpeech_IsCatFleet(actor) ~= nil then
+            local key = strupper(event)
+            if CatSpeech_Fleet[key] ~= nil then
+                return playSpeechActorLinked(CatSpeech_Fleet[key], "cat_fleet", 0, freq, link)
+            end
+            return 0
+        end
         if CatSpeech_IsSomtaaw(CatSpeech_Ship) == nil then
             return playSpeechActorLinked(event, actor, count, freq, link)
         end

@@ -924,7 +924,14 @@ function KAS_ApplyColourSchemes()
     print("CKAS: colour schemes on " .. count .. " teams")
 end
 
+-- The Somtaaw announcer: the speech logic's raceHelper() picks the announcer by Race_ID[currentRace], read from
+-- player:racelist.lua, which Players Patch writes only from its skirmish rules (SpeechRaceHelper); write it here too,
+-- so the campaign's list has the Somtaaw (install_cr.py patches raceHelper: Somtaaw -> "cat_fleet", Cataclysm's
+-- Fleet Command, data/soundscripts/cataclysm/catspeech.lua)
+dofilepath("data:scripts/playerspatch_speech_util.lua")
+
 function KAS_StartEngine()
+    SpeechRaceHelper()
     KAS_ApplyColourSchemes()
     Rule_AddInterval("CatAbilityTick", 0.25)
     Rule_AddInterval("KAS_VariantBuildWatch", 2)
