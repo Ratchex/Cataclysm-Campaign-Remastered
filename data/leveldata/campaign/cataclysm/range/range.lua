@@ -14,7 +14,7 @@ dofilepath("data:scripts/scar/cataclysmspeech.lua")
 dofilepath("data:scripts/scar/cataclysmships.lua")
 dofilepath("data:scripts/scar/cataclysmtech.lua")
 
-RANGE_GRANT_ALL = 1      -- 1: every Cataclysm tech researched at the start, the placed ships upgraded with it;
+RANGE_GRANT_ALL = 0      -- 1: every Cataclysm tech researched at the start, the placed ships upgraded with it;
                          -- 0: every tech researchable, none done (to test researching and upgrading)
 
 -- every module the player can have (tools/make_modules.py), so all research and building is possible
