@@ -1285,6 +1285,8 @@ CAT_PROC_YAW_SPEED = 35               -- degrees a second (kus_destroyerion1 max
 CAT_PROC_PITCH_SPEED = 20             -- (maxDeclinationSpeed)
 CAT_PROC_FINE_ANGLE = 10              -- degrees off the target within which the turret's rate eases off with the angle
 CAT_PROC_ACCEL = 2                    -- full speeds a second the turret's rate can change by (0.5 s to full speed)
+CAT_PROC_TRACK_A = 0.25               -- target filter: share of each position's surprise taken into the position
+CAT_PROC_TRACK_B = 0.03               -- (into the velocity; an alpha-beta filter: smooth without a buffer's lag)
 CAT_PROC_DEADBAND = 0.2               -- degrees off the target the turret holds still within (one step is 0.35)
 
 -- one axis of a turret: its new angle and rate. The rate it wants is full speed beyond CAT_PROC_FINE_ANGLE and
@@ -1306,6 +1308,24 @@ function CatProcBeam_Turn(cur, vel, want, speed, dt)
     return cur + step, vel
 end
 
+-- a turret's smoothed view of its target's position (the raw position jumps, user: the cone's far end shook):
+-- predicted on from the last estimate at its velocity, then pulled part way toward the measured position
+function CatProcBeam_Track(tu, tp, dt)
+    local s = tu.fp
+    if not s or dt <= 0 then
+        if not s then tu.fp, tu.fv = { tp[1], tp[2], tp[3] }, { 0, 0, 0 } end
+        return tu.fp
+    end
+    local v = tu.fv
+    for k = 1, 3 do
+        local pred = s[k] + v[k] * dt
+        local e = tp[k] - pred
+        s[k] = pred + CAT_PROC_TRACK_A * e
+        v[k] = v[k] + CAT_PROC_TRACK_B * e / dt
+    end
+    return s
+end
+
 function CatProcBeam_Aim(rec, g, i, t, o, r, u, f, now, dt)
     rec.tur = rec.tur or {}
     local tu = rec.tur[i]
@@ -1315,8 +1335,8 @@ function CatProcBeam_Aim(rec, g, i, t, o, r, u, f, now, dt)
     end
     local band, wy, wp = 0, 0, 0                         -- no target: back to rest, cone off
     if t then
-        if tu.t ~= t then tu.t, tu.since = t, now end
-        local tp = SobGroup_GetPosition(CatShips[t].g)
+        if tu.t ~= t then tu.t, tu.since, tu.fp = t, now, nil end
+        local tp = CatProcBeam_Track(tu, SobGroup_GetPosition(CatShips[t].g), dt)
         local v = { tp[1] - o[1], tp[2] - o[2], tp[3] - o[3] }
         local vx = v[1] * r[1] + v[2] * r[2] + v[3] * r[3]
         local vy = v[1] * u[1] + v[2] * u[2] + v[3] * u[3]
@@ -1342,7 +1362,7 @@ function CatProcBeam_Aim(rec, g, i, t, o, r, u, f, now, dt)
             end
         end
     else
-        tu.t = nil
+        tu.t, tu.fp = nil, nil
     end
     tu.yaw, tu.vy = CatProcBeam_Turn(tu.yaw, tu.vy, wy, CAT_PROC_YAW_SPEED, dt)
     tu.pitch, tu.vp = CatProcBeam_Turn(tu.pitch, tu.vp, wp, CAT_PROC_PITCH_SPEED, dt)
@@ -1353,7 +1373,8 @@ function CatProcBeam_Aim(rec, g, i, t, o, r, u, f, now, dt)
               floor(tu.pitch * 10) / 10 .. " v " .. floor(tu.vy * 10) / 10 .. "," .. floor(tu.vp * 10) / 10 ..
               " head " .. floor(atan2(f[1], f[3]) * 10) / 10 .. "," .. floor(asin(f[2]) * 10) / 10 ..
               " o " .. floor(o[1]) .. "," .. floor(o[2]) .. "," .. floor(o[3]) ..
-              " tp " .. floor(tp[1]) .. "," .. floor(tp[2]) .. "," .. floor(tp[3]))
+              " tp " .. floor(tp[1]) .. "," .. floor(tp[2]) .. "," .. floor(tp[3]) ..
+              " fp " .. floor(tu.fp[1]) .. "," .. floor(tu.fp[2]) .. "," .. floor(tu.fp[3]))
     end
     local yq, pq = CatProcBeam_Level(tu.yaw), CatProcBeam_Level(tu.pitch)
     rec.aim = rec.aim or {}
