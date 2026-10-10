@@ -8,8 +8,8 @@ Coordinates: HW1 models are X up, Y right, Z forward; HODOR wants Y up, Z forwar
 (0.35 = the same factor Gearbox used for HW1 levels and ship sizes, see NOTES.md); a proper rotation, so winding
 is kept. Objects are baked into JNT[Root], except animated parts (--anim-joints: each under its own joint, driven
 by tools/mad2hwrm.py's converted .mad).
-Materials: MAT[<tex>]_SHD[ship] with image IMG[<name>_<tex>_DIFF] (id ...-image); HODOR picks up the _TEAM and _STRP
-files next to the _DIFF one (masks, white = painted; HODOR stores $team R = 1 - team mask, G = 1 - stripe mask).
+Materials: MAT[<tex>]_SHD[ship] with image IMG[<name>_<tex>_DIFF] (id ...-image); the Somtaaw colours are baked into
+the DIFF (write_textures), no team mask files.
 
 Usage: geo2dae.py <geo> <out_dir> <name> [--scale 0.35]   (tools/build_ship.sh runs it, then HODOR)
 HODOR quirks: it must be started from Git Bash (from Python or PowerShell it spins forever), with forward-slash
@@ -23,7 +23,7 @@ import os
 import struct
 import sys
 
-from PIL import Image, ImageChops
+from PIL import Image
 
 DECOMP = r"C:\Modding\Cataclysm-decomp"
 sys.path.insert(0, os.path.join(DECOMP, "tools"))
@@ -39,8 +39,19 @@ def pow2(n):
     return p
 
 
+# Somtaaw colour scheme 0 (Cataclysm teamcolors.script: BaseColor 66 108 202, StripeColor 255 255 255)
+BAKE_BASE, BAKE_STRIPE = (66, 108, 202), (255, 255, 255)
+
+
 def write_textures(png_dir, tex, out_dir, base, colour):
-    """Write <base>_DIFF.tga (and _TEAM.tga when masks exist); return the DIFF file name."""
+    """Write <base>_DIFF.tga with the team / stripe colours baked in; return the DIFF file name.
+
+    Cataclysm (HW1 texreg.c trBufferColorRGB, Somtaaw scalar 1: colpick.script has curves for the Taiidan only)
+    paints texel = texel x (1 - team mask) + base x team mask, then the same with the stripe mask and colour: grey
+    hull, blue panels, white bands. Baked here (Somtaaw's own colours: only the Somtaaw player uses these models)
+    because HWRM team masks through HODOR (<x>_TEAM / _STRP.tga -> $team) went wrong three ways in game (whole hulls
+    blue or white, no stripes) and HODOR's POOL can't be read back to check (RODOH reads HW2 Classic HODs only).
+    """
     src = os.path.join(png_dir, tex.lower() + ".png") if tex else None
     if src and os.path.exists(src):
         im = Image.open(src).convert("RGB")
@@ -50,27 +61,15 @@ def write_textures(png_dir, tex, out_dir, base, colour):
     n = max(64, pow2(im.width), pow2(im.height))
     size = (n, n)
     im = im.resize(size) if size != im.size else im
-    masks = []
     if src:
-        for k in (0, 1):
+        for k, c in ((0, BAKE_BASE), (1, BAKE_STRIPE)):
             m = os.path.join(png_dir, f"{tex.lower()}_team{k}.png")
-            masks.append(Image.open(m).convert("L").resize(size) if os.path.exists(m) else Image.new("L", size, 0))
-    if masks and any(m.getextrema()[1] for m in masks):
-        # HW1 (texreg.c trBufferColorRGB) replaces painted texels by the team / stripe colour, in proportion to the
-        # mask; HWRM's ship shader (sob_ship.frag) paints the colour there and then modulates it by the diffuse
-        # (0.5 neutral, darker darkens): so the diffuse goes to neutral grey under the masks, or a white stripe
-        # over Cataclysm's dark hull texels came out as hull (the Somtaaw stripes were missing)
-        paint = ImageChops.lighter(masks[0], masks[1])
-        im = Image.composite(Image.new("RGB", size, (128, 128, 128)), im, paint)
+            if os.path.exists(m):
+                im = Image.composite(Image.new("RGB", size, c), im, Image.open(m).convert("L").resize(size))
+    for old in ("_TEAM.tga", "_STRP.tga"):      # HODOR picks up any mask file next to the DIFF: drop stale ones
+        if os.path.exists(os.path.join(out_dir, base + old)):
+            os.remove(os.path.join(out_dir, base + old))
     im.save(os.path.join(out_dir, base + "_DIFF.tga"))
-    if src:
-        if any(m.getextrema()[1] for m in masks):
-            # HODOR fills $team from separate images (SHADERS.MAP: TEAM = 1 1 1 r, STRP = 1 1 1 g, PAIN = 1 1 1 b;
-            # lower case = inverted): the team mask is _TEAM's red, the stripe mask <x>_STRP.tga's green, both
-            # white = painted (HODOR inverts them; sob_ship.frag paints where the channel is 0). Inverted masks
-            # painted whole hulls (team colour everywhere, then stripe white everywhere: solid white ships, in game)
-            Image.merge("RGB", (masks[0], masks[1], Image.new("L", size, 0))).save(os.path.join(out_dir, base + "_TEAM.tga"))
-            Image.merge("RGB", (masks[1], masks[1], masks[1])).save(os.path.join(out_dir, base + "_STRP.tga"))
     return base + "_DIFF.tga"
 
 

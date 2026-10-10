@@ -1,4 +1,4 @@
--- Cataclysm-HWRM: stock ez14_extra.lua (Mission 1's sky) with dimmer god rays (rayExposure 0.735 -> 0.5; user: light too bright)
+-- Cataclysm-HWRM: stock ez14_extra.lua (Mission 1 sky), user: light too bright, bloom overpowering: god rays rayExposure 0.735 -> 0.5; bloom threshold 0.68 -> 0.855 (ez10-12, bright skies like it)
 usesharp = 1.0 -- load a 2nd sharper environment map?
 
 draw_pre = 1.0
@@ -30,8 +30,8 @@ bloom =
 {
 	lumiMin = { 0.299, 0.587, 0.114 },	-- RGB to Lumi
 	lumiMax = { 0.299, 0.587, 0.114 },
-	inMin = { 0.68, 1.3, 1.6 }, -- Thresh, Boost, Curve
-	inMax = { 0.68, 1.3, 1.6 },
+	inMin = { 0.855, 1.3, 1.6 }, -- Thresh, Boost, Curve
+	inMax = { 0.855, 1.3, 1.6 },
 	outMin = { 0.8, 0.75, 0.3 }, -- Mask, Curve, Scale
 	outMax = { 0.8, 0.75, 0.3 },
 
