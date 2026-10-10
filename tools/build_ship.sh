@@ -36,7 +36,7 @@ case "$NAME" in
   som_processor)
     # its four lateral repair beams (dock points REPAIR0-3, two each side, facing out: shiprules.lua CAT_PROC_BEAMS)
     # as script-aimed turrets carrying the beam cone; their aim clips: tools/make_procbeam.py --mad (below)
-    # (-90 faces -X, the REPAIR0/1 side; the cone mesh runs along -Z: make_procbeam.py write_dae)
+    # (-90 faces -X, the REPAIR0/1 side; the cone mesh runs along +Z: make_procbeam.py write_dae)
     GEO2DAE_ARGS="$GEO2DAE_ARGS --turret Beam0@dok:REPAIR0@-90 --turret Beam1@dok:REPAIR1@-90"
     GEO2DAE_ARGS="$GEO2DAE_ARGS --turret Beam2@dok:REPAIR2@90 --turret Beam3@dok:REPAIR3@90"
     PROCBEAM=1

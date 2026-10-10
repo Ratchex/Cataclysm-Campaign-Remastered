@@ -85,11 +85,11 @@ def fl(v):
 
 
 def write_dae():
-    """A thin cone along -Z (an effect mesh renders along its marker's -Z: in game a +Z cone pointed away from its
-    target), both windings (seen from inside and out); U runs along it (the texture fades toward the tip), V around."""
+    """A thin cone along +Z (the marker's axis: a -Z one rested pointing into the hull, calibration 2026-10-10), both
+    windings (seen from inside and out); U runs along it (the texture fades toward the tip), V around."""
     os.makedirs(BUILD, exist_ok=True)
     pos, nrm, uv, tris = [], [], [], []
-    for ring, (z, rad) in enumerate(((0.0, CONE_R0), (-CONE_LEN, CONE_R1))):
+    for ring, (z, rad) in enumerate(((0.0, CONE_R0), (CONE_LEN, CONE_R1))):
         for k in range(SEGS + 1):
             a = 2 * math.pi * k / SEGS
             pos.append((rad * math.cos(a), rad * math.sin(a), z))

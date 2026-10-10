@@ -1238,11 +1238,8 @@ CAT_PROC_RANGE = 1400       -- twProcessorAutoRepairDistance 4000 (x 0.35: ship 
 CAT_PROC_CONE = 0.7071      -- cos(twProcessorAutoRepairConeAngle 90 / 2)
 CAT_PROC_RATE = 30          -- twRepairRate (35 for the capital classes: the Kuun-Lan here)
 CAT_PROC_TRACE = 0          -- 1: log each heal step
--- Repair0-3 (sprocessor.mex): origin and side along the engine's right axis (SobGroup_GetCoordSys column 0). Our
--- models' +X is the engine's LEFT (calibration screenshots, 2026-10-10: the cone on the model's +X side showed on the
--- Kuun-Lan's side, -X in the world), so the model's x is negated here: Beam0/1 (model -X) are on the right.
-CAT_PROC_BEAMS = {
-    { 97.7, 25.4, -78.1, 1 }, { 106.7, -28.0, 6.3, 1 }, { -106.7, -28.0, 6.3, -1 }, { -97.7, 25.4, -78.1, -1 } }
+CAT_PROC_BEAMS = {          -- origin (HWRM units, our model) and side (x direction) of Repair0-3 (sprocessor.mex)
+    { -97.7, 25.4, -78.1, -1 }, { -106.7, -28.0, 6.3, -1 }, { 106.7, -28.0, 6.3, 1 }, { 97.7, 25.4, -78.1, 1 } }
 
 -- The beam cones (tools/make_procbeam.py: the cone on each beam's turret joints, aimed by smt_processor.madstate).
 -- Each beam's state goes to the madstate as a 14-bit message (beam, band, yaw, pitch) when it changes: a bit is a
@@ -1278,11 +1275,14 @@ function CatProcBeam_Aim(rec, g, i, t, o, r, u, f, now, dt)
         local n = sqrt(vx * vx + vy * vy + vz * vz)
         if n > 1 then
             -- Lua 4 trig is in degrees
-            -- solved from the calibration (fixed poses, screenshots): at rest each cone points out of its side, yaw
-            -- +40 on Beam1 turned it aft, pitch +40 on Beam2 up. Model side = -world side (CAT_PROC_BEAMS)
-            local yaw = -90 * CAT_PROC_BEAMS[i][4] - atan2(-vx, vz)
-            if yaw > 180 then yaw = yaw - 360 elseif yaw < -180 then yaw = yaw + 360 end
-            local pitch = asin(vy / n)
+            -- the beam's own frame (geo2dae --turret: _Base turned 90 x side degrees about up, +Z out of its side):
+            -- direction = Ry(yaw) Rx(pitch) +Z, standard right-handed rotations, the cone mesh along +Z. Confirmed by
+            -- a calibration (CAT_PROC_CALIBRATE, screenshots 2026-10-10: built along -Z the cones rested pointing
+            -- into the hull, yaw +40 on Beam1 swung it aft, pitch +40 on Beam2 up)
+            local side = CAT_PROC_BEAMS[i][4]
+            local lx, ly, lz = -side * vz, vy, side * vx
+            local yaw = atan2(lx, lz)
+            local pitch = asin(-ly / n)
             yq = CatProcBeam_Level(yaw)
             pq = CatProcBeam_Level(pitch)
             band = 3
