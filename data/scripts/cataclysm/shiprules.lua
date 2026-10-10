@@ -1002,7 +1002,10 @@ function CatMimic_Swap(g, p, id, shiptype, say)
     pend.up, pend.armour = up, rec.armour
     if getn(m) == 9 then CatPlace(new, pos, m) end
     SobGroup_SetHealth(new, health)
-    rec.gone = 1
+    -- hidden at once and despawned until it is gone (CatShip_Update rec.swapped): a single SobGroup_Despawn left the
+    -- old Mimic in place beside its new form (user)
+    rec.gone, rec.swapped = 1, 1
+    SobGroup_SetHidden(g, 1)
     SobGroup_Despawn(g)
     -- the new ship takes the old one's place in the selection (cataclysmkas.lua CatMimicTick): otherwise the next
     -- menu press found nothing selected until the player reselected (user)
