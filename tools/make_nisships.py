@@ -21,8 +21,10 @@ SHIP, BASE = "tai_missiledestroyer_nis", "tai_missiledestroyer"
 LAUNCHERS = ("Tai_DestroyerLauncher",)   # (the volley tubes fire special attacks only)
 WEAPON, MISSILE, BASE_WEAPON, BASE_MISSILE = "cat_nis_tailauncher", "tai_nismissile", "tai_destroyerlauncher", "tai_missile"
 # the missile: straight at its target from launch
-MISSILE_TUNING = {"rotationMaxSpeed": 1000, "rotationAccelTime": 0.05, "rotationBrakeTime": 0.05,
-                  "mainEngineAccelTime": 0.1, "thrusterAccelTime": 0.1}
+# (each brake time below its accel time: HWRM rejects a missile otherwise, "Could not load weapon fire" and a crash)
+MISSILE_TUNING = {"rotationMaxSpeed": 1000, "rotationAccelTime": 0.1, "rotationBrakeTime": 0.05,
+                  "mainEngineAccelTime": 0.15, "mainEngineBrakeTime": 0.1,
+                  "thrusterAccelTime": 0.15, "thrusterBrakeTime": 0.1}
 
 
 def write(rel, data):
