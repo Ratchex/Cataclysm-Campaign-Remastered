@@ -1245,16 +1245,17 @@ CAT_PROC_BEAM_DELAY = 1.0             -- seconds after a beam takes a target bef
 CAT_PROC_AIM_EVERY = 0                -- seconds between a turret's messages while it turns (0: every update)
 CAT_PROC_YAW_SPEED = 35               -- degrees a second (kus_destroyerion1 maxAzimuthSpeed; make_procbeam.py)
 CAT_PROC_PITCH_SPEED = 20             -- (maxDeclinationSpeed)
-CAT_PROC_FINE = 0.1                   -- speedMultiplierWhenPointingAtTarget
-CAT_PROC_FINE_ANGLE = 5               -- degrees off the target below which the turret eases to the fine rate
+CAT_PROC_FINE = 0.25                  -- the rate within CAT_PROC_FINE_ANGLE (stock speedMultiplierWhenPointingAtTarget 0.1)
+CAT_PROC_FINE_ANGLE = 10              -- degrees off the target within which the turret slows to the fine rate
 
--- one axis of a turret: its new angle, turned toward want at speed (easing to the fine rate near it)
+-- one axis of a turret: its new angle, turned toward want at speed, or the fine rate once within
+-- CAT_PROC_FINE_ANGLE of it (user: toggle to slow as it closes in)
 function CatProcBeam_Turn(cur, want, speed, dt)
     local e = want - cur
     local ae = abs(e)
     if ae < 0.01 then return want end
-    local k = ae / CAT_PROC_FINE_ANGLE
-    if k < CAT_PROC_FINE then k = CAT_PROC_FINE elseif k > 1 then k = 1 end
+    local k = 1
+    if ae <= CAT_PROC_FINE_ANGLE then k = CAT_PROC_FINE end
     local step = speed * k * dt
     if step > ae then step = ae end
     if e < 0 then step = -step end

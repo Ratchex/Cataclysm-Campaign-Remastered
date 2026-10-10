@@ -19,7 +19,13 @@ SMT_PROCESSOR_Aim = function(ship, clip, sweep, target)
     if(isAnimRunning(ship, clip) == 0) then
         startAnim(ship, clip)
     end
-    setTime(ship, clip, t)
+    -- set just short of the angle and paused at it: a clip set and paused at the same time didn't pause (it kept
+    -- playing through its sweep between updates: twitching, drifting)
+    local t0 = t - 0.02
+    if(t0 < 0) then
+        t0 = 0
+    end
+    setTime(ship, clip, t0)
     setPauseTime(ship, clip, t)
 end
 
