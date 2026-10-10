@@ -374,8 +374,6 @@ badges/cnabaal.tga
 badges/imperial taiidan.tga
 badges/kiith somtaaw.tga
 badges/republican taiidan.tga
-missile/cat_nis_tai_missile/cat_nis_tai_missile.events
-missile/cat_nis_tai_missile/cat_nis_tai_missile.miss
 missile/dread_bomb/dread_bomb.events
 missile/dread_bomb/dread_bomb.hod
 missile/dread_bomb/dread_bomb.miss
@@ -465,6 +463,8 @@ missile/tai_mineforced/tai_mineforced.miss
 missile/tai_missile/tai_missile.events
 missile/tai_missile/tai_missile.miss
 missile/tai_missilevolley/tai_missilevolley.miss
+missile/tai_nismissile/tai_nismissile.events
+missile/tai_nismissile/tai_nismissile.miss
 missile/tur_smallmissile/tur_smallmissile.events
 missile/vgr_heavymissile/vgr_heavymissile.events
 missile/vgr_heavymissile/vgr_heavymissile.miss

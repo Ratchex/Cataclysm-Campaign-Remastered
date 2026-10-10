@@ -1,9 +1,10 @@
 """Cutscene-only ship types (used by tools/nis2hwrm.py NIS_TYPES), built into data/ by tools/install_cr.py.
 
-tai_missiledestroyer_nis: the Taiidan missile destroyer whose launchers fire cat_nis_tai_missile, a Taiidan missile
+tai_missiledestroyer_nis: the Taiidan missile destroyer whose launchers fire tai_nismissile, a Taiidan missile
 that turns and speeds up at once. HWRM's (a 0.75 s engine and 1 s turn ramp) left the fixed launchers' missiles
 swinging out in a big loop before they came round to the target; in Cataclysm's nislet01 they fly straight in
-(user). Gameplay's missile destroyers keep the stock missile.
+(user). Gameplay's missile destroyers keep the stock missile. Missile types load by their race's Prefix (TAI_): one
+named cat_... was never found ("WEAPON FIRE ERROR: Could not load weapon fire", then an access violation).
 
 install() returns the data/ paths written (install_cr.py's manifest: generated, not committed).
 """
@@ -18,7 +19,7 @@ STOCK_HW1 = r"C:\Modding\Cataclysm-decomp\reference\hwrm\HW1Ships\ship"
 
 SHIP, BASE = "tai_missiledestroyer_nis", "tai_missiledestroyer"
 LAUNCHERS = ("Tai_DestroyerLauncher",)   # (the volley tubes fire special attacks only)
-WEAPON, MISSILE, BASE_WEAPON, BASE_MISSILE = "cat_nis_tailauncher", "cat_nis_tai_missile", "tai_destroyerlauncher", "tai_missile"
+WEAPON, MISSILE, BASE_WEAPON, BASE_MISSILE = "cat_nis_tailauncher", "tai_nismissile", "tai_destroyerlauncher", "tai_missile"
 # the missile: straight at its target from launch
 MISSILE_TUNING = {"rotationMaxSpeed": 1000, "rotationAccelTime": 0.05, "rotationBrakeTime": 0.05,
                   "mainEngineAccelTime": 0.1, "thrusterAccelTime": 0.1}
