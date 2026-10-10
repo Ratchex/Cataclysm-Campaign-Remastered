@@ -38,7 +38,10 @@ CONE_LEN = 1400.0         # twProcessorAutoRepairDistance 4000 x 0.35 (shiprules
 CONE_R0, CONE_R1 = 2.0, 44.0   # twProcessorAutoRepairBeamWidth 250 x 0.35 wide at full range: very thin
 BANDS = (500.0, 950.0, 1400.0)  # cone lengths (shiprules.lua CAT_PROC_BANDS): the shortest that reaches the target
 SEGS = 16
-SWEEP = 3.0               # seconds per sweep (one way): 30 degrees a second (user: 90 and 45 too fast, 22.5 slow)
+# seconds per sweep (one way) at a stock ion turret's rates (kus_destroyerion1 maxAzimuthSpeed 35, maxDeclinationSpeed
+# 20 degrees a second; user: move like the destroyer's ion turret); shiprules.lua turns at the same rates
+SWEEP_YAW = 90.0 / 35
+SWEEP_PITCH = 90.0 / 20
 STOCK_TEX = "C:/Modding/Cataclysm-decomp/reference/hwrm/Homeworld2/art/fx/repair_fx/repair_beam/fx_repairbeam_diff.tga"
 CLOCK = 100000.0
 
@@ -67,10 +70,9 @@ def write_mad(out):
         njref += 1
 
     r = math.radians(RANGE)
-    sweep = [(0.0, -r), (SWEEP, r), (2 * SWEEP, -r)]
     for i in range(BEAMS):
-        clip(f"Yaw{i}", f"Beam{i}_Yaw", "Y", sweep, 2 * SWEEP)
-        clip(f"Pitch{i}", f"Beam{i}_Pitch", "X", sweep, 2 * SWEEP)
+        clip(f"Yaw{i}", f"Beam{i}_Yaw", "Y", [(0.0, -r), (SWEEP_YAW, r), (2 * SWEEP_YAW, -r)], 2 * SWEEP_YAW)
+        clip(f"Pitch{i}", f"Beam{i}_Pitch", "X", [(0.0, -r), (SWEEP_PITCH, r), (2 * SWEEP_PITCH, -r)], 2 * SWEEP_PITCH)
     clip("Clock", "Beam0_Cone", "Z", [(0.0, 0.0), (CLOCK, 0.0)], CLOCK)
     body = (b"MAD " + chunk(b"NAME", b"Homeworld2 MAD File") + chunk(b"VERS", bytes([4, 1, 0, 0]))
             + chunk(b"INFO", struct.pack("<5I", FPS, len(marks), len(curves), njref, 6 * njref))

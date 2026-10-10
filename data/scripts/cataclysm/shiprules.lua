@@ -1231,65 +1231,87 @@ CAT_PROC_BEAMS = {          -- origin (HWRM units, our model) and side (x direct
     { -97.7, 25.4, -78.1, -1 }, { -106.7, -28.0, 6.3, -1 }, { 106.7, -28.0, 6.3, 1 }, { 97.7, 25.4, -78.1, 1 } }
 
 -- The beam cones (tools/make_procbeam.py: the cone on each beam's turret joints, aimed by smt_processor.madstate).
--- Each beam's state goes to the madstate as a 16-bit message (beam, band, yaw, pitch) when it changes: a bit is a
--- switch to one of the two of NIS00-02 the madstate is not in (it can't read this script's globals).
+-- The turrets move like a stock ion turret (kus_destroyerion1: AnimatedTurret, 35 degrees a second in yaw, 20 in
+-- pitch, 10 % of that when pointing at the target; user: copy the destroyer's ion turret): this script turns each
+-- turret's angles toward the target's current position at those rates, slowing as it closes in, and sends the angle
+-- it will have reached by the next message (CAT_PROC_AIM_EVERY ahead) so the madstate's clip, running at the full
+-- rate, keeps moving. A message: beam (2 bits), band (2), yaw (8), pitch (8), each bit a switch to one of the two
+-- of NIS00-02 the madstate is not in (it can't read this script's globals).
 CAT_PROC_BANDS = { 500, 950, 1400 }   -- the cone's lengths (make_procbeam.py BANDS): the shortest that reaches
-CAT_PROC_LEVELS = 63                  -- yaw / pitch steps over -45..45 degrees (6 bits each)
+CAT_PROC_LEVELS = 255                 -- yaw / pitch steps over -45..45 degrees (8 bits each)
 CAT_PROC_AIM_TRACE = 0                -- 1: log each message
 CAT_PROC_CALIBRATE = 0                -- 1: fixed poses to read the turret's signs off in game (CatProcessor_Tick)
-CAT_PROC_AIM_WINDOW = 2.0             -- seconds of target positions averaged: the tracking point trails by 1 s
 CAT_PROC_BEAM_DELAY = 1.0             -- seconds after a beam takes a target before its cone shows
-CAT_PROC_AIM_EVERY = 0.25             -- a beam's aim is sent at most this often (the turret keeps turning between)
+CAT_PROC_AIM_EVERY = 0.1              -- seconds between a turret's messages while it turns
+CAT_PROC_YAW_SPEED = 35               -- degrees a second (kus_destroyerion1 maxAzimuthSpeed; make_procbeam.py)
+CAT_PROC_PITCH_SPEED = 20             -- (maxDeclinationSpeed)
+CAT_PROC_FINE = 0.1                   -- speedMultiplierWhenPointingAtTarget
+CAT_PROC_FINE_ANGLE = 5               -- degrees off the target below which the turret eases to the fine rate
+
+-- one axis of a turret: the new angle and the angle to send (where it will be CAT_PROC_AIM_EVERY from now)
+function CatProcBeam_Turn(cur, want, speed, dt)
+    local e = want - cur
+    local ae = abs(e)
+    if ae < 0.01 then return want, want end
+    local k = ae / CAT_PROC_FINE_ANGLE
+    if k < CAT_PROC_FINE then k = CAT_PROC_FINE elseif k > 1 then k = 1 end
+    local rate = speed * k
+    local step = rate * dt
+    local ahead = rate * (dt + CAT_PROC_AIM_EVERY)
+    if step > ae then step = ae end
+    if ahead > ae then ahead = ae end
+    local sg = 1
+    if e < 0 then sg = -1 end
+    return cur + sg * step, cur + sg * ahead
+end
 
 function CatProcBeam_Aim(rec, g, i, t, o, r, u, f, now, dt)
-    local band, yq, pq = 0, 0, 0
-    rec.aimF = rec.aimF or {}
+    rec.tur = rec.tur or {}
+    local tu = rec.tur[i]
+    if not tu then
+        tu = { yaw = 0, pitch = 0 }
+        rec.tur[i] = tu
+    end
+    local band, wy, wp = 0, 0, 0                         -- no target: back to rest, cone off
     if t then
-        -- the tracking point: the average of the target's positions over the last CAT_PROC_AIM_WINDOW seconds,
-        -- so it trails the target by half that (user: a buffer averaging the points, 1 s behind); a new target
-        -- starts a new buffer
+        if tu.t ~= t then tu.t, tu.since = t, now end
         local tp = SobGroup_GetPosition(CatShips[t].g)
-        local sm = rec.aimF[i]
-        if not sm or sm.t ~= t then
-            sm = { t = t, since = now, buf = {} }
-            rec.aimF[i] = sm
-        end
-        tinsert(sm.buf, { now, tp[1], tp[2], tp[3] })
-        while getn(sm.buf) > 1 and now - sm.buf[1][1] > CAT_PROC_AIM_WINDOW do tremove(sm.buf, 1) end
-        local ax, ay, az = 0, 0, 0
-        for k = 1, getn(sm.buf) do
-            ax, ay, az = ax + sm.buf[k][2], ay + sm.buf[k][3], az + sm.buf[k][4]
-        end
-        local nb = getn(sm.buf)
-        local v = { ax / nb - o[1], ay / nb - o[2], az / nb - o[3] }
+        local v = { tp[1] - o[1], tp[2] - o[2], tp[3] - o[3] }
         local vx = v[1] * r[1] + v[2] * r[2] + v[3] * r[3]
         local vy = v[1] * u[1] + v[2] * u[2] + v[3] * u[3]
         local vz = v[1] * f[1] + v[2] * f[2] + v[3] * f[3]
         local n = sqrt(vx * vx + vy * vy + vz * vz)
         if n > 1 then
-            -- Lua 4 trig is in degrees
             -- the beam's own frame (geo2dae --turret: _Base turned 90 x side degrees about up, +Z out of its side):
             -- direction = Ry(yaw) Rx(pitch) +Z, standard right-handed rotations, the cone mesh along +Z. Confirmed by
             -- a calibration (CAT_PROC_CALIBRATE, screenshots 2026-10-10: built along -Z the cones rested pointing
-            -- into the hull, yaw +40 on Beam1 swung it aft, pitch +40 on Beam2 up)
+            -- into the hull, yaw +40 on Beam1 swung it aft, pitch +40 on Beam2 up). Lua 4 trig is in degrees
             local side = CAT_PROC_BEAMS[i][4]
             local lx, ly, lz = -side * vz, vy, side * vx
-            local yaw = atan2(lx, lz)
-            local pitch = asin(-ly / n)
-            yq = CatProcBeam_Level(yaw)
-            pq = CatProcBeam_Level(pitch)
+            wy = atan2(lx, lz)
+            wp = asin(-ly / n)
+            if wy > 45 then wy = 45 elseif wy < -45 then wy = -45 end
+            if wp > 45 then wp = 45 elseif wp < -45 then wp = -45 end
             band = 3
             if n <= CAT_PROC_BANDS[1] then band = 1 elseif n <= CAT_PROC_BANDS[2] then band = 2 end
-            if now - sm.since < CAT_PROC_BEAM_DELAY then band = 0 end   -- the cone shows a second after the beam starts
+            if now - tu.since < CAT_PROC_BEAM_DELAY then band = 0 end   -- the cone shows a second after the beam starts
+            if CAT_PROC_AIM_TRACE == 1 then
+                rec.aimWhy = "target " .. t .. " side " .. side .. " v(r,u,f) " .. floor(vx) .. "," .. floor(vy) .. "," ..
+                             floor(vz) .. " want " .. floor(wy) .. "," .. floor(wp)
+            end
         end
+    else
+        tu.t = nil
     end
+    local sy, sp
+    tu.yaw, sy = CatProcBeam_Turn(tu.yaw, wy, CAT_PROC_YAW_SPEED, dt)
+    tu.pitch, sp = CatProcBeam_Turn(tu.pitch, wp, CAT_PROC_PITCH_SPEED, dt)
+    local yq, pq = CatProcBeam_Level(sy), CatProcBeam_Level(sp)
     rec.aim = rec.aim or {}
     local last = rec.aim[i]
-    if not t then rec.aimF[i] = nil end
-    if last and last[1] == band then
-        if band == 0 then return end
-        if yq == last[2] and pq == last[3] then return end
-        if now - last[4] < CAT_PROC_AIM_EVERY then return end
+    if last then
+        if last[1] == band and last[2] == yq and last[3] == pq then return end
+        if last[1] == band and now - last[4] < CAT_PROC_AIM_EVERY then return end
     end
     rec.aim[i] = { band, yq, pq, now }
     CatProcBeam_Send(rec, g, i - 1, band, yq, pq)
@@ -1300,8 +1322,8 @@ function CatProcBeam_Send(rec, g, beam, band, yq, pq)
     local bits = {}
     CatProcBeam_Bits(bits, beam, 2)
     CatProcBeam_Bits(bits, band, 2)
-    CatProcBeam_Bits(bits, yq, 6)
-    CatProcBeam_Bits(bits, pq, 6)
+    CatProcBeam_Bits(bits, yq, 8)
+    CatProcBeam_Bits(bits, pq, 8)
     if not rec.madSym then                               -- first: a sync switch (no bit)
         rec.madSym = 0
         SobGroup_SetMadState(g, "NIS00")
@@ -1313,7 +1335,9 @@ function CatProcBeam_Send(rec, g, beam, band, yq, pq)
         SobGroup_SetMadState(g, "NIS0" .. sym)
     end
     if CAT_PROC_AIM_TRACE == 1 then
-        print("CATACLYSM procbeam " .. rec.g .. " beam " .. beam .. ": band " .. band .. ", yaw " .. yq .. ", pitch " .. pq)
+        print("CATACLYSM procbeam send beam " .. beam .. ": band " .. band .. ", yaw " .. yq .. ", pitch " .. pq ..
+              " (" .. (rec.aimWhy or "") .. ")")
+        rec.aimWhy = nil
     end
 end
 
