@@ -23,6 +23,7 @@ import os
 import struct
 import sys
 
+import numpy as np
 from PIL import Image
 
 DECOMP = r"C:\Modding\Cataclysm-decomp"
@@ -66,11 +67,36 @@ def write_textures(png_dir, tex, out_dir, base, colour):
             m = os.path.join(png_dir, f"{tex.lower()}_team{k}.png")
             if os.path.exists(m):
                 im = Image.composite(Image.new("RGB", size, c), im, Image.open(m).convert("L").resize(size))
-    for old in ("_TEAM.tga", "_STRP.tga"):      # HODOR picks up any mask file next to the DIFF: drop stale ones
+    for old in ("_TEAM.tga", "_STRP.tga", "_GLOW.tga"):   # HODOR picks up any such file next to the DIFF
         if os.path.exists(os.path.join(out_dir, base + old)):
             os.remove(os.path.join(out_dir, base + old))
     im.save(os.path.join(out_dir, base + "_DIFF.tga"))
+    glow = GLOW_MAPS.get(tex.lower()) if tex else None
+    if glow is not None:
+        # sob_ship.frag: $glow G = self-illumination mask (R spec sharpness, B spec mask: left 0, as before)
+        g = Image.fromarray(glow).resize(size)
+        zero = Image.new("L", size, 0)
+        Image.merge("RGB", (zero, g, zero)).save(os.path.join(out_dir, base + "_GLOW.tga"))
     return base + "_DIFF.tga"
+
+
+GLOW_MAPS = {}   # Cataclysm texture name (lower case) -> glow mask (uint8 array), from --glow-from
+
+
+def load_glow_maps(hod, cache_dir):
+    """CR's GLOW textures (G channel) by Cataclysm texture name: "SMO_com_antenna_EXPORT[1]_GLOW" / "SWKcap_1_GLOW"
+    -> smo_com_antenna / swkcap. Decoded once into cache_dir (the hod is 20 MB of DXT)."""
+    import hodtex
+    os.makedirs(cache_dir, exist_ok=True)
+    stamp = os.path.join(cache_dir, "_done")
+    if not os.path.exists(stamp):
+        for name, img in hodtex.textures(hod, r"_GLOW$").items():
+            key = re.sub(r"(_EXPORT\[\d+\]|_\d+)?_GLOW$", "", name, flags=re.I).lower()
+            Image.fromarray(img[..., 1].clip(0, 255).astype("uint8")).save(os.path.join(cache_dir, key + ".png"))
+        open(stamp, "w").close()
+    for f in os.listdir(cache_dir):
+        if f.endswith(".png"):
+            GLOW_MAPS[f[:-4]] = np.asarray(Image.open(os.path.join(cache_dir, f)).convert("L"))
 
 
 def fl(vals):
@@ -104,6 +130,12 @@ def read_mex(path):
                 if raw and all(32 <= c < 127 for c in raw):
                     parent = raw.decode("latin-1")
             out.append((typ, label, pos, nrm, parent))
+        elif typ == "Nav" and len(body) >= 36:
+            # MEX.h MEXNAVLightChunk: position, red, BLUE, green, pad, name[20] (the .shp NavLight's name, any case)
+            pos = struct.unpack_from("<3f", body, 0)
+            r, b_, g = body[12], body[13], body[14]
+            label = body[16:36].split(b"\0")[0].decode("latin-1")
+            out.append((typ, label, pos, (r / 255, g / 255, b_ / 255), path))
         p += 16 + size
     return out
 
@@ -344,6 +376,50 @@ def borrowed_dock_nodes(path, scale, family, anchors=()):
     return "".join(nodes), len(nodes)
 
 
+def shp_navlights(mex_path):
+    """The .shp NavLight lines of the ship a .mex belongs to (<race>/<ship>/rl0/lod0/<ship>.mex -> <race>/<ship>.shp):
+    name (lower case) -> (blink on s, off s, start delay s, size HW1 units)."""
+    d = os.path.dirname(os.path.dirname(os.path.dirname(mex_path)))
+    shp = os.path.join(os.path.dirname(d), os.path.basename(d) + ".shp")
+    out = {}
+    if os.path.exists(shp):
+        for line in open(shp, encoding="latin-1"):
+            m = re.match(r"\s*NavLight\s+(.*)", line.split(";")[0])
+            if m:
+                f = [x.strip() for x in m.group(1).split(",")]
+                if len(f) >= 6:
+                    try:
+                        out[f[0].lower()] = (float(f[2]), float(f[3]), float(f[4]), float(f[5]))
+                    except ValueError:
+                        pass
+    return out
+
+
+def navlight_nodes(points, conv, scale):
+    """Cataclysm nav lights (.mex Nav chunks: position, colour; .shp NavLight: blink on/off, delay, size) as HODOR
+    NAVL joints: NAVL[name]_Type[default]_Sect[0]_Sz[]_Ph[]_Fr[]_Dist[0]_Col[r,g,b]_Flags[Sprite] (the keys
+    HODOR.exe parses, in its order; Cataclysm Remastered's Kuun-Lan NAVL chunk: size 16, freq 0.75, phase 0, dist 0,
+    sprite on). Size x the model scale; frequency = 1 / (on + off); phase = start delay / period."""
+    out, used, shps = [], set(), {}
+    for typ, lbl, pos, col, mex in points:
+        if typ != "Nav":
+            continue
+        if mex not in shps:
+            shps[mex] = shp_navlights(mex)
+        on, off, delay, size = shps[mex].get(lbl.lower(), (1.0, 1.0, 0.0, 30.0))
+        period = max(on + off, 0.01)
+        stem = re.sub(r"\W", "", lbl) or "Nav"
+        name, k = stem, 1
+        while name in used:
+            k += 1
+            name = f"{stem}_{k}"
+        used.add(name)
+        tag = (f"NAVL[{name}]_Type[default]_Sect[0]_Sz[{size * scale:.4g}]_Ph[{(delay / period) % 1:.4g}]"
+               f"_Fr[{1 / period:.4g}]_Dist[0]_Col[{col[0]:.3g},{col[1]:.3g},{col[2]:.3g}]_Flags[Sprite]")
+        out.append(jnode(tag, conv(*pos)))
+    return "".join(out), len(out)
+
+
 def weapon_nodes(points, conv, convn):
     """JNT[Weapon_<GUNn>_Position] with _Direction (up), _Rest (firing direction), _Muzzle children (the layout of
     the HWRM Blender toolkit's hardpoint tool); the position joint itself is not rotated."""
@@ -390,7 +466,13 @@ def main():
                          "forward)")
     ap.add_argument("--latch", help="LatchOrientation joint at x,y,z (HWRM units): the point a collector puts on "
                                     "the asteroid's surface while harvesting")
+    ap.add_argument("--glow-from", help="old-format HOD whose GLOW textures (Cataclysm texture names) become our "
+                                        "_GLOW maps (Cataclysm Remastered's smt_ms_sp.hod for the Kuun-Lan)")
+    ap.add_argument("--no-navlights", action="store_true", help="no NAVL joints from the .mex Nav chunks")
     a = ap.parse_args()
+    if a.glow_from:
+        load_glow_maps(a.glow_from, os.path.join(os.path.dirname(os.path.abspath(a.out_dir)), "_glow_cache",
+                                                 os.path.splitext(os.path.basename(a.glow_from))[0]))
     anim_names = {n for n in a.anim_joints.split(",") if n}
     os.makedirs(a.out_dir, exist_ok=True)
     rel = os.path.relpath(os.path.dirname(a.geo), os.path.join(DECOMP, "extracted", "big"))
@@ -560,6 +642,8 @@ def main():
         shape = (f'<node name="{gid}" id="{gid}" sid="{gid}E"><translate sid="translate">0 0 0</translate>'
                  f'<instance_geometry url="#{gid}"></instance_geometry></node>')
         weapons += jnode(f"JNT[EngineNozzle{n}]", conv(*pos), jnode(f"BURN[EngineBurn{n}]", (0, 0, 0), flames) + shape)
+    nav, nnav = ("", 0) if a.no_navlights else navlight_nodes(points, conv, a.scale)
+    weapons += nav
     # resource drop-off at the collector docks (Cataclysm Remastered's sits at its Kuun-Lan's front dock)
     res = [conv(*pt[2]) for pt in points if pt[0] == "Dok" and re.match(r"RES\d+$", pt[1])]
     res_at = tuple(sum(p[k] for p in res) / len(res) for k in range(3)) if res else (0, 0, 0)
@@ -641,7 +725,8 @@ def main():
                 '</visual_scene></library_visual_scenes>\n'
                 '<scene><instance_visual_scene url="#scene"/></scene>\n</COLLADA>\n')
     print(f"{dae}: {total} triangles ({flipped} rewound), {len(groups)} materials, {nweap} weapon joints, "
-          f"{ndock} dock paths, {len(engines)} engine nozzles")
+          f"{ndock} dock paths, {len(engines)} engine nozzles, {nnav} nav lights, "
+          f"{sum(1 for f in os.listdir(a.out_dir) if f.endswith('_GLOW.tga'))} glow maps")
     if not a.no_hodor:
         print("HODOR hangs when started from Python/PowerShell (not from Git Bash); use tools/build_ship.sh")
 
