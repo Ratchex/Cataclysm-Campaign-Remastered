@@ -103,4 +103,4 @@ NewShipType.specialDeathSpeed=40
 NewShipType.chanceOfSpecialDeath=0
 NewShipType.deadSobFadeTime=1
 addAbility(NewShipType, "CanBeRepaired", "RepCap");   -- Cataclysm-HWRM
-loadLatchPointList(NewShipType, "RepCap", "RepairPoint0");   -- Cataclysm-HWRM
+loadLatchPointList(NewShipType, "RepCap", "RepairPoint0", "RepairPoint1", "RepairPoint2", "RepairPoint3");   -- Cataclysm-HWRM

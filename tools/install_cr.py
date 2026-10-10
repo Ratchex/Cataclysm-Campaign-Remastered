@@ -588,22 +588,25 @@ def main():
     # every Somtaaw ship repairable (Cataclysm's repair beams take anything; HWRM repairs only ships with
     # CanBeRepaired: theirs left out the fighters, the ACV...: user, the Processor's ordered repair did nothing).
     # HWRM repairs only at RepCap latch points ("marked as repairable ... but has no repair points!"): our models
-    # carry RepairPoint0 (geo2dae.py); ships with their own active RepCap list keep it.
+    # carry RepairPoint0-3 (geo2dae.py; one repairer per point); every RepairPointN in a ship's model is declared.
+    # Ships with their own (not ours) active RepCap list keep it.
     for d in sorted(os.listdir(os.path.join(DATA, "ship"))):
         path = os.path.join(DATA, "ship", d, d + ".ship")
         if not (d.startswith("smt_") and os.path.exists(path)):
             continue
         text = open(path, encoding="latin-1").read()
-        if re.search(r'^\s*addAbility\(NewShipType,\s*"CanBeRepaired",\s*"RepCap"', text, re.M) and \
-                re.search(r'^\s*loadLatchPointList\(NewShipType,\s*"RepCap"', text, re.M):
+        if re.search(r'^\s*addAbility\(NewShipType,\s*"CanBeRepaired",\s*"RepCap"\);\s*$', text, re.M) and \
+                re.search(r'^\s*loadLatchPointList\(NewShipType,\s*"RepCap"(?![^\n]*Cataclysm-HWRM)', text, re.M):
             continue
         hod = os.path.join(DATA, "ship", d, d + ".hod")
-        points = os.path.exists(hod) and b"RepairPoint0" in open(hod, "rb").read()
+        data = open(hod, "rb").read() if os.path.exists(hod) else b""
+        points = sorted({int(n) for n in re.findall(rb"RepairPoint(\d+)(?![A-Za-z\d])", data)})
         text = re.sub(r'^[ \t]*addAbility\(NewShipType,\s*"CanBeRepaired"[^\n]*\n?', "", text, flags=re.M)
         text = re.sub(r'^[ \t]*loadLatchPointList\(NewShipType,\s*"RepCap"[^\n]*\n?', "", text, flags=re.M)
         if points:
             add = ('addAbility(NewShipType, "CanBeRepaired", "RepCap");   -- Cataclysm-HWRM\n'
-                   'loadLatchPointList(NewShipType, "RepCap", "RepairPoint0");   -- Cataclysm-HWRM\n')
+                   'loadLatchPointList(NewShipType, "RepCap", '
+                   + ", ".join(f'"RepairPoint{n}"' for n in points) + ');   -- Cataclysm-HWRM\n')
         else:
             add = 'addAbility(NewShipType, "CanBeRepaired");   -- Cataclysm-HWRM\n'
         open(path, "w", encoding="latin-1", newline="").write(text.rstrip("\n") + "\n" + add)

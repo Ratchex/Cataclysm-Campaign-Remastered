@@ -195,6 +195,7 @@ function CatShip_Update(g, p, id)
     local now = Universe_GameTime()
     CatSession(now)
     if getn(CatLinkSwaps) > 0 then CatLinkSwap_Tick(now) end
+    if CatBeamCount > 0 then CatBeam_Sweep(now) end
     local rec = CatShips[id]
     if not rec then return end
     if not rec.adopted and SobGroup_Empty(g) == 0 then CatShip_Adopt(rec, g, now) end
@@ -1118,6 +1119,58 @@ function CatGated_Tick(rec)
     end
 end
 
+-- Repair beams (data/art/fx/cat_repairbeam.lua): a beam effect between two volumes, at the beam's origin and the
+-- target (FX_PlayEffectBetweenPoints; it stays where it was spawned, so it is re-spawned once either end moves).
+-- Each beam is refreshed by its ship's update (every 0.5 s); one not refreshed for 1.2 s (repair over, ship gone)
+-- is stopped by CatBeam_Sweep.
+CatBeams = {}
+CatBeamCount = 0
+CAT_BEAM_MOVE = 64          -- re-spawn once an end has moved this far (squared: 8 units)
+
+function CatBeam_Set(key, o, tp, scale, now)
+    local b = CatBeams[key]
+    if not b then
+        b = {}
+        CatBeams[key] = b
+        CatBeamCount = CatBeamCount + 1
+    end
+    if b.h then
+        local d1 = (b.o[1] - o[1]) * (b.o[1] - o[1]) + (b.o[2] - o[2]) * (b.o[2] - o[2]) + (b.o[3] - o[3]) * (b.o[3] - o[3])
+        local d2 = (b.t[1] - tp[1]) * (b.t[1] - tp[1]) + (b.t[2] - tp[2]) * (b.t[2] - tp[2]) + (b.t[3] - tp[3]) * (b.t[3] - tp[3])
+        if d1 > CAT_BEAM_MOVE or d2 > CAT_BEAM_MOVE then
+            FX_StopEffect(b.h)
+            b.h = nil
+        end
+    end
+    if not b.h then
+        Volume_Delete(key .. "a")
+        Volume_AddSphere(key .. "a", o, 1)
+        Volume_Delete(key .. "b")
+        Volume_AddSphere(key .. "b", tp, 1)
+        b.h = FX_PlayEffectBetweenPoints("cat_repairbeam", key .. "a", key .. "b", scale)
+        b.o, b.t = o, tp
+    end
+    b.seen = now
+end
+
+function CatBeam_Off(key)
+    local b = CatBeams[key]
+    if not b then return end
+    if b.h then FX_StopEffect(b.h) end
+    Volume_Delete(key .. "a")
+    Volume_Delete(key .. "b")
+    CatBeams[key] = nil
+    CatBeamCount = CatBeamCount - 1
+end
+
+function CatBeam_Sweep(now)
+    local old = {}
+    for k, b in CatBeams do
+        if now - b.seen > 1.2 then tinsert(old, k) end
+    end
+    for i = 1, getn(old) do CatBeam_Off(old[i]) end
+end
+
 -- The ordered repair (the Worker's and Processor's RepairCommand: install_cr.py repair_order). HWRM heals only by
 -- latching onto the target's repair point (RepairByLatchingCommand), which flew the repairer onto the target and
 -- dragged it along (user: "jank"). Its non-latching form (4th argument 1) picks the target, approaches and faces it
@@ -1128,6 +1181,8 @@ end
 CAT_WORKER_RANGE = 790
 CAT_WORKER_CONE = 0.5       -- cos(120 / 2)
 CAT_WORKER_TIP = { 0, 28.5, 0 }
+CAT_WORKER_BEAM = 1         -- beam effect scale (sworker.shp repairBeamWidth 100; the Processor's 250)
+CAT_PROC_BEAM = 2.5
 CAT_REPAIR_TRACE = 0        -- 1: log the ordered repair each second
 
 function CatRepair_Tick(rec, g, id, now)
@@ -1148,7 +1203,11 @@ function CatRepair_Tick(rec, g, id, now)
             rec.ordered[k] = 1
             if SobGroup_HealthPercentage(trec.g) < 0.999 then
                 damaged = damaged + 1
-                if rec.t == "smt_worker" and not healing then healing = CatRepair_WorkerBeam(rec, g, k) end
+                if rec.t == "smt_worker" and not healing then
+                    local o, tp
+                    healing, o, tp = CatRepair_WorkerBeam(rec, g, k)
+                    if healing then CatBeam_Set("cat_rb_" .. id .. "_w", o, tp, CAT_WORKER_BEAM, now) end
+                end
             end
         end
     end
@@ -1184,7 +1243,7 @@ function CatRepair_WorkerBeam(rec, g, t)
     local dist = sqrt(v[1] * v[1] + v[2] * v[2] + v[3] * v[3])
     if dist > CAT_WORKER_RANGE then return nil end
     if dist >= 1 and (v[1] * f[1] + v[2] * f[2] + v[3] * f[3]) / dist < CAT_WORKER_CONE then return nil end
-    return t
+    return t, o, tp
 end
 
 -- The Processor's automatic repair beams (Cataclysm FUN_005bedd0 / 005beae0, tweak.script twProcessorAutoRepair*):
@@ -1248,6 +1307,7 @@ function CatProcessor_Tick(rec, g, id, now)
             end
         end
         rec.beams[i] = t
+        if t then CatBeam_Set("cat_rb_" .. id .. "_" .. i, o, SobGroup_GetPosition(CatShips[t].g), CAT_PROC_BEAM, now) end
         if t and dt > 0 then
             local tg = CatShips[t].g
             local rate = CAT_PROC_RATE

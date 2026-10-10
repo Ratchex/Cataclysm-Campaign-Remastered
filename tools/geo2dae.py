@@ -893,11 +893,21 @@ def main():
                          rot=(90.0, 0.0, 180.0))
 
     if not a.fx_mesh:
-        # a repair point (stock HW1 fighters' layout: RepairPoint0 with _Heading / _Left / _Up, 10 out): HWRM repairs
-        # a ship only at its RepCap latch points ("marked as repairable ... but has no repair points!"; user: the
-        # Processor's / Worker's repair order targeted nothing). At the centre; install_cr.py declares it.
-        weapons += jnode("JNT[RepairPoint0]", (0, 0, 0), jnode("JNT[RepairPoint0Heading]", (0, 0, 10))
-                         + jnode("JNT[RepairPoint0Left]", (10, 0, 0)) + jnode("JNT[RepairPoint0Up]", (0, 10, 0)))
+        # repair points (stock HW1 layout: RepairPointN with _Heading / _Left / _Up, 10 out): HWRM repairs a ship only
+        # at its RepCap latch points ("marked as repairable ... but has no repair points!"; user: the repair order
+        # targeted nothing), one repairer per point (user: several craft must repair one target). Four, just off
+        # the hull's top, bottom and sides (bounding box); install_cr.py declares them.
+        rp_vs = [v for g in groups.values() for t in g["tris"] for v in t[0]] or [(0.0, 0.0, 0.0)]
+        rp_lo = [min(v[k] for v in rp_vs) for k in range(3)]
+        rp_hi = [max(v[k] for v in rp_vs) for k in range(3)]
+        rp_c = [(rp_lo[k] + rp_hi[k]) / 2 for k in range(3)]
+        rp_out = [(rp_hi[k] - rp_lo[k]) * 0.05 for k in range(3)]
+        spots = [(rp_c[0], rp_hi[1] + rp_out[1], rp_c[2]), (rp_c[0], rp_lo[1] - rp_out[1], rp_c[2]),
+                 (rp_lo[0] - rp_out[0], rp_c[1], rp_c[2]), (rp_hi[0] + rp_out[0], rp_c[1], rp_c[2])]
+        for k, at in enumerate(spots):
+            rp = f"RepairPoint{k}"
+            weapons += jnode(f"JNT[{rp}]", at, jnode(f"JNT[{rp}Heading]", (0, 0, 10))
+                             + jnode(f"JNT[{rp}Left]", (10, 0, 0)) + jnode(f"JNT[{rp}Up]", (0, 10, 0)))
 
     dae = os.path.join(a.out_dir, a.name + ".dae")
     with open(dae, "w", encoding="utf-8", newline="\n") as f:
