@@ -39,142 +39,142 @@ None.
 | 0 | 0.0s |  | `fadeSet 100%, 0` | translated: fadeSet(1) |
 | 0 | 0.0s |  | `motionCueScale 1` | dropped: HW1 camera motion-cue tuning; no HWRM equivalent |
 | 0 | 0.0s |  | `hideUniverseToggle` | translated: hideUniverse(1) |
-| 0 | 0.0s | kus_carrier | `colorScheme 6` | translated: colourScheme({0.890, 0.678, 0.325}, {0.596, 0.435, 0.114}, "cnabaal.tga") |
+| 0 | 0.0s | kus_carrier | `colorScheme 6` | translated: colourSchemeTrail({0.890, 0.678, 0.325}, {0.596, 0.435, 0.114}, "cnabaal.tga", {0.702, 0.969, 0.396}, "") |
 | 0 | 0.0s | kus_carrier | `hide` | translated: hide() |
-| 0 | 0.0s | kus_destroyer1 | `colorScheme 4` | translated: colourScheme({0.216, 0.592, 0.031}, {0.702, 0.969, 0.396}, "cmanaan.tga") |
+| 0 | 0.0s | kus_destroyer1 | `colorScheme 4` | translated: colourSchemeTrail({0.216, 0.592, 0.031}, {0.702, 0.969, 0.396}, "cmanaan.tga", {0.702, 0.969, 0.396}, "") |
 | 0 | 0.0s | kus_destroyer1 | `hide` | translated: hide() |
-| 0 | 0.0s | kus_destroyer2 | `colorScheme 4` | translated: colourScheme({0.216, 0.592, 0.031}, {0.702, 0.969, 0.396}, "cmanaan.tga") |
+| 0 | 0.0s | kus_destroyer2 | `colorScheme 4` | translated: colourSchemeTrail({0.216, 0.592, 0.031}, {0.702, 0.969, 0.396}, "cmanaan.tga", {0.702, 0.969, 0.396}, "") |
 | 0 | 0.0s | kus_destroyer2 | `hide` | translated: hide() |
-| 0 | 0.0s | kus_destroyer3 | `colorScheme 4` | translated: colourScheme({0.216, 0.592, 0.031}, {0.702, 0.969, 0.396}, "cmanaan.tga") |
+| 0 | 0.0s | kus_destroyer3 | `colorScheme 4` | translated: colourSchemeTrail({0.216, 0.592, 0.031}, {0.702, 0.969, 0.396}, "cmanaan.tga", {0.702, 0.969, 0.396}, "") |
 | 0 | 0.0s | kus_destroyer3 | `hide` | translated: hide() |
-| 0 | 0.0s | kus_ioncannonfrigate2 | `colorScheme 6` | translated: colourScheme({0.890, 0.678, 0.325}, {0.596, 0.435, 0.114}, "cnabaal.tga") |
+| 0 | 0.0s | kus_ioncannonfrigate2 | `colorScheme 6` | translated: colourSchemeTrail({0.890, 0.678, 0.325}, {0.596, 0.435, 0.114}, "cnabaal.tga", {0.702, 0.969, 0.396}, "") |
 | 0 | 0.0s | kus_ioncannonfrigate2 | `hide` | translated: hide() |
 | 0 | 0.0s | kus_heavycorvette1 | `minimumLODSet 1` | dropped: HWRM picks LODs itself |
-| 0 | 0.0s | kus_heavycorvette1 | `colorScheme 7` | translated: colourScheme({0.784, 0.000, 0.000}, {0.000, 0.000, 1.000}, "Kushan.tga") |
+| 0 | 0.0s | kus_heavycorvette1 | `colorScheme 7` | translated: colourSchemeTrail({0.784, 0.000, 0.000}, {0.000, 0.000, 1.000}, "Kushan.tga", {1.000, 1.000, 1.000}, "") |
 | 0 | 0.0s | kus_heavycorvette1 | `hide` | translated: hide() |
 | 0 | 0.0s | kus_heavycorvette2 | `minimumLODSet 1` | dropped: HWRM picks LODs itself |
-| 0 | 0.0s | kus_heavycorvette2 | `colorScheme 7` | translated: colourScheme({0.784, 0.000, 0.000}, {0.000, 0.000, 1.000}, "Kushan.tga") |
+| 0 | 0.0s | kus_heavycorvette2 | `colorScheme 7` | translated: colourSchemeTrail({0.784, 0.000, 0.000}, {0.000, 0.000, 1.000}, "Kushan.tga", {1.000, 1.000, 1.000}, "") |
 | 0 | 0.0s | kus_heavycorvette2 | `hide` | translated: hide() |
 | 0 | 0.0s | kus_heavycorvette3 | `minimumLODSet 1` | dropped: HWRM picks LODs itself |
-| 0 | 0.0s | kus_heavycorvette3 | `colorScheme 7` | translated: colourScheme({0.784, 0.000, 0.000}, {0.000, 0.000, 1.000}, "Kushan.tga") |
+| 0 | 0.0s | kus_heavycorvette3 | `colorScheme 7` | translated: colourSchemeTrail({0.784, 0.000, 0.000}, {0.000, 0.000, 1.000}, "Kushan.tga", {1.000, 1.000, 1.000}, "") |
 | 0 | 0.0s | kus_heavycorvette3 | `hide` | translated: hide() |
-| 0 | 0.0s | kus_ioncannonfrigate1 | `colorScheme 6` | translated: colourScheme({0.890, 0.678, 0.325}, {0.596, 0.435, 0.114}, "cnabaal.tga") |
+| 0 | 0.0s | kus_ioncannonfrigate1 | `colorScheme 6` | translated: colourSchemeTrail({0.890, 0.678, 0.325}, {0.596, 0.435, 0.114}, "cnabaal.tga", {0.702, 0.969, 0.396}, "") |
 | 0 | 0.0s | kus_ioncannonfrigate1 | `hide` | translated: hide() |
-| 0 | 0.0s | kus_ioncannonfrigate3 | `colorScheme 6` | translated: colourScheme({0.890, 0.678, 0.325}, {0.596, 0.435, 0.114}, "cnabaal.tga") |
+| 0 | 0.0s | kus_ioncannonfrigate3 | `colorScheme 6` | translated: colourSchemeTrail({0.890, 0.678, 0.325}, {0.596, 0.435, 0.114}, "cnabaal.tga", {0.702, 0.969, 0.396}, "") |
 | 0 | 0.0s | kus_ioncannonfrigate3 | `health 0.05` | translated: health(0.05) |
 | 0 | 0.0s | kus_ioncannonfrigate3 | `show` | translated: show() |
-| 0 | 0.0s | kus_ioncannonfrigate4 | `colorScheme 6` | translated: colourScheme({0.890, 0.678, 0.325}, {0.596, 0.435, 0.114}, "cnabaal.tga") |
+| 0 | 0.0s | kus_ioncannonfrigate4 | `colorScheme 6` | translated: colourSchemeTrail({0.890, 0.678, 0.325}, {0.596, 0.435, 0.114}, "cnabaal.tga", {0.702, 0.969, 0.396}, "") |
 | 0 | 0.0s | kus_ioncannonfrigate4 | `hide` | translated: hide() |
-| 0 | 0.0s | kus_ioncannonfrigate5 | `colorScheme 6` | translated: colourScheme({0.890, 0.678, 0.325}, {0.596, 0.435, 0.114}, "cnabaal.tga") |
+| 0 | 0.0s | kus_ioncannonfrigate5 | `colorScheme 6` | translated: colourSchemeTrail({0.890, 0.678, 0.325}, {0.596, 0.435, 0.114}, "cnabaal.tga", {0.702, 0.969, 0.396}, "") |
 | 0 | 0.0s | kus_ioncannonfrigate5 | `hide` | translated: hide() |
 | 0 | 0.0s | kus_interceptor1 | `minimumLODSet 1` | dropped: HWRM picks LODs itself |
-| 0 | 0.0s | kus_interceptor1 | `colorScheme 4` | translated: colourScheme({0.216, 0.592, 0.031}, {0.702, 0.969, 0.396}, "cmanaan.tga") |
+| 0 | 0.0s | kus_interceptor1 | `colorScheme 4` | translated: colourSchemeTrail({0.216, 0.592, 0.031}, {0.702, 0.969, 0.396}, "cmanaan.tga", {0.702, 0.969, 0.396}, "") |
 | 0 | 0.0s | kus_interceptor1 | `hide` | translated: hide() |
 | 0 | 0.0s | kus_interceptor2 | `minimumLODSet 1` | dropped: HWRM picks LODs itself |
-| 0 | 0.0s | kus_interceptor2 | `colorScheme 4` | translated: colourScheme({0.216, 0.592, 0.031}, {0.702, 0.969, 0.396}, "cmanaan.tga") |
+| 0 | 0.0s | kus_interceptor2 | `colorScheme 4` | translated: colourSchemeTrail({0.216, 0.592, 0.031}, {0.702, 0.969, 0.396}, "cmanaan.tga", {0.702, 0.969, 0.396}, "") |
 | 0 | 0.0s | kus_interceptor2 | `hide` | translated: hide() |
 | 0 | 0.0s | kus_interceptor3 | `minimumLODSet 1` | dropped: HWRM picks LODs itself |
-| 0 | 0.0s | kus_interceptor3 | `colorScheme 4` | translated: colourScheme({0.216, 0.592, 0.031}, {0.702, 0.969, 0.396}, "cmanaan.tga") |
+| 0 | 0.0s | kus_interceptor3 | `colorScheme 4` | translated: colourSchemeTrail({0.216, 0.592, 0.031}, {0.702, 0.969, 0.396}, "cmanaan.tga", {0.702, 0.969, 0.396}, "") |
 | 0 | 0.0s | kus_interceptor3 | `hide` | translated: hide() |
 | 0 | 0.0s | kus_interceptor4 | `minimumLODSet 1` | dropped: HWRM picks LODs itself |
-| 0 | 0.0s | kus_interceptor4 | `colorScheme 4` | translated: colourScheme({0.216, 0.592, 0.031}, {0.702, 0.969, 0.396}, "cmanaan.tga") |
+| 0 | 0.0s | kus_interceptor4 | `colorScheme 4` | translated: colourSchemeTrail({0.216, 0.592, 0.031}, {0.702, 0.969, 0.396}, "cmanaan.tga", {0.702, 0.969, 0.396}, "") |
 | 0 | 0.0s | kus_interceptor4 | `hide` | translated: hide() |
 | 0 | 0.0s | kus_interceptor5 | `minimumLODSet 1` | dropped: HWRM picks LODs itself |
-| 0 | 0.0s | kus_interceptor5 | `colorScheme 4` | translated: colourScheme({0.216, 0.592, 0.031}, {0.702, 0.969, 0.396}, "cmanaan.tga") |
+| 0 | 0.0s | kus_interceptor5 | `colorScheme 4` | translated: colourSchemeTrail({0.216, 0.592, 0.031}, {0.702, 0.969, 0.396}, "cmanaan.tga", {0.702, 0.969, 0.396}, "") |
 | 0 | 0.0s | kus_interceptor5 | `hide` | translated: hide() |
 | 0 | 0.0s | kus_interceptor6 | `minimumLODSet 1` | dropped: HWRM picks LODs itself |
-| 0 | 0.0s | kus_interceptor6 | `colorScheme 4` | translated: colourScheme({0.216, 0.592, 0.031}, {0.702, 0.969, 0.396}, "cmanaan.tga") |
+| 0 | 0.0s | kus_interceptor6 | `colorScheme 4` | translated: colourSchemeTrail({0.216, 0.592, 0.031}, {0.702, 0.969, 0.396}, "cmanaan.tga", {0.702, 0.969, 0.396}, "") |
 | 0 | 0.0s | kus_interceptor6 | `hide` | translated: hide() |
 | 0 | 0.0s | kus_interceptor7 | `minimumLODSet 1` | dropped: HWRM picks LODs itself |
-| 0 | 0.0s | kus_interceptor7 | `colorScheme 7` | translated: colourScheme({0.784, 0.000, 0.000}, {0.000, 0.000, 1.000}, "Kushan.tga") |
+| 0 | 0.0s | kus_interceptor7 | `colorScheme 7` | translated: colourSchemeTrail({0.784, 0.000, 0.000}, {0.000, 0.000, 1.000}, "Kushan.tga", {1.000, 1.000, 1.000}, "") |
 | 0 | 0.0s | kus_interceptor7 | `hide` | translated: hide() |
 | 0 | 0.0s | kus_interceptor8 | `minimumLODSet 1` | dropped: HWRM picks LODs itself |
-| 0 | 0.0s | kus_interceptor8 | `colorScheme 7` | translated: colourScheme({0.784, 0.000, 0.000}, {0.000, 0.000, 1.000}, "Kushan.tga") |
+| 0 | 0.0s | kus_interceptor8 | `colorScheme 7` | translated: colourSchemeTrail({0.784, 0.000, 0.000}, {0.000, 0.000, 1.000}, "Kushan.tga", {1.000, 1.000, 1.000}, "") |
 | 0 | 0.0s | kus_interceptor8 | `hide` | translated: hide() |
 | 0 | 0.0s | kus_interceptor9 | `minimumLODSet 1` | dropped: HWRM picks LODs itself |
-| 0 | 0.0s | kus_interceptor9 | `colorScheme 7` | translated: colourScheme({0.784, 0.000, 0.000}, {0.000, 0.000, 1.000}, "Kushan.tga") |
+| 0 | 0.0s | kus_interceptor9 | `colorScheme 7` | translated: colourSchemeTrail({0.784, 0.000, 0.000}, {0.000, 0.000, 1.000}, "Kushan.tga", {1.000, 1.000, 1.000}, "") |
 | 0 | 0.0s | kus_interceptor9 | `hide` | translated: hide() |
 | 0 | 0.0s | kus_interceptor10 | `minimumLODSet 1` | dropped: HWRM picks LODs itself |
-| 0 | 0.0s | kus_interceptor10 | `colorScheme 7` | translated: colourScheme({0.784, 0.000, 0.000}, {0.000, 0.000, 1.000}, "Kushan.tga") |
+| 0 | 0.0s | kus_interceptor10 | `colorScheme 7` | translated: colourSchemeTrail({0.784, 0.000, 0.000}, {0.000, 0.000, 1.000}, "Kushan.tga", {1.000, 1.000, 1.000}, "") |
 | 0 | 0.0s | kus_interceptor10 | `hide` | translated: hide() |
 | 0 | 0.0s | kus_interceptor11 | `minimumLODSet 1` | dropped: HWRM picks LODs itself |
-| 0 | 0.0s | kus_interceptor11 | `colorScheme 7` | translated: colourScheme({0.784, 0.000, 0.000}, {0.000, 0.000, 1.000}, "Kushan.tga") |
+| 0 | 0.0s | kus_interceptor11 | `colorScheme 7` | translated: colourSchemeTrail({0.784, 0.000, 0.000}, {0.000, 0.000, 1.000}, "Kushan.tga", {1.000, 1.000, 1.000}, "") |
 | 0 | 0.0s | kus_interceptor11 | `hide` | translated: hide() |
-| 0 | 0.0s | tai_carrier | `colorScheme 2` | translated: colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga") |
+| 0 | 0.0s | tai_carrier | `colorScheme 2` | translated: colourSchemeTrail({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga", {0.992, 0.929, 0.145}, "") |
 | 0 | 0.0s | tai_carrier | `hide` | translated: hide() |
-| 0 | 0.0s | tai_destroyer | `colorScheme 2` | translated: colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga") |
+| 0 | 0.0s | tai_destroyer | `colorScheme 2` | translated: colourSchemeTrail({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga", {0.992, 0.929, 0.145}, "") |
 | 0 | 0.0s | tai_destroyer | `hide` | translated: hide() |
-| 0 | 0.0s | tai_ioncannonfrigate2 | `colorScheme 2` | translated: colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga") |
+| 0 | 0.0s | tai_ioncannonfrigate2 | `colorScheme 2` | translated: colourSchemeTrail({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga", {0.992, 0.929, 0.145}, "") |
 | 0 | 0.0s | tai_ioncannonfrigate2 | `hide` | translated: hide() |
-| 0 | 0.0s | tai_ioncannonfrigate4 | `colorScheme 2` | translated: colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga") |
+| 0 | 0.0s | tai_ioncannonfrigate4 | `colorScheme 2` | translated: colourSchemeTrail({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga", {0.992, 0.929, 0.145}, "") |
 | 0 | 0.0s | tai_ioncannonfrigate4 | `hide` | translated: hide() |
-| 0 | 0.0s | tai_ioncannonfrigate1 | `colorScheme 2` | translated: colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga") |
+| 0 | 0.0s | tai_ioncannonfrigate1 | `colorScheme 2` | translated: colourSchemeTrail({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga", {0.992, 0.929, 0.145}, "") |
 | 0 | 0.0s | tai_ioncannonfrigate1 | `hide` | translated: hide() |
-| 0 | 0.0s | tai_ioncannonfrigate3 | `colorScheme 2` | translated: colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga") |
+| 0 | 0.0s | tai_ioncannonfrigate3 | `colorScheme 2` | translated: colourSchemeTrail({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga", {0.992, 0.929, 0.145}, "") |
 | 0 | 0.0s | tai_ioncannonfrigate3 | `hide` | translated: hide() |
-| 0 | 0.0s | tai_assaultfrigate1 | `colorScheme 2` | translated: colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga") |
+| 0 | 0.0s | tai_assaultfrigate1 | `colorScheme 2` | translated: colourSchemeTrail({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga", {0.992, 0.929, 0.145}, "") |
 | 0 | 0.0s | tai_assaultfrigate1 | `hide` | translated: hide() |
-| 0 | 0.0s | tai_assaultfrigate2 | `colorScheme 2` | translated: colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga") |
+| 0 | 0.0s | tai_assaultfrigate2 | `colorScheme 2` | translated: colourSchemeTrail({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga", {0.992, 0.929, 0.145}, "") |
 | 0 | 0.0s | tai_assaultfrigate2 | `hide` | translated: hide() |
-| 0 | 0.0s | tai_assaultfrigate3 | `colorScheme 2` | translated: colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga") |
+| 0 | 0.0s | tai_assaultfrigate3 | `colorScheme 2` | translated: colourSchemeTrail({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga", {0.992, 0.929, 0.145}, "") |
 | 0 | 0.0s | tai_assaultfrigate3 | `hide` | translated: hide() |
 | 0 | 0.0s | tai_interceptor1 | `minimumLODSet 1` | dropped: HWRM picks LODs itself |
-| 0 | 0.0s | tai_interceptor1 | `colorScheme 2` | translated: colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga") |
+| 0 | 0.0s | tai_interceptor1 | `colorScheme 2` | translated: colourSchemeTrail({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga", {0.992, 0.929, 0.145}, "") |
 | 0 | 0.0s | tai_interceptor1 | `hide` | translated: hide() |
 | 0 | 0.0s | tai_interceptor2 | `minimumLODSet 1` | dropped: HWRM picks LODs itself |
-| 0 | 0.0s | tai_interceptor2 | `colorScheme 2` | translated: colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga") |
+| 0 | 0.0s | tai_interceptor2 | `colorScheme 2` | translated: colourSchemeTrail({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga", {0.992, 0.929, 0.145}, "") |
 | 0 | 0.0s | tai_interceptor2 | `hide` | translated: hide() |
 | 0 | 0.0s | tai_interceptor3 | `minimumLODSet 1` | dropped: HWRM picks LODs itself |
-| 0 | 0.0s | tai_interceptor3 | `colorScheme 2` | translated: colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga") |
+| 0 | 0.0s | tai_interceptor3 | `colorScheme 2` | translated: colourSchemeTrail({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga", {0.992, 0.929, 0.145}, "") |
 | 0 | 0.0s | tai_interceptor3 | `hide` | translated: hide() |
 | 0 | 0.0s | tai_interceptor4 | `minimumLODSet 1` | dropped: HWRM picks LODs itself |
-| 0 | 0.0s | tai_interceptor4 | `colorScheme 2` | translated: colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga") |
+| 0 | 0.0s | tai_interceptor4 | `colorScheme 2` | translated: colourSchemeTrail({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga", {0.992, 0.929, 0.145}, "") |
 | 0 | 0.0s | tai_interceptor4 | `hide` | translated: hide() |
 | 0 | 0.0s | tai_interceptor5 | `minimumLODSet 1` | dropped: HWRM picks LODs itself |
-| 0 | 0.0s | tai_interceptor5 | `colorScheme 2` | translated: colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga") |
+| 0 | 0.0s | tai_interceptor5 | `colorScheme 2` | translated: colourSchemeTrail({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga", {0.992, 0.929, 0.145}, "") |
 | 0 | 0.0s | tai_interceptor5 | `hide` | translated: hide() |
 | 0 | 0.0s | tai_interceptor6 | `minimumLODSet 1` | dropped: HWRM picks LODs itself |
-| 0 | 0.0s | tai_interceptor6 | `colorScheme 2` | translated: colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga") |
+| 0 | 0.0s | tai_interceptor6 | `colorScheme 2` | translated: colourSchemeTrail({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga", {0.992, 0.929, 0.145}, "") |
 | 0 | 0.0s | tai_interceptor6 | `hide` | translated: hide() |
 | 0 | 0.0s | tai_interceptor7 | `minimumLODSet 1` | dropped: HWRM picks LODs itself |
-| 0 | 0.0s | tai_interceptor7 | `colorScheme 2` | translated: colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga") |
+| 0 | 0.0s | tai_interceptor7 | `colorScheme 2` | translated: colourSchemeTrail({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga", {0.992, 0.929, 0.145}, "") |
 | 0 | 0.0s | tai_interceptor7 | `hide` | translated: hide() |
 | 0 | 0.0s | tai_interceptor8 | `minimumLODSet 1` | dropped: HWRM picks LODs itself |
-| 0 | 0.0s | tai_interceptor8 | `colorScheme 2` | translated: colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga") |
+| 0 | 0.0s | tai_interceptor8 | `colorScheme 2` | translated: colourSchemeTrail({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga", {0.992, 0.929, 0.145}, "") |
 | 0 | 0.0s | tai_interceptor8 | `hide` | translated: hide() |
 | 0 | 0.0s | tai_interceptor9 | `minimumLODSet 1` | dropped: HWRM picks LODs itself |
-| 0 | 0.0s | tai_interceptor9 | `colorScheme 2` | translated: colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga") |
+| 0 | 0.0s | tai_interceptor9 | `colorScheme 2` | translated: colourSchemeTrail({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga", {0.992, 0.929, 0.145}, "") |
 | 0 | 0.0s | tai_interceptor9 | `hide` | translated: hide() |
 | 0 | 0.0s | tai_interceptor10 | `minimumLODSet 1` | dropped: HWRM picks LODs itself |
-| 0 | 0.0s | tai_interceptor10 | `colorScheme 2` | translated: colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga") |
+| 0 | 0.0s | tai_interceptor10 | `colorScheme 2` | translated: colourSchemeTrail({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga", {0.992, 0.929, 0.145}, "") |
 | 0 | 0.0s | tai_interceptor10 | `hide` | translated: hide() |
 | 0 | 0.0s | tai_interceptor11 | `minimumLODSet 1` | dropped: HWRM picks LODs itself |
-| 0 | 0.0s | tai_interceptor11 | `colorScheme 2` | translated: colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga") |
+| 0 | 0.0s | tai_interceptor11 | `colorScheme 2` | translated: colourSchemeTrail({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga", {0.992, 0.929, 0.145}, "") |
 | 0 | 0.0s | tai_interceptor11 | `hide` | translated: hide() |
 | 0 | 0.0s | tai_interceptor12 | `minimumLODSet 1` | dropped: HWRM picks LODs itself |
-| 0 | 0.0s | tai_interceptor12 | `colorScheme 2` | translated: colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga") |
+| 0 | 0.0s | tai_interceptor12 | `colorScheme 2` | translated: colourSchemeTrail({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga", {0.992, 0.929, 0.145}, "") |
 | 0 | 0.0s | tai_interceptor12 | `hide` | translated: hide() |
 | 0 | 0.0s | tai_interceptor13 | `minimumLODSet 1` | dropped: HWRM picks LODs itself |
-| 0 | 0.0s | tai_interceptor13 | `colorScheme 2` | translated: colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga") |
+| 0 | 0.0s | tai_interceptor13 | `colorScheme 2` | translated: colourSchemeTrail({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga", {0.992, 0.929, 0.145}, "") |
 | 0 | 0.0s | tai_interceptor13 | `hide` | translated: hide() |
 | 0 | 0.0s | tai_interceptor14 | `minimumLODSet 1` | dropped: HWRM picks LODs itself |
-| 0 | 0.0s | tai_interceptor14 | `colorScheme 2` | translated: colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga") |
+| 0 | 0.0s | tai_interceptor14 | `colorScheme 2` | translated: colourSchemeTrail({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga", {0.992, 0.929, 0.145}, "") |
 | 0 | 0.0s | tai_interceptor14 | `hide` | translated: hide() |
 | 0 | 0.0s | tai_interceptor15 | `minimumLODSet 1` | dropped: HWRM picks LODs itself |
-| 0 | 0.0s | tai_interceptor15 | `colorScheme 2` | translated: colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga") |
+| 0 | 0.0s | tai_interceptor15 | `colorScheme 2` | translated: colourSchemeTrail({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga", {0.992, 0.929, 0.145}, "") |
 | 0 | 0.0s | tai_interceptor15 | `show` | translated: show() |
 | 0 | 0.0s | tai_interceptor16 | `minimumLODSet 1` | dropped: HWRM picks LODs itself |
-| 0 | 0.0s | tai_interceptor16 | `colorScheme 2` | translated: colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga") |
+| 0 | 0.0s | tai_interceptor16 | `colorScheme 2` | translated: colourSchemeTrail({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga", {0.992, 0.929, 0.145}, "") |
 | 0 | 0.0s | tai_interceptor16 | `show` | translated: show() |
 | 0 | 0.0s | tai_attackbomber1 | `minimumLODSet 1` | dropped: HWRM picks LODs itself |
-| 0 | 0.0s | tai_attackbomber1 | `colorScheme 2` | translated: colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga") |
+| 0 | 0.0s | tai_attackbomber1 | `colorScheme 2` | translated: colourSchemeTrail({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga", {0.992, 0.929, 0.145}, "") |
 | 0 | 0.0s | tai_attackbomber1 | `hide` | translated: hide() |
 | 0 | 0.0s | tai_attackbomber2 | `minimumLODSet 1` | dropped: HWRM picks LODs itself |
-| 0 | 0.0s | tai_attackbomber2 | `colorScheme 2` | translated: colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga") |
+| 0 | 0.0s | tai_attackbomber2 | `colorScheme 2` | translated: colourSchemeTrail({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga", {0.992, 0.929, 0.145}, "") |
 | 0 | 0.0s | tai_attackbomber2 | `hide` | translated: hide() |
-| 0 | 0.0s | tai_missiledestroyer1 | `colorScheme 2` | translated: colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga") |
+| 0 | 0.0s | tai_missiledestroyer1 | `colorScheme 2` | translated: colourSchemeTrail({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga", {0.992, 0.929, 0.145}, "") |
 | 0 | 0.0s | tai_missiledestroyer1 | `hide` | translated: hide() |
-| 0 | 0.0s | tai_missiledestroyer2 | `colorScheme 2` | translated: colourScheme({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga") |
+| 0 | 0.0s | tai_missiledestroyer2 | `colorScheme 2` | translated: colourSchemeTrail({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga", {0.992, 0.929, 0.145}, "") |
 | 0 | 0.0s | tai_missiledestroyer2 | `hide` | translated: hide() |
 | 0 | 0.0s | Asteroid11 | `show` | translated: show() |
 | 0 | 0.0s | Asteroid12 | `show` | translated: show() |
