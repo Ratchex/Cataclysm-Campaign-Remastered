@@ -1147,16 +1147,36 @@ function CatSayTick()
             SobGroup_Clear(grp)
         end
     end
-    -- technology lines: when the human gains such a research (not for what it starts the mission with)
+    -- technology lines (the Tactical Officer): when the human gains such a research (not for what it starts the
+    -- mission with), after Fleet Command's "Research completed." has finished plus a short pause (user)
     local first = CatTechHad == nil
     if first then CatTechHad = {} end
     for tech, v in CatSpeech_TechLine do
         local has = Player_HasResearch(0, tech)
         if not first and has == 1 and CatTechHad[tech] ~= 1 then
-            KAS_SpeechBark(188, v, Actor_HW1_FleetCommand)
+            tinsert(CatTechQueue, { at = now + CatResearchCompleteSecs() + CAT_TECH_LINE_GAP, v = v })
         end
         CatTechHad[tech] = has
     end
+    local k = 1
+    while k <= getn(CatTechQueue) do
+        if now >= CatTechQueue[k].at then
+            KAS_SpeechBark(188, CatTechQueue[k].v, Actor_HW1_FleetIntel)   -- Tactical Officer (as KAS_SpeechPlay)
+            tremove(CatTechQueue, k)
+        else
+            k = k + 1
+        end
+    end
+end
+
+CatTechQueue = {}
+CAT_TECH_LINE_GAP = 1.0   -- seconds of silence between "Research completed." and the technology line
+
+-- length of Fleet Command's "Research completed." (event 51, the line catspeech.lua plays for it)
+function CatResearchCompleteSecs()
+    local e = KAS_SpeechEvents and KAS_SpeechEvents["sect51"]
+    if e == nil then return 1.5 end
+    return (KAS_SpeechDurations[KAS_SpeechBankBase.sect + e[3]] or 1500) / 1000
 end
 
 function K_497b00()                                                                               -- kasfIntelEventEnded
