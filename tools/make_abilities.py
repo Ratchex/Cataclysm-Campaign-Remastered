@@ -30,7 +30,7 @@ ICONS = "DATA:UI\\\\NewUI\\\\Taskbar\\\\CommandIcons\\\\"
 
 # name: (command ID 4-31 if native else None, label, ship types, research to show the button ("" none), upgrade
 # the ship must have ("" none: tools/make_upgrades.py), handler in shiprules.lua, icon).
-# Labels: english.script strMenuSpecial*Desc. Icons: stock placeholders for now.
+# Labels: english.script strMenuSpecial*Desc. Icons: stock placeholders, or ours (tools/make_icons.py).
 ABILITIES = {
     # the Acolyte's native command is its missile volley (strMenuSpecialFireMissilesDesc): its energy bar is the
     # missile cooldown (ENERGY); Link is a button
@@ -38,7 +38,7 @@ ABILITIES = {
     "link": (None, "Link", ["smt_acolyte"], "TECH_LINK", "LINK", "CatLink_Start", "cmd_ico_dronefrigate.dds"),
     "unlink": (None, "Unlink", ["smt_acv"], "", "UNLINK", "CatUnlink_Start", "cmd_ico_specialattack.dds"),
     # strMenuUpgradeSectShipsDesc: every ship type with upgrades
-    "upgrade": (None, "Upgrade", make_upgrades.upgradable(), "", "", "CatUpgrade_Start", "cmd_ico_repair.dds"),
+    "upgrade": (None, "Upgrade", make_upgrades.upgradable(), "", "", "CatUpgrade_Start", "cat_ico_upgrade.dds"),   # tools/make_icons.py
     # the Mimic (strMenuSpecialSelectMimicTypeDesc "Select Mimic Type"): "mimic" opens a menu of disguises (one
     # button each, MENU below), "unmimic" drops the disguise (ship_variants.py DISGUISES, shiprules.lua CatMimic_*)
     "mimic": (None, "Mimic", ["smt_mimic"], "", "MIMIC", "CatNoop", "cmd_ico_cloak.dds"),
