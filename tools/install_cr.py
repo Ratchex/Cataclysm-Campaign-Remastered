@@ -131,8 +131,9 @@ def patch_hw1_armour(text):
     return text
 
 
-# the Mimic's attack (install below): stock kus_resourcecollector's, its kamikaze on every family
-MIMIC_ATTACK = ('addAbility(NewShipType, "CanAttack", 1, 5, 2, 0, 0.35, 1, "Fighter, Fighter_hw1, Corvette, '
+# the Mimic's attack (install below): its own CanAttack numbers (the collector's 1, 5, 2 took attack orders away: a
+# click gave a move order, user) with stock kus_resourcecollector's kamikaze styles, on every family
+MIMIC_ATTACK = ('addAbility(NewShipType, "CanAttack", 1, 5, 1, 0, 0.35, 1, "Fighter, Fighter_hw1, Corvette, '
                 'Corvette_hw1, Frigate, Utility, SmallCapitalShip, BigCapitalShip, Mothership", "kamikaze", '
                 '{Fighter="kamikaze"}, {Fighter_hw1="kamikaze"}, {SubSystem="kamikaze"}, {SmallCapitalShip="kamikaze"}, '
                 '{BigCapitalShip="kamikaze"}, {Mothership="kamikaze"}, {ResourceLarge="kamikaze"});  -- Cataclysm-HWRM')
@@ -528,11 +529,6 @@ def main():
         assert n == 1, f"smt_mimic: {n} CanAttack lines"
         text = re.sub(r'^addAbility\(NewShipType,\s*"CanAttack".*$', MIMIC_ATTACK.replace("\\", "\\\\"), text,
                       flags=re.M)
-        # ...and a weapon: HWRM gives attack orders only to ships with one (data/weapon/cat_mimicnull: no damage)
-        if "cat_mimicnull" not in text:
-            text = text.replace("LoadModel(NewShipType, 1);", 'LoadModel(NewShipType, 1);\nStartShipWeaponConfig('
-                                'NewShipType, "cat_mimicnull", "Weapon_GUN0", "Weapon_GUN0");   -- Cataclysm-HWRM', 1)
-            assert "cat_mimicnull" in text, "smt_mimic: no LoadModel line"
         open(mimic, "w", encoding="latin-1", newline="").write(text)
     for variant in ship_variants.DISGUISES:
         copied += ship_variants.build_disguise(variant)

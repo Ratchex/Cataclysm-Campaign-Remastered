@@ -1057,9 +1057,18 @@ end
 -- attack is its kamikaze, so its pilot's last words (line 167) as it starts.
 CatKamikazeScream = { smt_mimic = 1 }
 
+-- An attack order on one is made a kamikaze (user: its default attack; SobGroup_Kamikaze, as KAS_Kamikaze), on the
+-- same targets; the order stays COMMAND_Attack, so once per order.
 function CatKamikaze_Tick(rec, g, id)
     local attacking = SobGroup_GetCurrentOrder(g) == (COMMAND_Attack or 2)
-    if attacking and not rec.kamiAttack then CatSay(167, g, rec.p) end
+    if attacking and not rec.kamiAttack then
+        CatSay(167, g, rec.p)
+        local t = "cat_kamit_" .. id
+        SobGroup_CreateIfNotExist(t)
+        SobGroup_Clear(t)
+        SobGroup_GetCommandTargets(t, g, COMMAND_Attack or 2)
+        if SobGroup_Empty(t) == 0 then SobGroup_Kamikaze(g, t) end
+    end
     rec.kamiAttack = attacking
 end
 
