@@ -15,6 +15,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 MOD = os.path.dirname(HERE)
 DATA = os.path.join(MOD, "data")
 STOCK_HW1 = r"C:\Modding\Cataclysm-decomp\reference\hwrm\HW1Ships\ship"
+STOCK_HW2 = r"C:\Modding\Cataclysm-decomp\reference\hwrm\Homeworld2"
 
 SHIP, BASE = "tai_missiledestroyer_nis", "tai_missiledestroyer"
 LAUNCHERS = ("Tai_DestroyerLauncher",)   # (the volley tubes fire special attacks only)
