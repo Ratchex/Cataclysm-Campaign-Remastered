@@ -1285,7 +1285,8 @@ function CatProcBeam_Aim(rec, g, i, t, o, r, u, f, now, dt)
             -- into the hull, yaw +40 on Beam1 swung it aft, pitch +40 on Beam2 up). Lua 4 trig is in degrees
             local side = CAT_PROC_BEAMS[i][4]
             local lx, ly, lz = -side * vz, vy, side * vx
-            wy = atan2(lx, lz)
+            wy = -atan2(lx, lz)       -- yaw: the calibration's bow / stern read the wrong way round (user: a target
+                                      -- off the starboard bow swung the cone fully aft)
             wp = asin(-ly / n)
             if wy > 45 then wy = 45 elseif wy < -45 then wy = -45 end
             if wp > 45 then wp = 45 elseif wp < -45 then wp = -45 end
