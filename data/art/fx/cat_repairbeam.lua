@@ -1,6 +1,6 @@
 -- Cataclysm-HWRM: the Worker's / Processor's repair beam, drawn by shiprules.lua CatBeam_Set between two volumes
 -- (FX_PlayEffectBetweenPoints, re-spawned as the ends move). Stock pro_tech_beam_link's layout (a beam stretched
--- between its two points), the ion beam texture tinted repair green, scrolling from the repairer to the target.
+-- between its two points), our white beam texture (data/art/fx/cat/cat_repairbeam.tga; the stock ion beam one is blue) tinted repair green, scrolling from the repairer to the target.
 fx = {
 style = "STYLE_BEAM",
 properties = {
@@ -22,7 +22,7 @@ value = 2,
 property_03 = {
 name = "Texture",
 type = "VARTYPE_STRING",
-value = "DATA:ART/FX/ION_BEAM/ION_BEAM.TGA",
+value = "DATA:ART/FX/CAT/CAT_REPAIRBEAM.TGA",
 },
 property_04 = {
 name = "SelfIlluminated",

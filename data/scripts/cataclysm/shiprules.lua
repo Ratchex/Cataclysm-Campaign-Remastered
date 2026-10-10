@@ -238,6 +238,11 @@ function CatShip_Update(g, p, id)
         end
     end
     if rec.link and rec.filled then CatLink_Tick(rec, id, now) end     -- every update: the approach needs it
+    -- repair beams: every update (make_shipcode.py FAST: 0.05 s), so the beams follow their ships
+    if (rec.t == "smt_worker" or rec.t == "smt_processor") and rec.filled and rec.p and SobGroup_Empty(g) == 0 then
+        CatRepair_Tick(rec, g, id, now)
+        if rec.t == "smt_processor" then CatProcessor_Tick(rec, g, id, now) end
+    end
     if now < rec.next then return end
     rec.next = now + CAT_TICK
     if SobGroup_Empty(g) == 1 then return end
@@ -284,8 +289,6 @@ function CatShip_Update(g, p, id)
     CatUpgradeWeapons_Tick(rec, id, now)
     CatNative_Tick(rec)
     CatGated_Tick(rec)
-    if rec.t == "smt_worker" or rec.t == "smt_processor" then CatRepair_Tick(rec, g, id, now) end
-    if rec.t == "smt_processor" then CatProcessor_Tick(rec, g, id, now) end
     CatUpgrade_Instant(rec, id)
     if rec.upg then CatUpgrade_Tick(rec, id, now) end
     if rec.gone then return end
@@ -1194,7 +1197,29 @@ function CatRepair_Tick(rec, g, id, now)
     SobGroup_CreateIfNotExist(out)
     SobGroup_Clear(out)
     SobGroup_GetCommandTargets(out, g, COMMAND_Repair)
-    if SobGroup_Empty(out) == 1 then return end
+    if SobGroup_Empty(out) == 1 then
+        local found = nil
+        local names = { "COMMAND_Attack", "COMMAND_Guard", "COMMAND_MoveToSob", "COMMAND_Dock", "COMMAND_Salvage",
+                        "COMMAND_Capture", "COMMAND_Resource" }
+        local line = "order " .. tostring(SobGroup_GetCurrentOrder(g)) .. ", COMMAND_Repair " .. tostring(COMMAND_Repair)
+        for i = 1, getn(names) do
+            local c = getglobal(names[i])
+            if c then
+                SobGroup_Clear(out)
+                SobGroup_GetCommandTargets(out, g, c)
+                local n = SobGroup_Count(out)
+                line = line .. ", " .. names[i] .. " " .. c .. ": " .. n
+                if n > 0 and not found then found = names[i] end
+            end
+        end
+        if CAT_REPAIR_TRACE == 1 and now >= (rec.repDiag or 0) then
+            rec.repDiag = now + 1
+            print("CATACLYSM repair " .. id .. " targets: " .. line)
+        end
+        if not found then return end
+        SobGroup_Clear(out)
+        SobGroup_GetCommandTargets(out, g, getglobal(found))
+    end
     rec.ordered = {}
     local damaged, healing, bo, bt = 0, nil, nil, nil
     for k, trec in CatShips do
@@ -1277,6 +1302,8 @@ function CatProcessor_Tick(rec, g, id, now)
     local pos = SobGroup_GetPosition(g)
     local r, u, f = CatCol(m, 0), CatCol(m, 1), CatCol(m, 2)
     rec.beams = rec.beams or {}
+    local scan = now >= (rec.procScan or 0)
+    if scan then rec.procScan = now + CAT_TICK end
     local taken = {}
     for i = 1, 4 do
         if rec.beams[i] then taken[rec.beams[i]] = 1 end
@@ -1290,7 +1317,7 @@ function CatProcessor_Tick(rec, g, id, now)
         if t and not CatProcessor_InBeam(t, o, d, rec.p, id, rec.ordered) then
             taken[t], t = nil, nil
         end
-        if not t then                                -- the nearest damaged friendly in this beam
+        if not t and scan then                       -- the nearest damaged friendly in this beam
             local best
             for k, _ in CatShips do
                 if not taken[k] then
