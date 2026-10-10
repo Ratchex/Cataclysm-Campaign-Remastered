@@ -131,6 +131,13 @@ def patch_hw1_armour(text):
     return text
 
 
+# the Mimic's attack (install below): stock kus_resourcecollector's, its kamikaze on every family
+MIMIC_ATTACK = ('addAbility(NewShipType, "CanAttack", 1, 5, 2, 0, 0.35, 1, "Fighter, Fighter_hw1, Corvette, '
+                'Corvette_hw1, Frigate, Utility, SmallCapitalShip, BigCapitalShip, Mothership", "kamikaze", '
+                '{Fighter="kamikaze"}, {Fighter_hw1="kamikaze"}, {SubSystem="kamikaze"}, {SmallCapitalShip="kamikaze"}, '
+                '{BigCapitalShip="kamikaze"}, {Mothership="kamikaze"}, {ResourceLarge="kamikaze"});  -- Cataclysm-HWRM')
+
+
 # Cataclysm's two launchers (our model's Weapon_GUN2/GUN3: tools/build_ship.sh)
 ACOLYTE_LAUNCHERS = ["Weapon_GUN2", "Weapon_GUN3"]
 
@@ -515,6 +522,12 @@ def main():
         text = open(mimic, encoding="latin-1").read()
         text = re.sub(r'^(addAbility\(NewShipType,\s*"CustomCommand",\s*1,\s*"Mimic")',
                       r"-- Cataclysm-HWRM (our Mimic menu, shiprules.lua CatMimic_*): \1", text, flags=re.M)
+        # it has no guns: its attack is a kamikaze (user), as stock HW1 resource collectors' (their CanAttack: the
+        # kamikaze style on every family, the HW1 ones included: theirs left out Fighter_hw1, the Taiidan fighters)
+        n = len(re.findall(r'^addAbility\(NewShipType,\s*"CanAttack".*$', text, flags=re.M))
+        assert n == 1, f"smt_mimic: {n} CanAttack lines"
+        text = re.sub(r'^addAbility\(NewShipType,\s*"CanAttack".*$', MIMIC_ATTACK.replace("\\", "\\\\"), text,
+                      flags=re.M)
         open(mimic, "w", encoding="latin-1", newline="").write(text)
     for variant in ship_variants.DISGUISES:
         copied += ship_variants.build_disguise(variant)
