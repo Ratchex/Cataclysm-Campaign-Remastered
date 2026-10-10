@@ -1246,10 +1246,13 @@ CAT_PROC_BEAMS = {          -- origin (HWRM units, our model) and side (x direct
 -- switch to one of the two of NIS00-02 the madstate is not in (it can't read this script's globals).
 CAT_PROC_BANDS = { 500, 950, 1400 }   -- the cone's lengths (make_procbeam.py BANDS): the shortest that reaches
 CAT_PROC_LEVELS = 31                  -- yaw / pitch steps over -45..45 degrees
-CAT_PROC_AIM_TRACE = 1                -- TEST: log each message
+CAT_PROC_AIM_TRACE = 0                -- 1: log each message
+CAT_PROC_AIM_EASE = 0.35              -- seconds the aim takes to follow its target
+CAT_PROC_AIM_HOLD = 0.5               -- a one-step change is sent only after this long
 
-function CatProcBeam_Aim(rec, g, i, t, o, r, u, f)
+function CatProcBeam_Aim(rec, g, i, t, o, r, u, f, now, dt)
     local band, yq, pq = 0, 0, 0
+    rec.aimF = rec.aimF or {}
     if t then
         local tp = SobGroup_GetPosition(CatShips[t].g)
         local v = { tp[1] - o[1], tp[2] - o[2], tp[3] - o[3] }
@@ -1263,16 +1266,35 @@ function CatProcBeam_Aim(rec, g, i, t, o, r, u, f)
         if n > 1 then
             local yaw = atan2(lx, lz)                    -- Lua 4: degrees
             local pitch = asin(-ly / n)
-            yq = CatProcBeam_Level(yaw)
-            pq = CatProcBeam_Level(pitch)
+            -- smoothed (user: the cone wiggled, re-aimed at every small change): eased toward the target's direction
+            -- over CAT_PROC_AIM_EASE seconds; a new target snaps
+            local sm = rec.aimF[i]
+            if not sm or sm.t ~= t then
+                sm = { t = t, yaw = yaw, pitch = pitch }
+                rec.aimF[i] = sm
+            else
+                local k = dt / CAT_PROC_AIM_EASE
+                if k > 1 then k = 1 end
+                sm.yaw = sm.yaw + (yaw - sm.yaw) * k
+                sm.pitch = sm.pitch + (pitch - sm.pitch) * k
+            end
+            yq = CatProcBeam_Level(sm.yaw)
+            pq = CatProcBeam_Level(sm.pitch)
             band = 3
             if n <= CAT_PROC_BANDS[1] then band = 1 elseif n <= CAT_PROC_BANDS[2] then band = 2 end
         end
     end
     rec.aim = rec.aim or {}
     local last = rec.aim[i]
-    if last and last[1] == band and (band == 0 or (last[2] == yq and last[3] == pq)) then return end
-    rec.aim[i] = { band, yq, pq }
+    if not t then rec.aimF[i] = nil end
+    if last and last[1] == band then
+        if band == 0 then return end
+        -- one step only once it has held CAT_PROC_AIM_HOLD seconds (no dithering between neighbouring steps)
+        local dy, dp = abs(yq - last[2]), abs(pq - last[3])
+        if dy == 0 and dp == 0 then return end
+        if dy <= 1 and dp <= 1 and now - last[4] < CAT_PROC_AIM_HOLD then return end
+    end
+    rec.aim[i] = { band, yq, pq, now }
     local bits = {}
     CatProcBeam_Bits(bits, i - 1, 2)
     CatProcBeam_Bits(bits, band, 2)
@@ -1377,7 +1399,7 @@ function CatProcessor_Tick(rec, g, id, now)
                       " (max " .. mx .. ", dt " .. dt .. ") now " .. SobGroup_HealthPercentage(tg))
             end
         end
-        CatProcBeam_Aim(rec, g, i, t, o, r, u, f)   -- after the heal
+        CatProcBeam_Aim(rec, g, i, t, o, r, u, f, now, dt)   -- after the heal
     end
 end
 
