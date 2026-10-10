@@ -872,6 +872,13 @@ def main():
                          + jnode("JNT[LatchOrientationLeft]", (10, 0, 0)) + jnode("JNT[LatchOrientationUp]", (0, 10, 0)),
                          rot=(90.0, 0.0, 180.0))
 
+    if not a.fx_mesh:
+        # a repair point (stock HW1 fighters' layout: RepairPoint0 with _Heading / _Left / _Up, 10 out): HWRM repairs
+        # a ship only at its RepCap latch points ("marked as repairable ... but has no repair points!"; user: the
+        # Processor's / Worker's repair order targeted nothing). At the centre; install_cr.py declares it.
+        weapons += jnode("JNT[RepairPoint0]", (0, 0, 0), jnode("JNT[RepairPoint0Heading]", (0, 0, 10))
+                         + jnode("JNT[RepairPoint0Left]", (10, 0, 0)) + jnode("JNT[RepairPoint0Up]", (0, 10, 0)))
+
     dae = os.path.join(a.out_dir, a.name + ".dae")
     with open(dae, "w", encoding="utf-8", newline="\n") as f:
         f.write('<?xml version="1.0" encoding="utf-8"?>\n'

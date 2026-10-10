@@ -580,14 +580,27 @@ def main():
     # Cataclysm's health and weapon damage (user: all ships, Cataclysm's scale 1:1)
     copied += make_damage.apply(make_damage.plan())
     # every Somtaaw ship repairable (Cataclysm's repair beams take anything; HWRM repairs only ships with
-    # CanBeRepaired: theirs left out the fighters, the ACV...: user, the Processor's ordered repair did nothing)
+    # CanBeRepaired: theirs left out the fighters, the ACV...: user, the Processor's ordered repair did nothing).
+    # HWRM repairs only at RepCap latch points ("marked as repairable ... but has no repair points!"): our models
+    # carry RepairPoint0 (geo2dae.py); ships with their own active RepCap list keep it.
     for d in sorted(os.listdir(os.path.join(DATA, "ship"))):
         path = os.path.join(DATA, "ship", d, d + ".ship")
-        if d.startswith("smt_") and os.path.exists(path):
-            text = open(path, encoding="latin-1").read()
-            if '"CanBeRepaired"' not in text:
-                open(path, "w", encoding="latin-1", newline="").write(
-                    text.rstrip("\n") + '\naddAbility(NewShipType, "CanBeRepaired");   -- Cataclysm-HWRM\n')
+        if not (d.startswith("smt_") and os.path.exists(path)):
+            continue
+        text = open(path, encoding="latin-1").read()
+        if re.search(r'^\s*addAbility\(NewShipType,\s*"CanBeRepaired",\s*"RepCap"', text, re.M) and \
+                re.search(r'^\s*loadLatchPointList\(NewShipType,\s*"RepCap"', text, re.M):
+            continue
+        hod = os.path.join(DATA, "ship", d, d + ".hod")
+        points = os.path.exists(hod) and b"RepairPoint0" in open(hod, "rb").read()
+        text = re.sub(r'^[ \t]*addAbility\(NewShipType,\s*"CanBeRepaired"[^\n]*\n?', "", text, flags=re.M)
+        text = re.sub(r'^[ \t]*loadLatchPointList\(NewShipType,\s*"RepCap"[^\n]*\n?', "", text, flags=re.M)
+        if points:
+            add = ('addAbility(NewShipType, "CanBeRepaired", "RepCap");   -- Cataclysm-HWRM\n'
+                   'loadLatchPointList(NewShipType, "RepCap", "RepairPoint0");   -- Cataclysm-HWRM\n')
+        else:
+            add = 'addAbility(NewShipType, "CanBeRepaired");   -- Cataclysm-HWRM\n'
+        open(path, "w", encoding="latin-1", newline="").write(text.rstrip("\n") + "\n" + add)
     # the Mimic's kamikaze through HWRM's own: more health, more damage taken (tools/make_mimicarmour.py)
     import make_mimicarmour
     copied += [f"weapon/{w}" for w in make_mimicarmour.install()]
