@@ -150,25 +150,26 @@ def write_dae():
 
 
 def fade_texture(path):
-    """Stock HWRM's repair cone noise (fx_repairbeam_diff.tga: user, reuse the stock repair look) in grey (the effect
-    tints it green), stretched along the cone (U), fading toward the tip and black over its last tenth (the mesh's U
-    stops short of 1: a wrapped tip showed the bright base, a white end like a searchlight)."""
-    w, h = 256, 64
-    src = Image.open(STOCK_TEX).convert("L").resize((w, h))
-    lo, hi = min(src.getdata()), max(src.getdata())
+    """Stock HWRM's repair beam texture (fx_repairbeam_diff.tga, its teal-green noise as it is: user, as close to the
+    Worker's repair beam, stock repair_beam, as it can be) stretched along the cone (U), fading toward the tip and
+    black over its last tenth (the mesh's U stops short of 1: a wrapped tip showed the bright base, a white end like
+    a searchlight). Added (Blending 4, as stock), so black is see-through."""
+    w, h = 512, 128
+    src = Image.open(STOCK_TEX).convert("RGB").resize((w, h))
     im = Image.new("RGBA", (w, h))
     for x in range(w):
         u = x / (w - 1)
         v = max(0.0, 1 - u / 0.9) ** 1.2
         for y in range(h):
-            n = (src.getpixel((x, y)) - lo) / max(1, hi - lo)
-            c = int(255 * v * (0.45 + 0.5 * n))           # never white: noise between 45 and 95 %
-            im.putpixel((x, y), (c, c, c, c))
+            r, g, b = src.getpixel((x, y))
+            im.putpixel((x, y), (int(r * v), int(g * v), int(b * v), 255))
     im.save(path)
 
 
 FX = '''-- Cataclysm-HWRM: the Processor's repair beam cone (tools/make_procbeam.py; on its Beam<i>_Cone joints, aimed by
--- its madstate). A mesh effect: the thin cone mesh, stock HWRM's repair cone noise in grey tinted repair green, fading toward the tip, slowly spinning.
+-- its madstate). A mesh effect: the thin cone mesh with stock repair_beam's look
+-- (the Worker's repair beam, user: as close to it as can be): its texture (faded toward the tip), its 5 s colour cycle,
+-- its blending and lighting.
 fx = {
 style = "STYLE_RING",
 properties = {
@@ -176,26 +177,26 @@ property_00 = { name = "Radius", type = "VARTYPE_ARRAY_TIMEFLOAT", value = { 0, 
 property_01 = { name = "Offset", type = "VARTYPE_ARRAY_TIMEVECTOR3", value = { entry_00 = { 0, 0, 0, 0, }, entry_01 = { 1, 0, 0, 0, }, }, },
 property_02 = { name = "SpinX", type = "VARTYPE_ARRAY_TIMEFLOAT", value = { 0, 0, 1, 0, }, },
 property_03 = { name = "SpinY", type = "VARTYPE_ARRAY_TIMEFLOAT", value = { 0, 0, 1, 0, }, },
-property_04 = { name = "SpinZ", type = "VARTYPE_ARRAY_TIMEFLOAT", value = { 0, 0.25, 1, 0.25, }, },
-property_05 = { name = "Colour", type = "VARTYPE_ARRAY_TIMECOLOUR", value = { entry_00 = { 0, 0.35, 1, 0.5, 0.8, }, entry_01 = { 1, 0.35, 1, 0.5, 0.8, }, }, },
+property_04 = { name = "SpinZ", type = "VARTYPE_ARRAY_TIMEFLOAT", value = { 0, 0, 1, 0, }, },
+property_05 = { name = "Colour", type = "VARTYPE_ARRAY_TIMECOLOUR", value = { entry_00 = { 0, 1, 1, 1, 1, }, entry_01 = { 0.35224, 0.72209, 0.49140, 0.28737, 1, }, entry_02 = { 0.55224, 0.49434, 0.39566, 0.34763, 1, }, entry_03 = { 0.80000, 0.48113, 0.34909, 0.29957, 1, }, entry_04 = { 1, 1, 1, 1, 1, }, }, },
 property_06 = { name = "RadiusEpsilon", type = "VARTYPE_FLOAT", value = 0, },
 property_07 = { name = "RateEpsilon", type = "VARTYPE_FLOAT", value = 0, },
 property_08 = { name = "SpinEpsilonX", type = "VARTYPE_FLOAT", value = 0, },
 property_09 = { name = "SpinEpsilonY", type = "VARTYPE_FLOAT", value = 0, },
 property_10 = { name = "SpinEpsilonZ", type = "VARTYPE_FLOAT", value = 0, },
 property_11 = { name = "SpinRandom", type = "VARTYPE_BOOL", value = 0, },
-property_12 = { name = "Duration", type = "VARTYPE_FLOAT", value = 1, },
+property_12 = { name = "Duration", type = "VARTYPE_FLOAT", value = 5, },
 property_13 = { name = "UseMesh", type = "VARTYPE_BOOL", value = 1, },
 property_14 = { name = "UseDepthTest", type = "VARTYPE_BOOL", value = 1, },
-property_15 = { name = "UseDepthSort", type = "VARTYPE_BOOL", value = 0, },
+property_15 = { name = "UseDepthSort", type = "VARTYPE_BOOL", value = 1, },
 property_16 = { name = "Loop", type = "VARTYPE_BOOL", value = 1, },
 property_17 = { name = "Billboard", type = "VARTYPE_BOOL", value = 0, },
 property_18 = { name = "AlternateFOV", type = "VARTYPE_BOOL", value = 0, },
-property_19 = { name = "SelfIlluminated", type = "VARTYPE_BOOL", value = 1, },
-property_20 = { name = "Blending", type = "VARTYPE_INT", value = 2, },
+property_19 = { name = "SelfIlluminated", type = "VARTYPE_BOOL", value = 0, },
+property_20 = { name = "Blending", type = "VARTYPE_INT", value = 4, },
 property_21 = { name = "Texture", type = "VARTYPE_STRING", value = "DATA:ART/FX/TEXTURES/CAT_PROCBEAM.TGA", },
 property_22 = { name = "Mesh", type = "VARTYPE_STRING", value = "DATA:ART/FX/CAT_PROCBEAM/CAT_PROCBEAM.HOD", },
-property_23 = { name = "SortOrder", type = "VARTYPE_INT", value = 0, },
+property_23 = { name = "SortOrder", type = "VARTYPE_INT", value = 2, },
 property_24 = { name = "RandomBitmap", type = "VARTYPE_BOOL", value = 0, },
 property_25 = { name = "BirthSpawn_Fx", type = "VARTYPE_STRING", value = "", },
 property_26 = { name = "Spawn_Fx", type = "VARTYPE_STRING", value = "", },
