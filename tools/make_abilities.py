@@ -65,9 +65,10 @@ def main():
             click = '"MainUI_ScarEvent( \\"CatAbility(\'%s\')\\" )"' % name
         ui.append(f'CAT_BTN_{name.upper()} = GetCommandButton("btnCat_{name}", "{label}", nil, "{ICONS}{icon}", {click})')
         if cid is None:
-            # a script button has no energy: GetCommandButton's CooldownFrame child would show its placeholder number
-            # (cooldownProgress 24) on the button (user); native ones keep it (their energy bar)
-            ui.append(f"CAT_BTN_{name.upper()}[1].drawText = 0")
+            # a script button has no energy: GetCommandButton's CooldownFrame child would draw its placeholder
+            # (cooldownProgress 24 of 100: a number and a fifth of the button shaded, user); removed. Native ones
+            # keep it (their energy bar)
+            ui.append(f"CAT_BTN_{name.upper()}[1] = nil")
     folder = os.path.join(MOD, "data", "ui", "newui", "taskbar")
     os.makedirs(folder, exist_ok=True)
     with open(os.path.join(folder, "cat_abilities.lua"), "w", newline="\n") as f:
