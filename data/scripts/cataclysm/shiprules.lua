@@ -283,6 +283,7 @@ function CatShip_Update(g, p, id)
     CatUpgradeWeapons_Tick(rec, id, now)
     CatNative_Tick(rec)
     CatGated_Tick(rec)
+    if rec.t == "smt_worker" or rec.t == "smt_processor" then CatRepair_Tick(rec, g, id, now) end
     if rec.t == "smt_processor" then CatProcessor_Tick(rec, g, id, now) end
     CatUpgrade_Instant(rec, id)
     if rec.upg then CatUpgrade_Tick(rec, id, now) end
@@ -1117,6 +1118,75 @@ function CatGated_Tick(rec)
     end
 end
 
+-- The ordered repair (the Worker's and Processor's RepairCommand: install_cr.py repair_order). HWRM heals only by
+-- latching onto the target's repair point (RepairByLatchingCommand), which flew the repairer onto the target and
+-- dragged it along (user: "jank"). Its non-latching form (4th argument 1) picks the target, approaches and faces it
+-- and holds off at range (data/scripts/attack/*_catrepair.lua) but never heals (log: doing 1, repairing group
+-- empty). So this script heals: the Worker's beam from its jackhammer tip (sworker.shp repairDistance 1500 x 0.525,
+-- cone 120), the Processor's from its side beams (CatProcessor_Tick, ordered targets first); the order ends once
+-- every target is healed.
+CAT_WORKER_RANGE = 790
+CAT_WORKER_CONE = 0.5       -- cos(120 / 2)
+CAT_WORKER_TIP = { 0, 28.5, 0 }
+CAT_REPAIR_TRACE = 1        -- TEST: log the ordered repair each second
+
+function CatRepair_Tick(rec, g, id, now)
+    local dt = now - (rec.repLast or now)
+    rec.repLast = now
+    rec.ordered = nil
+    if not rec.up.REPAIR or SobGroup_IsDoingAbility(g, AB_Repair) ~= 1 then return end
+    local out = "cat_repairtargets"
+    SobGroup_CreateIfNotExist(out)
+    SobGroup_Clear(out)
+    SobGroup_GetCommandTargets(out, g, COMMAND_Repair)
+    if SobGroup_Empty(out) == 1 then return end
+    rec.ordered = {}
+    local damaged, healing = 0, nil
+    for k, trec in CatShips do
+        if k ~= id and not trec.gone and trec.p == rec.p and SobGroup_Empty(trec.g) == 0
+                and SobGroup_GroupInGroup(trec.g, out) == 1 then
+            rec.ordered[k] = 1
+            if SobGroup_HealthPercentage(trec.g) < 0.999 then
+                damaged = damaged + 1
+                if rec.t == "smt_worker" and not healing then healing = CatRepair_WorkerBeam(rec, g, k) end
+            end
+        end
+    end
+    if damaged == 0 then                            -- all healed: the order is done
+        SobGroup_Stop(rec.p, g)
+        rec.ordered = nil
+        return
+    end
+    if healing and dt > 0 then
+        local tg = CatShips[healing].g
+        local rate = CAT_PROC_RATE
+        if CatShips[healing].t == "smt_ms_sp" then rate = 35 end
+        local h = SobGroup_HealthPercentage(tg) + rate * dt / SobGroup_MaxHealthTotal(tg)
+        if h > 1 then h = 1 end
+        SobGroup_SetHealth(tg, h)
+    end
+    if CAT_REPAIR_TRACE == 1 and now >= (rec.repTrace or 0) then
+        rec.repTrace = now + 1
+        print("CATACLYSM repair " .. id .. " (" .. rec.t .. "): " .. damaged .. " damaged targets, healing " .. (healing or "none"))
+    end
+end
+
+function CatRepair_WorkerBeam(rec, g, t)
+    local m = SobGroup_GetCoordSys(g)
+    if getn(m) ~= 9 then return nil end
+    local pos = SobGroup_GetPosition(g)
+    local r, u, f = CatCol(m, 0), CatCol(m, 1), CatCol(m, 2)
+    local b = CAT_WORKER_TIP
+    local o = { pos[1] + r[1] * b[1] + u[1] * b[2] + f[1] * b[3], pos[2] + r[2] * b[1] + u[2] * b[2] + f[2] * b[3],
+                pos[3] + r[3] * b[1] + u[3] * b[2] + f[3] * b[3] }
+    local tp = SobGroup_GetPosition(CatShips[t].g)
+    local v = { tp[1] - o[1], tp[2] - o[2], tp[3] - o[3] }
+    local dist = sqrt(v[1] * v[1] + v[2] * v[2] + v[3] * v[3])
+    if dist > CAT_WORKER_RANGE then return nil end
+    if dist >= 1 and (v[1] * f[1] + v[2] * f[2] + v[3] * f[3]) / dist < CAT_WORKER_CONE then return nil end
+    return t
+end
+
 -- The Processor's automatic repair beams (Cataclysm FUN_005bedd0 / 005beae0, tweak.script twProcessorAutoRepair*):
 -- once it has the Repair upgrade, each of its four beams (dock points Repair0-3: two each side, straight out) holds
 -- one damaged friendly ship within the beam's range and cone and heals it at twRepairRate per second; a beam drops
@@ -1168,6 +1238,7 @@ function CatProcessor_Tick(rec, g, id, now)
             for k, _ in CatShips do
                 if not taken[k] then
                     local dist = CatProcessor_InBeam(k, o, d, rec.p, id)
+                    if dist and rec.ordered and rec.ordered[k] then dist = dist - 100000 end
                     if dist and (not best or dist < best) then t, best = k, dist end
                 end
             end

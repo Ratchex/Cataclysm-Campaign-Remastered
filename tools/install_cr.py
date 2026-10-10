@@ -116,24 +116,23 @@ def patch_race(text):
 # approached in its attack style (stock repair corvette: corvettes and up). Theirs listed only the dock families
 # SuperCap / Flagship (user: the order targeted nothing but the Kuun-Lan); Cataclysm's beams repair anything. Rate:
 # tweak.script twRepairRate 30.
-# Beam mode (4th argument 1, as stock HWRM's HW1 repair corvette / support frigate): the repairer heals with its
-# heal weapons (data/weapon/cat_*repair: Cataclysm's beam range and rate) from range. Docking mode (0, the HW2
-# collectors') flew it onto the target's repair point and dragged it along (user: "jank", stuck to fighters flying
-# off, the Processor's point inside its hull). The attack styles (data/scripts/attack/*_catrepair.lua) hold it off
-# near the beam range; the Processor turns its side, where its beams are.
+# Latching (4th argument 0, the HW2 collectors') flew the repairer onto the target's repair point and dragged it
+# along (user: "jank", stuck to fighters flying off, the Processor's point inside its hull). HWRM heals only by
+# latching (RepairByLatchingCommand; heal weapons never fire on it), so with 4th argument 1 the order only picks the
+# target, approaches and faces it and holds off near Cataclysm's beam range (data/scripts/attack/*_catrepair.lua;
+# the Processor turns its side, where its beams are), and shiprules.lua CatRepair_Tick heals.
 REPAIR_FAMILIES = ("Fighter", "Fighter_hw1", "Corvette", "Corvette_hw1", "Utility", "Resource", "ResourceLarge",
                    "NonCombat", "Frigate", "SmallCapitalShip", "BigCapitalShip", "Mothership")
-REPAIR_BEAMS = {   # ship: (RepairCommand range, attack style, heal weapon, its hardpoints: tools/build_ship.sh)
-    "worker": (790, "Frontal_CatRepair", "cat_workerrepair", ["Weapon_Repair"]),
-    "processor": (1400, "Broadside_CatRepair", "cat_processorrepair",
-                  ["Weapon_Repair0", "Weapon_Repair1", "Weapon_Repair2", "Weapon_Repair3"]),
+REPAIR_BEAMS = {   # ship: (RepairCommand range, attack style)
+    "worker": (790, "Frontal_CatRepair"),
+    "processor": (1400, "Broadside_CatRepair"),
 }
 
 
 def repair_order(text, kind):
-    """Their RepairCommand (or a new one after RetireAbility) replaced by our beam-mode one, plus its heal weapons."""
-    rng, style, wep, points = REPAIR_BEAMS[kind]
-    order = (f'addAbility(NewShipType,"RepairCommand",1,{rng},1,1,"{style}",{{EndRepairRates=0}},'
+    """Their RepairCommand (or a new one after RetireAbility) replaced by our non-latching one."""
+    rng, style = REPAIR_BEAMS[kind]
+    order = (f'addAbility(NewShipType,"RepairCommand",1,{rng},30,1,"{style}",{{EndRepairRates=0}},'
              + ",".join('{%s="%s"}' % (f, style) for f in REPAIR_FAMILIES) + ");   -- Cataclysm-HWRM")
     new, n = re.subn(r'^\s*addAbility\(NewShipType,\s*"RepairCommand".*?\);[^\n]*$', order, text,
                      count=1, flags=re.M | re.S)
@@ -141,11 +140,6 @@ def repair_order(text, kind):
         assert 'addAbility(NewShipType, "RetireAbility", 1, 1);' in text
         new = text.replace('addAbility(NewShipType, "RetireAbility", 1, 1);',
                            'addAbility(NewShipType, "RetireAbility", 1, 1);\n' + order, 1)
-    configs = "".join(f'\nStartShipWeaponConfig(NewShipType,"{wep}","{p}","{p}");   -- Cataclysm-HWRM'
-                      for p in points)
-    new, n = re.subn(r"^(\s*LoadModel\(NewShipType,\s*1\);[^\n]*)", lambda m: m.group(1) + configs, new,
-                     count=1, flags=re.M)
-    assert n == 1
     return new
 
 
