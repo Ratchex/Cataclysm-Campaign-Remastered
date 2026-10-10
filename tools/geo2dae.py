@@ -522,6 +522,8 @@ def main():
     ap.add_argument("--glow-from", help="old-format HOD whose GLOW textures (Cataclysm texture names) become our "
                                         "_GLOW maps (Cataclysm Remastered's smt_ms_sp.hod for the Kuun-Lan)")
     ap.add_argument("--no-navlights", action="store_true", help="no NAVL joints from the .mex Nav chunks")
+    ap.add_argument("--anim-geo", help="the .geo (the main one or a --merge one) whose objects --anim-joints names "
+                                       "(the Kuun-Lan core's spinning grav_generator is in the merged command module)")
     ap.add_argument("--no-engines", action="store_true", help="no engine nozzles from the .mex Eng chunks")
     ap.add_argument("--engines-from", help="engine look from this old-format HOD (Cataclysm Remastered's smt_ms_sp.hod): "
                                            "its ETSH shape on our .mex nozzles")
@@ -541,13 +543,16 @@ def main():
     groups = {}   # key -> {"mat", "png_dir", "tris": [(positions[3], normals[3], uvs[3])]}
     flipped = total = 0
     extent = 0.0   # largest |coordinate| of the hull (HW1 units), sizes the engine glow quads
-    frames = {}   # animated object index (main .geo) -> (joint parent, local matrix)
-    for gn, geo in enumerate([a.geo] + a.merge):
+    frames = {}   # animated object index (in the --anim-geo .geo) -> (joint parent, local matrix)
+    geos = [a.geo] + a.merge
+    norm = lambda g: os.path.normcase(os.path.abspath(g))
+    anim_gn = [norm(g) for g in geos].index(norm(a.anim_geo)) if a.anim_geo else 0
+    for gn, geo in enumerate(geos):
         b, ver, mats, objs = geo2obj.parse(geo)
         png_dir = os.path.join(DECOMP, "extracted", "textures",
                                os.path.relpath(os.path.dirname(geo), os.path.join(DECOMP, "extracted", "big")))
         cache = {}
-        if gn == 0 and anim_names:
+        if gn == anim_gn and anim_names:
             frames = joint_frames(objs, anim_names)
             missing = anim_names - {objs[i]["name"] for i in frames}
             if missing:
@@ -556,7 +561,7 @@ def main():
         for i, o in enumerate(objs):
             W = geo2obj.world(objs, i, cache)
             owner = None
-            if gn == 0 and frames:
+            if gn == anim_gn and frames:
                 owner = i
                 while owner is not None and owner not in frames:
                     owner = objs[owner]["parent"]

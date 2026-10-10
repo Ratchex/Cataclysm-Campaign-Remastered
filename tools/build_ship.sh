@@ -14,7 +14,7 @@ OUT="$MOD/build/ships/$NAME"
 HODOR="C:/Program Files (x86)/Steam/steamapps/common/Homeworld 347380/GBXTools/HODOR"
 # Animated ships: their Cataclysm .mad objects become joints (geo2dae --anim-joints) driven by a converted .mad
 # (tools/mad2hwrm.py -> build/ships/<name>/<name>.mad, installed by install_cr.py), plus effect marker joints.
-ANIM=""; TRIM=""; CLIPS=""
+ANIM=""; TRIM=""; CLIPS=""; ANIM_SRC=""
 case "$NAME" in
   som_worker)
     ANIM="Jackbase,Jackhamr,Blade(1),Blade(2),Blade(3),DockClmp(1),DockClmp(2),DockClmp(3),DockClmp(4)"
@@ -30,6 +30,14 @@ case "$NAME" in
     # smt_worker.events. Cataclysm held 400 HW1 units (140) off, far beyond the stock cone.
     GEO2DAE_ARGS="$GEO2DAE_ARGS --latch 0,28.5,44.8"
     CLIPS="JackOut,JackSpin,JackClose,DockOpen,DockClose,BladesSpin"
+    ;;
+  som_mothership)
+    # the command module's gravity generator spins (smothershipcommand.mad GravRotate: a full turn every 12 s, looped
+    # by our smt_ms_sp.madstate); the module is merged into the core, so the animation comes from its .geo / .mad
+    ANIM_SRC=race_sect/smothershipcommand
+    ANIM="grav_generator"
+    CLIPS="GravRotate"
+    GEO2DAE_ARGS="$GEO2DAE_ARGS --anim-joints $ANIM --anim-geo $(geo $ANIM_SRC)"
     ;;
   som_acolyte)
     # the whole body is a joint too: Link / Unlink slide it along its up axis (sacolyte.mad; NOTES.md "Link")
@@ -53,6 +61,7 @@ grep -v -e '^X*$' -e 'Building LMIP' "$OUT/hodor.log" | sed 's/^/  /'
 [ -s "$OUT/$NAME.hod" ] || { echo "HODOR did not write $OUT/$NAME.hod"; exit 1; }
 echo "build/ships/$NAME/$NAME.hod: $(stat -c %s "$OUT/$NAME.hod") bytes"
 if [ -n "$ANIM" ]; then
-  python "$MOD/tools/mad2hwrm.py" "C:/Modding/Cataclysm-decomp/extracted/big/$SRC.mad" "$GEO" "$OUT/$NAME.mad" \
+  ASRC="${ANIM_SRC:-$SRC}"
+  python "$MOD/tools/mad2hwrm.py" "C:/Modding/Cataclysm-decomp/extracted/big/$ASRC.mad" "$(geo "$ASRC")" "$OUT/$NAME.mad" \
       --joints "$ANIM" --clips "$CLIPS" $TRIM
 fi
