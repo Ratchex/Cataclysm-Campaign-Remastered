@@ -42,7 +42,9 @@ ABILITIES = {
     # the Mimic (strMenuSpecialSelectMimicTypeDesc "Select Mimic Type"): "mimic" opens a menu of disguises (one
     # button each, MENU below), "unmimic" drops the disguise (ship_variants.py DISGUISES, shiprules.lua CatMimic_*)
     "mimic": (None, "Mimic", ["smt_mimic"], "", "MIMIC", "CatNoop", "cmd_ico_cloak.dds"),
-    "unmimic": (None, "Unmimic", sorted(ship_variants.DISGUISES), "", "", "CatUnmimic_Start", "cmd_ico_cancel.dds"),
+    # TEST: and on the Mimic itself (a disguise shown on its own model, shiprules.lua CAT_MIMIC_JOINTS)
+    "unmimic": (None, "Unmimic", sorted(ship_variants.DISGUISES) + ["smt_mimic"], "", "", "CatUnmimic_Start",
+                "cmd_ico_cancel.dds"),
 }
 # disguise buttons, shown while the Mimic menu is open (a placeholder icon each: stock command icons)
 DISGUISE_ICONS = ["cmd_ico_attack.dds", "cmd_ico_burstattack.dds", "cmd_ico_defense.dds", "cmd_ico_moveatk.dds",

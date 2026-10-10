@@ -529,6 +529,10 @@ def main():
     ap.add_argument("--engines-from", help="engine look from this old-format HOD (Cataclysm Remastered's smt_ms_sp.hod): "
                                            "its ETSH shape on our .mex nozzles")
     ap.add_argument("--engines-scale", type=float, default=1.0, help="size scale for --engines-from shapes")
+    ap.add_argument("--body", help="this ship's own meshes under a joint of this name (shown / hidden by the "
+                                   ".madstate: the Mimic's body)")
+    ap.add_argument("--part", action="append", default=[],
+                    help="NAME@x.geo: another model's meshes under joint NAME at the origin (the Mimic's disguises)")
     ap.add_argument("--fx-mesh", action="store_true",
                     help="an effect mesh (STYLE_RING UseMesh): every triangle in one mesh with one plain white "
                          "material, no joints (the Mimic's shell, tools/make_mimicfx.py)")
@@ -551,7 +555,9 @@ def main():
     flipped = total = 0
     extent = 0.0   # largest |coordinate| of the hull (HW1 units), sizes the engine glow quads
     frames = {}   # animated object index (in the --anim-geo .geo) -> (joint parent, local matrix)
-    geos = [a.geo] + a.merge
+    parts = [p.split("@", 1) for p in a.part]   # [(joint name, .geo)]
+    npre = 1 + len(a.merge)
+    geos = [a.geo] + a.merge + [g for _, g in parts]
     norm = lambda g: os.path.normcase(os.path.abspath(g))
     anim_gn = [norm(g) for g in geos].index(norm(a.anim_geo)) if a.anim_geo else 0
     for gn, geo in enumerate(geos):
@@ -602,7 +608,8 @@ def main():
                     pos, nrm, uv = pos[::-1], nrm[::-1], uv[::-1]
                 mat = mats[m] if m < len(mats) else {"texture": None, "diffuse": 0x808080}
                 key = (mat["texture"] or "").lower() or "col%06x" % (mat["diffuse"] & 0xFFFFFF)
-                groups.setdefault((owner if owner is not None else -1, key),
+                # owner: an --anim-joints object, -1 the root (or --body), -2 - k --part k
+                groups.setdefault((-2 - (gn - npre) if gn >= npre else owner if owner is not None else -1, key),
                                   {"mat": mat, "png_dir": png_dir, "tris": []})["tris"].append(
                     ([conv(*q) for q in pos], [convn(*q) for q in nrm], uv))
 
@@ -651,6 +658,7 @@ def main():
             f.write(",".join(f"{c:.4f}" for c in o) + "\n")
     images, materials, effects, geoms, nodes = [], [], [], [], []
     joint_kids = {i: [] for i in frames}   # animated object -> its mesh / marker / child joint nodes
+    part_kids = [[] for _ in parts]        # --part k -> its mesh nodes
     done_mats = set()
     for gi, ((owner, key), g) in enumerate(sorted(groups.items())):
         d = g["mat"]["diffuse"]
@@ -690,7 +698,7 @@ def main():
             f'<input semantic="VERTEX" offset="0" source="#{gid}-v"/><input semantic="NORMAL" offset="0" source="#{gid}-nrm"/>'
             f'<input semantic="TEXCOORD" offset="0" set="0" source="#{gid}-uv0"/>'
             f'<p>{" ".join(map(str, range(n)))}</p></triangles></mesh></geometry>')
-        (nodes if owner < 0 else joint_kids[owner]).append(
+        (nodes if owner == -1 else part_kids[-2 - owner] if owner < -1 else joint_kids[owner]).append(
                      f'<node name="{gid}" id="{gid}" sid="{gid}E"><translate sid="translate">0 0 0</translate>'
                      f'<instance_geometry url="#{gid}"><bind_material><technique_common>'
                      f'<instance_material symbol="{mname}" target="#{mname}"><bind_vertex_input semantic="CHANNEL0" '
@@ -822,6 +830,13 @@ def main():
         return out
     if frames:
         weapons += joint_tree(None)
+    # whole models as joints the .madstate can show / hide (setJointVisible): --body (this ship's own meshes) and
+    # each --part (another model, at the origin): the Mimic's disguises
+    if a.body:
+        weapons += jnode(f"JNT[{a.body}]", (0, 0, 0), "".join(nodes))
+        nodes = []
+    for k, (name, _) in enumerate(parts):
+        weapons += jnode(f"JNT[{name}]", (0, 0, 0), "".join(part_kids[k]))
     if a.latch:
         # harvesting: HWRM puts LatchOrientation on the asteroid's surface, so it sets how far off a collector holds
         # (none = the ship's origin: it sits on the rock). Layout of stock tai_resourcecollector's: Up along the

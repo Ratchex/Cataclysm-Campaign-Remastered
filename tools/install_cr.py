@@ -183,6 +183,8 @@ OUR_MODELS = {
     # their four guns are Cataclysm's four, in order
     "smt_acv": ("som_acv", {"Weapon_Gun": "Weapon_GUN0", "Weapon_Gun1": "Weapon_GUN1", "Weapon_Gun2": "Weapon_GUN2",
                             "Weapon_Gun3": "Weapon_GUN3"}),
+    # its body and its disguises as joints, one shown at a time (tools/overrides/ship/smt_mimic/smt_mimic.madstate)
+    "smt_mimic": ("som_mimic", {}),
 }
 
 

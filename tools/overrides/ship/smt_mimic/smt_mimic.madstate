@@ -1,0 +1,12 @@
+-- Cataclysm-HWRM: the Mimic's model holds its body and its disguises (tools/build_ship.sh som_mimic: geo2dae.py
+-- --body MimicBody, --part Disguise_<target>); shiprules.lua shows one at a time (SobGroup_SetMadState).
+-- TEST: one disguise (kus_attackbomber).
+SMT_MIMIC_Mimic_OnSet = function(ship)
+    setJointVisible(ship, "MimicBody", 1)
+    setJointVisible(ship, "Disguise_kus_attackbomber", 0)
+end
+
+SMT_MIMIC_Disguise_kus_attackbomber_OnSet = function(ship)
+    setJointVisible(ship, "MimicBody", 0)
+    setJointVisible(ship, "Disguise_kus_attackbomber", 1)
+end

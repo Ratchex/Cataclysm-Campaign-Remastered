@@ -165,6 +165,7 @@ end
 CAT_PENDING_LIFE = 5
 function CatShip_Adopt(rec, g, now)
     rec.adopted = 1
+    if rec.real == "smt_mimic" then SobGroup_SetMadState(g, "Mimic") end   -- its disguises hidden (CatMimic_As)
     local i = 1
     while i <= getn(CatPending) do
         local pend = CatPending[i]
@@ -267,6 +268,15 @@ function CatShip_Update(g, p, id)
         SobGroup_SetGhost(g, 0)
     end
     -- a Mimic becoming its disguise once the shell has formed (CatMimic_As)
+    if rec.mimicSwap and now >= rec.mimicSwap.t and rec.mimicSwap.joint then
+        local s = rec.mimicSwap
+        rec.mimicSwap = nil
+        SobGroup_SetMadState(g, "Disguise_" .. s.joint)
+        FX_StartEvent(g, s.tail)
+        SobGroup_MakeUntargeted(g)
+        rec.disguise = s.joint
+        print("CATACLYSM mimic: ship " .. id .. " shows its " .. s.joint .. " disguise")
+    end
     if rec.mimicSwap and now >= rec.mimicSwap.t then
         local s = rec.mimicSwap
         rec.mimicSwap = nil
@@ -1012,6 +1022,9 @@ CAT_MIMIC_SWAP = 1.0     -- make_mimicfx.py SWAP; two ship updates (CAT_TICK)
 -- no collisions while the old and new ship overlap (user: they pushed each other apart before the old one went):
 -- the Mimic from the press, the new ship until the shell has played out (1.25 s, then the next update)
 CAT_MIMIC_GHOST = 1.5
+-- TEST: disguises shown on the Mimic itself (its model's Disguise_<target> joint, smt_mimic.madstate) instead of a
+-- ship swap: the same ship, keeping its speed and orders
+CAT_MIMIC_JOINTS = { kus_attackbomber = 1 }
 CAT_MIMIC_FXTEST = 0     -- DEVELOPMENT: also the stock Keeper mesh effect (does a mesh effect show at all?)
 
 function CatNoop(g, p, id, name)
@@ -1095,8 +1108,15 @@ function CatMimic_As(g, p, id, name)
     for i = 1, getn(CatDisguises) do
         local d = CatDisguises[i]
         if d.button == name then
-            if rec.real == d.type then return end
+            if rec.real == d.type or rec.disguise == d.target then return end
             CatSay(165, g, p)
+            if CAT_MIMIC_JOINTS[d.target] and rec.real == "smt_mimic" then
+                if rec.disguise then FX_StartEvent(g, "MimicOut_" .. rec.disguise) end
+                FX_StartEvent(g, "MimicIn_" .. d.target)
+                rec.mimicSwap = { t = Universe_GameTime() + CAT_MIMIC_SWAP - 0.01, joint = d.target,
+                                  tail = "MimicTail_" .. d.target }
+                return
+            end
             SobGroup_SetGhost(g, 1)
             local was = CatDisguise_Of(rec.real)
             if was then FX_StartEvent(g, "MimicOut_" .. was.target) end
@@ -1112,6 +1132,15 @@ end
 function CatUnmimic_Start(g, p, id, name)
     local rec = CatShips[id]
     if not rec or rec.mimicSwap then return end
+    if rec.disguise then                      -- TEST: a disguise on the Mimic itself (CAT_MIMIC_JOINTS)
+        CatSay(166, g, p)
+        SobGroup_SetMadState(g, "Mimic")
+        FX_StartEvent(g, "MimicOut_" .. rec.disguise)
+        SobGroup_MakeUntargeted(g, 0)         -- TEST: does a 0 make it targetable again?
+        print("CATACLYSM mimic: ship " .. id .. " drops its " .. rec.disguise .. " disguise")
+        rec.disguise = nil
+        return
+    end
     local was = CatDisguise_Of(rec.real)
     local new = CatMimic_Swap(g, p, id, "smt_mimic", 166)
     if new and was then FX_StartEvent(new, "MimicOut_" .. was.target) end
