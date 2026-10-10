@@ -34,7 +34,11 @@ from collections import Counter, OrderedDict
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import make_colours  # noqa: E402
 
-SCALE, RADIUS_SCALE, OUTER = 0.35, 0.175, 1.2
+# Gearbox's HW1 factor (0.35, ship models too) spread out: the maps felt cramped and slow with ships, speeds, sensors
+# and the camera at Cataclysm's proportions (user, Missions 1-2: bigger map, ships / camera / UI unchanged)
+MAP_SPREAD = 1.4
+SCALE = 0.35 * MAP_SPREAD
+RADIUS_SCALE, OUTER = SCALE / 2, 1.2
 
 
 # Camera on the player's hyperspace arrival (cataclysmkas.lua K_498230, Camera_UseCameraPoint), offsets from
