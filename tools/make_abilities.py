@@ -46,13 +46,11 @@ ABILITIES = {
     "unmimic": (None, "Unmimic", sorted(ship_variants.DISGUISES) + ["smt_mimic"], "", "", "CatUnmimic_Start",
                 "cmd_ico_cancel.dds"),
 }
-# disguise buttons, shown while the Mimic menu is open (a placeholder icon each: stock command icons)
-DISGUISE_ICONS = ["cmd_ico_attack.dds", "cmd_ico_burstattack.dds", "cmd_ico_defense.dds", "cmd_ico_moveatk.dds",
-                  "cmd_ico_speedburst.dds", "cmd_ico_custom.dds", "cmd_ico_dronefrigate.dds", "cmd_ico_misc.dds"]
+# disguise buttons, shown while the Mimic menu is open: all the Mimic button's icon (user), told apart by their labels
+DISGUISE_ICON = "cmd_ico_cloak.dds"
 MENU = {}       # ability -> the menu it is in ("mimic": shown only while the Mimic menu is open)
-for k, (variant, (_, target, label, _)) in enumerate(sorted(ship_variants.DISGUISES.items())):
-    ABILITIES[f"mimic_{target}"] = (None, f"Mimic: {label}", ["smt_mimic"], "", "MIMIC", "CatMimic_As",
-                                    DISGUISE_ICONS[k % len(DISGUISE_ICONS)])
+for variant, (_, target, label, _) in sorted(ship_variants.DISGUISES.items()):
+    ABILITIES[f"mimic_{target}"] = (None, f"Mimic: {label}", ["smt_mimic"], "", "MIMIC", "CatMimic_As", DISGUISE_ICON)
     MENU[f"mimic_{target}"] = "mimic"
 OPENS = {"mimic": "mimic"}   # ability -> the menu its button opens / closes (no ship action)
 
