@@ -16,10 +16,12 @@ models have many), scaled from R / (target radius) to 1. shiprules.lua plays the
                            fading out over 1.25 s
 Radii: Cataclysm's own models (lod0 .geo, the farthest vertex from the ship's centre).
 
-Writes data/art/fx/cat_mimic_*.lua, data/art/fx/textures/cat_white.tga. Usage: make_mimicfx.py
+Writes data/art/fx/cat_mimic_*.lua, data/art/fx/cat_mimic/<target>.hod, data/art/fx/textures/cat_white.tga.
+Usage: tools/build_mimicfx.sh (the meshes, then this)
 """
 import math
 import os
+import shutil
 import struct
 import sys
 
@@ -123,7 +125,13 @@ def main():
         rt = radius(CATACLYSM_MODEL[target])
         s0 = SHELL * max(rt, rm) / rt          # the sphere, as a scale of the target's model
         at_swap = s0 + (1 - s0) * k
-        mesh = f"DATA:SHIP/{variant.upper()}/{variant.upper()}.HOD"
+        # the target's Cataclysm model as one plain mesh (tools/build_mimicfx.sh): HWRM drew nothing of a ship model
+        # (many meshes and materials on joints) as an effect mesh; the Keeper's one-mesh effect model showed
+        mdir = os.path.join(MOD, "data", "art", "fx", "cat_mimic")
+        os.makedirs(mdir, exist_ok=True)
+        shutil.copyfile(os.path.join(MOD, "build", "ships", "fx_" + target, "fx_" + target + ".hod"),
+                        os.path.join(mdir, target + ".hod"))
+        mesh = f"DATA:ART/FX/CAT_MIMIC/{target.upper()}.HOD"
         # phase 1 -> 0 linear: scale s0 -> 1, opacity 0 -> ALPHA
         write(f"cat_mimic_in_{target}", mesh, PHASE_TIME, [(0, s0), (1, 1)], [(0, 0), (1, ALPHA)])
         # from the swap: the rest of the shrink, fading off the real model as Cataclysm's shell gives way to it
@@ -134,4 +142,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    if "--list-builds" in sys.argv:      # for tools/build_mimicfx.sh
+        print(" ".join(f"{t}={CATACLYSM_MODEL[t]}" for _, t, _, _ in ship_variants.DISGUISES.values()))
+    else:
+        main()

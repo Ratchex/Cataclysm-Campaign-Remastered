@@ -1000,6 +1000,7 @@ end
 -- on the Mimic, the swap CAT_MIMIC_SWAP later (Cataclysm stops drawing the Mimic at 0.94 s), cat_mimic_tail_<target>
 -- on the disguise; Unmimic swaps at once, cat_mimic_out_<target> on the Mimic.
 CAT_MIMIC_SWAP = 1.0     -- make_mimicfx.py SWAP; two ship updates (CAT_TICK)
+CAT_MIMIC_FXTEST = 0     -- DEVELOPMENT: also the stock Keeper mesh effect (does a mesh effect show at all?)
 
 function CatNoop(g, p, id, name)
 end
@@ -1050,6 +1051,7 @@ function CatMimic_As(g, p, id, name)
             local was = CatDisguise_Of(rec.real)
             if was then FX_PlayEffect("cat_mimic_out_" .. was.target, g, 1) end
             FX_PlayEffect("cat_mimic_in_" .. d.target, g, 1)
+            if CAT_MIMIC_FXTEST == 1 then FX_PlayEffect("cat_fxtest", g, 1) end
             rec.mimicSwap = { t = Universe_GameTime() + CAT_MIMIC_SWAP - 0.01, type = d.type,
                               tail = "cat_mimic_tail_" .. d.target }
             return

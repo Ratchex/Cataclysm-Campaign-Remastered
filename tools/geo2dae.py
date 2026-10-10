@@ -528,6 +528,9 @@ def main():
     ap.add_argument("--engines-from", help="engine look from this old-format HOD (Cataclysm Remastered's smt_ms_sp.hod): "
                                            "its ETSH shape on our .mex nozzles")
     ap.add_argument("--engines-scale", type=float, default=1.0, help="size scale for --engines-from shapes")
+    ap.add_argument("--fx-mesh", action="store_true",
+                    help="an effect mesh (STYLE_RING UseMesh): every triangle in one mesh with one plain white "
+                         "material, no joints (the Mimic's shell, tools/make_mimicfx.py)")
     ap.add_argument("--origin", help="recentre the model on x,y,z (HWRM units) or 'auto' (its bounding box centre), "
                                      "written to <out_dir>/origin.txt: a Kuun-Lan module on a hardpoint there "
                                      "(HWRM draws a subsystem's health bar at its hardpoint)")
@@ -602,6 +605,10 @@ def main():
                                   {"mat": mat, "png_dir": png_dir, "tris": []})["tris"].append(
                     ([conv(*q) for q in pos], [convn(*q) for q in nrm], uv))
 
+    if a.fx_mesh:   # one mesh, one plain white material (an effect mesh: HWRM drew nothing of a ship's many meshes)
+        groups = {(-1, "fxwhite"): {"mat": {"texture": None, "diffuse": 0xFFFFFF}, "png_dir": "",
+                                    "tris": [t for g in groups.values() for t in g["tris"]]}}
+        frames = {}
     if a.origin:   # recentred: the model's point o is its origin (o: HWRM units, written to origin.txt)
         if a.origin == "auto":
             vs = [v for g in groups.values() for t in g["tris"] for v in t[0]]
@@ -660,7 +667,7 @@ def main():
                      f'input_semantic="TEXCOORD" input_set="0"/></instance_material>'
                      f'</technique_common></bind_material></instance_geometry></node>')
 
-    points = read_mex(os.path.splitext(a.geo)[0] + ".mex")
+    points = [] if a.fx_mesh else read_mex(os.path.splitext(a.geo)[0] + ".mex")
     for g in a.merge:
         points += read_mex(os.path.splitext(g)[0] + ".mex")
     engine_geo = {}   # engine point -> the .geo its parent object is in
