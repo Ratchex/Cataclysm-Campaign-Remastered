@@ -1125,6 +1125,7 @@ end
 CAT_PROC_RANGE = 1400       -- twProcessorAutoRepairDistance 4000 (x 0.35: ship scale)
 CAT_PROC_CONE = 0.7071      -- cos(twProcessorAutoRepairConeAngle 90 / 2)
 CAT_PROC_RATE = 30          -- twRepairRate (35 for the capital classes: the Kuun-Lan here)
+CAT_PROC_TRACE = 1          -- TEST: log each heal step
 CAT_PROC_BEAMS = {          -- origin (HWRM units, our model) and side (x direction) of Repair0-3 (sprocessor.mex)
     { -97.7, 25.4, -78.1, -1 }, { -106.7, -28.0, 6.3, -1 }, { 106.7, -28.0, 6.3, 1 }, { 97.7, 25.4, -78.1, 1 } }
 
@@ -1180,9 +1181,14 @@ function CatProcessor_Tick(rec, g, id, now)
             local tg = CatShips[t].g
             local rate = CAT_PROC_RATE
             if CatShips[t].t == "smt_ms_sp" then rate = 35 end
-            local h = SobGroup_HealthPercentage(tg) + rate * dt / SobGroup_MaxHealthTotal(tg)
+            local h0, mx = SobGroup_HealthPercentage(tg), SobGroup_MaxHealthTotal(tg)
+            local h = h0 + rate * dt / mx
             if h > 1 then h = 1 end
             SobGroup_SetHealth(tg, h)
+            if CAT_PROC_TRACE == 1 then
+                print("CATACLYSM processor " .. id .. ": beam " .. i .. " ship " .. t .. " health " .. h0 .. " -> " .. h ..
+                      " (max " .. mx .. ", dt " .. dt .. ") now " .. SobGroup_HealthPercentage(tg))
+            end
         end
     end
 end

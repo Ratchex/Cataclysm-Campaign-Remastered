@@ -102,3 +102,4 @@ NewShipType.sobSpecialDieTime=2
 NewShipType.specialDeathSpeed=40
 NewShipType.chanceOfSpecialDeath=0
 NewShipType.deadSobFadeTime=1
+addAbility(NewShipType, "CanBeRepaired");   -- Cataclysm-HWRM

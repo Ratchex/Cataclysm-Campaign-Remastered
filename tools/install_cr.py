@@ -559,6 +559,15 @@ def main():
     copied += make_shipcode.install()
     # Cataclysm's health and weapon damage (user: all ships, Cataclysm's scale 1:1)
     copied += make_damage.apply(make_damage.plan())
+    # every Somtaaw ship repairable (Cataclysm's repair beams take anything; HWRM repairs only ships with
+    # CanBeRepaired: theirs left out the fighters, the ACV...: user, the Processor's ordered repair did nothing)
+    for d in sorted(os.listdir(os.path.join(DATA, "ship"))):
+        path = os.path.join(DATA, "ship", d, d + ".ship")
+        if d.startswith("smt_") and os.path.exists(path):
+            text = open(path, encoding="latin-1").read()
+            if '"CanBeRepaired"' not in text:
+                open(path, "w", encoding="latin-1", newline="").write(
+                    text.rstrip("\n") + '\naddAbility(NewShipType, "CanBeRepaired");   -- Cataclysm-HWRM\n')
     # the Mimic's kamikaze through HWRM's own: more health, more damage taken (tools/make_mimicarmour.py)
     import make_mimicarmour
     copied += [f"weapon/{w}" for w in make_mimicarmour.install()]
