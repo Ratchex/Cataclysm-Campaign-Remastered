@@ -552,7 +552,7 @@ None.
 | 2761 | 92.0s | tai_interceptor12 | `hide` | translated: hide() |
 | 2761 | 92.0s | tai_interceptor13 | `hide` | translated: hide() |
 | 2761 | 92.0s | tai_interceptor14 | `hide` | translated: hide() |
-| 2820 | 94.0s | kus_destroyer1 | `deathDamage` | translated: hide() + its double kus_destroyer1_wreck dies there (missiles still fly at it: HWRM missiles drop a dead target) |
+| 2820 | 94.0s | kus_destroyer1 | `deathDamage` | translated: death("deathCannon") |
 | 2880 | 96.0s | kus_ioncannonfrigate5 | `show` | translated: show() |
 | 2880 | 96.0s | kus_interceptor7 | `show` | translated: show() |
 | 2880 | 96.0s | kus_interceptor8 | `show` | translated: show() |

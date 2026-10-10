@@ -88,14 +88,14 @@ ATTACK_LEAD = {"ioncannonfrigate": 2.2}
 HALT_DELAY = {"ioncannonfrigate": 0.25}
 # explosion for a target that "dies" under such a beam (beam_kills): stock HW1 fighter death effect
 BEAM_KILL_FX, BEAM_KILL_SCALE, BEAM_KILL_SUFFIX = "death_generic_fighter", 0.75, "_explosion"
-# NIS object types (substring) whose missiles should still fly into a target that dies under them: HWRM missiles drop
-# a dead target (nislet01: the Taiidan missile destroyer's volley at the Kushan destroyer, user: "need to fly into
-# the kushan ship even after it dies"). The target is hidden (alive, still their target) and a double of it
-# (<target>_wreck, same type and path) shows and dies there instead.
-MISSILE_SHIPS = ("missiledestroyer",)
-WRECK_SUFFIX = "_wreck"
-WRECK_AWAY = -3000.0   # HWRM units the double is held off (along Y: below) until a frame before its death (100000, far
-#                         outside the world, went with an ion frigate that never fired in game)
+# per cutscene: an object's ship type replaced (tools/make_nisships.py: nislet01's missile destroyer firing missiles
+# that fly straight in, as Cataclysm's did; HWRM's swung out in a big loop: user)
+NIS_TYPES = {("nislet01", "tai_missiledestroyer1"): "tai_missiledestroyer_nis"}
+# per cutscene: an object taken out of the scene from a frame (its path dropped REMOVE_DROP below, then it dies there,
+# out of shot): nislet01's hidden interceptor, kept alive for the ion frigate's beam, once that has fired (else the
+# frigate fired on at it through the rest of the cutscene: user)
+REMOVE_AFTER = {("nislet01", "kus_interceptor4"): 1590}
+REMOVE_DROP = -3000.0
 # per cutscene: haltAttack() at this frame instead
 # (nislet01's ion frigate: its 4 s beam, ordered at 1404 and charging 2 s, ends by itself about 1584, just before
 # the 1591 camera cut; halted mid-beam its warbling sound looped on: user)
@@ -400,8 +400,7 @@ def speech_lookup():
 
 
 def beam_kills(src, objects, fps):
-    """{target key: (death frame, "beam" / "missile")} for NIS objects that die while a HALT_DELAY ship (a beam) or a
-    MISSILE_SHIPS ship is attacking them (missiles: see MISSILE_SHIPS). Beams: an
+    """{target key: death frame} for NIS objects that die while a HALT_DELAY ship (a beam) is attacking them: an
     HWRM beam stops when its target dies (nislet01's ion frigate cut off as the interceptor blew up, though HW1's
     kept firing into space), so such a death becomes hide() + an explosion effect object on the target's path (the
     hidden ship stays the target until haltAttack)."""
@@ -425,7 +424,7 @@ def beam_kills(src, objects, fps):
         if not m:                                          # "{"
             continue
         cmd = COMMANDS.get(m.group(1).lower(), m.group(1))
-        if cur and cmd == "attack" and any(k in cur.lower() for k in tuple(HALT_DELAY) + MISSILE_SHIPS):
+        if cur and cmd == "attack" and any(k in cur.lower() for k in HALT_DELAY):
             attacks.append([cur, objects.get(object_key(m.group(2).strip())), t, None])
         elif cur and cmd == "haltAttack":
             for a_ in attacks:
@@ -437,7 +436,7 @@ def beam_kills(src, objects, fps):
     for ship, target, t0, t1 in attacks:
         d = deaths.get(target)
         if target and d is not None and t0 <= d <= (t1 if t1 is not None else 10 ** 9):
-            out[target] = (d, "missile" if any(k in ship.lower() for k in MISSILE_SHIPS) else "beam")
+            out[target] = d
     return out
 
 
@@ -505,9 +504,6 @@ def translate_script(src, objects, nisname, speech, fps, end_frame, cam_events, 
             badge = make_colours.FACTIONS[n][1].split("/", 1)[1]
             rgb = lambda c: "{" + ", ".join(f"{v:.3f}" for v in c) + "}"
             emit(f'colourSchemeTrail({rgb(s["BaseColor"])}, {rgb(s["StripeColor"])}, "{badge}", {rgb(s["trail"])}, "")')
-            if (hidden_deaths or {}).get(cur_obj, (0, ""))[1] == "missile":
-                out_obj.setdefault(cur_obj + WRECK_SUFFIX, []).extend(
-                    [f"    at frame {cur_time}", "        " + cur_list[-1].strip(), "        hide()"])
         elif cmd in ("hide", "show") and cur_obj:
             emit(f"{cmd}()")
         elif cmd == "meshAnimStart" and cur_obj:
@@ -556,14 +552,6 @@ def translate_script(src, objects, nisname, speech, fps, end_frame, cam_events, 
                 note(f"translated: haltAttack() at frame {frame} ({delay}s late: the beam keeps firing off-screen)")
                 continue
             emit("haltAttack()")
-        elif cmd in DEATHS and cur_obj and (hidden_deaths or {}).get(cur_obj, (0, ""))[1] == "missile":
-            # missiles still on their way (beam_kills): hidden, still their target; its double dies in its place
-            emit("hide()")
-            out_obj.setdefault(cur_obj + WRECK_SUFFIX, []).extend(
-                [f"    at frame {cur_time}", "        show()", f'        death("{DEATHS[cmd]}")'])
-            note(f"translated: hide() + its double {cur_obj}{WRECK_SUFFIX} dies there (missiles still fly at it: "
-                 f"HWRM missiles drop a dead target)")
-            continue
         elif cmd in DEATHS and cur_obj and cur_obj in (hidden_deaths or {}):
             # a beam is still on it (beam_kills): hidden, with its explosion effect object, so the beam fires on
             emit("hide()")
@@ -645,6 +633,9 @@ def translate_script(src, objects, nisname, speech, fps, end_frame, cam_events, 
         cues.append((end_frame + 1, "noui", ""))
     else:
         out.append("    fadeTo(0, 1)")
+    for (nis_, key_), frame_ in REMOVE_AFTER.items():
+        if nis_ == nisname.lower() and key_ in out_obj:   # out of the scene (main(): its path dropped): dies there
+            out_obj[key_] += [f"    at frame {frame_ + 5}", '        death("deathCannon")']
     for key, body in out_obj.items():
         if key == "#drop" or not any(not b.strip().startswith("at frame") for b in body):
             continue
@@ -680,7 +671,7 @@ def main():
     nframes = int(math.ceil(nis["length"] * fps))
     times = [f / fps for f in range(nframes + 1)]
 
-    anim, folw, objects, dropped, teleports, object_channels, object_types = [], [], {}, [], {}, {}, {}
+    anim, folw, objects, dropped, teleports, object_channels = [], [], {}, [], {}, {}
     kept = []
     for o in nis["objects"]:
         k = hwrm_object(o["name"], o["race"], shipmap, a.placeholder)
@@ -697,20 +688,15 @@ def main():
         seen_[typ] = seen_.get(typ, 0) + 1
         by_key[typ if counts[typ] == 1 else f"{typ}{seen_[typ]}"] = o
 
-    def own_channels(new_key, src_key, away_until=None):
+    def own_channels(new_key, src_key):
         """A copy of another object's channels under the new object's names: HWRM frees each object's channels
         when the NIS ends, so two objects on the same channels freed them twice (heap corruption 0xc0000374,
-        found as a crash on every exit to the menu; ProcDump stack in MotionNode / MotionFollower).
-        away_until: seconds before which the copy is held WRECK_AWAY off (a hidden ship still has a hull: a double
-        on the same spot took its original's shots and the missiles at it; user: the destroyers stopped firing)."""
+        found as a crash on every exit to the menu; ProcDump stack in MotionNode / MotionFollower)."""
         tl, ch, _ = object_channels[src_key]
         out = []
         for c in ("translateX", "translateY", "translateZ", "rotateX", "rotateY", "rotateZ"):
             out.append(f"{new_key}_{c}")
-            vals = ch[c]
-            if away_until is not None and c == "translateY":
-                vals = [v + (WRECK_AWAY if t < away_until else 0) for t, v in zip(tl, vals)]
-            anim.append(channel(out[-1], list(zip(tl, vals)), fps))
+            anim.append(channel(out[-1], list(zip(tl, ch[c])), fps))
         return out
 
     for o, (kind, typ) in kept:
@@ -719,7 +705,6 @@ def main():
         seen[typ] = seen.get(typ, 0) + 1
         key = typ if counts[typ] == 1 else f"{typ}{seen[typ]}"
         objects[object_key(o["name"])] = key
-        object_types[key] = typ
         st, _ = sample_times(o, times)
         tlist = [t for t, _ in st]
         ts_ = o["times"]
@@ -728,6 +713,11 @@ def main():
                                                                pose(o, ts_[i_ + 1], False)[0]) > TELEPORT:
                 teleports.setdefault(key, []).append((round(ts_[i_] * fps), round(ts_[i_ + 1] * fps)))
         poses = [pose(o, te, False) for _, te in st]
+        gone = REMOVE_AFTER.get((a.name.lower(), key))
+        if gone is not None:
+            poses = [((p_[0][0], p_[0][1] + (REMOVE_DROP if t_ * fps >= gone else 0), p_[0][2]), p_[1])
+                     for p_, (t_, _) in zip(poses, st)]
+            print(f"  {key}: out of the scene from frame {gone}")
         off = PATH_OFFSET.get((a.name.lower(), key))
         if off:
             ref, frame_, dist_ = off
@@ -746,7 +736,8 @@ def main():
             anim.append(channel(nm, list(zip(tlist, chans[c])), fps))
         start = struct.pack("<6d", *(chans[c][0] for c in ("translateX", "translateY", "translateZ",
                                                             "rotateX", "rotateY", "rotateZ")))
-        folw.append(lstr(key) + lstr("HW1") + lstr(kind) + lstr(typ) + b"".join(lstr(n) for n in names)
+        folw.append(lstr(key) + lstr("HW1") + lstr(kind) + lstr(NIS_TYPES.get((a.name.lower(), key), typ))
+                    + b"".join(lstr(n) for n in names)
                     + start + b" ZYX")
         object_channels[key] = (tlist, chans, start)
         # Cataclysm's Kuun-Lan carries its modules; HWRM NIS objects have no subsystems, so each module is a dummy
@@ -759,16 +750,8 @@ def main():
 
     # explosion effect objects for targets that die under a beam (beam_kills), on the target's own channels
     hidden_deaths = beam_kills(src + ".script", objects, fps)
-    for target, (dframe, kind_) in hidden_deaths.items():
+    for target in hidden_deaths:
         start = object_channels[target][2]
-        if kind_ == "missile":
-            typ_ = object_types[target]
-            away = own_channels(target + WRECK_SUFFIX, target, away_until=(dframe - 1) / fps)
-            wstart = struct.unpack("<6d", start)
-            wstart = struct.pack("<6d", wstart[0], wstart[1] + WRECK_AWAY, *wstart[2:])
-            folw.append(lstr(target + WRECK_SUFFIX) + lstr("HW1") + lstr("ship") + lstr(typ_)
-                        + b"".join(lstr(n) for n in away) + wstart + b" ZYX")
-            continue
         folw.append(lstr(target + BEAM_KILL_SUFFIX) + lstr("HW1") + lstr("effect") + lstr(BEAM_KILL_FX)
                     + b"".join(lstr(n) for n in own_channels(target + BEAM_KILL_SUFFIX, target)) + start + b" ZYX")
 

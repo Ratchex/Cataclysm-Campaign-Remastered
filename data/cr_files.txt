@@ -374,6 +374,8 @@ badges/cnabaal.tga
 badges/imperial taiidan.tga
 badges/kiith somtaaw.tga
 badges/republican taiidan.tga
+missile/cat_nis_tai_missile/cat_nis_tai_missile.events
+missile/cat_nis_tai_missile/cat_nis_tai_missile.miss
 missile/dread_bomb/dread_bomb.events
 missile/dread_bomb/dread_bomb.hod
 missile/dread_bomb/dread_bomb.miss
@@ -1530,6 +1532,10 @@ ship/tai_minelayercorvette/tai_minelayercorvette.ship
 ship/tai_missiledestroyer/singleplayer/props/default.lua
 ship/tai_missiledestroyer/tai_missiledestroyer.lua
 ship/tai_missiledestroyer/tai_missiledestroyer.ship
+ship/tai_missiledestroyer_nis/tai_missiledestroyer_nis.events
+ship/tai_missiledestroyer_nis/tai_missiledestroyer_nis.hod
+ship/tai_missiledestroyer_nis/tai_missiledestroyer_nis.lua
+ship/tai_missiledestroyer_nis/tai_missiledestroyer_nis.ship
 ship/tai_mothership/singleplayer/props/default.lua
 ship/tai_mothership/tai_mothership.lua
 ship/tai_mothership/tai_mothership.ship
@@ -2713,6 +2719,7 @@ weapon/bst_turretedioncannon/bst_turretedioncannon.wepn
 weapon/bst_turretedpulsarcannondriver1/bst_turretedpulsarcannondriver1.wepn
 weapon/bst_turretedpulsarcannondriver2/bst_turretedpulsarcannondriver2.wepn
 weapon/bst_vulcankineticturret/bst_vulcankineticturret.wepn
+weapon/cat_nis_tailauncher/cat_nis_tailauncher.wepn
 weapon/cat_tai_carrier_hw1_mothershipgun2/cat_tai_carrier_hw1_mothershipgun2.wepn
 weapon/hgn_antishipbomblauncher/hgn_antishipbomblauncher.wepn
 weapon/hgn_antisubsystembomblauncher/hgn_antisubsystembomblauncher.wepn
