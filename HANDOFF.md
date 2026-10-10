@@ -30,8 +30,20 @@ findings).
   latching; data/scripts/attack/*_catrepair.lua) just targets, approaches and holds off; shiprules.lua CatRepair_Tick
   heals the order's target (SobGroup_GetCommandTargets COMMAND_Repair) at 30 HP/s and stops the order when healed.
   Processor's automatic side beams: CatProcessor_Tick. Every model has RepairPoint0 (geo2dae) declared as RepCap.
-- **Pending (user):** ships need more than one repair point so several craft can repair one target. No beam visuals
-  yet (ordered or automatic). Worker salvage untested.
+- **Pending (user):** ships need more than one repair point so several craft can repair one target. Worker salvage
+  untested.
+
+## Processor: COMPLETE (2026-10-10, user-tested)
+- Four automatic side beams (shiprules.lua CatProcessor_Tick): each picks the nearest damaged friendly in its 90°
+  cone on its side; ship axes are SobGroup_GetCoordSys's ROWS (measured in game: CatAxesRows, logged "CATACLYSM
+  axes"). Turrets move like a stock ion turret: the script turns them (rate eased within 10°, accel-limited, 0.2°
+  deadband) toward an alpha-beta-filtered target position and sends angles as bit messages (NIS00-02 switches,
+  4-bit check) to smt_processor.madstate, which freezes a still turret with pauseAnim and plays a moving one on the
+  aim clip's matching speed tier (9 tiers, make_procbeam.py) between the script's 10 Hz updates.
+- Look: the cone mesh (make_procbeam.py, tools/build_procbeam.sh) on stock fx_harvest (the stock repair beam's
+  animated shader) with stock repair_beam's texture, colour cycle and blending; ion_repairflash on each target.
+  Landing pads lit with the Kuun-Lan's pad glow (geo2dae --glow-copy), Cataclysm Remastered's glow elsewhere; the
+  Kuun-Lan's engine shape (scaled) and setEngineBurn (install_cr.py patch_processor).
 
 ## RESUME HERE (updated 2026-10-09, after the damage conversion; see git log for the last commit)
 **Console start:** run `claude` from `C:\Modding\Homeworld` (loads the project memory), then say "resume from

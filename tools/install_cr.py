@@ -146,7 +146,13 @@ def repair_order(text, kind):
 def patch_processor(text):
     """An ordered repair (user: Cataclysm's Processor only repaired what drifted into its beams; here also on order:
     shiprules.lua CatProcessor_* runs the automatic beams): the Worker's RepairCommand at Cataclysm's repair rate
-    (tweak.script twRepairRate 30 / s). Both only once it has the Repair upgrade (shiprules.lua CatGated)."""
+    (tweak.script twRepairRate 30 / s). Both only once it has the Repair upgrade (shiprules.lua CatGated). Engines: the
+    Kuun-Lan's burn (their smt_ms_sp.ship setEngineBurn; its setEngineGlow is the Kuun-Lan's already; user: same
+    engine glow as the Kuun-Lan's)."""
+    if "setEngineBurn" not in text:
+        assert text.count("setEngineGlow(NewShipType") == 1
+        text = text.replace("setEngineGlow(NewShipType", "setEngineBurn(NewShipType, 9, 0.2, 0.5, 300, 1.02, 0.1, 0.25, "
+                            "380);   -- Cataclysm-HWRM: the Kuun-Lan's\nsetEngineGlow(NewShipType", 1)
     return repair_order(text, "processor")
 
 

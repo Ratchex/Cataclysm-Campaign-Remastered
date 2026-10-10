@@ -39,6 +39,14 @@ case "$NAME" in
     # (-90 faces -X, the REPAIR0/1 side; the cone mesh runs along +Z: make_procbeam.py write_dae)
     GEO2DAE_ARGS="$GEO2DAE_ARGS --turret Beam0@dok:REPAIR0@-90 --turret Beam1@dok:REPAIR1@-90"
     GEO2DAE_ARGS="$GEO2DAE_ARGS --turret Beam2@dok:REPAIR2@90 --turret Beam3@dok:REPAIR3@90"
+    # glow (its landing pads lit like the Kuun-Lan's: user) from Cataclysm Remastered's Processor, the old-format
+    # copy (its .hod is the compressed kind hodtex can't read); engines the Kuun-Lan's (user: same engine glow): CR's
+    # Kuun-Lan engine shape, x0.909 (CR -> ours) x 0.30 (our Processor's length / our Kuun-Lan's, 340 / 1131)
+    GEO2DAE_ARGS="$GEO2DAE_ARGS --glow-from C:/Modding/Cataclysm-decomp/reference/cr_main/ship/smt_processor/smt_processor.hod.bak"
+    GEO2DAE_ARGS="$GEO2DAE_ARGS --engines-from C:/Modding/Cataclysm-decomp/reference/cr_main/ship/smt_ms_sp/smt_ms_sp.hod --engines-scale 0.273"
+    # its landing pads (0pro20, which CR leaves unlit) are the Kuun-Lan engineering module's pad art (smo_eng_face_upr,
+    # luminance correlation 0.99): its glow
+    GEO2DAE_ARGS="$GEO2DAE_ARGS --glow-copy 0pro20=C:/Modding/Cataclysm-decomp/reference/cr_main/ship/smt_ms_sp/smt_ms_sp.hod:smo_eng_face_upr"
     PROCBEAM=1
     ;;
   som_mothership)

@@ -95,7 +95,7 @@ GLOW_KEEP = re.compile(r"smo_eng(up|lwr)_")    # engine module textures: their g
 GLOW_MAPS = {}   # Cataclysm texture name (lower case) -> glow mask (uint8 array), from --glow-from
 
 
-def load_glow_maps(hod, cache_dir):
+def load_glow_maps(hod, cache_dir, into=None):
     """CR's GLOW textures (G channel) by Cataclysm texture name: "SMO_com_antenna_EXPORT[1]_GLOW" / "SWKcap_1_GLOW"
     -> smo_com_antenna / swkcap. Decoded once into cache_dir (the hod is 20 MB of DXT)."""
     import hodtex
@@ -108,7 +108,7 @@ def load_glow_maps(hod, cache_dir):
         open(stamp, "w").close()
     for f in os.listdir(cache_dir):
         if f.endswith(".png"):
-            GLOW_MAPS[f[:-4]] = np.asarray(Image.open(os.path.join(cache_dir, f)).convert("L"))
+            (GLOW_MAPS if into is None else into)[f[:-4]] = np.asarray(Image.open(os.path.join(cache_dir, f)).convert("L"))
 
 
 def fl(vals):
@@ -531,6 +531,9 @@ def main():
                                     "the asteroid's surface while harvesting")
     ap.add_argument("--glow-from", help="old-format HOD whose GLOW textures (Cataclysm texture names) become our "
                                         "_GLOW maps (Cataclysm Remastered's smt_ms_sp.hod for the Kuun-Lan)")
+    ap.add_argument("--glow-copy", action="append", default=[],
+                    help="OURS=HOD:THEIRS: our texture OURS takes the GLOW of texture THEIRS in old-format HOD "
+                         "(the Processor's landing pads: the Kuun-Lan's same pad art, smo_eng_face_upr; user)")
     ap.add_argument("--no-navlights", action="store_true", help="no NAVL joints from the .mex Nav chunks")
     ap.add_argument("--anim-geo", help="the .geo (the main one or a --merge one) whose objects --anim-joints names "
                                        "(the Kuun-Lan core's spinning grav_generator is in the merged command module)")
@@ -563,6 +566,13 @@ def main():
     if a.glow_from:
         load_glow_maps(a.glow_from, os.path.join(os.path.dirname(os.path.abspath(a.out_dir)), "_glow_cache",
                                                  os.path.splitext(os.path.basename(a.glow_from))[0]))
+    for spec in a.glow_copy:
+        ours, src = spec.split("=", 1)
+        hod, theirs = src.rsplit(":", 1)
+        maps = {}
+        load_glow_maps(hod, os.path.join(os.path.dirname(os.path.abspath(a.out_dir)), "_glow_cache",
+                                         os.path.splitext(os.path.basename(hod))[0]), maps)
+        GLOW_MAPS[ours.lower()] = maps[theirs.lower()]
     anim_names = {n for n in a.anim_joints.split(",") if n}
     os.makedirs(a.out_dir, exist_ok=True)
     rel = os.path.relpath(os.path.dirname(a.geo), os.path.join(DECOMP, "extracted", "big"))
