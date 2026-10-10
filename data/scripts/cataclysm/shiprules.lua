@@ -1247,7 +1247,7 @@ CAT_PROC_BEAMS = {          -- origin (HWRM units, our model) and side (x direct
 CAT_PROC_BANDS = { 500, 950, 1400 }   -- the cone's lengths (make_procbeam.py BANDS): the shortest that reaches
 CAT_PROC_LEVELS = 31                  -- yaw / pitch steps over -45..45 degrees
 CAT_PROC_AIM_TRACE = 0                -- 1: log each message
-CAT_PROC_AIM_EASE = 1.0               -- seconds the aim takes to follow its target (user: 0.35 still twitchy)
+CAT_PROC_AIM_EASE = 1.0               -- seconds the tracking point takes to follow its target
 CAT_PROC_AIM_HOLD = 1.0               -- a change under CAT_PROC_AIM_JUMP steps is sent only after this long
 CAT_PROC_AIM_JUMP = 3                 -- steps (about 3 degrees each) sent at once
 
@@ -1255,32 +1255,33 @@ function CatProcBeam_Aim(rec, g, i, t, o, r, u, f, now, dt)
     local band, yq, pq = 0, 0, 0
     rec.aimF = rec.aimF or {}
     if t then
+        -- a tracking point eased toward the target in the world (user: the turret smoothly tracks a point the
+        -- target drives); a new target snaps it
         local tp = SobGroup_GetPosition(CatShips[t].g)
-        local v = { tp[1] - o[1], tp[2] - o[2], tp[3] - o[3] }
+        local sm = rec.aimF[i]
+        if not sm or sm.t ~= t then
+            sm = { t = t, p = { tp[1], tp[2], tp[3] } }
+            rec.aimF[i] = sm
+        else
+            local k = dt / CAT_PROC_AIM_EASE
+            if k > 1 then k = 1 end
+            sm.p = CatLerp(sm.p, tp, k)
+        end
+        local v = { sm.p[1] - o[1], sm.p[2] - o[2], sm.p[3] - o[3] }
         local vx = v[1] * r[1] + v[2] * r[2] + v[3] * r[3]
         local vy = v[1] * u[1] + v[2] * u[2] + v[3] * u[3]
         local vz = v[1] * f[1] + v[2] * f[2] + v[3] * f[3]
-        local side = CAT_PROC_BEAMS[i][4]
-        -- the beam's own frame (geo2dae --turret: _Base turned 90 degrees about up, +Z out of its side)
-        local lx, ly, lz = -side * vz, vy, side * vx
-        local n = sqrt(lx * lx + ly * ly + lz * lz)
+        local n = sqrt(vx * vx + vy * vy + vz * vz)
         if n > 1 then
-            local yaw = atan2(lx, lz)                    -- Lua 4: degrees
-            local pitch = asin(-ly / n)
-            -- smoothed (user: the cone wiggled, re-aimed at every small change): eased toward the target's direction
-            -- over CAT_PROC_AIM_EASE seconds; a new target snaps
-            local sm = rec.aimF[i]
-            if not sm or sm.t ~= t then
-                sm = { t = t, yaw = yaw, pitch = pitch }
-                rec.aimF[i] = sm
-            else
-                local k = dt / CAT_PROC_AIM_EASE
-                if k > 1 then k = 1 end
-                sm.yaw = sm.yaw + (yaw - sm.yaw) * k
-                sm.pitch = sm.pitch + (pitch - sm.pitch) * k
-            end
-            yq = CatProcBeam_Level(sm.yaw)
-            pq = CatProcBeam_Level(sm.pitch)
+            -- HWRM turns a joint by -angle in the usual right-handed sense (in game the first cones, built that way,
+            -- came out of the far side): the direction is Ry(-(base + yaw)) Rx(-pitch) +Z, base = -90 x side
+            -- (geo2dae --turret, build_ship.sh); Lua 4 trig is in degrees
+            local side = CAT_PROC_BEAMS[i][4]
+            local yaw = 90 * side - atan2(vx, vz)
+            if yaw > 180 then yaw = yaw - 360 elseif yaw < -180 then yaw = yaw + 360 end
+            local pitch = asin(vy / n)
+            yq = CatProcBeam_Level(yaw)
+            pq = CatProcBeam_Level(pitch)
             band = 3
             if n <= CAT_PROC_BANDS[1] then band = 1 elseif n <= CAT_PROC_BANDS[2] then band = 2 end
         end

@@ -1,5 +1,5 @@
 -- Cataclysm-HWRM: the Processor's repair beam cone (tools/make_procbeam.py; on its Beam<i>_Cone joints, aimed by
--- its madstate). A mesh effect: the thin cone mesh with stock HWRM's repair cone texture, fading toward the tip, slowly spinning.
+-- its madstate). A mesh effect: the thin cone mesh, stock HWRM's repair cone noise in grey tinted repair green, fading toward the tip, slowly spinning.
 fx = {
 style = "STYLE_RING",
 properties = {
@@ -8,7 +8,7 @@ property_01 = { name = "Offset", type = "VARTYPE_ARRAY_TIMEVECTOR3", value = { e
 property_02 = { name = "SpinX", type = "VARTYPE_ARRAY_TIMEFLOAT", value = { 0, 0, 1, 0, }, },
 property_03 = { name = "SpinY", type = "VARTYPE_ARRAY_TIMEFLOAT", value = { 0, 0, 1, 0, }, },
 property_04 = { name = "SpinZ", type = "VARTYPE_ARRAY_TIMEFLOAT", value = { 0, 0.25, 1, 0.25, }, },
-property_05 = { name = "Colour", type = "VARTYPE_ARRAY_TIMECOLOUR", value = { entry_00 = { 0, 1, 1, 1, 1, }, entry_01 = { 1, 1, 1, 1, 1, }, }, },
+property_05 = { name = "Colour", type = "VARTYPE_ARRAY_TIMECOLOUR", value = { entry_00 = { 0, 0.35, 1, 0.5, 0.8, }, entry_01 = { 1, 0.35, 1, 0.5, 0.8, }, }, },
 property_06 = { name = "RadiusEpsilon", type = "VARTYPE_FLOAT", value = 0, },
 property_07 = { name = "RateEpsilon", type = "VARTYPE_FLOAT", value = 0, },
 property_08 = { name = "SpinEpsilonX", type = "VARTYPE_FLOAT", value = 0, },

@@ -94,7 +94,7 @@ def write_dae():
             a = 2 * math.pi * k / SEGS
             pos.append((rad * math.cos(a), rad * math.sin(a), z))
             nrm.append((math.cos(a), math.sin(a), 0.0))
-            uv.append((float(ring), k / SEGS))
+            uv.append((0.02 + 0.93 * ring, k / SEGS))   # U stops short of the texture's edges
     n = SEGS + 1
     for k in range(SEGS):
         a, b, c, d = k, k + 1, n + k, n + k + 1
@@ -136,23 +136,25 @@ def write_dae():
 
 
 def fade_texture(path):
-    """Stock HWRM's repair cone texture (its green energy noise, fx_repairbeam_diff.tga: user, reuse the stock
-    repair look), stretched along the cone (U) and fading toward the tip."""
+    """Stock HWRM's repair cone noise (fx_repairbeam_diff.tga: user, reuse the stock repair look) in grey (the effect
+    tints it green), stretched along the cone (U), fading toward the tip and black over its last tenth (the mesh's U
+    stops short of 1: a wrapped tip showed the bright base, a white end like a searchlight)."""
     w, h = 256, 64
-    src = Image.open(STOCK_TEX).convert("RGB").resize((w, h))
+    src = Image.open(STOCK_TEX).convert("L").resize((w, h))
+    lo, hi = min(src.getdata()), max(src.getdata())
     im = Image.new("RGBA", (w, h))
     for x in range(w):
-        v = (1 - x / (w - 1)) ** 0.9             # the fade, gentle: the cone reads most of its length
+        u = x / (w - 1)
+        v = max(0.0, 1 - u / 0.9) ** 1.2
         for y in range(h):
-            r, g, b = src.getpixel((x, y))
-            k = 1.8 * v                              # the noise brightened (the stock texture is dark)
-            c = (int(r * k + 25 * v), int(g * k + 45 * v), int(b * k + 35 * v))
-            im.putpixel((x, y), (min(255, c[0]), min(255, c[1]), min(255, c[2]), int(255 * v)))
+            n = (src.getpixel((x, y)) - lo) / max(1, hi - lo)
+            c = int(255 * v * (0.45 + 0.5 * n))           # never white: noise between 45 and 95 %
+            im.putpixel((x, y), (c, c, c, c))
     im.save(path)
 
 
 FX = '''-- Cataclysm-HWRM: the Processor's repair beam cone (tools/make_procbeam.py; on its Beam<i>_Cone joints, aimed by
--- its madstate). A mesh effect: the thin cone mesh with stock HWRM's repair cone texture, fading toward the tip, slowly spinning.
+-- its madstate). A mesh effect: the thin cone mesh, stock HWRM's repair cone noise in grey tinted repair green, fading toward the tip, slowly spinning.
 fx = {
 style = "STYLE_RING",
 properties = {
@@ -161,7 +163,7 @@ property_01 = { name = "Offset", type = "VARTYPE_ARRAY_TIMEVECTOR3", value = { e
 property_02 = { name = "SpinX", type = "VARTYPE_ARRAY_TIMEFLOAT", value = { 0, 0, 1, 0, }, },
 property_03 = { name = "SpinY", type = "VARTYPE_ARRAY_TIMEFLOAT", value = { 0, 0, 1, 0, }, },
 property_04 = { name = "SpinZ", type = "VARTYPE_ARRAY_TIMEFLOAT", value = { 0, 0.25, 1, 0.25, }, },
-property_05 = { name = "Colour", type = "VARTYPE_ARRAY_TIMECOLOUR", value = { entry_00 = { 0, 1, 1, 1, 1, }, entry_01 = { 1, 1, 1, 1, 1, }, }, },
+property_05 = { name = "Colour", type = "VARTYPE_ARRAY_TIMECOLOUR", value = { entry_00 = { 0, 0.35, 1, 0.5, 0.8, }, entry_01 = { 1, 0.35, 1, 0.5, 0.8, }, }, },
 property_06 = { name = "RadiusEpsilon", type = "VARTYPE_FLOAT", value = 0, },
 property_07 = { name = "RateEpsilon", type = "VARTYPE_FLOAT", value = 0, },
 property_08 = { name = "SpinEpsilonX", type = "VARTYPE_FLOAT", value = 0, },
