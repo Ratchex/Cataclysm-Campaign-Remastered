@@ -62,6 +62,8 @@ PILOT = [
 ]
 # Cataclysm events recorded once for every ship (variable 0), used for any ship type
 GENERIC = {146}
+# ...except for these Cataclysm types (lower case), which never said it (user: the Processor has no repair order line)
+GENERIC_SKIP = {146: {"sprocessor"}}
 
 # HWRM announcer event (exact upper-case name) -> (Cataclysm event, variable)
 FLEET = {
@@ -168,7 +170,8 @@ def main():
             ce = next((e for p, e in PILOT if re.fullmatch(p, ev_name)), None)
             if ce is None:
                 continue
-            variants = rows.get((ce, v)) or (rows.get((ce, 0)) if ce in GENERIC else None)
+            generic = ce in GENERIC and cat.lower() not in GENERIC_SKIP.get(ce, ())
+            variants = rows.get((ce, v)) or (rows.get((ce, 0)) if generic else None)
             if not variants:
                 continue
             d = os.path.join(ALLSHIPS, base + "1", ev_name.lower())
