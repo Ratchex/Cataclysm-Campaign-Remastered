@@ -37,6 +37,16 @@ if CatSpeech_Loaded == nil then
         return nil
     end
 
+    -- a ship whose attack order is its kamikaze (no guns: the Mimic): its pilot's last words come from the ship
+    -- rules (line 167, shiprules.lua CatKamikaze_Tick) instead of the attack acknowledgement (user: not over it)
+    CatSpeech_Kamikaze = { SMT_MIMIC = 1 }
+    function CatSpeech_SilentAttack(ship)
+        if ship ~= nil and CatSpeech_Kamikaze[strupper(ship)] ~= nil then
+            return 1
+        end
+        return nil
+    end
+
     -- for a Somtaaw ship: the replacement event, actor, count, or nil (nothing to play)
     function CatSpeech_Route(event, actor)
         local key = strupper(event)

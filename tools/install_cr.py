@@ -383,6 +383,7 @@ SPEECH_EARLY_OUT = {   # Somtaaw ships: Cataclysm's per-ship-type Fleet Command 
     "CommandConstructionComplete": "if CatSpeech_IsSomtaaw({s}) ~= nil and CatSpeech_Built({s}) ~= nil then return end",
     "StatusShipDestroyed": "if CatSpeech_IsSomtaaw({s}) ~= nil and CatSpeech_Destroyed({s}) ~= nil then return end",
     "StatusBuildAvailable": "if CatSpeech_IsSomtaaw({s}) ~= nil and CatSpeech_Available({s}) ~= nil then return end",
+    "CommandAttackGiven": "if CatSpeech_SilentAttack({s}) ~= nil then return end",   # the Mimic: its scream instead
 }
 
 

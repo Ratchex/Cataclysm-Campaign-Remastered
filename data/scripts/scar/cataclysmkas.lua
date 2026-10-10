@@ -1155,7 +1155,15 @@ function KAS_SpeechBark(ev, variable, actor)
     if e == nil or variable == nil or variable < 0 or variable >= e[2] then
         return
     end
+    -- one of the event's recordings at random (Cataclysm's variations: e[1] of them, e[2] apart; user: the
+    -- kamikaze scream was always the first), of those this variable has (a duration: the recording exists)
+    local ids = {}
+    for v = 0, e[1] - 1 do
+        local i = KAS_SpeechBankBase.sect + e[3] + v * e[2] + variable
+        if KAS_SpeechDurations[i] then tinsert(ids, i) end
+    end
     local id = KAS_SpeechBankBase.sect + e[3] + variable
+    if getn(ids) > 0 then id = ids[random(1, getn(ids))] end
     Subtitle_AddSkippable(actor or Actor_HW1_FleetIntel, "$" .. id, (KAS_SpeechDurations[id] or 2000) / 1000)
     print("CKAS bark " .. ev .. "/" .. variable .. " -> $" .. id)
 end
