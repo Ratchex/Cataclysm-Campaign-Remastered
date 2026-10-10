@@ -78,7 +78,7 @@ def write_textures(png_dir, tex, out_dir, base, colour, bake=None):
         g = Image.fromarray(glow).resize(size)
         Image.merge("RGB", (g, g, g)).save(os.path.join(out_dir, base + "_GLOW.tga"))
         # glowing texels emit the diffuse x a global strength: brighten it under the mask, keeping its colour (user:
-        # the hangars needed more glow; lifting toward white was too white; then 1.35 a little bright, 1.25 still: user). Not the engines' (user: keep those).
+        # the hangars needed more glow; lifting toward white was too white; then 1.35 a little bright, 1.25 still, then 1.05, 0.85: user). Not the engines' (user: keep those).
         if not GLOW_KEEP.match(tex.lower()):
             m = np.asarray(g, np.float32)[..., None] / 255
             im = Image.fromarray(np.clip(np.asarray(im, np.float32) * (1 + (GLOW_BOOST - 1) * m), 0, 255)
@@ -88,7 +88,7 @@ def write_textures(png_dir, tex, out_dir, base, colour, bake=None):
 
 
 FX_TILE = 128                                  # --fx-mesh: atlas cell size per texture page
-GLOW_BOOST = 1.05                             # diffuse multiplier under a full glow mask
+GLOW_BOOST = 0.85                             # diffuse multiplier under a full glow mask (user: 1.05 -> 0.85)
 GLOW_KEEP = re.compile(r"smo_eng(up|lwr)_")    # engine module textures: their glow is right as is
 
 

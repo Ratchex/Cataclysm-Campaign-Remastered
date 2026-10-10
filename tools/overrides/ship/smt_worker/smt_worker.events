@@ -83,7 +83,7 @@ effects =
             { "marker", "marker_repair" },
             { "fx", "repair_beam" },
             { "sound", "SP_ELEMENTS/HGN_RESOURCECOLLECTOR_REPAIRING" },
-            { "fx_scale", "1" },
+            { "fx_scale", "1.5" },          -- user: 1.5x bigger
         },
     },
 }
