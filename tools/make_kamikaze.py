@@ -3,11 +3,12 @@
 Cataclysm (FUN_0043a980): a ship that rams its target in a kamikaze does kamikazeDamage[its type] (tactics.script),
 times its Quantum Explosive Charge multiplier once upgraded (FUN_005b9980: ship +0x770; its value not found yet:
 CAT_KAMIKAZE_CHARGE in shiprules.lua). Health here is Cataclysm's 1:1 (tools/make_damage.py), so the damage is too.
-HWRM's own kamikaze damage is the rammer's health x tuning.lua CollisionInfo.kamikazeDamageMultiplier (7) x an
-armour factor (the Mimic, health 40: about 70 to a frigate instead of 1000): set to 0 here, the ship rules deal
-Cataclysm's (SobGroup_TakeDamageAbsolute) when a ship dies in a kamikaze at its target.
+HWRM's own kamikaze stays (a script can't tell it from an attack on an armed ship; its damage, the rammer's
+health x tuning.lua kamikazeDamageMultiplier 7 x an armour factor, is close to Cataclysm's for the armed fighters);
+the ship rules add the difference for unarmed rammers far below Cataclysm's (shiprules.lua CatKamikazeTopUp: the
+Mimic, about 200 of 1000).
 
-Writes data/scripts/cataclysm/kamikaze_gen.lua (CatKamikazeDamage[our ship type]); patch_tuning() for install_cr.py.
+Writes data/scripts/cataclysm/kamikaze_gen.lua (CatKamikazeDamage[our ship type]).
 Usage: make_kamikaze.py
 """
 import os
@@ -31,11 +32,6 @@ def table():
         if m and m.group(1).lower() in ours:
             out[ours[m.group(1).lower()]] = float(m.group(2))
     return out
-
-
-def patch_tuning(text):
-    """tuning.lua: HWRM's kamikaze collision damage off (the ship rules deal Cataclysm's)."""
-    return re.sub(r"(kamikazeDamageMultiplier\s*=\s*)[\d.]+", r"\g<1>0", text, count=1)
 
 
 def main():
