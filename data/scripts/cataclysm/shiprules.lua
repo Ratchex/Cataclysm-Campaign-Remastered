@@ -280,7 +280,7 @@ function CatShip_Update(g, p, id)
         rec.mimicSwap = nil
         SobGroup_SetMadState(g, "Disguise_" .. s.joint)
         FX_StartEvent(g, s.tail)
-        SobGroup_MakeUntargeted(g)
+        SobGroup_SetGhost(g, 1)               -- TEST: untargeted (MakeUntargeted can't be undone: one argument only)
         rec.disguise = s.joint
         print("CATACLYSM mimic: ship " .. id .. " shows its " .. s.joint .. " disguise")
     end
@@ -1143,7 +1143,7 @@ function CatUnmimic_Start(g, p, id, name)
         CatSay(166, g, p)
         SobGroup_SetMadState(g, "Mimic")
         FX_StartEvent(g, "MimicOut_" .. rec.disguise)
-        SobGroup_MakeUntargeted(g, 0)         -- TEST: does a 0 make it targetable again?
+        SobGroup_SetGhost(g, 0)
         print("CATACLYSM mimic: ship " .. id .. " drops its " .. rec.disguise .. " disguise")
         rec.disguise = nil
         return
