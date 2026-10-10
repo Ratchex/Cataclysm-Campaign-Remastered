@@ -124,7 +124,7 @@ def patch_race(text):
 REPAIR_FAMILIES = ("Fighter", "Fighter_hw1", "Corvette", "Corvette_hw1", "Utility", "Resource", "ResourceLarge",
                    "NonCombat", "Frigate", "SmallCapitalShip", "BigCapitalShip", "Mothership")
 REPAIR_BEAMS = {   # ship: (RepairCommand range, attack style)
-    "worker": (790, "Frontal_CatRepair"),
+    "worker": (150, "Frontal_CatRepair"),   # parks within the beam reach (shiprules.lua CAT_WORKER_REACH)
     "processor": (1400, "Broadside_CatRepair"),
 }
 

@@ -109,10 +109,14 @@ SMT_WORKER_RepairEnd_OnSet = function(ship)
 end
 
 -- SCRIPTED REPAIR (shiprules.lua CatRepair_Tick heals; HWRM's own repair states never come, its order doesn't
--- latch): SobGroup_SetMadState passes on only engine state names, so NIS02 = jack out and repair cone on,
--- DockPathOpen1 = cone off and jack back (the Worker has no dock paths of its own)
+-- latch): SobGroup_SetMadState passes on only engine state names, so NIS02 = jack out, DockPathOpen2 = repair
+-- cone on (the script sends it once JackOut has played: user, no cone before the boom is out), DockPathOpen1 =
+-- cone off and jack back (the Worker has no dock paths of its own)
 SMT_WORKER_NIS02_OnSet = function(ship)
     SMT_WORKER_Swap(ship, "JackClose", "JackOut")
+end
+
+SMT_WORKER_DockPathOpen2_OnSet = function(ship)
     startEffect(ship, "Repairing")
 end
 

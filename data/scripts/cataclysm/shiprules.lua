@@ -1183,8 +1183,13 @@ end
 -- stop in range, face the target, beam it while it is in the beam's angle): the Worker beams the damaged friendly
 -- nearest to it (sworker.shp repairDistance 1500 x 0.525; no cone: CatRepair_InWorkerBeam), the Processor its side beams
 -- (CatProcessor_Tick); the order ends once it sits still with nothing to heal.
-CAT_WORKER_RANGE = 790
-CAT_REPAIR_SIZE = { smt_ms_sp = 600 }   -- range measured to the centre: the Kuun-Lan's hull is far from it
+CAT_REPAIR_CONE = 60        -- the repair cone's length (stock repair_beam at scale 1: estimated; its mesh is unreadable)
+CAT_WORKER_REACH = 2 * CAT_REPAIR_CONE   -- the beam reaches this far past the tip (user: about twice the cone)
+CAT_WORKER_TIP_OFF = 30     -- its jackhammer tip from its centre (build_ship.sh TIP)
+CAT_JACK_OUT = 2.3          -- sworker.mad JackOut: 2.267 s; the cone shows once the boom is out (user)
+-- how far a ship's hull is from its centre (its model's repair points, geo2dae.py; the Kuun-Lan with its modules)
+CAT_REPAIR_SIZE = { smt_ms_sp = 600, smt_processor = 116, smt_rammingfrigate = 56, smt_worker = 27, smt_mimic = 11,
+                    smt_acv = 9, smt_acolyte = 8, smt_scout = 6 }
 CAT_REPAIR_STILL = 5        -- slower than this: sitting still
 CAT_REPAIR_IDLE = 3         -- seconds sitting still with nothing to heal before the order ends
 CAT_PROC_BEAM = 2.5
@@ -1195,7 +1200,7 @@ function CatRepair_Tick(rec, g, id, now)
     rec.repLast = now
     if not rec.up.REPAIR or SobGroup_IsDoingAbility(g, AB_Repair) ~= 1 then
         rec.repT, rec.repIdle = nil, nil
-        CatRepair_Cone(rec, g, nil)
+        CatRepair_Cone(rec, g, nil, now)
         return
     end
     local busy = nil
@@ -1219,7 +1224,7 @@ function CatRepair_Tick(rec, g, id, now)
             end
         end
         rec.repT = t
-        CatRepair_Cone(rec, g, t)
+        CatRepair_Cone(rec, g, t, now)
         if t then
             busy = 1
             local tg = CatShips[t].g
@@ -1249,13 +1254,16 @@ function CatRepair_Tick(rec, g, id, now)
 end
 
 -- the Worker's look while it heals: its jack out and the static repair cone from the tip (smt_worker.madstate
--- NIS02 / DockPathOpen1), not a beam to the target (user: the beam is just the mechanic)
-function CatRepair_Cone(rec, g, on)
+-- NIS02 jack out, DockPathOpen2 cone on once it is out, DockPathOpen1 cone off and jack back), not a beam to the target (user: the beam is just the mechanic)
+function CatRepair_Cone(rec, g, on, now)
     if on and not rec.repCone then
-        SobGroup_SetMadState(g, "NIS02")
+        SobGroup_SetMadState(g, "NIS02")                 -- jack out
+        rec.repCone = now
+    elseif on and rec.repCone ~= 1 and now - rec.repCone >= CAT_JACK_OUT then
+        SobGroup_SetMadState(g, "DockPathOpen2")         -- the boom is out: cone on
         rec.repCone = 1
     elseif not on and rec.repCone then
-        SobGroup_SetMadState(g, "DockPathOpen1")
+        SobGroup_SetMadState(g, "DockPathOpen1")         -- cone off, jack back
         rec.repCone = nil
     end
 end
@@ -1271,7 +1279,7 @@ function CatRepair_InWorkerBeam(rec, g, id, t)
     local tp = SobGroup_GetPosition(trec.g)
     local v = { tp[1] - pos[1], tp[2] - pos[2], tp[3] - pos[3] }
     local dist = sqrt(v[1] * v[1] + v[2] * v[2] + v[3] * v[3])
-    local reach = CAT_WORKER_RANGE + (CAT_REPAIR_SIZE[trec.t] or 0)
+    local reach = CAT_WORKER_TIP_OFF + CAT_WORKER_REACH + (CAT_REPAIR_SIZE[trec.t] or 20)
     if dist > reach then return nil end
     return reach - dist
 end
