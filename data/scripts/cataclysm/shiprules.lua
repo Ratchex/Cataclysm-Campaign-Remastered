@@ -1277,6 +1277,7 @@ CAT_PROC_BEAMS = {          -- origin (HWRM units, our model) and side (x direct
 CAT_PROC_BANDS = { 500, 950, 1400 }   -- the cone's lengths (make_procbeam.py BANDS): the shortest that reaches
 CAT_PROC_LEVELS = 255                 -- yaw / pitch steps over -45..45 degrees (8 bits each)
 CAT_PROC_AIM_TRACE = 0                -- 1: log each message
+CAT_PROC_TURN_TRACE = 1               -- 1: log each update of a turret with a target (want / angle / rate, dt, heading)
 CAT_PROC_CALIBRATE = 0                -- 1: fixed poses to read the turret's signs off in game (CatProcessor_Tick)
 CAT_PROC_BEAM_DELAY = 1.0             -- seconds after a beam takes a target before its cone shows
 CAT_PROC_AIM_EVERY = 0                -- seconds between a turret's messages while it turns (0: every update)
@@ -1345,6 +1346,15 @@ function CatProcBeam_Aim(rec, g, i, t, o, r, u, f, now, dt)
     end
     tu.yaw, tu.vy = CatProcBeam_Turn(tu.yaw, tu.vy, wy, CAT_PROC_YAW_SPEED, dt)
     tu.pitch, tu.vp = CatProcBeam_Turn(tu.pitch, tu.vp, wp, CAT_PROC_PITCH_SPEED, dt)
+    if CAT_PROC_TURN_TRACE == 1 and t then
+        local tp = SobGroup_GetPosition(CatShips[t].g)
+        print("CATACLYSM procturn " .. floor(now * 100) / 100 .. " b" .. i .. " t" .. t .. " dt " .. floor(dt * 1000) ..
+              " want " .. floor(wy * 10) / 10 .. "," .. floor(wp * 10) / 10 .. " at " .. floor(tu.yaw * 10) / 10 .. "," ..
+              floor(tu.pitch * 10) / 10 .. " v " .. floor(tu.vy * 10) / 10 .. "," .. floor(tu.vp * 10) / 10 ..
+              " head " .. floor(atan2(f[1], f[3]) * 10) / 10 .. "," .. floor(asin(f[2]) * 10) / 10 ..
+              " o " .. floor(o[1]) .. "," .. floor(o[2]) .. "," .. floor(o[3]) ..
+              " tp " .. floor(tp[1]) .. "," .. floor(tp[2]) .. "," .. floor(tp[3]))
+    end
     local yq, pq = CatProcBeam_Level(tu.yaw), CatProcBeam_Level(tu.pitch)
     rec.aim = rec.aim or {}
     local last = rec.aim[i]
