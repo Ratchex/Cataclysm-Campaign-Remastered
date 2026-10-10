@@ -437,9 +437,6 @@ with tai_ioncannonfrigate1
         attack("kus_interceptor4")
     at frame 1470
     at frame 1540
-    at frame 1600
-        haltAttack()
-    at frame 1540
 }
 with tai_ioncannonfrigate3
 {

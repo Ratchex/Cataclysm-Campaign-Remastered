@@ -99,7 +99,8 @@ WRECK_AWAY = -3000.0   # HWRM units the double is held off (along Y: below) unti
 # per cutscene: haltAttack() at this frame instead
 # (nislet01's ion frigate: its 4 s beam, ordered at 1404 and charging 2 s, ends by itself about 1584, just before
 # the 1591 camera cut; halted mid-beam its warbling sound looped on: user)
-HALT_AT = {("nislet01", "tai_ioncannonfrigate1"): 1600}
+# None: no haltAttack (user: let it end by itself; its low warble is the beam's own sound)
+HALT_AT = {("nislet01", "tai_ioncannonfrigate1"): None}
 # per cutscene: an object's path moved by this many HWRM units along another object's up axis at a frame (user:
 # nislet01's top Taiidan interceptor clipped into the Kushan destroyer it loops round)
 PATH_OFFSET = {("nislet01", "tai_interceptor13"): ("kus_destroyer1", 2560, 20.0)}
@@ -541,8 +542,11 @@ def translate_script(src, objects, nisname, speech, fps, end_frame, cam_events, 
             emit(f'attack("{target}")')
         elif cmd == "haltAttack" and cur_obj and (nisname.lower(), cur_obj) in HALT_AT:
             frame = HALT_AT[(nisname.lower(), cur_obj)]
+            if frame is None:
+                note("dropped: HALT_AT None (the beam ends by itself)")
+                continue
             cur_list.extend([f"    at frame {frame}", "        haltAttack()", f"    at frame {cur_time}"])
-            note(f"translated: haltAttack() at frame {frame} (HALT_AT: this cutscene's beam ended sooner)")
+            note(f"translated: haltAttack() at frame {frame} (HALT_AT: this cutscene's beam timing)")
             continue
         elif cmd == "haltAttack" and cur_obj:
             delay = next((s_ for k_, s_ in HALT_DELAY.items() if k_ in cur_obj.lower()), 0)
