@@ -256,6 +256,7 @@ function CatShip_Update(g, p, id)
         end
     end
     rec.p = SobGroup_OwnedBy(g)
+    if CatAxesRows == nil then CatAxes_Sample(rec, g) end
     -- who is shooting at us, for the kill credit when we die
     SobGroup_Clear(rec.att)
     SobGroup_GetAttackers(g, rec.att)
@@ -672,6 +673,42 @@ function CatUpAxis(m)
 end
 
 function CatCol(m, c)
+    return { m[c + 1], m[c + 4], m[c + 7] }
+end
+
+-- Which way round SobGroup_GetCoordSys really is: its columns (as NOTES.md says) or its rows. They agree for a ship
+-- facing straight ahead and part as it turns (user: the Processor's port beams fired at Workers off its starboard
+-- side once it had turned; range.lua's Recon at yaw 50 has row 3, not column 3, pointing +X). Measured in game:
+-- each moving ship's travel is compared with both readings of forward; CAT_AXES_SAMPLES agreeing settle it.
+CatAxesRows = nil
+CatAxesVotes = { rows = 0, cols = 0 }
+CAT_AXES_SAMPLES = 12
+
+function CatAxes_Sample(rec, g)
+    local pos = SobGroup_GetPosition(g)
+    local last = rec.axPos
+    rec.axPos = pos
+    if not last then return end
+    local d = { pos[1] - last[1], pos[2] - last[2], pos[3] - last[3] }
+    local n = sqrt(d[1] * d[1] + d[2] * d[2] + d[3] * d[3])
+    if n < 20 then return end                            -- moving at least 40 a second
+    local m = SobGroup_GetCoordSys(g)
+    if getn(m) ~= 9 then return end
+    local fc = (d[1] * m[3] + d[2] * m[6] + d[3] * m[9]) / n        -- column 3
+    local fr = (d[1] * m[7] + d[2] * m[8] + d[3] * m[9]) / n        -- row 3
+    if abs(fc - fr) < 0.3 then return end                -- facing nearly straight ahead: no difference
+    if fr > fc then CatAxesVotes.rows = CatAxesVotes.rows + 1 else CatAxesVotes.cols = CatAxesVotes.cols + 1 end
+    if CatAxesVotes.rows + CatAxesVotes.cols >= CAT_AXES_SAMPLES then
+        CatAxesRows = 0
+        if CatAxesVotes.rows > CatAxesVotes.cols then CatAxesRows = 1 end
+        print("CATACLYSM axes: SobGroup_GetCoordSys forward is its " .. ((CatAxesRows == 1 and "ROW") or "COLUMN") ..
+              " (votes rows " .. CatAxesVotes.rows .. ", columns " .. CatAxesVotes.cols .. ")")
+    end
+end
+
+-- axis c (0 right, 1 up, 2 forward) of a ship's orientation, by the measured layout (columns until measured)
+function CatAxis(m, c)
+    if CatAxesRows == 1 then return { m[c * 3 + 1], m[c * 3 + 2], m[c * 3 + 3] } end
     return { m[c + 1], m[c + 4], m[c + 7] }
 end
 
@@ -1285,8 +1322,7 @@ function CatProcBeam_Aim(rec, g, i, t, o, r, u, f, now, dt)
             -- into the hull, yaw +40 on Beam1 swung it aft, pitch +40 on Beam2 up). Lua 4 trig is in degrees
             local side = CAT_PROC_BEAMS[i][4]
             local lx, ly, lz = -side * vz, vy, side * vx
-            wy = -atan2(lx, lz)       -- yaw: the calibration's bow / stern read the wrong way round (user: a target
-                                      -- off the starboard bow swung the cone fully aft)
+            wy = atan2(lx, lz)
             wp = asin(-ly / n)
             if wy > 45 then wy = 45 elseif wy < -45 then wy = -45 end
             if wp > 45 then wp = 45 elseif wp < -45 then wp = -45 end
@@ -1401,7 +1437,7 @@ function CatProcessor_Tick(rec, g, id, now)
     local m = SobGroup_GetCoordSys(g)
     if getn(m) ~= 9 then return end
     local pos = SobGroup_GetPosition(g)
-    local r, u, f = CatCol(m, 0), CatCol(m, 1), CatCol(m, 2)
+    local r, u, f = CatAxis(m, 0), CatAxis(m, 1), CatAxis(m, 2)
     rec.beams = rec.beams or {}
     local scan = now >= (rec.procScan or 0)
     if scan then rec.procScan = now + CAT_TICK end
