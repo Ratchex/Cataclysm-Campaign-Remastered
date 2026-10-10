@@ -4,6 +4,15 @@ Last updated 2026-10-09 (late). Read this first, then `C:\Modding\Cataclysm-deco
 `NOTES.md` (HWRM engine rules learned in game) and `C:\Modding\Cataclysm-decomp\MODLOG.md` (reverse-engineering
 findings).
 
+## Kuun-Lan effects, lighting, voices: DONE (2026-10-09, confirmed in game)
+- Kuun-Lan: running lights (NAVL from Cataclysm's .mex Nav + .shp, all our models), emissive maps (CR's GLOW maps,
+  boosted x1.35 except engines), CR's engine trail shape + our burn flames, the command module's spinning gravity
+  generator (geo2dae --anim-geo, smt_ms_sp.madstate). NOTES.md "Ships and HODOR".
+- Mission 1 lighting: ez14 relit with Cataclysm's mission01.hsf (make_background.RELIGHT, at install). Fog (step 2)
+  not needed so far.
+- Voices: Cataclysm's Somtaaw unit barks per ship type and Fleet Command as the Somtaaw race announcer (NOTES.md
+  "Unit barks and the announcer"). Rebuild: tools/make_unitspeech.py (audio, git-ignored) then install_cr.py.
+
 ## Mission 1 cosmetics detour: DONE (2026-10-09, confirmed in game)
 - Team colours per faction (tools/make_colours.py, teamcolour.lua, KAS_ApplyColourSchemes; m01_paths.lua loads
   again: Lua 4 constructors need `;` between named and list items). Reinforcement groups keep their player's

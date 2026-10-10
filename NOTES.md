@@ -40,6 +40,32 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
   being added, so Cataclysm's own "Tactical Officer: ..." text appears once.
 - Cataclysm actor bits in speech events: 0x1000 Fleet Command, 0x2000 Tactical Officer, 0x8000 other fleets.
 
+## Unit barks and the announcer (2026-10-09, confirmed in game)
+- HWRM: soundscripts/speechlogic/{commands,status,chatter}.lua handlers call playSpeechActor(event, actor, voices,
+  freq) / playSpeechActorLinked(..., link). Announcer actor = raceHelper() (Players Patch: Race_ID[currentRace] from
+  player:racelist.lua -> Makaan / Emperor / Fleet); pilots = class + random voice ("Fighter_" with 3 -> Fighter_1-3).
+  Files: allships/<actor>/<event>.wav flat for announcers; allships/<voice>/<event>/<event>.lua
+  (randSampContainer = 1) + <event>_<n>.wav for pilots (.wav works, stock uses .fda).
+- That Lua environment refuses redefining a global function ("Cannot overwrite function", the load then aborts and
+  the speech logic is broken) and has no getn. So tools/install_cr.py patch_speech_logic() edits the Players Patch
+  files from their pristine copy: loads data/soundscripts/cataclysm/catspeech.lua first, each handler stores its ship
+  (CatSpeech_Ship), play calls go through CatSpeech_Play(Linked), construction complete / ship destroyed play
+  Cataclysm's per-type line, raceHelper returns "cat_fleet" for Race_ID "Somtaaw".
+- player:racelist.lua (Bin/Profiles/ProfileN) is written only by Players Patch's skirmish rules (SpeechRaceHelper);
+  the campaign writes it at mission start (cataclysmkas.lua KAS_StartEngine). Without it the default Race_ID has no
+  Somtaaw and the stock HW2 announcer speaks.
+- Cataclysm's generic speech events (0-197; the variable is the ShipType, so barks exist per ship type) are not HW1's
+  numbering and have no subtitles: transcribed locally (tools/transcribe_speech.py, faster-whisper small.en on CPU:
+  the GTX 1080 Ti has no fast float16 and the CUDA build lacks cublas64_12.dll) -> Cataclysm-decomp/out/
+  speech_text_sect.tsv; tools/make_unitspeech.py maps them (PILOT / FLEET tables): 0 selected, 1 move, 2 stop, 3 dock,
+  4 docked, 5 attack, 6 cancel, 7/8 force attack, 9 cannot comply, 10 scuttle, 11 damaged, 12 dies, 13-15 tactics,
+  17-25 battle chatter, 26-107 Fleet Command (hyperspace, research, construction per type 61, destroyed per type 101,
+  hotkey groups 91-100 with the group as variable), 142-189 special abilities (cloak, gravwell, link 156/157, mimic
+  165-168, worker harvest/salvage). Not wired: Link/Unlink / Mimic (our abilities aren't engine speech events),
+  module online lines (48), "<ship> is now available for construction" (52); no generic "research available".
+- Alt-tabbing out of fullscreen HWRM can silence all 3D sound (weapons, explosions, engines) for the session
+  (looked like a speech regression; confirmed by a clean rerun).
+
 ## Level conversion (Phase 0.2, `tools/mission2level.py`)
 - HW1/Cataclysm → HWRM: position `{-0.35x, 0.35z, 0.35y}`, yaw `rot - 90`, sphere radius `× 0.175`, inner bounds
   `0.35 × (sizeX, sizeZ, sizeY)`, outer `1.2 × inner`. `.missphere` positions are absolute.
