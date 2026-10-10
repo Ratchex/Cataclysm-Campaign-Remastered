@@ -340,6 +340,10 @@ def use_our_model(ship, ours, joints):
     text = open(path, encoding="latin-1").read()
     for theirs, mine in joints.items():
         text = re.sub(r'"%s"' % theirs, '"%s"' % mine, text)
+    # our models have one level of detail: their LOD switches (made for theirs) left ours invisible past the first
+    # (user: the Mimic vanished zooming out), as on the disguises (ship_variants.py LOD_LINES)
+    text = re.sub(r'^\s*NewShipType(\.|\[")(upLOD|downLOD)\b.*\n', "", text, flags=re.M)
+    text = re.sub(r'^(\s*NewShipType(?:\.|\[")minLOD(?:"\])?\s*=\s*)[\d.]+', r"\g<1>1", text, flags=re.M)
 
     def drop(m):
         joint = m.group(2)

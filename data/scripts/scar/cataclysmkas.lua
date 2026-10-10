@@ -830,38 +830,6 @@ function CatAbility_OwnSelection(grp)
     return grp
 end
 
--- Disguised Mimics (ship_variants.py DISGUISES, swapped in by shiprules.lua CatMimic_As): painted in the impersonated
--- faction's colour scheme and made untargetable, so that side leaves them alone (Cataclysm: a mimic shows its
--- target's model in the target owner's colours; "None of the mines can track a mimic when it imitates an enemy
--- ship"). Only when a type's count grows (KAS_SetColourScheme logs every call).
-CatDisguiseCount = {}
-
-function CatMimicTick()
-    if CatDisguises == nil then return end
-    -- swapped Mimics (shiprules.lua CatMimic_Swap) rejoin the selection with the rest of it
-    SobGroup_CreateIfNotExist("cat_reselect")
-    if SobGroup_Empty("cat_reselect") == 0 then
-        local sel = CatAbility_OwnSelection("cat_reselect_sel")
-        SobGroup_SobGroupAdd(sel, "cat_reselect")
-        SobGroup_SelectSobGroup(sel)
-        print("CKAS: mimic reselected, " .. SobGroup_Count(sel) .. " ships")
-        SobGroup_Clear("cat_reselect")
-    end
-    for i = 1, getn(CatDisguises) do
-        local d, grp = CatDisguises[i], "cat_disg_" .. i
-        SobGroup_CreateIfNotExist(grp)
-        SobGroup_Clear(grp)
-        Player_FillShipsByType(grp, 0, d.type)
-        local n = SobGroup_Count(grp)
-        if n > (CatDisguiseCount[i] or 0) then
-            KAS_SetColourScheme(grp, d.scheme)
-            SobGroup_MakeUntargeted(grp)
-            print("CKAS: mimic disguised as " .. d.target .. " (" .. n .. ")")
-        end
-        CatDisguiseCount[i] = n
-    end
-end
-
 -- Menus (the Mimic's "Select Mimic Type"): a button with opens = <menu> shows / hides the buttons with menu = <menu>
 -- (no ship action); pressing one of those closes the menu
 CatMenuOpen = {}
@@ -992,7 +960,6 @@ function KAS_StartEngine()
     KAS_ApplyColourSchemes()
     Rule_AddInterval("CatAbilityTick", 0.25)
     Rule_AddInterval("CatSayTick", 0.5)
-    Rule_AddInterval("CatMimicTick", 0.5)
     Rule_AddInterval("KAS_VariantBuildWatch", 2)
     KAS_GrantRuntimeResearch()
     KAS_DisableCPUPlayers()

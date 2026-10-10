@@ -44,8 +44,9 @@ def pow2(n):
 BAKE_BASE, BAKE_STRIPE = (66, 108, 202), (255, 255, 255)
 
 
-def write_textures(png_dir, tex, out_dir, base, colour):
-    """Write <base>_DIFF.tga with the team / stripe colours baked in; return the DIFF file name.
+def write_textures(png_dir, tex, out_dir, base, colour, bake=None):
+    """Write <base>_DIFF.tga with the team / stripe colours baked in (bake: (base, stripe) RGB 0-255, default
+    Somtaaw's; the Mimic's disguises take their faction's); return the DIFF file name.
 
     Cataclysm (HW1 texreg.c trBufferColorRGB, Somtaaw scalar 1: colpick.script has curves for the Taiidan only)
     paints texel = texel x (1 - team mask) + base x team mask, then the same with the stripe mask and colour: grey
@@ -63,7 +64,7 @@ def write_textures(png_dir, tex, out_dir, base, colour):
     size = (n, n)
     im = im.resize(size) if size != im.size else im
     if src:
-        for k, c in ((0, BAKE_BASE), (1, BAKE_STRIPE)):
+        for k, c in enumerate(bake or (BAKE_BASE, BAKE_STRIPE)):
             m = os.path.join(png_dir, f"{tex.lower()}_team{k}.png")
             if os.path.exists(m):
                 im = Image.composite(Image.new("RGB", size, c), im, Image.open(m).convert("L").resize(size))
@@ -555,9 +556,13 @@ def main():
     flipped = total = 0
     extent = 0.0   # largest |coordinate| of the hull (HW1 units), sizes the engine glow quads
     frames = {}   # animated object index (in the --anim-geo .geo) -> (joint parent, local matrix)
-    parts = [p.split("@", 1) for p in a.part]   # [(joint name, .geo)]
+    # [(joint name, .geo, (base, stripe) colours baked into its textures or None: Somtaaw's)]
+    parts = []
+    for p in a.part:
+        f = p.split("@")
+        parts.append((f[0], f[1], tuple(tuple(int(c) for c in x.split(",")) for x in f[2:4]) if len(f) > 3 else None))
     npre = 1 + len(a.merge)
-    geos = [a.geo] + a.merge + [g for _, g in parts]
+    geos = [a.geo] + a.merge + [g for _, g, _ in parts]
     norm = lambda g: os.path.normcase(os.path.abspath(g))
     anim_gn = [norm(g) for g in geos].index(norm(a.anim_geo)) if a.anim_geo else 0
     for gn, geo in enumerate(geos):
@@ -608,9 +613,13 @@ def main():
                     pos, nrm, uv = pos[::-1], nrm[::-1], uv[::-1]
                 mat = mats[m] if m < len(mats) else {"texture": None, "diffuse": 0x808080}
                 key = (mat["texture"] or "").lower() or "col%06x" % (mat["diffuse"] & 0xFFFFFF)
+                bake = None
+                if gn >= npre:   # a --part: its own materials (models share texture names), its own colours
+                    key += f"_p{gn - npre}"
+                    bake = parts[gn - npre][2]
                 # owner: an --anim-joints object, -1 the root (or --body), -2 - k --part k
                 groups.setdefault((-2 - (gn - npre) if gn >= npre else owner if owner is not None else -1, key),
-                                  {"mat": mat, "png_dir": png_dir, "tris": []})["tris"].append(
+                                  {"mat": mat, "png_dir": png_dir, "tris": [], "bake": bake})["tris"].append(
                     ([conv(*q) for q in pos], [convn(*q) for q in nrm], uv))
 
     if a.fx_mesh:
@@ -670,7 +679,7 @@ def main():
         mname = f"MAT[{key}]_SHD[{'fx' if a.fx_mesh else 'ship'}]"
         if key not in done_mats:   # one material per texture, shared by the root and the animated parts
             done_mats.add(key)
-            tga = write_textures(g["png_dir"], g["mat"]["texture"], a.out_dir, base, colour)
+            tga = write_textures(g["png_dir"], g["mat"]["texture"], a.out_dir, base, colour, g.get("bake"))
             images.append(f'<image id="{img}-image" name="{img}_FMT[DXT1]"><init_from>{tga}</init_from></image>')
             materials.append(f'<material id="{mname}" name="{mname}"><instance_effect url="#{mname}-fx"/></material>')
             effects.append(f'<effect id="{mname}-fx" name="{mname}"><profile_COMMON>'
@@ -835,7 +844,7 @@ def main():
     if a.body:
         weapons += jnode(f"JNT[{a.body}]", (0, 0, 0), "".join(nodes))
         nodes = []
-    for k, (name, _) in enumerate(parts):
+    for k, (name, _, _) in enumerate(parts):
         weapons += jnode(f"JNT[{name}]", (0, 0, 0), "".join(part_kids[k]))
     if a.latch:
         # harvesting: HWRM puts LatchOrientation on the asteroid's surface, so it sets how far off a collector holds
