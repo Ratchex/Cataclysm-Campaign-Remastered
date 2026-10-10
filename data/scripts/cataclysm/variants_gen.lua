@@ -11,11 +11,11 @@ CatVariantBase = {
 CatDisguises = {
     { type = "smt_mimic_bst_acolyte", target = "bst_acolyte", label = "Beast Acolyte", scheme = 1, button = "mimic_bst_acolyte", state = "NIS01" },
     { type = "smt_mimic_kus_attackbomber", target = "kus_attackbomber", label = "Kushan Attack Bomber", scheme = 6, button = "mimic_kus_attackbomber", state = "NIS02" },
-    { type = "smt_mimic_kus_interceptor", target = "kus_interceptor", label = "Kushan Interceptor", scheme = 6, button = "mimic_kus_interceptor", state = "NIS03" },
-    { type = "smt_mimic_smt_acolyte", target = "smt_acolyte", label = "Acolyte", scheme = 0, button = "mimic_smt_acolyte", state = "NIS04" },
-    { type = "smt_mimic_tai_attackbomber", target = "tai_attackbomber", label = "Taiidan Attack Bomber", scheme = 2, button = "mimic_tai_attackbomber", state = "NIS05" },
-    { type = "smt_mimic_tai_defender", target = "tai_defender", label = "Taiidan Defender", scheme = 2, button = "mimic_tai_defender", state = "NIS06" },
-    { type = "smt_mimic_tai_interceptor", target = "tai_interceptor", label = "Taiidan Interceptor", scheme = 2, button = "mimic_tai_interceptor", state = "NIS07" },
+    { type = "smt_mimic_kus_interceptor", target = "kus_interceptor", label = "Kushan Interceptor", scheme = 6, button = "mimic_kus_interceptor", state = "DockPathOpen1" },
+    { type = "smt_mimic_smt_acolyte", target = "smt_acolyte", label = "Acolyte", scheme = 0, button = "mimic_smt_acolyte", state = "DockPathOpen2" },
+    { type = "smt_mimic_tai_attackbomber", target = "tai_attackbomber", label = "Taiidan Attack Bomber", scheme = 2, button = "mimic_tai_attackbomber", state = "DockPathOpen3" },
+    { type = "smt_mimic_tai_defender", target = "tai_defender", label = "Taiidan Defender", scheme = 2, button = "mimic_tai_defender", state = "DockPathOpen4" },
+    { type = "smt_mimic_tai_interceptor", target = "tai_interceptor", label = "Taiidan Interceptor", scheme = 2, button = "mimic_tai_interceptor", state = "DockPathOpen5" },
 }
 CatVariants = {
 }

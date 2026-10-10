@@ -137,8 +137,15 @@ def build(variant):
 
 def disguise_states():
     """target -> the Mimic's mad state showing that disguise (its model's Disguise_<target> joint: tools/make_mimic.py).
-    NIS00 is the Mimic itself; SobGroup_SetMadState passes on only the engine's state names."""
-    return {t: f"NIS{k + 1:02d}" for k, (_, (_, t, _, _)) in enumerate(sorted(DISGUISES.items()))}
+    NIS00 is the Mimic itself; SobGroup_SetMadState passes on only the engine's state names, and of the numbered NIS
+    states only NIS00-02 (the stock madstates' too: NIS03 and up never reached ours), so then the dock path states,
+    which the engine sets only on ships with dock paths (the Mimic has none)."""
+    assert len(DISGUISES) <= len(DISGUISE_STATES), "more disguises than mad states"
+    return {t: DISGUISE_STATES[k] for k, (_, (_, t, _, _)) in enumerate(sorted(DISGUISES.items()))}
+
+
+DISGUISE_STATES = ["NIS01", "NIS02"] + [f"DockPathOpen{n}" for n in range(1, 6)] + \
+    [f"DockPathClosed{n}" for n in range(1, 6)]
 
 
 def write_lua():

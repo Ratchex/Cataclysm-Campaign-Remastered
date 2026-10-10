@@ -3,17 +3,37 @@
 -- the madstate): NIS00 the Mimic, NIS01... its disguises (shiprules.lua CatMimic_*).
 SMT_MIMIC_Show = function(ship, shown)
     if(shown == "MimicBody") then setJointVisible(ship, "MimicBody", 1) else setJointVisible(ship, "MimicBody", 0) end
-    if(shown == "Disguise_bst_acolyte") then setJointVisible(ship, "Disguise_bst_acolyte", 1) else setJointVisible(ship, "Disguise_bst_acolyte", 0) end
-    if(shown == "Disguise_kus_attackbomber") then setJointVisible(ship, "Disguise_kus_attackbomber", 1) else setJointVisible(ship, "Disguise_kus_attackbomber", 0) end
     if(shown == "Disguise_kus_interceptor") then setJointVisible(ship, "Disguise_kus_interceptor", 1) else setJointVisible(ship, "Disguise_kus_interceptor", 0) end
     if(shown == "Disguise_smt_acolyte") then setJointVisible(ship, "Disguise_smt_acolyte", 1) else setJointVisible(ship, "Disguise_smt_acolyte", 0) end
     if(shown == "Disguise_tai_attackbomber") then setJointVisible(ship, "Disguise_tai_attackbomber", 1) else setJointVisible(ship, "Disguise_tai_attackbomber", 0) end
     if(shown == "Disguise_tai_defender") then setJointVisible(ship, "Disguise_tai_defender", 1) else setJointVisible(ship, "Disguise_tai_defender", 0) end
     if(shown == "Disguise_tai_interceptor") then setJointVisible(ship, "Disguise_tai_interceptor", 1) else setJointVisible(ship, "Disguise_tai_interceptor", 0) end
+    if(shown == "Disguise_bst_acolyte") then setJointVisible(ship, "Disguise_bst_acolyte", 1) else setJointVisible(ship, "Disguise_bst_acolyte", 0) end
+    if(shown == "Disguise_kus_attackbomber") then setJointVisible(ship, "Disguise_kus_attackbomber", 1) else setJointVisible(ship, "Disguise_kus_attackbomber", 0) end
 end
 
 SMT_MIMIC_NIS00_OnSet = function(ship)
     SMT_MIMIC_Show(ship, "MimicBody")
+end
+
+SMT_MIMIC_DockPathOpen1_OnSet = function(ship)
+    SMT_MIMIC_Show(ship, "Disguise_kus_interceptor")
+end
+
+SMT_MIMIC_DockPathOpen2_OnSet = function(ship)
+    SMT_MIMIC_Show(ship, "Disguise_smt_acolyte")
+end
+
+SMT_MIMIC_DockPathOpen3_OnSet = function(ship)
+    SMT_MIMIC_Show(ship, "Disguise_tai_attackbomber")
+end
+
+SMT_MIMIC_DockPathOpen4_OnSet = function(ship)
+    SMT_MIMIC_Show(ship, "Disguise_tai_defender")
+end
+
+SMT_MIMIC_DockPathOpen5_OnSet = function(ship)
+    SMT_MIMIC_Show(ship, "Disguise_tai_interceptor")
 end
 
 SMT_MIMIC_NIS01_OnSet = function(ship)
@@ -22,24 +42,4 @@ end
 
 SMT_MIMIC_NIS02_OnSet = function(ship)
     SMT_MIMIC_Show(ship, "Disguise_kus_attackbomber")
-end
-
-SMT_MIMIC_NIS03_OnSet = function(ship)
-    SMT_MIMIC_Show(ship, "Disguise_kus_interceptor")
-end
-
-SMT_MIMIC_NIS04_OnSet = function(ship)
-    SMT_MIMIC_Show(ship, "Disguise_smt_acolyte")
-end
-
-SMT_MIMIC_NIS05_OnSet = function(ship)
-    SMT_MIMIC_Show(ship, "Disguise_tai_attackbomber")
-end
-
-SMT_MIMIC_NIS06_OnSet = function(ship)
-    SMT_MIMIC_Show(ship, "Disguise_tai_defender")
-end
-
-SMT_MIMIC_NIS07_OnSet = function(ship)
-    SMT_MIMIC_Show(ship, "Disguise_tai_interceptor")
 end
