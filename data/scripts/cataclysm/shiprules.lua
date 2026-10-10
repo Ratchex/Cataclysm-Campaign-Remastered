@@ -1270,7 +1270,7 @@ CAT_PROC_BEAMS = {          -- origin (HWRM units, our model) and side (x direct
 -- The beam cones (tools/make_procbeam.py: the cone on each beam's turret joints, aimed by smt_processor.madstate).
 -- The turrets move like a stock ion turret (kus_destroyerion1: AnimatedTurret, 35 degrees a second in yaw, 20 in
 -- pitch, 10 % of that when pointing at the target; user: copy the destroyer's ion turret): this script turns each
--- turret's angles toward the target's current position at those rates, slowing as it closes in, and sends its
+-- turret's angles toward the target's current position at those rates, easing in, and sends its
 -- angle on every update; the madstate poses the clip at it (letting the clip play toward the angle lagged seconds
 -- behind in game: the engine plays the clips slower than their times say). A message: beam (2 bits), band (2), yaw (8), pitch (8), check (4), each bit a switch to one of the two
 -- of NIS00-02 the madstate is not in (it can't read this script's globals).
@@ -1282,28 +1282,34 @@ CAT_PROC_BEAM_DELAY = 1.0             -- seconds after a beam takes a target bef
 CAT_PROC_AIM_EVERY = 0                -- seconds between a turret's messages while it turns (0: every update)
 CAT_PROC_YAW_SPEED = 35               -- degrees a second (kus_destroyerion1 maxAzimuthSpeed; make_procbeam.py)
 CAT_PROC_PITCH_SPEED = 20             -- (maxDeclinationSpeed)
-CAT_PROC_FINE = 0.25                  -- the rate within CAT_PROC_FINE_ANGLE (stock speedMultiplierWhenPointingAtTarget 0.1)
-CAT_PROC_FINE_ANGLE = 10              -- degrees off the target within which the turret slows to the fine rate
+CAT_PROC_FINE_ANGLE = 10              -- degrees off the target within which the turret's rate eases off with the angle
+CAT_PROC_ACCEL = 2                    -- full speeds a second the turret's rate can change by (0.5 s to full speed)
+CAT_PROC_DEADBAND = 0.2               -- degrees off the target the turret holds still within (one step is 0.35)
 
--- one axis of a turret: its new angle, turned toward want at speed, or the fine rate once within
--- CAT_PROC_FINE_ANGLE of it (user: toggle to slow as it closes in)
-function CatProcBeam_Turn(cur, want, speed, dt)
+-- one axis of a turret: its new angle and rate. The rate it wants is full speed beyond CAT_PROC_FINE_ANGLE and
+-- in proportion to the angle within it, so it settles on a moving target at the target's own rate; its actual
+-- rate follows at no more than CAT_PROC_ACCEL. (A hard full / fine switch at the threshold twitched, user; a fine
+-- rate floor faster than a slow target stopped and started.)
+function CatProcBeam_Turn(cur, vel, want, speed, dt)
     local e = want - cur
     local ae = abs(e)
-    if ae < 0.01 then return want end
-    local k = 1
-    if ae <= CAT_PROC_FINE_ANGLE then k = CAT_PROC_FINE end
-    local step = speed * k * dt
-    if step > ae then step = ae end
-    if e < 0 then step = -step end
-    return cur + step
+    local k = ae / CAT_PROC_FINE_ANGLE
+    if k > 1 then k = 1 end
+    local wv = speed * k
+    if ae < CAT_PROC_DEADBAND then wv = 0 end
+    if e < 0 then wv = -wv end
+    local a = speed * CAT_PROC_ACCEL * dt
+    if wv > vel + a then vel = vel + a elseif wv < vel - a then vel = vel - a else vel = wv end
+    local step = vel * dt
+    if (step > 0 and e > 0 and step >= ae) or (step < 0 and e < 0 and -step >= ae) then return want, 0 end
+    return cur + step, vel
 end
 
 function CatProcBeam_Aim(rec, g, i, t, o, r, u, f, now, dt)
     rec.tur = rec.tur or {}
     local tu = rec.tur[i]
     if not tu then
-        tu = { yaw = 0, pitch = 0 }
+        tu = { yaw = 0, pitch = 0, vy = 0, vp = 0 }
         rec.tur[i] = tu
     end
     local band, wy, wp = 0, 0, 0                         -- no target: back to rest, cone off
@@ -1337,8 +1343,8 @@ function CatProcBeam_Aim(rec, g, i, t, o, r, u, f, now, dt)
     else
         tu.t = nil
     end
-    tu.yaw = CatProcBeam_Turn(tu.yaw, wy, CAT_PROC_YAW_SPEED, dt)
-    tu.pitch = CatProcBeam_Turn(tu.pitch, wp, CAT_PROC_PITCH_SPEED, dt)
+    tu.yaw, tu.vy = CatProcBeam_Turn(tu.yaw, tu.vy, wy, CAT_PROC_YAW_SPEED, dt)
+    tu.pitch, tu.vp = CatProcBeam_Turn(tu.pitch, tu.vp, wp, CAT_PROC_PITCH_SPEED, dt)
     local yq, pq = CatProcBeam_Level(tu.yaw), CatProcBeam_Level(tu.pitch)
     rec.aim = rec.aim or {}
     local last = rec.aim[i]
