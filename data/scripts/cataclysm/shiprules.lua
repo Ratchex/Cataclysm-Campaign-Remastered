@@ -519,9 +519,19 @@ end
 
 -- Link / Unlink
 
+-- a unit bark for the mission script to play (ship code can't reach the speech system): the human's ship goes into
+-- the named group cat_say_<Cataclysm speech event>, cataclysmkas.lua CatSayTick plays it in that ship type's voice
+function CatSay(event, g, p)
+    if p ~= 0 then return end
+    local grp = "cat_say_" .. event
+    SobGroup_CreateIfNotExist(grp)
+    SobGroup_SobGroupAdd(grp, g)
+end
+
 function CatLink_Start(g, p, id)
     local rec = CatShips[id]
     if not rec or rec.link or rec.gone then return end
+    CatSay(156, g, p)                                  -- "Initiating link protocol."
     rec.link = { since = Universe_GameTime() }
     tinsert(CatLinkQueue, id)
     CatLink_Pair(p)
@@ -971,6 +981,7 @@ end
 function CatUnlink_Start(g, p, id)
     local rec = CatShips[id]
     if not rec or rec.gone or SobGroup_Empty(g) == 1 then return end
+    CatSay(157, g, p)                                  -- "Roger, breaking link."
     local pos, health = SobGroup_GetPosition(g), SobGroup_HealthPercentage(g)
     -- each Acolyte: its own kills (none for a built ACV) plus half of what the ACV earned
     local parts = rec.parts or {}

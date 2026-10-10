@@ -934,6 +934,7 @@ function KAS_StartEngine()
     SpeechRaceHelper()
     KAS_ApplyColourSchemes()
     Rule_AddInterval("CatAbilityTick", 0.25)
+    Rule_AddInterval("CatSayTick", 0.5)
     Rule_AddInterval("KAS_VariantBuildWatch", 2)
     KAS_GrantRuntimeResearch()
     KAS_DisableCPUPlayers()
@@ -1114,6 +1115,49 @@ function KAS_SpeechPlay(event, variable)
 end
 
 function K_496eb0(event, variable) KAS_SpeechPlay(event, variable) end                              -- kasfSpeechEvent
+
+-- Barks the engine's speech logic can't trigger (data/soundscripts/cataclysm/catspeech.lua covers the rest): Link /
+-- Unlink from the ship rules, "<technology> available" on research. Same phrase files as KAS_SpeechPlay, but they
+-- don't hold up the mission's dialogue (KAS_SpeechEnd untouched). Variable = the speaking ship's Cataclysm ShipType /
+-- the TechnologyType (catspeech_gen.lua CatSpeech_Var / CatSpeech_TechLine, tools/make_unitspeech.py).
+dofilepath("data:soundscripts/cataclysm/catspeech_gen.lua")
+CatSayEvents = { 156, 157 }        -- Link, Unlink (shiprules.lua CatSay puts the ship in cat_say_<event>)
+CatSayLast = 0
+CatTechHad = nil
+
+function KAS_SpeechBark(ev, variable, actor)
+    local e = KAS_SpeechEvents and KAS_SpeechEvents["sect" .. ev]
+    if e == nil or variable == nil or variable < 0 or variable >= e[2] then
+        return
+    end
+    local id = KAS_SpeechBankBase.sect + e[3] + variable
+    Subtitle_AddSkippable(actor or Actor_HW1_FleetIntel, "$" .. id, (KAS_SpeechDurations[id] or 2000) / 1000)
+    print("CKAS bark " .. ev .. "/" .. variable .. " -> $" .. id)
+end
+
+function CatSayTick()
+    local now = Universe_GameTime()
+    for i = 1, getn(CatSayEvents) do
+        local grp = "cat_say_" .. CatSayEvents[i]
+        if SobGroup_Exists(grp) == 1 and SobGroup_Count(grp) > 0 then
+            if now - CatSayLast > 1.5 then      -- one bark per press, however many ships
+                KAS_SpeechBark(CatSayEvents[i], CatSpeech_Var[strlower(SobGroup_GetShipType(grp))])
+                CatSayLast = now
+            end
+            SobGroup_Clear(grp)
+        end
+    end
+    -- technology lines: when the human gains such a research (not for what it starts the mission with)
+    local first = CatTechHad == nil
+    if first then CatTechHad = {} end
+    for tech, v in CatSpeech_TechLine do
+        local has = Player_HasResearch(0, tech)
+        if not first and has == 1 and CatTechHad[tech] ~= 1 then
+            KAS_SpeechBark(188, v, Actor_HW1_FleetCommand)
+        end
+        CatTechHad[tech] = has
+    end
+end
 
 function K_497b00()                                                                               -- kasfIntelEventEnded
     return KAS_B(Universe_GameTime() >= KAS_SpeechEnd)

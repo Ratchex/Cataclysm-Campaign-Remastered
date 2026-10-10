@@ -100,9 +100,25 @@ if CatSpeech_Loaded == nil then
     -- construction complete: Cataclysm's Fleet Command names the new ship ("Acolyte. Construction completed.");
     -- returns 1 when handled
     function CatSpeech_Built(builtItem)
-        local t = CatSpeech_Type[strupper(builtItem or "")]
+        local key = strupper(builtItem or "")
+        if CatSpeech_Module[key] ~= nil then          -- a Kuun-Lan module: "Hangar module is now online."
+            playSpeechActor(CatSpeech_Module[key], "cat_fleet", 0, 0.5)
+            return 1
+        end
+        local t = CatSpeech_Type[key]
         if t ~= nil then
             playSpeechActor("CAT_BUILT_" .. t, "cat_fleet", 0, 0.5)
+            return 1
+        end
+        return nil
+    end
+
+    -- a ship type can now be built: "<ship> is now available for construction" (only when the engine names it;
+    -- it often reports "" and the stock generic line is not Cataclysm's: nothing plays then)
+    function CatSpeech_Available(shipName)
+        local t = CatSpeech_Type[strupper(shipName or "")]
+        if t ~= nil then
+            playSpeechActor("CAT_AVAILABLE_" .. t, "cat_fleet", 0, 0.5)
             return 1
         end
         return nil

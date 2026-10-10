@@ -87,8 +87,15 @@ for g in range(1, 11):    # hotkey groups: the variable is the group number ("..
     FLEET[f"COMMAND_GROUP_ASSIGNED_{gg}"] = (99, g)                    # "Setting assigned. Group n."
     FLEET[f"STATUS_HOTKEYGROUP_VICTORY_{gg}"] = (94, g)                # "Group n. Reports that enemy has retreated."
     FLEET[f"STATUS_HOTKEYGROUP_DEFEAT_{gg}"] = (118, 0)                # "Group destroyed."
-# per ship type announcer lines, played by catspeech.lua itself: CAT_BUILT_<type>, CAT_DESTROYED_<type>
-PER_TYPE = {"CAT_BUILT": 61, "CAT_DESTROYED": 101}
+# per ship type announcer lines, played by catspeech.lua itself: CAT_BUILT_<type>, CAT_DESTROYED_<type>,
+# CAT_AVAILABLE_<type> ("<ship> is now available for construction")
+PER_TYPE = {"CAT_BUILT": 61, "CAT_DESTROYED": 101, "CAT_AVAILABLE": 52}
+# Kuun-Lan modules coming online (event 48, the variable is Cataclysm's module index): our subsystem -> variable
+MODULE_ONLINE = 48
+MODULES = {"smt_kl_dockingbay": 0, "smt_kl_armour": 1, "smt_kl_micro": 2, "smt_kl_special": 3, "smt_kl_weapons": 4}
+# "<technology> available. Upgrade <ships>." (event 188, the variable is the TechnologyType): played by the mission
+# script when the player gains that research (cataclysmkas.lua CatTechLineTick)
+TECH_LINE = 188
 
 
 def load():
@@ -126,7 +133,8 @@ def main():
 
     pilot_events = sorted({m for m in re.findall(r"[A-Z_ ]{4,}", " ".join(p for p, _ in PILOT))})
     # the event names the logic actually passes: listed in the speech logic files
-    logic = os.path.join(MOD, "data", "soundscripts", "speechlogic")
+    # (Players Patch's pristine copies: the installed ones call CatSpeech_Play, install_cr.py patch_speech_logic)
+    logic = r"C:\Modding\Cataclysm-decomp\reference\players_patch\soundscripts\speechlogic"
     names = set()
     for fn in ("commands.lua", "status.lua", "chatter.lua"):
         for m in re.finditer(r'playSpeechActor\w*\(\s*"([^"]+)"', open(os.path.join(logic, fn), encoding="latin-1").read()):
@@ -167,14 +175,26 @@ def main():
         variants = rows.get((ce, v))
         if variants and write_clip(variants[0], os.path.join(fleet_dir, key.lower() + ".wav"), a.rate):
             fleet[key] = key
-    per_type = {}
+    per_type, var_of = {}, {}
     for prefix, ce in PER_TYPE.items():
         for v, cat in enumerate(types):
             if cat in hwrm and rows.get((ce, v)):
                 key = f"{prefix}_{cat[1:].upper()}"
                 if write_clip(rows[(ce, v)][0], os.path.join(fleet_dir, key.lower() + ".wav"), a.rate):
                     for name in hwrm[cat]:
-                        per_type.setdefault(name, cat[1:].upper())
+                        # module dummy ships share their subsystem's name minus _dummy
+                        for alias in {name, name[:-len("_dummy")] if name.endswith("_dummy") else name}:
+                            per_type.setdefault(alias, cat[1:].upper())
+    for v, cat in enumerate(types):
+        for name in hwrm.get(cat, []):
+            var_of.setdefault(name, v)
+    modules = {}
+    for sub, v in MODULES.items():
+        if rows.get((MODULE_ONLINE, v)):
+            key = "CAT_MODULE_" + sub[len("smt_kl_"):].upper()
+            if write_clip(rows[(MODULE_ONLINE, v)][0], os.path.join(fleet_dir, key.lower() + ".wav"), a.rate):
+                modules[sub] = key
+    tech_line = {make_upgrades.TECHS[v]: v for (e, v) in rows if e == TECH_LINE and v < len(make_upgrades.TECHS)}
 
     out = os.path.join(MOD, "data", "soundscripts", "cataclysm", "catspeech_gen.lua")
     with open(out, "w", newline="\n") as f:
@@ -189,9 +209,18 @@ def main():
         f.write("}\nCatSpeech_Fleet = {      -- announcer events with a Fleet Command line (cat_fleet/<event>.wav)\n")
         for k in sorted(fleet):
             f.write(f'    {k} = "{k}",\n')
-        f.write("}\nCatSpeech_Type = {       -- our ship type -> CAT_BUILT_<x> / CAT_DESTROYED_<x> in cat_fleet\n")
+        f.write("}\nCatSpeech_Type = {       -- our ship type -> CAT_BUILT_ / CAT_DESTROYED_ / CAT_AVAILABLE_<x> in cat_fleet\n")
         for k in sorted(per_type):
             f.write(f'    ["{k.upper()}"] = "{per_type[k]}",\n')
+        f.write("}\nCatSpeech_Module = {     -- Kuun-Lan module subsystem -> its \"... module is now online\" line\n")
+        for k in sorted(modules):
+            f.write(f'    ["{k.upper()}"] = "{modules[k]}",\n')
+        f.write("}\nCatSpeech_Var = {        -- our ship type -> Cataclysm ShipType (the speech variable; mission barks)\n")
+        for k in sorted(var_of):
+            f.write(f'    ["{k}"] = {var_of[k]},\n')
+        f.write("}\nCatSpeech_TechLine = {   -- research -> its \"<tech> available\" line (event %d variable)\n" % TECH_LINE)
+        for k in sorted(tech_line):
+            f.write(f'    {k} = {tech_line[k]},\n')
         f.write("}\n")
     print(f"{len(lines)} ship voices, {n_pilot} pilot lines over {sum(len(v) for v in lines.values())} events; "
           f"{len(fleet)} Fleet Command events, {len(per_type)} ship types with built/destroyed lines -> {out}")

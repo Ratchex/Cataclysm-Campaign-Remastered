@@ -56,11 +56,14 @@ def main():
                 continue  # phrase without any recorded segment
             ph, ev = int(r["phrase"]), int(r["event"])
             sid = BASE[bank] + ph
-            e = events.setdefault((bank, ev), {"nvar": 0, "maxvar": 0, "base": None})
+            e = events.setdefault((bank, ev), {"nvar": 0, "maxvar": 0, "base": None, "rows": []})
             e["nvar"] = max(e["nvar"], int(r["variation"]) + 1)
             e["maxvar"] = max(e["maxvar"], int(r["variable"]) + 1)
-            if int(r["variation"]) == 0 and int(r["variable"]) == 0:
-                e["base"] = ph
+            e["rows"].append((ph, int(r["variation"]), int(r["variable"])))
+            # phrase = base + variation * maxvar + variable: any variation-0 row gives the base (ship-specific
+            # events such as Link 156 have no variable-0 row: no line for the Recon)
+            if int(r["variation"]) == 0 and (e["base"] is None or ph - int(r["variable"]) < e["base"]):
+                e["base"] = ph - int(r["variable"])
             if sid in subs:
                 continue
             text = r["subtitle"].strip()
@@ -87,6 +90,10 @@ def main():
         for (bank, ev), e in sorted(events.items()):
             if e["base"] is None:
                 continue
+            for ph, var, v in e["rows"]:     # the table's real variable count, when a later variation shows it
+                if var > 0 and (ph - e["base"] - v) % var == 0 and (ph - e["base"] - v) // var >= e["maxvar"]:
+                    e["maxvar"] = (ph - e["base"] - v) // var
+                    break
             f.write(f'KAS_SpeechEvents["{bank}{ev}"] = {{ {e["nvar"]}, {e["maxvar"]}, {e["base"]} }}\n')
         f.write("KAS_SpeechDurations = {}\n")
         for sid in sorted(subs):

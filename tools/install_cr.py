@@ -315,6 +315,7 @@ SPEECH_SHIP_ARG = {"StatusSubsystem": 1, "CommandConstructionComplete": 1}   # h
 SPEECH_EARLY_OUT = {   # Somtaaw ships: Cataclysm's per-ship-type Fleet Command line instead of the stock logic
     "CommandConstructionComplete": "if CatSpeech_IsSomtaaw({s}) ~= nil and CatSpeech_Built({s}) ~= nil then return end",
     "StatusShipDestroyed": "if CatSpeech_IsSomtaaw({s}) ~= nil and CatSpeech_Destroyed({s}) ~= nil then return end",
+    "StatusBuildAvailable": "if CatSpeech_IsSomtaaw({s}) ~= nil and CatSpeech_Available({s}) ~= nil then return end",
 }
 
 
