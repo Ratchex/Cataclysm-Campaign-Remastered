@@ -6,14 +6,15 @@
 set -e
 cd "$(dirname "$0")/.."
 SECT=C:/Modding/Cataclysm-decomp/extracted/big/race_sect
-# emissive maps: Cataclysm Remastered's Kuun-Lan GLOW textures (its textures are Cataclysm's, upscaled; same UVs)
+# emissive maps and engine look: Cataclysm Remastered's Kuun-Lan (GLOW textures: its textures are Cataclysm's, upscaled, same UVs;
+# engines: its ETSH trail shape on our nozzles, no BURN flames; x0.909 = CR's model -> ours, as the dock paths)
 GLOW=C:/Modding/Cataclysm-decomp/reference/cr_main/ship/smt_ms_sp/smt_ms_sp.hod
 for spec in $(python tools/make_modules.py --list-builds); do
     key=${spec%%=*}; cat=${spec#*=}
-    GEO2DAE_ARGS="--no-docks --glow-from $GLOW" bash tools/build_ship.sh "race_sect/$cat" "smt_kl_$key" | tail -1
+    GEO2DAE_ARGS="--no-docks --glow-from $GLOW --engines-from $GLOW --engines-scale 0.909" bash tools/build_ship.sh "race_sect/$cat" "smt_kl_$key" | tail -1
 done
 HARDPOINTS="Hardpoint_Research $(python tools/make_modules.py --list-hardpoints)" \
-GEO2DAE_ARGS="--glow-from $GLOW --dock-from C:/Modding/Cataclysm-decomp/reference/cr_beast/ship/smt_ms/smt_ms.hod --dock-scale 0.909 \
+GEO2DAE_ARGS="--glow-from $GLOW --engines-from $GLOW --engines-scale 0.909 --dock-from C:/Modding/Cataclysm-decomp/reference/cr_beast/ship/smt_ms/smt_ms.hod --dock-scale 0.909 \
 --points-from $SECT/smothershipengineslower/rl0/lod0/smothershipengineslower.geo \
 --points-from $SECT/smothershipenginesupper/rl0/lod0/smothershipenginesupper.geo" \
     bash tools/build_ship.sh race_sect/smothership som_mothership $(python tools/make_modules.py --list-core) | tail -1

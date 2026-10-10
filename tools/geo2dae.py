@@ -420,6 +420,49 @@ def navlight_nodes(points, conv, scale):
     return "".join(out), len(out)
 
 
+def hod_engines(path):
+    """Engine nozzles and shapes of an old-format HWRM .hod (Cataclysm Remastered's smt_ms_sp): [(nozzle joint name,
+    world position, [(shape name, [vertex, ...])])]. HIER: u32 count, per joint name, parent (u32-length strings),
+    position 3f, rotation 3f, scale 3f, axis 3f, 3 flag bytes; ETSH: name, parent joint, u32 count, vertices 3f
+    (local to the parent). Joint rotations on the way are zero in CR's Kuun-Lan (only translations are summed)."""
+    d = open(path, "rb").read()
+
+    def lstr(p):
+        n = struct.unpack_from("<I", d, p)[0]
+        return d[p + 4:p + 4 + n].decode("latin-1"), p + 4 + n
+    joints = {}
+    i = d.find(b"HIER")
+    if i >= 0:
+        n, p = struct.unpack_from("<I", d, i + 8)[0], i + 12
+        for _ in range(min(n, 4096)):
+            name, p = lstr(p)
+            parent, p = lstr(p)
+            v = struct.unpack_from("<12f", d, p)
+            p += 51
+            joints[name] = (parent, v[:3], v[3:6])
+
+    def world(name):
+        x, seen = [0.0, 0.0, 0.0], set()
+        while name in joints and name not in seen:
+            seen.add(name)
+            parent, t, r = joints[name]
+            if any(abs(c) > 1e-6 for c in r):
+                sys.exit(f"--engines-from: joint {name} is rotated; only translations are handled")
+            x = [x[k] + t[k] for k in range(3)]
+            name = parent
+        return tuple(x)
+    shapes = {}
+    for m in re.finditer(rb"ETSH", d):
+        p = m.start() + 8
+        name, p = lstr(p)
+        parent, p = lstr(p)
+        n = struct.unpack_from("<I", d, p)[0]
+        if not 0 < n < 64:
+            continue
+        shapes.setdefault(parent, []).append((name, [struct.unpack_from("<3f", d, p + 4 + 12 * k) for k in range(n)]))
+    return [(nz, world(nz), shapes.get(nz, [])) for nz in sorted(n for n in joints if n.startswith("EngineNozzle"))]
+
+
 def weapon_nodes(points, conv, convn):
     """JNT[Weapon_<GUNn>_Position] with _Direction (up), _Rest (firing direction), _Muzzle children (the layout of
     the HWRM Blender toolkit's hardpoint tool); the position joint itself is not rotated."""
@@ -469,6 +512,10 @@ def main():
     ap.add_argument("--glow-from", help="old-format HOD whose GLOW textures (Cataclysm texture names) become our "
                                         "_GLOW maps (Cataclysm Remastered's smt_ms_sp.hod for the Kuun-Lan)")
     ap.add_argument("--no-navlights", action="store_true", help="no NAVL joints from the .mex Nav chunks")
+    ap.add_argument("--no-engines", action="store_true", help="no engine nozzles from the .mex Eng chunks")
+    ap.add_argument("--engines-from", help="engine look from this old-format HOD (Cataclysm Remastered's smt_ms_sp.hod): "
+                                           "its ETSH shape on our .mex nozzles, no BURN flames")
+    ap.add_argument("--engines-scale", type=float, default=1.0, help="size scale for --engines-from shapes")
     a = ap.parse_args()
     if a.glow_from:
         load_glow_maps(a.glow_from, os.path.join(os.path.dirname(os.path.abspath(a.out_dir)), "_glow_cache",
@@ -604,7 +651,8 @@ def main():
     # Engine nozzles from the .mex Eng chunks: JNT[EngineNozzle<n>] (setEngineTrail index n-1 / setEngineBurn).
     # Each nozzle as in HODOR's engine layout (toolkit demo ship): BURN[EngineBurn<n>] with five flame divisions
     # trailing backwards and an ETSH[EngineShape<n>] quad; trails/burns need these, not just the joint.
-    engines = [pt for pt in points if pt[0] == "Eng"]
+    engines = [] if a.no_engines else [pt for pt in points if pt[0] == "Eng"]
+    cr_shapes = [sh for _, _, shp in hod_engines(a.engines_from) for sh in shp] if a.engines_from else []
     parsed = {}
     for i, pt in enumerate(engines):
         _, _, pos, _, parent = pt
@@ -626,22 +674,32 @@ def main():
         flames = "".join(jnode(f"Flame[0]_Div[{d}]", (0, 0, -2.0 * d)) for d in range(5))
         gid = f"ETSH[EngineShape{n}]"
         # glow quad half-size ~6% of the ship's half-length (Cataclysm Remastered's Recon: 0.45 on ~7)
-        h = min(30.0, max(0.3, 0.06 * extent * a.scale))
-        P = [-h, -h, 0, -h, h, 0, h, h, 0, h, -h, 0]
+        if cr_shapes:
+            # Cataclysm Remastered's engine shape (its Kuun-Lan: one triangle 54 behind its nozzle), scaled to ours,
+            # on our nozzle; CR has no BURN flames, so neither do we here (user: "a direct port of CR's engines")
+            vs = cr_shapes[i % len(cr_shapes)][1]
+            P = [c * a.engines_scale for v in vs for c in v]
+            idx = [k for t in range(1, len(vs) - 1) for k in (0, t, t + 1)]
+        else:
+            h = min(30.0, max(0.3, 0.06 * extent * a.scale))
+            P = [-h, -h, 0, -h, h, 0, h, h, 0, h, -h, 0]
+            idx = [0, 1, 2, 0, 2, 3]
+        nv = len(P) // 3
         geoms.append(f'<geometry id="{gid}" name="{gid}"><mesh>'
-                     f'<source id="{gid}-pos"><float_array id="{gid}-pos-a" count="12">{fl(P)}</float_array>'
-                     f'<technique_common><accessor source="#{gid}-pos-a" count="4" stride="3"><param name="X" type="float"/>'
+                     f'<source id="{gid}-pos"><float_array id="{gid}-pos-a" count="{len(P)}">{fl(P)}</float_array>'
+                     f'<technique_common><accessor source="#{gid}-pos-a" count="{nv}" stride="3"><param name="X" type="float"/>'
                      f'<param name="Y" type="float"/><param name="Z" type="float"/></accessor></technique_common></source>'
-                     f'<source id="{gid}-nrm"><float_array id="{gid}-nrm-a" count="12">{fl([0, 0, -1] * 4)}</float_array>'
-                     f'<technique_common><accessor source="#{gid}-nrm-a" count="4" stride="3"><param name="X" type="float"/>'
+                     f'<source id="{gid}-nrm"><float_array id="{gid}-nrm-a" count="{len(P)}">{fl([0, 0, -1] * nv)}</float_array>'
+                     f'<technique_common><accessor source="#{gid}-nrm-a" count="{nv}" stride="3"><param name="X" type="float"/>'
                      f'<param name="Y" type="float"/><param name="Z" type="float"/></accessor></technique_common></source>'
                      f'<vertices id="{gid}-v"><input semantic="POSITION" source="#{gid}-pos"/></vertices>'
-                     f'<triangles count="2"><input semantic="VERTEX" offset="0" source="#{gid}-v"/>'
-                     f'<input semantic="NORMAL" offset="0" source="#{gid}-nrm"/><p>0 1 2 0 2 3</p></triangles>'
+                     f'<triangles count="{len(idx) // 3}"><input semantic="VERTEX" offset="0" source="#{gid}-v"/>'
+                     f'<input semantic="NORMAL" offset="0" source="#{gid}-nrm"/><p>{" ".join(map(str, idx))}</p></triangles>'
                      f'</mesh></geometry>')
         shape = (f'<node name="{gid}" id="{gid}" sid="{gid}E"><translate sid="translate">0 0 0</translate>'
                  f'<instance_geometry url="#{gid}"></instance_geometry></node>')
-        weapons += jnode(f"JNT[EngineNozzle{n}]", conv(*pos), jnode(f"BURN[EngineBurn{n}]", (0, 0, 0), flames) + shape)
+        burn = "" if cr_shapes else jnode(f"BURN[EngineBurn{n}]", (0, 0, 0), flames)
+        weapons += jnode(f"JNT[EngineNozzle{n}]", conv(*pos), burn + shape)
     nav, nnav = ("", 0) if a.no_navlights else navlight_nodes(points, conv, a.scale)
     weapons += nav
     # resource drop-off at the collector docks (Cataclysm Remastered's sits at its Kuun-Lan's front dock)
