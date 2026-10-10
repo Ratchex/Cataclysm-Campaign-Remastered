@@ -1066,6 +1066,7 @@ CAT_KAMIKAZE_CHARGE = 1.5   -- PLACEHOLDER: Cataclysm's multiplier not found
 CAT_KAMIKAZE_REACH = 150    -- died this close to its target's centre (after flying on since its last update): a hit
 CAT_KAMIKAZE_HWRM = 200     -- HWRM's own damage from a Mimic (measured: 181-252)
 CatKamikazeTopUp = { smt_mimic = 1 }   -- unarmed rammers dealt Cataclysm's damage less HWRM's
+CAT_KAMIKAZE_TEST = 1      -- TEST (tuning.lua Unarmoured 3.57): log only, no top-up
 
 function CatKamikaze_Tick(rec, g, id)
     local order = SobGroup_GetCurrentOrder(g)
@@ -1108,7 +1109,7 @@ function CatKamikaze_Died(rec, g, id)
         return
     end
     local before = SobGroup_CurrentHealthTotal(rec.kamiTargets)
-    if dmg > 0 then SobGroup_TakeDamageAbsolute(rec.kamiTargets, dmg) end
+    if dmg > 0 and CAT_KAMIKAZE_TEST ~= 1 then SobGroup_TakeDamageAbsolute(rec.kamiTargets, dmg) end
     print("CATACLYSM kamikaze: ship " .. id .. " (" .. rec.real .. ") hit (" .. floor(d) .. "), +" .. dmg ..
           " to HWRM's, target health " .. floor(before) .. " -> " .. floor(SobGroup_CurrentHealthTotal(rec.kamiTargets)))
 end
