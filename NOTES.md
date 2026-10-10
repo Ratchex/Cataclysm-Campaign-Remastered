@@ -61,8 +61,16 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
   4 docked, 5 attack, 6 cancel, 7/8 force attack, 9 cannot comply, 10 scuttle, 11 damaged, 12 dies, 13-15 tactics,
   17-25 battle chatter, 26-107 Fleet Command (hyperspace, research, construction per type 61, destroyed per type 101,
   hotkey groups 91-100 with the group as variable), 142-189 special abilities (cloak, gravwell, link 156/157, mimic
-  165-168, worker harvest/salvage). Not wired: Link/Unlink / Mimic (our abilities aren't engine speech events),
-  module online lines (48), "<ship> is now available for construction" (52); no generic "research available".
+  165-168, worker harvest/salvage). Also wired (confirmed): module online (48, variable = module index: hangar,
+  armour, engineering, advanced engineering, weapons), "<ship> is now available for construction" (52, only when the
+  engine names the ship), Link / Unlink (shiprules.lua CatSay -> named group cat_say_<event> -> cataclysmkas.lua
+  CatSayTick, KAS_SpeechBark: mission speech files, KAS_SpeechEnd untouched), the Tactical Officer's "<tech>
+  available. Upgrade <ships>." (188, variable = TechnologyType: only REPAIR, SALVAGE, CRYSTAL_HARVEST have one) when
+  the player gains the research, after "Research completed." + CAT_TECH_LINE_GAP 1 s. No generic "research available"
+  line in Cataclysm. Mimic lines (165-168) wait for the Mimic. tools/build_speech.py now keeps events without a
+  variable-0 line (base = phrase - variable of a variation-0 row).
+- Unit test range (campaign entry 1): range.lua RANGE_GRANT_ALL 0 = all research available, none done (voice
+  testing); 1 = everything researched and the placed ships upgraded.
 - Alt-tabbing out of fullscreen HWRM can silence all 3D sound (weapons, explosions, engines) for the session
   (looked like a speech regression; confirmed by a clean rerun).
 

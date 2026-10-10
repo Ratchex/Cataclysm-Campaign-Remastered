@@ -10,8 +10,10 @@ findings).
   generator (geo2dae --anim-geo, smt_ms_sp.madstate). NOTES.md "Ships and HODOR".
 - Mission 1 lighting: ez14 relit with Cataclysm's mission01.hsf (make_background.RELIGHT, at install). Fog (step 2)
   not needed so far.
-- Voices: Cataclysm's Somtaaw unit barks per ship type and Fleet Command as the Somtaaw race announcer (NOTES.md
-  "Unit barks and the announcer"). Rebuild: tools/make_unitspeech.py (audio, git-ignored) then install_cr.py.
+- Voices: Cataclysm's Somtaaw unit barks per ship type and Fleet Command as the Somtaaw race announcer, module
+  online, Link/Unlink and tech-available lines (NOTES.md "Unit barks and the announcer"). Rebuild:
+  tools/build_speech.py + tools/make_unitspeech.py (audio, git-ignored) then install_cr.py. Range: RANGE_GRANT_ALL 0
+  now (research testing); set 1 for upgraded test ships.
 
 ## Mission 1 cosmetics detour: DONE (2026-10-09, confirmed in game)
 - Team colours per faction (tools/make_colours.py, teamcolour.lua, KAS_ApplyColourSchemes; m01_paths.lua loads
