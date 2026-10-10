@@ -1246,7 +1246,8 @@ CAT_PROC_BEAMS = {          -- origin (HWRM units, our model) and side (x direct
 -- switch to one of the two of NIS00-02 the madstate is not in (it can't read this script's globals).
 CAT_PROC_BANDS = { 500, 950, 1400 }   -- the cone's lengths (make_procbeam.py BANDS): the shortest that reaches
 CAT_PROC_LEVELS = 31                  -- yaw / pitch steps over -45..45 degrees
-CAT_PROC_AIM_TRACE = 0                -- 1: log each message
+CAT_PROC_AIM_TRACE = 1                -- TEST: log each message
+CAT_PROC_CALIBRATE = 1                -- TEST: fixed poses (CatProcessor_Tick)
 CAT_PROC_AIM_EASE = 1.0               -- seconds the tracking point takes to follow its target
 CAT_PROC_AIM_HOLD = 1.0               -- a change under CAT_PROC_AIM_JUMP steps is sent only after this long
 CAT_PROC_AIM_JUMP = 3                 -- steps (about 3 degrees each) sent at once
@@ -1298,8 +1299,13 @@ function CatProcBeam_Aim(rec, g, i, t, o, r, u, f, now, dt)
         if dy < CAT_PROC_AIM_JUMP and dp < CAT_PROC_AIM_JUMP and now - last[4] < CAT_PROC_AIM_HOLD then return end
     end
     rec.aim[i] = { band, yq, pq, now }
+    CatProcBeam_Send(rec, g, i - 1, band, yq, pq)
+end
+
+-- one beam's message (beam 0-3, band, yaw / pitch steps) to the madstate
+function CatProcBeam_Send(rec, g, beam, band, yq, pq)
     local bits = {}
-    CatProcBeam_Bits(bits, i - 1, 2)
+    CatProcBeam_Bits(bits, beam, 2)
     CatProcBeam_Bits(bits, band, 2)
     CatProcBeam_Bits(bits, yq, 5)
     CatProcBeam_Bits(bits, pq, 5)
@@ -1314,7 +1320,7 @@ function CatProcBeam_Aim(rec, g, i, t, o, r, u, f, now, dt)
         SobGroup_SetMadState(g, "NIS0" .. sym)
     end
     if CAT_PROC_AIM_TRACE == 1 then
-        print("CATACLYSM procbeam " .. rec.g .. " beam " .. (i - 1) .. ": band " .. band .. ", yaw " .. yq .. ", pitch " .. pq)
+        print("CATACLYSM procbeam " .. rec.g .. " beam " .. beam .. ": band " .. band .. ", yaw " .. yq .. ", pitch " .. pq)
     end
 end
 
@@ -1354,6 +1360,20 @@ end
 function CatProcessor_Tick(rec, g, id, now)
     local dt = now - (rec.procLast or now)
     rec.procLast = now
+    if CAT_PROC_CALIBRATE == 1 then
+        -- TEST: fixed poses to read the turret's signs off in game. Beam0 (REPAIR0, upper rear, -X side) at rest,
+        -- Beam1 (lower front, -X) yawed +40, Beam2 (lower front, +X) pitched +40, Beam3 (upper rear, +X) at rest, short
+        if not rec.calSent and now > (rec.calAt or 0) then
+            if not rec.calAt then rec.calAt = now + 3 return end
+            rec.calSent = 1
+            local z, y40 = CatProcBeam_Level(0), CatProcBeam_Level(40)
+            CatProcBeam_Send(rec, g, 0, 3, z, z)
+            CatProcBeam_Send(rec, g, 1, 3, y40, z)
+            CatProcBeam_Send(rec, g, 2, 3, z, y40)
+            CatProcBeam_Send(rec, g, 3, 1, z, z)
+        end
+        return
+    end
     if not rec.up.REPAIR then return end
     local m = SobGroup_GetCoordSys(g)
     if getn(m) ~= 9 then return end
