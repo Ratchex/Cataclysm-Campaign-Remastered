@@ -1087,6 +1087,7 @@ function CatKamikaze_Tick(rec, g, id)
     if SobGroup_Empty(rec.kamiGrp) == 0 then
         SobGroup_Clear(rec.kamiTargets)
         SobGroup_SobGroupAdd(rec.kamiTargets, rec.kamiGrp)
+        rec.kamiTargetHealth = SobGroup_CurrentHealthTotal(rec.kamiTargets)
     end
     rec.kamiPos, rec.kamiSpeed, rec.kamiTime = SobGroup_GetPosition(g), SobGroup_GetActualSpeed(g), Universe_GameTime()
 end
@@ -1105,7 +1106,9 @@ function CatKamikaze_Died(rec, g, id)
     if rec.up.EXPLOSIVE_CHARGE then dmg = dmg * CAT_KAMIKAZE_CHARGE end
     dmg = dmg - CAT_KAMIKAZE_HWRM
     if d > CAT_KAMIKAZE_REACH then
-        print("CATACLYSM kamikaze: ship " .. id .. " (" .. rec.real .. ") died " .. floor(d) .. " short of its target")
+        print("CATACLYSM kamikaze: ship " .. id .. " (" .. rec.real .. ") died " .. floor(d) .. " from its target, " ..
+              "target health " .. floor(rec.kamiTargetHealth or -1) .. " at its last update, " ..
+              floor(SobGroup_CurrentHealthTotal(rec.kamiTargets)) .. " now")
         return
     end
     local before = SobGroup_CurrentHealthTotal(rec.kamiTargets)
