@@ -1273,13 +1273,14 @@ function CatProcBeam_Aim(rec, g, i, t, o, r, u, f, now, dt)
         local vz = v[1] * f[1] + v[2] * f[2] + v[3] * f[3]
         local n = sqrt(vx * vx + vy * vy + vz * vz)
         if n > 1 then
-            -- HWRM turns a joint by -angle in the usual right-handed sense (in game the first cones, built that way,
-            -- came out of the far side): the direction is Ry(-(base + yaw)) Rx(-pitch) +Z, base = -90 x side
-            -- (geo2dae --turret, build_ship.sh); Lua 4 trig is in degrees
+            -- the beam's own frame (geo2dae --turret: _Base turned 90 x side degrees about up, +Z out of its side);
+            -- direction = Ry(yaw) Rx(pitch) +Z there. An effect mesh renders along its marker's -Z, so the cone mesh
+            -- is built along -Z (in game: built along +Z the cones pointed straight away from the target, and with
+            -- the angles reversed, mirrored). Lua 4 trig is in degrees
             local side = CAT_PROC_BEAMS[i][4]
-            local yaw = 90 * side - atan2(vx, vz)
-            if yaw > 180 then yaw = yaw - 360 elseif yaw < -180 then yaw = yaw + 360 end
-            local pitch = asin(vy / n)
+            local lx, ly, lz = -side * vz, vy, side * vx
+            local yaw = atan2(lx, lz)
+            local pitch = asin(-ly / n)
             yq = CatProcBeam_Level(yaw)
             pq = CatProcBeam_Level(pitch)
             band = 3
