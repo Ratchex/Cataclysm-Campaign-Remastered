@@ -7,7 +7,7 @@
 -- it is dropped and the rest of that update ignored). Messages are sent whole within one script update; the Clock clip's
 -- time tells updates apart, so a message cut short (a lost bit) is dropped at the next update.
 -- Aim: clip Yaw<i> / Pitch<i> sweeps -45..45 (make_procbeam.py); the script turns the turret itself (like a stock
--- ion turret) and sends its angle on every update, and the clip is posed there (time set and paused at it).
+-- ion turret) and sends its angle on every update, and the clip is posed there (time set, clip paused).
 -- Letting the clip play toward a new angle lagged seconds behind in game (the engine plays them slower).
 
 SMT_PROCESSOR_P = {}
@@ -20,10 +20,14 @@ SMT_PROCESSOR_Aim = function(ship, clip, sweep, target)
     if(isAnimRunning(ship, clip) == 0) then
         startAnim(ship, clip)
     end
-    -- set at the angle and paused a hair after: a clip set and paused at the same time didn't pause (it kept playing
-    -- through its sweep between updates), and set 0.02 s short it twitched back and forth every update
+    -- frozen at the angle: unpaused, set and paused again within this call, so no frame plays in between. (Only a
+    -- pause point a hair after the angle, as before, was sometimes skipped: the clip played on through its sweep
+    -- until the next message snapped it back, user: still oscillating with both ships stopped. A pause point at the
+    -- angle itself didn't pause; 0.02 s short twitched every update.) The pause point stays as a backstop.
+    unpauseAnim(ship, clip)
     setTime(ship, clip, t)
     setPauseTime(ship, clip, t + 0.001)
+    pauseAnim(ship, clip)
 end
 
 SMT_PROCESSOR_Value = function(bits, first, count)
