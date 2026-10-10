@@ -1235,7 +1235,7 @@ CAT_PROC_BEAMS = {          -- origin (HWRM units, our model) and side (x direct
 -- pitch, 10 % of that when pointing at the target; user: copy the destroyer's ion turret): this script turns each
 -- turret's angles toward the target's current position at those rates, slowing as it closes in, and sends its
 -- angle on every update; the madstate poses the clip at it (letting the clip play toward the angle lagged seconds
--- behind in game: the engine plays the clips slower than their times say). A message: beam (2 bits), band (2), yaw (8), pitch (8), each bit a switch to one of the two
+-- behind in game: the engine plays the clips slower than their times say). A message: beam (2 bits), band (2), yaw (8), pitch (8), check (4), each bit a switch to one of the two
 -- of NIS00-02 the madstate is not in (it can't read this script's globals).
 CAT_PROC_BANDS = { 500, 950, 1400 }   -- the cone's lengths (make_procbeam.py BANDS): the shortest that reaches
 CAT_PROC_LEVELS = 255                 -- yaw / pitch steps over -45..45 degrees (8 bits each)
@@ -1307,7 +1307,8 @@ function CatProcBeam_Aim(rec, g, i, t, o, r, u, f, now, dt)
     rec.aim = rec.aim or {}
     local last = rec.aim[i]
     if last then
-        if last[1] == band and last[2] == yq and last[3] == pq then return end
+        -- unchanged: sent again each second all the same (a dropped message can't leave a cone stuck)
+        if last[1] == band and last[2] == yq and last[3] == pq and now - last[4] < 1 then return end
         if last[1] == band and now - last[4] < CAT_PROC_AIM_EVERY then return end
     end
     rec.aim[i] = { band, yq, pq, now }
@@ -1321,6 +1322,7 @@ function CatProcBeam_Send(rec, g, beam, band, yq, pq)
     CatProcBeam_Bits(bits, band, 2)
     CatProcBeam_Bits(bits, yq, 8)
     CatProcBeam_Bits(bits, pq, 8)
+    CatProcBeam_Bits(bits, CatProcBeam_Check(beam, band, yq, pq), 4)
     if not rec.madSym then                               -- first: a sync switch (no bit)
         rec.madSym = 0
         SobGroup_SetMadState(g, "NIS00")
@@ -1336,6 +1338,13 @@ function CatProcBeam_Send(rec, g, beam, band, yq, pq)
               " (" .. (rec.aimWhy or "") .. ")")
         rec.aimWhy = nil
     end
+end
+
+-- a message's 4-bit check (smt_processor.madstate drops a message that fails it: a lost switch shifted the beam
+-- field, and a port turret fired at a target off the starboard side, user)
+function CatProcBeam_Check(beam, band, yq, pq)
+    local c = beam * 7 + band * 5 + yq * 3 + pq + floor(yq / 16) + floor(pq / 16) * 9
+    return c - floor(c / 16) * 16
 end
 
 function CatProcBeam_Level(a)
