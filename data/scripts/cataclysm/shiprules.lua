@@ -1063,10 +1063,10 @@ end
 -- target. Line 167 (the pilot's last words) as an unarmed ship's attack starts.
 -- Cataclysm's blast (blastRadiusDamage) reaches about 6 units for a Mimic: only the ship rammed; not modelled.
 CAT_KAMIKAZE_CHARGE = 1.5   -- PLACEHOLDER: Cataclysm's multiplier not found
-CAT_KAMIKAZE_REACH = 150    -- died this close to its target's centre (after flying on since its last update): a hit
-CAT_KAMIKAZE_HWRM = 200     -- HWRM's own damage from a Mimic (measured: 181-252)
+CAT_KAMIKAZE_REACH = 1000   -- died this close to its target's centre (frigates: 448, 562 in game)...
+CAT_KAMIKAZE_HIT = 100      -- ...and the target lost this much since its last update: HWRM's own hit (a Mimic's:
+                            -- its health x 7, 280-306 in game; the armour factor goes by the target's family)
 CatKamikazeTopUp = { smt_mimic = 1 }   -- unarmed rammers dealt Cataclysm's damage less HWRM's
-CAT_KAMIKAZE_TEST = 1      -- TEST (tuning.lua Unarmoured 3.57): log only, no top-up
 
 function CatKamikaze_Tick(rec, g, id)
     local order = SobGroup_GetCurrentOrder(g)
@@ -1096,25 +1096,27 @@ function CatKamikaze_Died(rec, g, id)
     if not rec.kamiAttack or SobGroup_Empty(rec.kamiTargets) == 1 or not rec.kamiPos then return end
     -- where it died if the engine still has it, else where it was at its last update, flying on at its speed
     -- (straight at the target) for at most one update: a ship mid-kamikaze can stop getting updates (in game the
-    -- last one was minutes old, every death counted as a hit)
+    -- last one was minutes old)
     local here, fly = rec.kamiPos, rec.kamiSpeed * min(Universe_GameTime() - rec.kamiTime, CAT_TICK or 0.5)
     if SobGroup_Empty(g) == 0 then here, fly = SobGroup_GetPosition(g), 0 end
     local t = SobGroup_GetPosition(rec.kamiTargets)
     local dx, dy, dz = t[1] - here[1], t[2] - here[2], t[3] - here[3]
     local d = sqrt(dx * dx + dy * dy + dz * dz) - fly
-    local dmg = CatKamikazeDamage[rec.t]
-    if rec.up.EXPLOSIVE_CHARGE then dmg = dmg * CAT_KAMIKAZE_CHARGE end
-    dmg = dmg - CAT_KAMIKAZE_HWRM
-    if d > CAT_KAMIKAZE_REACH then
+    -- HWRM's hit is already in the target's health here: a hit is a ship dying near its target as that drops
+    local now = SobGroup_CurrentHealthTotal(rec.kamiTargets)
+    local lost = (rec.kamiTargetHealth or now) - now
+    if d > CAT_KAMIKAZE_REACH or lost < CAT_KAMIKAZE_HIT then
         print("CATACLYSM kamikaze: ship " .. id .. " (" .. rec.real .. ") died " .. floor(d) .. " from its target, " ..
-              "target health " .. floor(rec.kamiTargetHealth or -1) .. " at its last update, " ..
-              floor(SobGroup_CurrentHealthTotal(rec.kamiTargets)) .. " now")
+              "which lost " .. floor(lost) .. ": no hit")
         return
     end
-    local before = SobGroup_CurrentHealthTotal(rec.kamiTargets)
-    if dmg > 0 and CAT_KAMIKAZE_TEST ~= 1 then SobGroup_TakeDamageAbsolute(rec.kamiTargets, dmg) end
-    print("CATACLYSM kamikaze: ship " .. id .. " (" .. rec.real .. ") hit (" .. floor(d) .. "), +" .. dmg ..
-          " to HWRM's, target health " .. floor(before) .. " -> " .. floor(SobGroup_CurrentHealthTotal(rec.kamiTargets)))
+    -- Cataclysm's damage, less what HWRM dealt (all the target lost since the last update: combat too, a little)
+    local dmg = CatKamikazeDamage[rec.t]
+    if rec.up.EXPLOSIVE_CHARGE then dmg = dmg * CAT_KAMIKAZE_CHARGE end
+    local add = dmg - lost
+    if add > 0 then SobGroup_TakeDamageAbsolute(rec.kamiTargets, add) end
+    print("CATACLYSM kamikaze: ship " .. id .. " (" .. rec.real .. ") hit (" .. floor(d) .. "): HWRM " .. floor(lost) ..
+          " + " .. floor(add) .. ", target health " .. floor(SobGroup_CurrentHealthTotal(rec.kamiTargets)))
 end
 
 function CatUnlink_Start(g, p, id)
