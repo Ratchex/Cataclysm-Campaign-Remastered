@@ -73,10 +73,10 @@ def write_textures(png_dir, tex, out_dir, base, colour):
     im.save(os.path.join(out_dir, base + "_DIFF.tga"))
     glow = GLOW_MAPS.get(tex.lower()) if tex else None
     if glow is not None:
-        # sob_ship.frag: $glow G = self-illumination mask (R spec sharpness, B spec mask: left 0, as before)
+        # sob_ship.frag: $glow G = self-illumination mask (R spec sharpness, B spec mask). The mask goes in all three
+        # channels: with G alone the glow barely showed in game (HODOR may fill $glow G from another source channel)
         g = Image.fromarray(glow).resize(size)
-        zero = Image.new("L", size, 0)
-        Image.merge("RGB", (zero, g, zero)).save(os.path.join(out_dir, base + "_GLOW.tga"))
+        Image.merge("RGB", (g, g, g)).save(os.path.join(out_dir, base + "_GLOW.tga"))
     return base + "_DIFF.tga"
 
 
@@ -514,7 +514,7 @@ def main():
     ap.add_argument("--no-navlights", action="store_true", help="no NAVL joints from the .mex Nav chunks")
     ap.add_argument("--no-engines", action="store_true", help="no engine nozzles from the .mex Eng chunks")
     ap.add_argument("--engines-from", help="engine look from this old-format HOD (Cataclysm Remastered's smt_ms_sp.hod): "
-                                           "its ETSH shape on our .mex nozzles, no BURN flames")
+                                           "its ETSH shape on our .mex nozzles")
     ap.add_argument("--engines-scale", type=float, default=1.0, help="size scale for --engines-from shapes")
     a = ap.parse_args()
     if a.glow_from:
@@ -676,7 +676,7 @@ def main():
         # glow quad half-size ~6% of the ship's half-length (Cataclysm Remastered's Recon: 0.45 on ~7)
         if cr_shapes:
             # Cataclysm Remastered's engine shape (its Kuun-Lan: one triangle 54 behind its nozzle), scaled to ours,
-            # on our nozzle; CR has no BURN flames, so neither do we here (user: "a direct port of CR's engines")
+            # on our nozzle (user: "a direct port of CR's engines")
             vs = cr_shapes[i % len(cr_shapes)][1]
             P = [c * a.engines_scale for v in vs for c in v]
             idx = [k for t in range(1, len(vs) - 1) for k in (0, t, t + 1)]
@@ -698,7 +698,9 @@ def main():
                      f'</mesh></geometry>')
         shape = (f'<node name="{gid}" id="{gid}" sid="{gid}E"><translate sid="translate">0 0 0</translate>'
                  f'<instance_geometry url="#{gid}"></instance_geometry></node>')
-        burn = "" if cr_shapes else jnode(f"BURN[EngineBurn{n}]", (0, 0, 0), flames)
+        # BURN flames kept with CR's shape: CR's .ship setEngineBurn (ours too) drives them, but its own model has no
+        # BURN, so CR shows no flames; without them the engines barely glowed in game (user: "add CR's stuff")
+        burn = jnode(f"BURN[EngineBurn{n}]", (0, 0, 0), flames)
         weapons += jnode(f"JNT[EngineNozzle{n}]", conv(*pos), burn + shape)
     nav, nnav = ("", 0) if a.no_navlights else navlight_nodes(points, conv, a.scale)
     weapons += nav

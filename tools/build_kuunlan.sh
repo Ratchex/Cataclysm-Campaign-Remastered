@@ -7,7 +7,7 @@ set -e
 cd "$(dirname "$0")/.."
 SECT=C:/Modding/Cataclysm-decomp/extracted/big/race_sect
 # emissive maps and engine look: Cataclysm Remastered's Kuun-Lan (GLOW textures: its textures are Cataclysm's, upscaled, same UVs;
-# engines: its ETSH trail shape on our nozzles, no BURN flames; x0.909 = CR's model -> ours, as the dock paths)
+# engines: its ETSH trail shape on our nozzles (plus our BURN flames for its setEngineBurn); x0.909 = CR's model -> ours, as the dock paths)
 GLOW=C:/Modding/Cataclysm-decomp/reference/cr_main/ship/smt_ms_sp/smt_ms_sp.hod
 for spec in $(python tools/make_modules.py --list-builds); do
     key=${spec%%=*}; cat=${spec#*=}
