@@ -96,6 +96,84 @@ def texture_size(name):
 # The converted cat_m01 looked wrong in game (2026-10-09); fix it here before porting a sky that has no equivalent.
 BACKGROUNDS = {}
 
+# Stock skies relit with a Cataclysm mission's lights (user: Mission 1 looked harshly lit and shadowed; Cataclysm's
+# mission01.hsf has a high pale-yellow ambient, a moderate orange key and a weak red fill, stock ez14 two key lights
+# above 1.0 and little ambient). Written to data/background/<sky>/<sky>_light.hod by tools/install_cr.py.
+RELIGHT = {"ez14": "mission01"}
+HSF_DIR = r"C:\Modding\Cataclysm-decomp\extracted\big\hsf"
+BIGFILE = r"C:\Program Files (x86)\Steam\steamapps\common\Homeworld\HomeworldRM\Data\HWBackgrounds.big"
+
+
+def read_hsf(path):
+    """HW1 Game/Light.c lightParseHSF: header "rrasberry"[12], version, nLights; per light (44 bytes) type (0 distant,
+    5 ambient), x y z, h p b, cone, edge, r g b (bytes), pad, intensity. -> [(type, xyz, rgb x intensity)]."""
+    d = open(path, "rb").read()
+    n = struct.unpack_from("<I", d, 16)[0]
+    out = []
+    for k in range(min(n, (len(d) - 20) // 44)):
+        q = 20 + 44 * k
+        t, x, y, z = struct.unpack_from("<I3f", d, q)
+        inten = struct.unpack_from("<f", d, q + 40)[0]
+        out.append((t, (x, y, z), tuple(c / 255 * inten for c in d[q + 36:q + 39])))
+    return out
+
+
+def hsf_to_hwrm(v):
+    """HSF light vector -> HWRM: HW1 _inplace_glify (-90 about Z, then -90 about X) gives HW1 world (y, z, x); HW1
+    world -> HWRM axes (-x, z, y) as tools/mission2level.py pos. (Gearbox's own ez skies were relit by hand: no
+    axis map matches their lights to HW1's.)"""
+    x, y, z = v
+    return (-y, x, z)
+
+
+def relight(sky, mission):
+    """Copy stock <sky>_light.hod with its LITE lights replaced by Cataclysm's <mission>.hsf: ambientLight1 = the
+    ambient light, directionalLight1/2 = the distant lights in order (same names, so the chunk keeps its size), each
+    at its stock light's distance; colour = rgb x intensity (diffuse and specular), the ambient not doubled (Gearbox's
+    ez14 ambient 0.25 = its HW1 .hsf value). LITE: u32 count; per light name, u32 type (2 directional, 0 ambient),
+    position 3f, colour 3f, specular 3f, 2f. Returns the written path relative to data/."""
+    src = os.path.join(STOCK, sky, sky + "_light.hod")
+    if not os.path.exists(src):
+        import subprocess
+        import sys
+        subprocess.run([sys.executable, r"C:\Modding\Cataclysm-decomp\tools\hw2big.py", BIGFILE,
+                        os.path.dirname(STOCK), sky + "_light.hod"], check=True)
+    d = bytearray(open(src, "rb").read())
+    i = d.index(b"LITE")
+    end = i + 8 + struct.unpack(">I", d[i + 4:i + 8])[0]
+    lights = read_hsf(os.path.join(HSF_DIR, mission + ".hsf"))
+    ambient = [l for l in lights if l[0] == 5]
+    distant = [l for l in lights if l[0] == 0]
+    q, n = i + 12, struct.unpack_from("<I", d, i + 8)[0]
+    for _ in range(n):
+        ln = struct.unpack_from("<I", d, q)[0]
+        name = d[q + 4:q + 4 + ln].decode()
+        f = q + 8 + ln
+        if f + 44 > end:
+            raise SystemExit(f"{src}: LITE chunk shorter than expected")
+        pos = struct.unpack_from("<3f", d, f)
+        light = None
+        if name.startswith("ambient") and ambient:
+            light = ambient[0]
+        elif name.startswith("directional") and distant:
+            k = int(name[-1]) - 1
+            light = distant[k] if k < len(distant) else None
+        if light is None:                    # no such Cataclysm light: switch it off
+            struct.pack_into("<6f", d, f + 12, *([0.0] * 6))
+        else:
+            if name.startswith("directional"):
+                v = hsf_to_hwrm(light[1])
+                m = math.sqrt(sum(c * c for c in v)) or 1.0
+                dist = math.sqrt(sum(c * c for c in pos)) or 200.0
+                struct.pack_into("<3f", d, f, *(c / m * dist for c in v))
+            struct.pack_into("<6f", d, f + 12, *(light[2] + light[2]))
+        print(f"  {sky} {name}: {'off' if light is None else tuple(round(c, 3) for c in light[2])}")
+        q = f + 44
+    out = os.path.join(MOD, "data", "background", sky, sky + "_light.hod")
+    os.makedirs(os.path.dirname(out), exist_ok=True)
+    open(out, "wb").write(d)
+    return [f"background/{sky}/{sky}_light.hod"]
+
 
 def convert(btg, name, theta=0.0, phi=0.0):
     """Write data/background/<name>/; returns the written paths relative to data/ ('/' separated)."""

@@ -367,6 +367,7 @@ art/fxlod/dmg_cloud_torpedo_combo1.lod
 art/fxlod/dmg_damage_puff_combo_missile.lod
 art/fxlod/ion_dmg_blue_combo.lod
 art/fxlod/ion_dmg_red_combo.lod
+background/ez14/ez14_light.hod
 badges/beast.tga
 badges/cmanaan.tga
 badges/cnabaal.tga

@@ -400,6 +400,9 @@ def main():
     # Cataclysm's mission backgrounds (tools/make_background.py; their light .hod is stock ez01's, 22 MB)
     for name, (btg, theta, phi) in make_background.BACKGROUNDS.items():
         copied += make_background.convert(os.path.join(make_background.BIG, btg + ".btg"), name, theta, phi)
+    # stock skies relit with a Cataclysm mission's lights (make_background.RELIGHT; the light .hod is 17 MB of stock data)
+    for sky, mission in make_background.RELIGHT.items():
+        copied += make_background.relight(sky, mission)
     # both layers can list a file (theirs over the patch's): once, in the last spelling
     copied = sorted({rel.lower(): rel for rel in copied}.values())
     # files an earlier install put in data/ that are no longer installed (git-tracked files are ours: kept)
