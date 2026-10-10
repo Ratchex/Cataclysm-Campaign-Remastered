@@ -21,13 +21,23 @@ if CatSpeech_Loaded == nil then
     dofilepath("data:soundscripts/cataclysm/catspeech_gen.lua")   -- CatSpeech_Folders / _Lines / _Fleet / _Type
     CatSpeech_Announcers = { FLEET = 1, MAKAAN = 1, EMPEROR = 1 }   -- raceHelper()'s actors
 
+    -- the last ship the logic reported was Somtaaw: decides events without a ship (research complete, build paused,
+    -- hyperspace ...). The handlers fire for the local player's ships; Race_ID / currentRace don't help in the
+    -- campaign (Players Patch writes player:racelist.lua only from skirmish setup, so its default list has no Somtaaw)
+    CatSpeech_LastSmt = nil
+
     function CatSpeech_IsSomtaaw(ship)
         if ship ~= nil and ship ~= "" then
             local p = strsub(strupper(ship), 1, 4)
             if p == "SMT_" or p == "SOM_" then
+                CatSpeech_LastSmt = 1
                 return 1
             end
+            CatSpeech_LastSmt = nil
             return nil
+        end
+        if CatSpeech_LastSmt ~= nil then
+            return 1
         end
         if Race_ID ~= nil and currentRace ~= nil and Race_ID[currentRace] == "Somtaaw" then
             return 1
