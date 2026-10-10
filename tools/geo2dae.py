@@ -72,6 +72,8 @@ def write_textures(png_dir, tex, out_dir, base, colour, bake=None):
         if os.path.exists(os.path.join(out_dir, base + old)):
             os.remove(os.path.join(out_dir, base + old))
     glow = GLOW_MAPS.get(tex.lower()) if tex else None
+    if glow is None and tex and tex.lower() in GLOW_CYAN:
+        glow = cyan_glow(im)
     if glow is not None:
         # sob_ship.frag: $glow G = self-illumination mask (R spec sharpness, B spec mask). The mask goes in all three
         # channels: with G alone the glow barely showed in game (HODOR may fill $glow G from another source channel)
@@ -93,6 +95,20 @@ GLOW_KEEP = re.compile(r"smo_eng(up|lwr)_")    # engine module textures: their g
 
 
 GLOW_MAPS = {}   # Cataclysm texture name (lower case) -> glow mask (uint8 array), from --glow-from
+GLOW_CYAN = set()   # Cataclysm texture names (lower case) lit where they are cyan (--glow-cyan)
+
+
+def cyan_glow(im):
+    """A glow mask over a texture's cyan areas, filled and softened: the lit landing pads' look (the Kuun-Lan
+    engineering module's pad glow, CR's smo_eng_face_upr: one solid soft blob over the pad) for pad art CR left unlit
+    (the lower spine's fake pads, ocl_new_sidetop; user)."""
+    from PIL import ImageFilter
+    hsv = np.asarray(im.convert("RGB").convert("HSV"), np.float32)
+    h, sat, v = hsv[..., 0] * 360 / 255, hsv[..., 1] / 255, hsv[..., 2] / 255
+    m = Image.fromarray(((h > 170) & (h < 230) & (sat > 0.35) & (v > 0.25)).astype(np.uint8) * 255)
+    k = max(3, im.width // 40) | 1                # close the gaps between the pad's cyan parts, then soften
+    m = m.filter(ImageFilter.MaxFilter(k + 2)).filter(ImageFilter.MinFilter(k)).filter(ImageFilter.GaussianBlur(k / 2))
+    return np.asarray(m)
 
 
 def load_glow_maps(hod, cache_dir, into=None):
@@ -534,6 +550,8 @@ def main():
     ap.add_argument("--glow-copy", action="append", default=[],
                     help="OURS=HOD:THEIRS: our texture OURS takes the GLOW of texture THEIRS in old-format HOD "
                          "(the Processor's landing pads: the Kuun-Lan's same pad art, smo_eng_face_upr; user)")
+    ap.add_argument("--glow-cyan", action="append", default=[],
+                    help="TEX: texture TEX (Cataclysm name) glows over its cyan areas (unlit pad art; user)")
     ap.add_argument("--no-navlights", action="store_true", help="no NAVL joints from the .mex Nav chunks")
     ap.add_argument("--anim-geo", help="the .geo (the main one or a --merge one) whose objects --anim-joints names "
                                        "(the Kuun-Lan core's spinning grav_generator is in the merged command module)")
@@ -566,6 +584,7 @@ def main():
     if a.glow_from:
         load_glow_maps(a.glow_from, os.path.join(os.path.dirname(os.path.abspath(a.out_dir)), "_glow_cache",
                                                  os.path.splitext(os.path.basename(a.glow_from))[0]))
+    GLOW_CYAN.update(t.lower() for t in a.glow_cyan)
     for spec in a.glow_copy:
         ours, src = spec.split("=", 1)
         hod, theirs = src.rsplit(":", 1)
