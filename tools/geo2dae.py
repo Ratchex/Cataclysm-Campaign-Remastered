@@ -70,14 +70,21 @@ def write_textures(png_dir, tex, out_dir, base, colour):
     for old in ("_TEAM.tga", "_STRP.tga", "_GLOW.tga"):   # HODOR picks up any such file next to the DIFF
         if os.path.exists(os.path.join(out_dir, base + old)):
             os.remove(os.path.join(out_dir, base + old))
-    im.save(os.path.join(out_dir, base + "_DIFF.tga"))
     glow = GLOW_MAPS.get(tex.lower()) if tex else None
     if glow is not None:
         # sob_ship.frag: $glow G = self-illumination mask (R spec sharpness, B spec mask). The mask goes in all three
         # channels: with G alone the glow barely showed in game (HODOR may fill $glow G from another source channel)
         g = Image.fromarray(glow).resize(size)
         Image.merge("RGB", (g, g, g)).save(os.path.join(out_dir, base + "_GLOW.tga"))
+        # glowing texels emit the diffuse x a global strength: lift it toward white under the mask (user: the
+        # hangars needed more glow)
+        lift = g.point(lambda v: int(v * GLOW_LIFT))
+        im = Image.composite(Image.new("RGB", size, (255, 255, 255)), im, lift)
+    im.save(os.path.join(out_dir, base + "_DIFF.tga"))
     return base + "_DIFF.tga"
+
+
+GLOW_LIFT = 0.5   # how far a fully glowing texel's diffuse moves toward white
 
 
 GLOW_MAPS = {}   # Cataclysm texture name (lower case) -> glow mask (uint8 array), from --glow-from
