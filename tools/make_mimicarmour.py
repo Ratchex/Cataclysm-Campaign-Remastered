@@ -16,12 +16,15 @@ import glob
 import os
 import re
 import shutil
+import subprocess
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 MOD = os.path.dirname(HERE)
 DATA = os.path.join(MOD, "data")
 BIG = r"C:\Modding\Cataclysm-decomp\extracted\big"
 STOCK = r"C:\Modding\Cataclysm-decomp\reference\hwrm\Homeworld2\weapon"
+CR = r"C:\Modding\Cataclysm-decomp\reference\cr_beast"   # install_cr.py SRC
+PP = r"C:\Modding\Cataclysm-decomp\reference\players_patch"   # install_cr.py PP
 FAMILY = "MimicArmour"
 HWRM_PER_HEALTH = 7.5     # HWRM kamikaze damage per health point of the rammer (in game: 299, 306 from 40)
 
@@ -91,9 +94,14 @@ def patch_families(text):
 
 def install():
     health, k = factor()
+    # the stock weapons our ships use that neither Cataclysm Remastered, the Players Patch nor we provide: copied in every install (and
+    # listed for data/.gitignore: game files, not ours to commit)
+    theirs = {os.path.basename(d).lower() for src in (CR, PP) for d in glob.glob(os.path.join(src, "weapon", "*"))}
+    tracked = set(subprocess.run(["git", "-C", MOD, "ls-files", "data/weapon"], capture_output=True, text=True)
+                  .stdout.lower().split())
+    ours = {p.split("/")[2] for p in tracked if p.count("/") >= 3}
     copied = []
-    have = {os.path.basename(d).lower() for d in glob.glob(os.path.join(DATA, "weapon", "*"))}
-    for name in sorted(used_weapons() - have):
+    for name in sorted(used_weapons() - theirs - ours):
         src = os.path.join(STOCK, name)
         if os.path.isdir(src):
             shutil.copytree(src, os.path.join(DATA, "weapon", name), dirs_exist_ok=True)
