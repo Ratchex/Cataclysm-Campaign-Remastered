@@ -112,16 +112,36 @@ def patch_race(text):
     return re.sub(r'^(Tags = "(?:(?!race_gbx_hwrmc)[^"])*)"', r'\1,race_gbx_hwrmc"', text, count=1, flags=re.M)
 
 
+# The repair order (Worker, Processor): HWRM repairs only the attack families listed after EndRepairRates, each
+# approached in its attack style (stock repair corvette: corvettes and up). Theirs listed only the dock families
+# SuperCap / Flagship (user: the order targeted nothing but the Kuun-Lan); Cataclysm's beams repair anything. Rate:
+# tweak.script twRepairRate 30.
+REPAIR_STYLES = {"Fighter": "Frontal_SupportFrigate", "Fighter_hw1": "Frontal_SupportFrigate",
+                 "Corvette": "Frontal_SupportFrigate", "Corvette_hw1": "Frontal_SupportFrigate",
+                 "Utility": "Frontal_SupportFrigate", "Resource": "Frontal_SupportFrigate",
+                 "ResourceLarge": "Frontal_RepairFrigate_SmallCap", "NonCombat": "Frontal_SupportFrigate",
+                 "Frigate": "Frontal_RepairFrigate_Frigate", "SmallCapitalShip": "Frontal_RepairFrigate_SmallCap",
+                 "BigCapitalShip": "Frontal_RepairFrigate_BigCap", "Mothership": "Frontal_RepairFrigate_Mothership"}
+REPAIR_ORDER = ('addAbility(NewShipType,"RepairCommand",1,500,30,0,"Frontal_SupportFrigate",{EndRepairRates=0},'
+                + ",".join('{%s="%s"}' % kv for kv in REPAIR_STYLES.items()) + ");   -- Cataclysm-HWRM")
+
+
+def repair_order(text):
+    """Their RepairCommand (or a new one after RetireAbility) replaced by REPAIR_ORDER."""
+    new, n = re.subn(r'^\s*addAbility\(NewShipType,\s*"RepairCommand".*?\);[^\n]*$', REPAIR_ORDER, text,
+                     count=1, flags=re.M | re.S)
+    if n:
+        return new
+    assert 'addAbility(NewShipType, "RetireAbility", 1, 1);' in text
+    return text.replace('addAbility(NewShipType, "RetireAbility", 1, 1);',
+                        'addAbility(NewShipType, "RetireAbility", 1, 1);\n' + REPAIR_ORDER, 1)
+
+
 def patch_processor(text):
     """An ordered repair (user: Cataclysm's Processor only repaired what drifted into its beams; here also on order:
     shiprules.lua CatProcessor_* runs the automatic beams): the Worker's RepairCommand at Cataclysm's repair rate
     (tweak.script twRepairRate 30 / s). Both only once it has the Repair upgrade (shiprules.lua CatGated)."""
-    if '"RepairCommand"' in text:
-        return text
-    return text.replace('addAbility(NewShipType, "RetireAbility", 1, 1);',
-                        'addAbility(NewShipType, "RetireAbility", 1, 1);\n'
-                        'addAbility(NewShipType,"RepairCommand",1,500,30,0,"",{SuperCap="18"},{Flagship="18"});'
-                        '   -- Cataclysm-HWRM', 1)
+    return repair_order(text)
 
 
 def patch_worker(text):
@@ -129,7 +149,7 @@ def patch_worker(text):
     model's LatchOrientation joint, not by the Harvest ability: tools/build_ship.sh --latch.) No NLIPS (its icon
     and selection box scaled up with distance: user)."""
     text = re.sub(r"^(\s*NewShipType\.nlips(?:Range|Far|FarRange)?\s*=\s*)[\d.]+", r"\g<1>0", text, flags=re.M)
-    return re.sub(r'(addAbility\(NewShipType,\s*"RepairCommand",\s*)0,', r'\g<1>1,', text)
+    return repair_order(text)
 
 
 def patch_hw1_armour(text):

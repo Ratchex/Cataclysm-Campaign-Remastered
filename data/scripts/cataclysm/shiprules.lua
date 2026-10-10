@@ -1125,7 +1125,7 @@ end
 CAT_PROC_RANGE = 1400       -- twProcessorAutoRepairDistance 4000 (x 0.35: ship scale)
 CAT_PROC_CONE = 0.7071      -- cos(twProcessorAutoRepairConeAngle 90 / 2)
 CAT_PROC_RATE = 30          -- twRepairRate (35 for the capital classes: the Kuun-Lan here)
-CAT_PROC_TRACE = 1          -- TEST: log each heal step
+CAT_PROC_TRACE = 0          -- 1: log each heal step
 CAT_PROC_BEAMS = {          -- origin (HWRM units, our model) and side (x direction) of Repair0-3 (sprocessor.mex)
     { -97.7, 25.4, -78.1, -1 }, { -106.7, -28.0, 6.3, -1 }, { 106.7, -28.0, 6.3, 1 }, { 97.7, 25.4, -78.1, 1 } }
 
