@@ -528,6 +528,11 @@ def main():
         assert n == 1, f"smt_mimic: {n} CanAttack lines"
         text = re.sub(r'^addAbility\(NewShipType,\s*"CanAttack".*$', MIMIC_ATTACK.replace("\\", "\\\\"), text,
                       flags=re.M)
+        # ...and a weapon: HWRM gives attack orders only to ships with one (data/weapon/cat_mimicnull: no damage)
+        if "cat_mimicnull" not in text:
+            text = text.replace("LoadModel(NewShipType, 1);", 'LoadModel(NewShipType, 1);\nStartShipWeaponConfig('
+                                'NewShipType, "cat_mimicnull", "Weapon_GUN0", "Weapon_GUN0");   -- Cataclysm-HWRM', 1)
+            assert "cat_mimicnull" in text, "smt_mimic: no LoadModel line"
         open(mimic, "w", encoding="latin-1", newline="").write(text)
     for variant in ship_variants.DISGUISES:
         copied += ship_variants.build_disguise(variant)
