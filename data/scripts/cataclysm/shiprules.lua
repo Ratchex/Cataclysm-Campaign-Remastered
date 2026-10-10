@@ -175,6 +175,7 @@ function CatShip_Adopt(rec, g, now)
             rec.parts = pend.parts
             rec.hold, rec.pin = pend.hold, pend.pin
             rec.ghost = pend.ghost
+            if pend.order then CatMimic_Resume(rec, g, pend.order) end
             if pend.linking then                  -- standing in for the Link clip (CatLink_Pose)
                 rec.linking = pend.linking
                 tinsert(pend.linking.recs, rec)
@@ -270,7 +271,7 @@ function CatShip_Update(g, p, id)
         local s = rec.mimicSwap
         rec.mimicSwap = nil
         local new = CatMimic_Swap(g, p, id, s.type)
-        if new then FX_PlayEffect(s.tail, new, 1) end
+        if new then FX_StartEvent(new, s.tail) end
         if rec.gone then return end
     end
     -- button abilities: act on first finding ourselves in the press group, if still selected (the press group is
@@ -1004,7 +1005,9 @@ end
 -- The transformation (Cataclysm FUN_005b8f30, 1.25 s): the target's model as a shell shrinking out of a sphere and
 -- fading in, then the real model; Unmimic the reverse. Mesh effects (tools/make_mimicfx.py): cat_mimic_in_<target>
 -- on the Mimic, the swap CAT_MIMIC_SWAP later (Cataclysm stops drawing the Mimic at 0.94 s), cat_mimic_tail_<target>
--- on the disguise; Unmimic swaps at once, cat_mimic_out_<target> on the Mimic.
+-- on the disguise; Unmimic swaps at once, cat_mimic_out_<target> on the Mimic. Started as the ships' events
+-- (MimicIn_ / MimicOut_ / MimicTail_<target>, make_mimicfx.py patch_events) so they move with the ship (user:
+-- FX_PlayEffect stayed where the ship was).
 CAT_MIMIC_SWAP = 1.0     -- make_mimicfx.py SWAP; two ship updates (CAT_TICK)
 -- no collisions while the old and new ship overlap (user: they pushed each other apart before the old one went):
 -- the Mimic from the press, the new ship until the shell has played out (1.25 s, then the next update)
@@ -1021,6 +1024,39 @@ function CatDisguise_Of(shiptype)
     return nil
 end
 
+-- The old ship's order, for the new one (no engine call gives a ship speed, nor a move order's destination): an
+-- attack or guard on the same targets, a move as onward along the heading at its speed for CAT_MIMIC_COAST (user:
+-- the swapped ship started from a standstill)
+CAT_MIMIC_COAST = 3
+CAT_MIMIC_MOVING = 5      -- speed above which a ship counts as under way
+
+function CatMimic_Order(g, pos, m)
+    local order, speed = SobGroup_GetCurrentOrder(g), SobGroup_GetActualSpeed(g)
+    CatSerial = CatSerial + 1
+    local o = { targets = "cat_mimic_tgt" .. CatSerial }
+    SobGroup_CreateIfNotExist(o.targets)
+    SobGroup_Clear(o.targets)
+    if order == (COMMAND_Attack or 2) or order == (COMMAND_AttackMove or 20) then
+        SobGroup_GetCommandTargets(o.targets, g, COMMAND_Attack or 2)
+        if SobGroup_Empty(o.targets) == 0 then o.kind = "attack" end
+    elseif order == (COMMAND_Guard or 9) then
+        SobGroup_GetCommandTargets(o.targets, g, COMMAND_Guard or 9)
+        if SobGroup_Empty(o.targets) == 0 then o.kind = "guard" end
+    end
+    if not o.kind and speed > CAT_MIMIC_MOVING and getn(m) == 9 then
+        local f, d = CatCol(m, 2), speed * CAT_MIMIC_COAST
+        o.kind, o.at = "move", { pos[1] + f[1] * d, pos[2] + f[2] * d, pos[3] + f[3] * d }
+    end
+    if o.kind then return o end
+    return nil
+end
+
+function CatMimic_Resume(rec, g, o)
+    if o.kind == "attack" then SobGroup_Attack(rec.p, g, o.targets)
+    elseif o.kind == "guard" then SobGroup_GuardSobGroup(g, o.targets)
+    elseif o.kind == "move" then SobGroup_MoveToPoint(rec.p, g, o.at) end
+end
+
 -- the ship swapped for shiptype in place; returns the new ship's group
 function CatMimic_Swap(g, p, id, shiptype, say)
     local rec = CatShips[id]
@@ -1033,6 +1069,7 @@ function CatMimic_Swap(g, p, id, shiptype, say)
     local pend = CatPending[getn(CatPending)]
     pend.up, pend.armour = up, rec.armour
     pend.ghost = Universe_GameTime() + CAT_MIMIC_GHOST
+    pend.order = CatMimic_Order(g, pos, m)
     SobGroup_SetGhost(g, 1)
     SobGroup_SetGhost(new, 1)
     if getn(m) == 9 then CatPlace(new, pos, m) end
@@ -1062,11 +1099,11 @@ function CatMimic_As(g, p, id, name)
             CatSay(165, g, p)
             SobGroup_SetGhost(g, 1)
             local was = CatDisguise_Of(rec.real)
-            if was then FX_PlayEffect("cat_mimic_out_" .. was.target, g, 1) end
-            FX_PlayEffect("cat_mimic_in_" .. d.target, g, 1)
+            if was then FX_StartEvent(g, "MimicOut_" .. was.target) end
+            FX_StartEvent(g, "MimicIn_" .. d.target)
             if CAT_MIMIC_FXTEST == 1 then FX_PlayEffect("cat_fxtest", g, 1) end
             rec.mimicSwap = { t = Universe_GameTime() + CAT_MIMIC_SWAP - 0.01, type = d.type,
-                              tail = "cat_mimic_tail_" .. d.target }
+                              tail = "MimicTail_" .. d.target }
             return
         end
     end
@@ -1077,7 +1114,7 @@ function CatUnmimic_Start(g, p, id, name)
     if not rec or rec.mimicSwap then return end
     local was = CatDisguise_Of(rec.real)
     local new = CatMimic_Swap(g, p, id, "smt_mimic", 166)
-    if new and was then FX_PlayEffect("cat_mimic_out_" .. was.target, new, 1) end
+    if new and was then FX_StartEvent(new, "MimicOut_" .. was.target) end
 end
 
 function CatUnlink_Start(g, p, id)

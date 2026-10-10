@@ -510,6 +510,9 @@ def main():
     for variant in ship_variants.DISGUISES:
         copied += ship_variants.build_disguise(variant)
     ship_variants.write_lua()
+    # the Mimic's transformation effects as events on the Mimic and its disguises (tools/make_mimicfx.py)
+    import make_mimicfx
+    make_mimicfx.patch_all_events()
     # Cataclysm's ship rules (experience, damage slowing ships, Acolyte link) on every ship the campaign uses
     copied += make_shipcode.install()
     # Cataclysm's health and weapon damage (user: all ships, Cataclysm's scale 1:1)

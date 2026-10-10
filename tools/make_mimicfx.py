@@ -21,6 +21,7 @@ Usage: tools/build_mimicfx.sh (the meshes, then this)
 """
 import math
 import os
+import re
 import shutil
 import struct
 import sys
@@ -115,6 +116,42 @@ def write(name, mesh, duration, scale, alpha):
         f.write(FX.format(radius=curve(scale), colour=colours(alpha), duration=f"{duration:.4f}", mesh=mesh))
 
 
+ANIM = ("    {name} = {{ name = \"{name}\", length = {length:.4f}, loop = 0, parent = \"\", minimum = 0, "
+        "maximum = 0, markers = {{ \"\" }} }},\n")
+EVENT = ("    {name}_fx = {{ {{ \"anim\", \"{name}\" }}, {{ \"animtime\", \"0\" }}, {{ \"marker\", \"Root\" }}, "
+         "{{ \"fx\", \"{fx}\" }}, {{ \"fx_scale\", \"1\" }}, }},\n")
+
+
+def patch_events(path):
+    """Add MimicIn_ / MimicOut_ / MimicTail_<target> (each playing that effect on the Root marker) to a ship's .events:
+    started by shiprules.lua FX_StartEvent, they move with the ship (FX_PlayEffect stayed where it was started)."""
+    text = open(path, encoding="latin-1").read()
+    if "MimicIn_" in text:
+        return
+    anims, events = "", ""
+    for _, target, _, _ in sorted(ship_variants.DISGUISES.values()):
+        for name, fx, length in ((f"MimicIn_{target}", f"cat_mimic_in_{target}", PHASE_TIME),
+                                 (f"MimicOut_{target}", f"cat_mimic_out_{target}", PHASE_TIME),
+                                 (f"MimicTail_{target}", f"cat_mimic_tail_{target}", PHASE_TIME - SWAP)):
+            anims += ANIM.format(name=name, length=length)
+            events += EVENT.format(name=name, fx=fx)
+    for table, add in (("animations", anims), ("events", events)):
+        m = re.search(table + r"\s*=\s*\{", text)
+        assert m, f"{path}: no {table} table"
+        text = (text[:m.end()] + "\n    -- Cataclysm-HWRM: the Mimic's transformation (tools/make_mimicfx.py)\n" + add +
+                text[m.end():])
+    open(path, "w", encoding="latin-1", newline="").write(text)
+
+
+def patch_all_events():
+    for ship in ["smt_mimic"] + sorted(ship_variants.DISGUISES):
+        path = os.path.join(MOD, "data", "ship", ship, ship + ".events")
+        if not os.path.exists(path):
+            with open(path, "w", newline="\n") as f:
+                f.write("effects = {\nanimations = {},\nevents = {}\n}\n")
+        patch_events(path)
+
+
 def main():
     tex = os.path.join(MOD, "data", "art", "fx", "textures")
     os.makedirs(tex, exist_ok=True)
@@ -139,6 +176,7 @@ def main():
         # phase 0 -> 1: the shell grows from the model to the sphere and fades out
         write(f"cat_mimic_out_{target}", mesh, PHASE_TIME, [(0, 1), (1, s0)], [(0, ALPHA), (1, 0)])
         print(f"{target}: radius {rt:.1f} (Mimic {rm:.1f}), shell from x{s0:.2f}")
+    patch_all_events()
 
 
 if __name__ == "__main__":
