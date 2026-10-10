@@ -206,7 +206,7 @@ SPEED_CLASS = {"scout": 490 / 1000, "interceptor": 487 / 875, "collector": 110 /
 # The Worker on Gearbox's collector ratio (144) was a bit slow (user): the scout ratio (208); the original's Worker
 # runs at 0.52x an Acolyte, the interceptor ratio would be 237.
 SPEEDS = {"smt_scout": ("srecon", "scout"), "smt_acolyte": ("sacolyte", "interceptor"),
-          "smt_worker": ("sworker", "scout")}
+          "smt_worker": ("sworker", "scout"), "smt_acv": ("sacv", "interceptor")}
 
 
 # Build cost and time: Cataclysm's own (the .shp buildCost / buildTime, 1:1: RUs are Cataclysm's too, asteroids by
@@ -270,6 +270,28 @@ def set_trails():
         text = text.rstrip("\n") + f"\n-- Cataclysm-HWRM: {src}'s trail on each of our {nozzles} nozzles (as Cataclysm)\n" + lines
         open(path, "w", encoding="latin-1", newline="").write(text)
         print(f"  {ship}: {src}'s engine trail on {nozzles} nozzles")
+
+
+# CR's energy cannons, "Special Attack" weapons on their Acolyte / ACV: they never fire in normal combat (make_damage
+# counted them, so the guns that do fire got about half of Cataclysm's damage: ACV ~25 of 58 DPS, user: "doesn't do
+# enough damage"), and once UseSpecialWeaponsInNormalAttack is on (the Acolyte's missile upgrade) they fire as an
+# extra gun Cataclysm only gives with its Energy upgrade (shelved). Cataclysm's ships fire their projectile guns only.
+DROP_WEAPONS = {"smt_acolyte": ("Ksh_KineticAutoGun1",), "smt_acv": ("Smt_ACVAutoGun1",)}
+
+
+def drop_weapons():
+    for ship, weapons in DROP_WEAPONS.items():
+        path = os.path.join(DATA, "ship", ship, ship + ".ship")
+        if not os.path.exists(path):
+            continue
+        text = open(path, encoding="latin-1").read()
+        n = 0
+        for w in weapons:
+            text, k = re.subn(r'^(StartShipWeaponConfig\(NewShipType,\s*"%s")' % re.escape(w),
+                              r"-- Cataclysm-HWRM (drop_weapons): \1", text, flags=re.M | re.I)
+            n += k
+        open(path, "w", encoding="latin-1", newline="").write(text)
+        print(f"  {ship}: {n} special-attack weapon configs dropped")
 
 
 def set_speed(ship, cat, cls):
@@ -453,6 +475,7 @@ def main():
         set_speed(ship, cat, cls)
     set_costs()
     set_trails()
+    drop_weapons()
     for root, _, files in os.walk(OVERRIDES):   # our own versions of their files (.events / .madstate)
         for fn in files:
             rel = os.path.relpath(os.path.join(root, fn), OVERRIDES)
