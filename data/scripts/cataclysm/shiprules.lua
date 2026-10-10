@@ -1285,8 +1285,8 @@ CAT_PROC_YAW_SPEED = 35               -- degrees a second (kus_destroyerion1 max
 CAT_PROC_PITCH_SPEED = 20             -- (maxDeclinationSpeed)
 CAT_PROC_FINE_ANGLE = 10              -- degrees off the target within which the turret's rate eases off with the angle
 CAT_PROC_ACCEL = 2                    -- full speeds a second the turret's rate can change by (0.5 s to full speed)
-CAT_PROC_TRACK_A = 0.25               -- target filter: share of each position's surprise taken into the position
-CAT_PROC_TRACK_B = 0.03               -- (into the velocity; an alpha-beta filter: smooth without a buffer's lag)
+CAT_PROC_TRACK_A = 0.05               -- target filter: share of each position's surprise taken into the position
+CAT_PROC_TRACK_B = 0.001              -- (into the velocity; an alpha-beta filter: smooth without a buffer's lag)
 CAT_PROC_DEADBAND = 0.2               -- degrees off the target the turret holds still within (one step is 0.35)
 
 -- one axis of a turret: its new angle and rate. The rate it wants is full speed beyond CAT_PROC_FINE_ANGLE and
