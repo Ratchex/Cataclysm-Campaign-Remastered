@@ -5,7 +5,7 @@
 -- Damage is theirs until the weapon damage conversion.
 StartWeaponConfig(NewWeaponType, "Gimble", "Missile", "SmallEnergyCannon", "Normal Only", 4200, 1600, 0, 0, 0, 0, 1, 1, 0, 0.5, 1, 2, 0, 0, 0, 0, 0.1, "Normal", 0, 0, 0);
 AddWeaponResult(NewWeaponType, "Hit", "DamageHealth", "Target", 32, 32, "");
-setPenetration(NewWeaponType, 5, 1, {Unarmoured=0.2}, {Unarmoured_hw1=0.2}, {LightArmour=0.5}, {LightArmour_hw1=0.5}, {MediumArmour=0.7}, {MoverArmour=0.25}, {PlanetKillerArmour=0}, {SubSystemArmour=0.5}, {ResArmour=0.6});
+setPenetration(NewWeaponType, 5, 1, {Unarmoured=0.2}, {Unarmoured_hw1=0.2}, {LightArmour=0.5}, {LightArmour_hw1=0.5}, {MediumArmour=0.7}, {MoverArmour=0.25}, {PlanetKillerArmour=0}, {SubSystemArmour=0.5}, {ResArmour=0.6}, { MimicArmour = 0.6667 });
 setAccuracy(NewWeaponType, 1, {Fighter=1}, {Corvette=1}, {munition=0.2}, {Frigate=1,
 damage=1}, {SmallCapitalShip=1,
 damage=1}, {BigCapitalShip=1,
