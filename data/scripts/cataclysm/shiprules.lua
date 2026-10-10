@@ -1128,7 +1128,7 @@ end
 CAT_WORKER_RANGE = 790
 CAT_WORKER_CONE = 0.5       -- cos(120 / 2)
 CAT_WORKER_TIP = { 0, 28.5, 0 }
-CAT_REPAIR_TRACE = 1        -- TEST: log the ordered repair each second
+CAT_REPAIR_TRACE = 0        -- 1: log the ordered repair each second
 
 function CatRepair_Tick(rec, g, id, now)
     local dt = now - (rec.repLast or now)

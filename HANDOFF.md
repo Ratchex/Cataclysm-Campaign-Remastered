@@ -25,6 +25,14 @@ findings).
   (nis2hwrm.py NIS_MODULES default, a regeneration had dropped them).
 - Sky: stock ez14 for Mission 1 (NOTES.md "Backgrounds"); bloom left as is for now (user watches it).
 
+## Repair (2026-10-10): ordered repair works (Worker healed the Kuun-Lan, confirmed in game)
+- HWRM heals only by latching (RepairByLatchingCommand). Our RepairCommand (install_cr.py repair_order: 4th arg 1, no
+  latching; data/scripts/attack/*_catrepair.lua) just targets, approaches and holds off; shiprules.lua CatRepair_Tick
+  heals the order's target (SobGroup_GetCommandTargets COMMAND_Repair) at 30 HP/s and stops the order when healed.
+  Processor's automatic side beams: CatProcessor_Tick. Every model has RepairPoint0 (geo2dae) declared as RepCap.
+- **Pending (user):** ships need more than one repair point so several craft can repair one target. No beam visuals
+  yet (ordered or automatic). Worker salvage untested.
+
 ## RESUME HERE (updated 2026-10-09, after the damage conversion; see git log for the last commit)
 **Console start:** run `claude` from `C:\Modding\Homeworld` (loads the project memory), then say "resume from
 Cataclysm-HWRM/HANDOFF.md". Shells: Git Bash for anything that runs HODOR (tools/build_ship.sh); `powershell -File
