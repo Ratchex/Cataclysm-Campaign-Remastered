@@ -38,6 +38,7 @@ function OnInit()
     end
     Camera_Interpolate("here", "Camera_Startpos", 0)
     Rule_AddInterval("Range_CoordSys", 1)
+    Rule_AddInterval("Range_Damage", 2)
     if RANGE_GRANT_ALL == 1 then Rule_AddInterval("Range_Upgrade", 2) end
 end
 
@@ -52,6 +53,13 @@ function Range_CoordSys()
         s = s .. " | col" .. c .. " " .. v[1] .. " " .. v[2] .. " " .. v[3]
     end
     print(s)
+end
+
+-- the Workers at half health: something for the repair beams to heal
+function Range_Damage()
+    Rule_Remove("Range_Damage")
+    SobGroup_SetHealth("Workers", 0.5)
+    print("CATACLYSM range: Workers at half health")
 end
 
 -- the ships placed with the level were created before the research: upgrade them (kasfShipsUpgrade)

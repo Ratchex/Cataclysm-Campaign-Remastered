@@ -10,10 +10,15 @@ function DetermChunk()
     for i = 0, 7 do
         addSquadron("Acolyte" .. i, "smt_acolyte", {-700 + i * 200, 0, 2200}, 0, {0, 0, 0}, 0, 0)
     end
+    createSOBGroup("Workers")
     for i = 0, 1 do
         addSquadron("ACV" .. i, "smt_acv", {-300 + i * 600, 0, 2600}, 0, {0, 0, 0}, 0, 0)
         addSquadron("Worker" .. i, "smt_worker", {-1800 + i * 400, 0, 1200}, 0, {0, 0, 0}, 0, 0)
+        addToSOBGroup("Worker" .. i, "Workers")
     end
+    -- the Processor (repair beams) to starboard, a Ramming Frigate beside the ACVs
+    addSquadron("Processor0", "smt_processor", {1900, 0, 1200}, 0, {0, 0, 0}, 0, 0)
+    addSquadron("RammingFrigate0", "smt_rammingfrigate", {1100, 0, 2600}, 0, {0, 0, 0}, 0, 0)
     -- tilted (pitch 20, yaw 50, roll 10): the orientation-matrix layout check in range.lua
     addSquadron("Recon0", "smt_scout", {0, 300, 2900}, 0, {20, 50, 10}, 0, 0)
     createSOBGroup("Recon")
