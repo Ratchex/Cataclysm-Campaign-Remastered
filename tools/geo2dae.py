@@ -76,15 +76,18 @@ def write_textures(png_dir, tex, out_dir, base, colour):
         # channels: with G alone the glow barely showed in game (HODOR may fill $glow G from another source channel)
         g = Image.fromarray(glow).resize(size)
         Image.merge("RGB", (g, g, g)).save(os.path.join(out_dir, base + "_GLOW.tga"))
-        # glowing texels emit the diffuse x a global strength: lift it toward white under the mask (user: the
-        # hangars needed more glow)
-        lift = g.point(lambda v: int(v * GLOW_LIFT))
-        im = Image.composite(Image.new("RGB", size, (255, 255, 255)), im, lift)
+        # glowing texels emit the diffuse x a global strength: brighten it under the mask, keeping its colour (user:
+        # the hangars needed more glow; lifting toward white was too white). Not the engines' (user: keep those).
+        if not GLOW_KEEP.match(tex.lower()):
+            m = np.asarray(g, np.float32)[..., None] / 255
+            im = Image.fromarray(np.clip(np.asarray(im, np.float32) * (1 + (GLOW_BOOST - 1) * m), 0, 255)
+                                 .astype(np.uint8))
     im.save(os.path.join(out_dir, base + "_DIFF.tga"))
     return base + "_DIFF.tga"
 
 
-GLOW_LIFT = 0.5   # how far a fully glowing texel's diffuse moves toward white
+GLOW_BOOST = 1.35                              # diffuse multiplier under a full glow mask
+GLOW_KEEP = re.compile(r"smo_eng(up|lwr)_")    # engine module textures: their glow is right as is
 
 
 GLOW_MAPS = {}   # Cataclysm texture name (lower case) -> glow mask (uint8 array), from --glow-from
