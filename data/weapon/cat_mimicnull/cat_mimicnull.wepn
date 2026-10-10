@@ -1,8 +1,0 @@
--- Cataclysm-HWRM: the Mimic's placeholder weapon. It has no guns, and HWRM gives attack orders only to ships with a
--- weapon (user: clicking a target gave a move order, a forced attack did nothing); its attack is a kamikaze
--- (tools/install_cr.py MIMIC_ATTACK). No damage, range 1: never fires before the ship hits.
-StartWeaponConfig(NewWeaponType, "Gimble", "Bullet", "Kinetic_Rapid", "Normal Only", 2200, 1, 0, 0, 0, 0, 1, 1, 0, 0.6, 1.3, 0.8, 0, 0, 0, 0, 0.1, "Normal", 0, 0, 0);
-AddWeaponResult(NewWeaponType, "Hit", "DamageHealth", "Target", 0, 0, "");
-setPenetration(NewWeaponType, 5, 0, { MimicArmour = 0 });
-setAccuracy(NewWeaponType, 1);
-setAngles(NewWeaponType, 180, 0, 0, 0, 0);
