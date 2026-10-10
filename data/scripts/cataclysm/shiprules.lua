@@ -372,7 +372,7 @@ function CatAbility_Run(name, g, p, id)
                 print("CATACLYSM ability " .. name .. ": ship " .. id .. " lacks the " .. a.upgrade .. " upgrade")
                 return
             end
-            getglobal(a.handler)(g, p, id)
+            getglobal(a.handler)(g, p, id, name)    -- the name: one handler for several buttons (Mimic menu)
             return
         end
     end
@@ -976,6 +976,45 @@ function CatSpawn(p, shiptype, pos, kills, parts, hold, pin, linking)
     SobGroup_SpawnNewShipInSobGroup(p, shiptype, "cat_squad" .. CatSerial, grp, vol)
     Volume_Delete(vol)
     return grp
+end
+
+-- ---------------------------------------------------------------------------------------------------------------
+-- The Mimic (Cataclysm FUN_005b8d70: mimic a ship type as its owner / unmimic). A disguise is its own ship type
+-- (tools/ship_variants.py DISGUISES: the Mimic's stats, the target's model); the Mimic is swapped for it in place,
+-- keeping health, kills and upgrades, and back on Unmimic. The mission script paints it and makes it untargetable
+-- (cataclysmkas.lua CatMimicTick). Lines: 165 "Roger, holographic projectors on.", 166 "Holographic field collapsed."
+function CatNoop(g, p, id, name)
+end
+
+function CatMimic_Swap(g, p, id, shiptype, say)
+    local rec = CatShips[id]
+    if not rec or rec.gone or SobGroup_Empty(g) == 1 or rec.real == shiptype then return end
+    CatSay(say, g, p)
+    local pos, health, m = SobGroup_GetPosition(g), SobGroup_HealthPercentage(g), SobGroup_GetCoordSys(g)
+    local up = {}
+    for k, v in rec.up do up[k] = v end
+    local new = CatSpawn(p, shiptype, pos, rec.kills, rec.parts)
+    local pend = CatPending[getn(CatPending)]
+    pend.up, pend.armour = up, rec.armour
+    if getn(m) == 9 then CatPlace(new, pos, m) end
+    SobGroup_SetHealth(new, health)
+    rec.gone = 1
+    SobGroup_Despawn(g)
+    print("CATACLYSM mimic: ship " .. id .. " (" .. rec.real .. ") -> " .. shiptype)
+end
+
+-- a Mimic menu button (mimic_<target>): become that disguise
+function CatMimic_As(g, p, id, name)
+    for i = 1, getn(CatDisguises) do
+        if CatDisguises[i].button == name then
+            CatMimic_Swap(g, p, id, CatDisguises[i].type, 165)
+            return
+        end
+    end
+end
+
+function CatUnmimic_Start(g, p, id, name)
+    CatMimic_Swap(g, p, id, "smt_mimic", 166)
 end
 
 function CatUnlink_Start(g, p, id)

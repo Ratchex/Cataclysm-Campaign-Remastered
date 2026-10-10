@@ -830,7 +830,47 @@ function CatAbility_OwnSelection(grp)
     return grp
 end
 
+-- Disguised Mimics (ship_variants.py DISGUISES, swapped in by shiprules.lua CatMimic_As): painted in the impersonated
+-- faction's colour scheme and made untargetable, so that side leaves them alone (Cataclysm: a mimic shows its
+-- target's model in the target owner's colours; "None of the mines can track a mimic when it imitates an enemy
+-- ship"). Only when a type's count grows (KAS_SetColourScheme logs every call).
+CatDisguiseCount = {}
+
+function CatMimicTick()
+    if CatDisguises == nil then return end
+    for i = 1, getn(CatDisguises) do
+        local d, grp = CatDisguises[i], "cat_disg_" .. i
+        SobGroup_CreateIfNotExist(grp)
+        SobGroup_Clear(grp)
+        Player_FillShipsByType(grp, 0, d.type)
+        local n = SobGroup_Count(grp)
+        if n > (CatDisguiseCount[i] or 0) then
+            KAS_SetColourScheme(grp, d.scheme)
+            SobGroup_MakeUntargeted(grp)
+            print("CKAS: mimic disguised as " .. d.target .. " (" .. n .. ")")
+        end
+        CatDisguiseCount[i] = n
+    end
+end
+
+-- Menus (the Mimic's "Select Mimic Type"): a button with opens = <menu> shows / hides the buttons with menu = <menu>
+-- (no ship action); pressing one of those closes the menu
+CatMenuOpen = {}
+
+function CatAbility_Find(name)
+    for i = 1, getn(CatAbilities) do
+        if CatAbilities[i].name == name then return CatAbilities[i] end
+    end
+    return nil
+end
+
 function CatAbility(name)
+    local a = CatAbility_Find(name)
+    if a and a.opens ~= "" then
+        if CatMenuOpen[a.opens] then CatMenuOpen[a.opens] = nil else CatMenuOpen[a.opens] = 1 end
+        return
+    end
+    if a and a.menu ~= "" then CatMenuOpen[a.menu] = nil end
     local grp = "cat_cmd_" .. name
     SobGroup_CreateIfNotExist(grp)
     SobGroup_Clear(grp)
@@ -841,6 +881,14 @@ end
 
 function CatAbilityTick()
     local now, sel = Universe_GameTime(), CatAbility_OwnSelection("cat_sel_own")
+    -- a menu closes once the selection has nothing that could open it
+    for i = 1, getn(CatAbilities) do
+        local a = CatAbilities[i]
+        if a.opens ~= "" and CatMenuOpen[a.opens] and
+           (SobGroup_Count(sel) == 0 or SobGroup_AreAnyOfTheseTypes(sel, a.types) == 0) then
+            CatMenuOpen[a.opens] = nil
+        end
+    end
     for i = 1, getn(CatAbilities) do
         local a = CatAbilities[i]
         if a.native == 0 then
@@ -851,7 +899,7 @@ function CatAbilityTick()
             end
             local show = 0
             if SobGroup_Count(sel) > 0 and SobGroup_AreAnyOfTheseTypes(sel, a.types) == 1 and
-               (a.tech == "" or Player_HasResearch(0, a.tech) == 1) then
+               (a.tech == "" or Player_HasResearch(0, a.tech) == 1) and (a.menu == "" or CatMenuOpen[a.menu]) then
                 show = 1
             end
             if CatAbilityShown[a.name] ~= show then
@@ -935,6 +983,7 @@ function KAS_StartEngine()
     KAS_ApplyColourSchemes()
     Rule_AddInterval("CatAbilityTick", 0.25)
     Rule_AddInterval("CatSayTick", 0.5)
+    Rule_AddInterval("CatMimicTick", 0.5)
     Rule_AddInterval("KAS_VariantBuildWatch", 2)
     KAS_GrantRuntimeResearch()
     KAS_DisableCPUPlayers()
@@ -1121,7 +1170,7 @@ function K_496eb0(event, variable) KAS_SpeechPlay(event, variable) end          
 -- don't hold up the mission's dialogue (KAS_SpeechEnd untouched). Variable = the speaking ship's Cataclysm ShipType /
 -- the TechnologyType (catspeech_gen.lua CatSpeech_Var / CatSpeech_TechLine, tools/make_unitspeech.py).
 dofilepath("data:soundscripts/cataclysm/catspeech_gen.lua")
-CatSayEvents = { 156, 157 }        -- Link, Unlink (shiprules.lua CatSay puts the ship in cat_say_<event>)
+CatSayEvents = { 156, 157, 165, 166 }   -- Link, Unlink, mimic, unmimic (shiprules.lua CatSay: cat_say_<event>)
 CatSayLast = 0
 CatTechHad = nil
 
@@ -1141,7 +1190,9 @@ function CatSayTick()
         local grp = "cat_say_" .. CatSayEvents[i]
         if SobGroup_Exists(grp) == 1 and SobGroup_Count(grp) > 0 then
             if now - CatSayLast > 1.5 then      -- one bark per press, however many ships
-                KAS_SpeechBark(CatSayEvents[i], CatSpeech_Var[strlower(SobGroup_GetShipType(grp))])
+                local t = strlower(SobGroup_GetShipType(grp))
+                if CatSpeech_Var[t] == nil and CatVariantBase and CatVariantBase[t] then t = CatVariantBase[t] end
+                KAS_SpeechBark(CatSayEvents[i], CatSpeech_Var[t])   -- a disguise speaks as its Mimic
                 CatSayLast = now
             end
             SobGroup_Clear(grp)

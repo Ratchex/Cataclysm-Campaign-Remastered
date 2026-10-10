@@ -206,7 +206,7 @@ SPEED_CLASS = {"scout": 490 / 1000, "interceptor": 487 / 875, "collector": 110 /
 # The Worker on Gearbox's collector ratio (144) was a bit slow (user): the scout ratio (208); the original's Worker
 # runs at 0.52x an Acolyte, the interceptor ratio would be 237.
 SPEEDS = {"smt_scout": ("srecon", "scout"), "smt_acolyte": ("sacolyte", "interceptor"),
-          "smt_worker": ("sworker", "scout"), "smt_acv": ("sacv", "interceptor")}
+          "smt_worker": ("sworker", "scout"), "smt_acv": ("sacv", "interceptor"), "smt_mimic": ("smimic", "interceptor")}
 
 
 # Build cost and time: Cataclysm's own (the .shp buildCost / buildTime, 1:1: RUs are Cataclysm's too, asteroids by
@@ -300,10 +300,12 @@ def set_speed(ship, cat, cls):
     main = round(v * SPEED_CLASS[cls])
     path = os.path.join(DATA, "ship", ship, ship + ".ship")
     text = open(path, encoding="latin-1").read()
-    num = lambda key: eval(re.search(r"NewShipType\.%s\s*=\s*([\d.*]+)" % key, text).group(1))  # e.g. 350*1.4
+    # NewShipType.key = v or NewShipType["key"] = v (their Mimic), v e.g. 350*1.4
+    field = lambda key: r'(NewShipType(?:\.%s|\["%s"\])\s*=\s*)([\d.*]+)' % (key, key)
+    num = lambda key: eval(re.search(field(key), text).group(2))
     thr = round(main * num("thrusterMaxSpeed") / num("mainEngineMaxSpeed"))
-    text = re.sub(r"(NewShipType\.mainEngineMaxSpeed\s*=\s*)[\d.*]+", r"\g<1>%d" % main, text, count=1)
-    text = re.sub(r"(NewShipType\.thrusterMaxSpeed\s*=\s*)[\d.*]+", r"\g<1>%d" % thr, text, count=1)
+    text = re.sub(field("mainEngineMaxSpeed"), r"\g<1>%d" % main, text, count=1)
+    text = re.sub(field("thrusterMaxSpeed"), r"\g<1>%d" % thr, text, count=1)
     open(path, "w", encoding="latin-1", newline="").write(text)
     print(f"  {ship}: speed {main} (thrusters {thr}) from Cataclysm {cat} {v:g}")
 
@@ -487,6 +489,16 @@ def main():
     # weapon-upgrade variants (tools/ship_variants.py), from their base ship as installed above
     for variant in ship_variants.VARIANTS:
         copied += ship_variants.build(variant)
+    # the Mimic: their CustomCommand (a random one of three disguises) gives way to our Mimic menu, then the
+    # disguises (tools/ship_variants.py DISGUISES) from the Mimic as installed above
+    mimic = os.path.join(DATA, "ship", "smt_mimic", "smt_mimic.ship")
+    if os.path.exists(mimic):
+        text = open(mimic, encoding="latin-1").read()
+        text = re.sub(r'^(addAbility\(NewShipType,\s*"CustomCommand",\s*1,\s*"Mimic")',
+                      r"-- Cataclysm-HWRM (our Mimic menu, shiprules.lua CatMimic_*): \1", text, flags=re.M)
+        open(mimic, "w", encoding="latin-1", newline="").write(text)
+    for variant in ship_variants.DISGUISES:
+        copied += ship_variants.build_disguise(variant)
     ship_variants.write_lua()
     # Cataclysm's ship rules (experience, damage slowing ships, Acolyte link) on every ship the campaign uses
     copied += make_shipcode.install()
