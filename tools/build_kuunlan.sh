@@ -12,6 +12,8 @@ GLOW=C:/Modding/Cataclysm-decomp/reference/cr_main/ship/smt_ms_sp/smt_ms_sp.hod
 for spec in $(python tools/make_modules.py --list-builds); do
     key=${spec%%=*}; cat=${spec#*=}
     MODARGS="--no-docks --glow-from $GLOW --engines-from $GLOW --engines-scale 0.909"
+    # the lower engine's exhaust (spine texture, no glow) as the upper's glowing thruster (user: same glow as the upper)
+    [ "$key" = engineslower ] && MODARGS="$MODARGS --retexture smo_lowspine_sides=race_sect/smothershipenginesupper:SMO_engup_thruster@0,0.53,0,0.709"
     # on the Kuun-Lan: recentred, its hardpoint at its centre (HWRM draws a subsystem's health bar at its hardpoint:
     # at the shared origin every bar sat in the middle of the ship); Support already sits on its dock points
     ORIGIN=""; [ "$key" != support ] && ORIGIN="--origin auto"

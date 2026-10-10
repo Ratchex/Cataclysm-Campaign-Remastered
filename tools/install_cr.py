@@ -114,7 +114,9 @@ def patch_race(text):
 
 def patch_worker(text):
     """Cataclysm's Worker repairs; their RepairCommand was disabled. (How far off it harvests is set by the
-    model's LatchOrientation joint, not by the Harvest ability: tools/build_ship.sh --latch.)"""
+    model's LatchOrientation joint, not by the Harvest ability: tools/build_ship.sh --latch.) No NLIPS (its icon
+    and selection box scaled up with distance: user)."""
+    text = re.sub(r"^(\s*NewShipType\.nlips(?:Range|Far|FarRange)?\s*=\s*)[\d.]+", r"\g<1>0", text, flags=re.M)
     return re.sub(r'(addAbility\(NewShipType,\s*"RepairCommand",\s*)0,', r'\g<1>1,', text)
 
 

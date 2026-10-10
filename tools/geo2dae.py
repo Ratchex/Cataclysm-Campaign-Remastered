@@ -78,7 +78,7 @@ def write_textures(png_dir, tex, out_dir, base, colour, bake=None):
         g = Image.fromarray(glow).resize(size)
         Image.merge("RGB", (g, g, g)).save(os.path.join(out_dir, base + "_GLOW.tga"))
         # glowing texels emit the diffuse x a global strength: brighten it under the mask, keeping its colour (user:
-        # the hangars needed more glow; lifting toward white was too white). Not the engines' (user: keep those).
+        # the hangars needed more glow; lifting toward white was too white; then 1.35 a little bright). Not the engines' (user: keep those).
         if not GLOW_KEEP.match(tex.lower()):
             m = np.asarray(g, np.float32)[..., None] / 255
             im = Image.fromarray(np.clip(np.asarray(im, np.float32) * (1 + (GLOW_BOOST - 1) * m), 0, 255)
@@ -88,7 +88,7 @@ def write_textures(png_dir, tex, out_dir, base, colour, bake=None):
 
 
 FX_TILE = 128                                  # --fx-mesh: atlas cell size per texture page
-GLOW_BOOST = 1.35                             # diffuse multiplier under a full glow mask
+GLOW_BOOST = 1.25                             # diffuse multiplier under a full glow mask
 GLOW_KEEP = re.compile(r"smo_eng(up|lwr)_")    # engine module textures: their glow is right as is
 
 
@@ -530,6 +530,10 @@ def main():
     ap.add_argument("--engines-from", help="engine look from this old-format HOD (Cataclysm Remastered's smt_ms_sp.hod): "
                                            "its ETSH shape on our .mex nozzles")
     ap.add_argument("--engines-scale", type=float, default=1.0, help="size scale for --engines-from shapes")
+    ap.add_argument("--retexture", action="append", default=[],
+                    help="OLD=MODEL:NEW@u0,u1,v0,v1: faces textured OLD take MODEL's (race dir/model, e.g. "
+                         "race_sect/smothershipenginesupper) texture NEW, their UV box u0-u1 x v0-v1 (HW1 UVs) "
+                         "stretched over it (the Kuun-Lan's lower engine exhaust: the upper's glowing thruster, user)")
     ap.add_argument("--body", help="this ship's own meshes under a joint of this name (shown / hidden by the "
                                    ".madstate: the Mimic's body)")
     ap.add_argument("--part", action="append", default=[],
@@ -541,6 +545,13 @@ def main():
                                      "written to <out_dir>/origin.txt: a Kuun-Lan module on a hardpoint there "
                                      "(HWRM draws a subsystem's health bar at its hardpoint)")
     a = ap.parse_args()
+    retex = {}   # old texture (lower case) -> (png dir, new texture, (u0, u1, v0, v1))
+    for spec in a.retexture:
+        old, rest = spec.split("=", 1)
+        model_tex, box = rest.split("@")
+        model, new = model_tex.split(":")
+        retex[old.lower()] = (os.path.join(DECOMP, "extracted", "textures", model.replace("/", os.sep), "rl0", "lod0"),
+                              new, tuple(float(c) for c in box.split(",")))
     if a.glow_from:
         load_glow_maps(a.glow_from, os.path.join(os.path.dirname(os.path.abspath(a.out_dir)), "_glow_cache",
                                                  os.path.splitext(os.path.basename(a.glow_from))[0]))
@@ -612,6 +623,12 @@ def main():
                     flipped += 1
                     pos, nrm, uv = pos[::-1], nrm[::-1], uv[::-1]
                 mat = mats[m] if m < len(mats) else {"texture": None, "diffuse": 0x808080}
+                face_png = png_dir
+                rt = retex.get((mat["texture"] or "").lower())
+                if rt:   # --retexture: another model's texture, these faces' UV box stretched over all of it
+                    new_dir, new_tex, (u0, u1, v0, v1) = rt
+                    mat, face_png = dict(mat, texture=new_tex), new_dir
+                    uv = [((u_ - u0) / (u1 - u0), 1 - ((1 - v_) - v0) / (v1 - v0)) for u_, v_ in uv]
                 key = (mat["texture"] or "").lower() or "col%06x" % (mat["diffuse"] & 0xFFFFFF)
                 bake = None
                 if gn >= npre:   # a --part: its own materials (models share texture names), its own colours
@@ -619,7 +636,7 @@ def main():
                     bake = parts[gn - npre][2]
                 # owner: an --anim-joints object, -1 the root (or --body), -2 - k --part k
                 groups.setdefault((-2 - (gn - npre) if gn >= npre else owner if owner is not None else -1, key),
-                                  {"mat": mat, "png_dir": png_dir, "tris": [], "bake": bake})["tris"].append(
+                                  {"mat": mat, "png_dir": face_png, "tris": [], "bake": bake})["tris"].append(
                     ([conv(*q) for q in pos], [convn(*q) for q in nrm], uv))
 
     if a.fx_mesh:
