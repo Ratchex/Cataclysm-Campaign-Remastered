@@ -479,13 +479,15 @@ def translate_script(src, objects, nisname, speech, fps, end_frame, cam_events, 
             hidden_universe = not hidden_universe
             emit(f"hideUniverse({1 if hidden_universe else 0})")
         elif cmd == "colorScheme" and cur_obj:
-            # HW1 colour scheme N (teamcolors.script: one per faction) -> HWRM NIS colourScheme(base, stripe, badge)
-            # (Gearbox's n01r1.script; without it every NIS ship had the same colours)
+            # HW1 colour scheme N (teamcolors.script: one per faction) -> HWRM NIS colourSchemeTrail(base, stripe,
+            # badge, trail colour, trail texture) (Gearbox's NIS scripts; without it every NIS ship had the same
+            # colours, and plain colourScheme left the engine trails at the default colour: user). Trail texture ""
+            # (default) as Gearbox's.
             n = int(args.strip())
             s = make_colours.read()[n]
             badge = make_colours.FACTIONS[n][1].split("/", 1)[1]
             rgb = lambda c: "{" + ", ".join(f"{v:.3f}" for v in c) + "}"
-            emit(f'colourScheme({rgb(s["BaseColor"])}, {rgb(s["StripeColor"])}, "{badge}")')
+            emit(f'colourSchemeTrail({rgb(s["BaseColor"])}, {rgb(s["StripeColor"])}, "{badge}", {rgb(s["trail"])}, "")')
         elif cmd in ("hide", "show") and cur_obj:
             emit(f"{cmd}()")
         elif cmd == "meshAnimStart" and cur_obj:
