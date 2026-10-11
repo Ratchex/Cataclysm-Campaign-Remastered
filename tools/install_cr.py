@@ -206,10 +206,14 @@ def patch_acolyte(text):
 
 def patch_rammingfrigate(text):
     """Cataclysm's ram grapples onto a target's salvage points (user: the points resourcers dock to when salvaging;
-    Cataclysm lines up far more loosely than HWRM could from script): HWRM's own salvage-capture latch, ordered by
-    shiprules.lua CatRam_Tick when it attacks (SobGroup_SalvageSobGroup; stock kus_salvagecorvette's SalCapCommand)."""
+    Cataclysm lines up far more loosely than HWRM could from script): HWRM's own salvage-capture latch (stock
+    kus_salvagecorvette's SalCapCommand), which shiprules.lua CatRam_Tick turns into the hit, push and cutting beam.
+    No attack (no guns; Cataclysm Remastered's attack run only collided): a right-click on an enemy is the latch
+    (SobGroup_SalvageSobGroup from script did nothing)."""
     if '"SalCapCommand"' in text:
         return text
+    text = re.sub(r'^(addAbility\(NewShipType,\s*"CanAttack".*)$', r"-- Cataclysm-HWRM (the ram is its salvage latch): \1",
+                  text, count=1, flags=re.M)
     return (text.rstrip("\n") +
             '\naddAbility(NewShipType,"SalCapCommand",1,500,0,0);   -- Cataclysm-HWRM: the ram\'s latch\n')
 

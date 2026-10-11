@@ -62,6 +62,9 @@ case "$NAME" in
     # on the charge (AftBurnIgnite / AftBurnFiring / CancelAftBurn): srammingfrigate.mad
     ANIM="RammingFrigate,RammingFrigateNose,GunHousing,Gun"
     GEO2DAE_ARGS="$GEO2DAE_ARGS --anim-joints $ANIM"
+    # its ram is HWRM's salvage latch (shiprules.lua CatRam_Tick): LatchOrientation just past the nose tip (z 106.2;
+    # user: on the very front, latched by its centre it collided with the target)
+    GEO2DAE_ARGS="$GEO2DAE_ARGS --latch 0,0,107"
     CLIPS="RamCollapse,RamRecover,AftBurnIgnite,AftBurnFiring,CancelAftBurn"
     ;;
   som_acolyte)

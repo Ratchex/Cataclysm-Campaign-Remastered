@@ -1135,118 +1135,92 @@ function CatKamikaze_Tick(rec, g, id)
 end
 
 -- ---------------------------------------------------------------------------------------------------------------
--- The Ramming Frigate (Cataclysm FUN_005c0090: aim, approach, charge at x1.2 / x2 speed, hit for RamDamage 1700,
--- grapple on, push for RamPushTime 30 s with the cutting beam at 20 / 60 per second, let go, RamWaitAfterPushTime
--- 10 s). Its grapple is HWRM's own salvage-capture latch onto the target's salvage points (user: the points
--- resourcers salvage from; HWRM lines up far more loosely than a script could), ordered when it attacks.
--- Learned (experiment 1, 2026-10-10): SobGroup_SalvageSobGroup on an attacking frigate waited for its attack run to
--- end (it rammed first); latched, the order is 22 and it sits still against the target: no tow to the Kuun-Lan, no
--- capture; IsDocked / IsReturningSalvage / GetSobGroupSalvagingGroup all say nothing; a move order lets go.
--- SobGroup_GetActualSpeed is the speed squared.
--- EXPERIMENT 2 (CAT_RAM_TRACE): stop first, then latch; latched = order 22, near, still; then push the target two
--- ways and see whether the latched frigate comes along: its own move order (CAT_RAM_PUSH_ORDER s), then moved by
--- script (SobGroup_SetPosition) for the rest.
+-- The Ramming Frigate (Cataclysm FUN_005c0090: aim, approach, charge, hit for RamDamage 1700, grapple on, push for
+-- RamPushTime 30 s with the cutting beam at 20 / 60 per second, let go, RamWaitAfterPushTime 10 s).
+-- Its grapple is HWRM's own salvage-capture latch (SalCapCommand; its LatchOrientation at the nose tip,
+-- tools/build_ship.sh) onto the target's salvage points (user: the points resourcers salvage from; HWRM lines up
+-- far more loosely than a script could). It has no attack (no guns; install_cr.py patch_rammingfrigate): a
+-- right-click on an enemy is the latch. Learned in game (2026-10-10): latched, its order is 22 and it sits against
+-- the target (no tow home, no capture; IsDocked / IsReturningSalvage / GetSobGroupSalvagingGroup say nothing);
+-- SobGroup_SalvageSobGroup from script did nothing; the target ordered to move carries the latched frigate with it
+-- (smooth); a stop or move order on the frigate lets go. SobGroup_GetActualSpeed is the speed squared.
 CAT_RAM_DAMAGE = 1700          -- srammingfrigate.shp RamDamage (health is Cataclysm's 1:1, make_damage.py)
 CAT_RAM_PUSH = 30              -- RamPushTime
 CAT_RAM_WAIT = 10              -- RamWaitAfterPushTime
-CAT_RAM_SALCAP = 22            -- SobGroup_GetCurrentOrder while salvage-capturing (experiment 1)
-CAT_RAM_NEAR = 60              -- latched: this close to the target's centre (experiment 1: 18)...
+CAT_RAM_BEAM = 20              -- cuttingBeamDamagePerSecond (60 upgraded: not yet)
+CAT_RAM_SALCAP = 22            -- SobGroup_GetCurrentOrder while salvage-capturing
+CAT_RAM_NEAR = 150             -- latched: an enemy this close to its centre (seen: 18-32 latched by the centre)...
 CAT_RAM_STILL = 0.5            -- ...and still (speed under 10) this long
-CAT_RAM_PUSH_ORDER = 8         -- EXPERIMENT: seconds of pushing by ordering the target to move
-CAT_RAM_PUSH_SPEED = 100       -- EXPERIMENT: script push, units a second
+CAT_RAM_PUSH_DIST = 5000       -- the target is ordered this far along the frigate's heading...
+CAT_RAM_PUSH_EVERY = 2         -- ...again every this many seconds (its own orders would win)
 CAT_RAM_TRACE = 1
 
-function CatRam_Log(rec, g, id, now, what)
-    local r = rec.ram
-    local tg = r.tgrp
-    local p, tp = SobGroup_GetPosition(g), SobGroup_GetPosition(tg)
-    local dx, dy, dz = tp[1] - p[1], tp[2] - p[2], tp[3] - p[3]
-    print("CATACLYSM ram " .. id .. " " .. what .. " t+" .. floor((now - r.t0) * 10) / 10 .. " state " .. r.state ..
-          ": order " .. SobGroup_GetCurrentOrder(g) .. ", target order " .. SobGroup_GetCurrentOrder(tg) ..
-          ", docked " .. SobGroup_IsDocked(g) .. ", docked to it " .. SobGroup_IsDockedSobGroup(g, tg) ..
-          ", dist " .. floor(sqrt(dx * dx + dy * dy + dz * dz)) .. ", speed " .. floor(sqrt(SobGroup_GetActualSpeed(g))) ..
-          ", target speed " .. floor(sqrt(SobGroup_GetActualSpeed(tg))) .. ", target health " ..
-          floor(SobGroup_HealthPercentage(tg) * 1000) / 1000 .. ", pos " .. floor(p[1]) .. "," .. floor(p[2]) .. "," ..
-          floor(p[3]) .. ", target pos " .. floor(tp[1]) .. "," .. floor(tp[2]) .. "," .. floor(tp[3]))
+-- the nearest enemy ship within CAT_RAM_NEAR of g
+function CatRam_Target(rec, g)
+    local p = SobGroup_GetPosition(g)
+    local best, bd
+    for k, o in CatShips do
+        if o.p and o.p ~= rec.p and not o.gone and SobGroup_Empty(o.g) == 0 then
+            local q = SobGroup_GetPosition(o.g)
+            local dx, dy, dz = q[1] - p[1], q[2] - p[2], q[3] - p[3]
+            local d = dx * dx + dy * dy + dz * dz
+            if d < CAT_RAM_NEAR * CAT_RAM_NEAR and (not bd or d < bd) then best, bd = k, d end
+        end
+    end
+    return best
+end
+
+function CatRam_Hurt(tg, amount)
+    local h = SobGroup_HealthPercentage(tg) - amount / SobGroup_MaxHealthTotal(tg)
+    if h < 0.01 then h = 0.01 end
+    SobGroup_SetHealth(tg, h)
 end
 
 function CatRam_Tick(rec, g, id, now)
     local r = rec.ram
+    local salcap = SobGroup_GetCurrentOrder(g) == CAT_RAM_SALCAP
     if not r then
-        if SobGroup_GetCurrentOrder(g) ~= (COMMAND_Attack or 2) or now < (rec.ramReady or 0) then return end
-        local tg = "cat_ram_t_" .. id
-        SobGroup_CreateIfNotExist(tg)
-        SobGroup_Clear(tg)
-        SobGroup_GetCommandTargets(tg, g, COMMAND_Attack or 2)
-        if SobGroup_Empty(tg) == 1 then return end
-        r = { state = "stop", t0 = now, tgrp = tg, log = 0 }
-        rec.ram = r
-        SobGroup_Stop(rec.p, g)                         -- (salvaging an attacking frigate waited for its ram run)
-        CatRam_Log(rec, g, id, now, "attack: stopped")
-        return
-    end
-    if SobGroup_Empty(r.tgrp) == 1 then
-        print("CATACLYSM ram " .. id .. ": target gone")
-        rec.ram, rec.ramReady = nil, now + CAT_RAM_WAIT
-        return
-    end
-    local log = CAT_RAM_TRACE == 1 and now >= r.log
-    if log then r.log = now + 1 end
-    local tg = r.tgrp
-    if r.state == "stop" then
-        SobGroup_SalvageSobGroup(g, tg)
-        r.state = "latch"
-        CatRam_Log(rec, g, id, now, "salvage ordered")
-    elseif r.state == "latch" then
-        if log then CatRam_Log(rec, g, id, now, "latching") end
-        local p, tp = SobGroup_GetPosition(g), SobGroup_GetPosition(tg)
-        local dx, dy, dz = tp[1] - p[1], tp[2] - p[2], tp[3] - p[3]
-        local near = dx * dx + dy * dy + dz * dz < CAT_RAM_NEAR * CAT_RAM_NEAR
-        if SobGroup_GetCurrentOrder(g) == CAT_RAM_SALCAP and near and SobGroup_GetActualSpeed(g) < 100 then
-            r.still = r.still or now
-        else
-            r.still = nil
+        if not salcap then
+            rec.ramStill = nil
+            return
         end
-        if r.still and now - r.still >= CAT_RAM_STILL then
-            r.state, r.t1 = "pushorder", now
-            local h = SobGroup_HealthPercentage(tg) - CAT_RAM_DAMAGE / SobGroup_MaxHealthTotal(tg)
-            if h < 0.01 then h = 0.01 end
-            SobGroup_SetHealth(tg, h)
-            local m = SobGroup_GetCoordSys(g)
-            r.f = (getn(m) == 9 and CatAxis(m, 2)) or { 0, 0, 1 }
-            local to = { tp[1] + r.f[1] * 5000, tp[2] + r.f[2] * 5000, tp[3] + r.f[3] * 5000 }
-            SobGroup_MoveToPoint(SobGroup_OwnedBy(tg), tg, to)
-            CatRam_Log(rec, g, id, now, "LATCHED, hit for " .. CAT_RAM_DAMAGE .. "; target ordered ahead to " ..
-                       floor(to[1]) .. "," .. floor(to[2]) .. "," .. floor(to[3]))
-        elseif now - r.t0 > 90 then
-            CatRam_Log(rec, g, id, now, "gave up latching")
-            rec.ram, rec.ramReady = nil, now + CAT_RAM_WAIT
-        end
-    elseif r.state == "pushorder" then
-        if log then CatRam_Log(rec, g, id, now, "push by order") end
-        if now - r.t1 >= CAT_RAM_PUSH_ORDER then
-            SobGroup_Stop(SobGroup_OwnedBy(tg), tg)
-            r.state, r.last = "pushset", now
-            CatRam_Log(rec, g, id, now, "target stopped; now moved by script")
-        end
-    elseif r.state == "pushset" then
-        local dt = now - r.last
-        r.last = now
-        local tp = SobGroup_GetPosition(tg)
-        local s = CAT_RAM_PUSH_SPEED * dt
-        SobGroup_SetPosition(tg, { tp[1] + r.f[1] * s, tp[2] + r.f[2] * s, tp[3] + r.f[3] * s })
-        if log then CatRam_Log(rec, g, id, now, "push by script") end
-        if now - r.t1 >= CAT_RAM_PUSH then
-            r.state, r.t2 = "release", now
+        if now < (rec.ramReady or 0) then           -- still recovering from its last push: no new grapple
             SobGroup_Stop(rec.p, g)
-            CatRam_Log(rec, g, id, now, "frigate stopped (release?)")
+            return
         end
-    elseif r.state == "release" then
-        if log then CatRam_Log(rec, g, id, now, "after release") end
-        if now - r.t2 >= 5 then
-            rec.ram, rec.ramReady = nil, now + CAT_RAM_WAIT
-            print("CATACLYSM ram " .. id .. ": done")
+        if SobGroup_GetActualSpeed(g) >= 100 then
+            rec.ramStill = nil
+            return
         end
+        rec.ramStill = rec.ramStill or now
+        if now - rec.ramStill < CAT_RAM_STILL then return end
+        local t = CatRam_Target(rec, g)
+        if not t then return end
+        local m = SobGroup_GetCoordSys(g)
+        r = { t = t, t0 = now, last = now, push = 0, f = (getn(m) == 9 and CatAxis(m, 2)) or { 0, 0, 1 } }
+        rec.ram, rec.ramStill = r, nil
+        CatRam_Hurt(CatShips[t].g, CAT_RAM_DAMAGE)
+        if CAT_RAM_TRACE == 1 then print("CATACLYSM ram " .. id .. ": latched on " .. t .. " (" .. CatShips[t].t ..
+                                         "), hit for " .. CAT_RAM_DAMAGE) end
+        return
+    end
+    local trec = CatShips[r.t]
+    local dt = now - r.last
+    r.last = now
+    if not trec or trec.gone or SobGroup_Empty(trec.g) == 1 or not salcap or now - r.t0 >= CAT_RAM_PUSH then
+        -- let go: the push is over, the target is gone, or the player ordered it elsewhere (which let go already)
+        if salcap then SobGroup_Stop(rec.p, g) end
+        if trec and not trec.gone and SobGroup_Empty(trec.g) == 0 then SobGroup_Stop(trec.p, trec.g) end
+        rec.ram, rec.ramReady = nil, now + CAT_RAM_WAIT
+        if CAT_RAM_TRACE == 1 then print("CATACLYSM ram " .. id .. ": let go after " .. floor(now - r.t0) .. " s") end
+        return
+    end
+    CatRam_Hurt(trec.g, CAT_RAM_BEAM * dt)           -- the cutting beam
+    if now >= r.push then
+        r.push = now + CAT_RAM_PUSH_EVERY
+        local tp = SobGroup_GetPosition(trec.g)
+        SobGroup_MoveToPoint(trec.p, trec.g, { tp[1] + r.f[1] * CAT_RAM_PUSH_DIST, tp[2] + r.f[2] * CAT_RAM_PUSH_DIST,
+                                               tp[3] + r.f[3] * CAT_RAM_PUSH_DIST })
     end
 end
 
