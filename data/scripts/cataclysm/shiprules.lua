@@ -1157,8 +1157,8 @@ CAT_RAM_STILL = 0.5            -- ...and still (speed under 10) this long
 CAT_RAM_PUSH_SPEED = 252       -- the push, units a second (the frigate's top speed; Cataclysm adds 500000 force a frame,
                                -- 800000 upgraded, through physics HWRM doesn't share)...
 CAT_RAM_PUSH_RAMP = 3          -- ...reached over this many seconds
-CAT_RAM_SNUG = 55              -- the frigate held this much closer than where it latched: its ram plate on the
-                               -- hull (measured on a Taiidan assault frigate: crept 10 a second, it touched at 5.5 s, user)
+CAT_RAM_SNUG = 60              -- the frigate held this much closer than where it latched: its ram plate on the
+                               -- hull (Taiidan assault frigate: a 10/s creep touched at 5.5 s; 55 almost, 60, user)
 CAT_RAM_CREEP = 0              -- measuring CAT_RAM_SNUG: the frigate also closes this many units a second while pushing...
 CAT_RAM_CREEP_MAX = 150        -- ...up to this, logged each second
 -- pushed by script: both frozen (CatFreeze: ordered to fly, the target turned and steered, user: jittered, not locked
