@@ -1188,14 +1188,11 @@ function CatRam_Hurt(tg, amount)
     SobGroup_SetHealth(tg, h)
 end
 
--- Its engines: the Kuun-Lan's burn (scaled to it, install_cr.py kuunlan_engines) shows only while it rams (user:
--- in normal flight only its emissive textures): held at no thrust (SobGroup_ManualEngineGlow 0), full while pushing
+-- Its engines are the Processor's (the Kuun-Lan's, install_cr.py kuunlan_engines); while it pushes, a scaled-up
+-- copy of the Worker's engine flames plays on its nozzles (tools/make_ramburn.py; smt_rammingfrigate.madstate NIS01 /
+-- NIS02). (SobGroup_ManualEngineGlow 0 / 1 instead: no glow in flight, no burn on the pinned frigate, user.)
 function CatRam_Tick(rec, g, id, now)
     local r = rec.ram
-    if not rec.ramGlow then
-        rec.ramGlow = 1
-        SobGroup_ManualEngineGlow(g, 0)
-    end
     local salcap = SobGroup_GetCurrentOrder(g) == CAT_RAM_SALCAP
     -- the Ram order's line: Cataclysm's attack ack in the frigate's voice (the salvage-capture order's own chatter is
     -- engine-played and HWRM has no audio for it: the order was silent, user)
@@ -1230,7 +1227,7 @@ function CatRam_Tick(rec, g, id, now)
         SobGroup_Stop(CatShips[t].p, tg)
         CatFreeze(tg, 0)
         CatFreeze(g, 0)
-        SobGroup_ManualEngineGlow(g, 1)                 -- its burn, at full thrust
+        SobGroup_SetMadState(g, "NIS01")                -- its push burn (smt_rammingfrigate.madstate)
         local p, q = SobGroup_GetPosition(g), SobGroup_GetPosition(tg)
         r.tp, r.txf, r.fxf = { q[1], q[2], q[3] }, SobGroup_GetCoordSys(tg), m
         r.off = { p[1] - q[1] + r.f[1] * CAT_RAM_SNUG, p[2] - q[2] + r.f[2] * CAT_RAM_SNUG,
@@ -1257,7 +1254,7 @@ function CatRam_Tick(rec, g, id, now)
     if not trec or trec.gone or SobGroup_Empty(trec.g) == 1 or ordered or now - r.t0 >= CAT_RAM_PUSH then
         -- let go: the push is over, the target is gone, or the player ordered it elsewhere (which let go already)
         CatFreeze(g, 1)
-        SobGroup_ManualEngineGlow(g, 0)                 -- back to no burn
+        SobGroup_SetMadState(g, "NIS02")                -- push burn out
         SobGroup_Stop(rec.p, g)
         if trec and not trec.gone and SobGroup_Empty(trec.g) == 0 then
             CatFreeze(trec.g, 1)
