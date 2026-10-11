@@ -20,7 +20,8 @@ FX = os.path.join(MOD, "data", "art", "fx")
 SPRITES = 6          # the Worker's burn: setEngineBurn(NewShipType, 6, ...) divisions
 LENGTH = 50.0        # behind the nozzle, last sprite (the frigate is 137 long; its nozzles ~15 across)
 R0, R1 = 9.0, 2.0    # sprite radius at the nozzle and at the tip
-COLOUR = (0.55, 0.78, 1.0)   # the engine glow's blue (0.27, 0.47, 0.69), lifted toward white: a hard burn
+COLOUR = tuple(round(c * 0.75, 3) for c in (0.55, 0.78, 1.0))   # the engine glow's blue (0.27, 0.47, 0.69), lifted
+                                                                # toward white: a hard burn; dimmed for a frigate (user)
 FLICKER = 0.12       # seconds per flicker cycle
 
 

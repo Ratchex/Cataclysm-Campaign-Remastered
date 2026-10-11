@@ -63,10 +63,14 @@ case "$NAME" in
     ANIM="RammingFrigate,RammingFrigateNose,GunHousing,Gun"
     GEO2DAE_ARGS="$GEO2DAE_ARGS --anim-joints $ANIM"
     # its ram is HWRM's salvage latch (shiprules.lua CatRam_Tick): LatchOrientation / SalvageOrientation (stock
-    # salvage corvette's pair) at the ram plate's tip (z 106.2; user: on the very front, latched by its centre it
-    # collided). Held ~17 off the target, pulled 17 in the nose was pushed out again (user): collision, the model had
-    # no collision mesh; now one that follows the hull (--col-slices)
-    GEO2DAE_ARGS="$GEO2DAE_ARGS --latch 0,0,105 --salvage-latch 0,0,105 --col-slices 10"
+    # salvage corvette's pair) at the ram plate's tip (user: on the very front, latched by its centre it collided),
+    # with a collision mesh that follows the hull (--col-slices; with none, targets were held well off). In model
+    # space the hull runs z -87.6..45.3 (it hangs 56.7 back on JNT[RammingFrigate]; measured raw, the latch and the
+    # collision mesh first sat 56.7 ahead of the nose and the script snugged it 65 back in)
+    GEO2DAE_ARGS="$GEO2DAE_ARGS --latch 0,0,45 --salvage-latch 0,0,45 --col-slices 10"
+    # its three engine nozzles, stacked on its rear face (y -20..32; the .mex put one there and two 33 ahead of the
+    # nose, user: two copies in front of the ram)
+    GEO2DAE_ARGS="$GEO2DAE_ARGS --engines-at 0,23.3,-87.6;0,6,-87.6;0,-11.3,-87.6"
     # engines the Kuun-Lan's (user): CR's Kuun-Lan engine shape, x0.909 (CR -> ours) x 0.121 (our frigate's length /
     # our Kuun-Lan's, 137 / 1131); its burn: install_cr.py kuunlan_engines
     GEO2DAE_ARGS="$GEO2DAE_ARGS --engines-from C:/Modding/Cataclysm-decomp/reference/cr_main/ship/smt_ms_sp/smt_ms_sp.hod --engines-scale 0.110"

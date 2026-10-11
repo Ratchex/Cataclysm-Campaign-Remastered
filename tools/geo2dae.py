@@ -562,6 +562,8 @@ def main():
     ap.add_argument("--no-engines", action="store_true", help="no engine nozzles from the .mex Eng chunks")
     ap.add_argument("--engines-from", help="engine look from this old-format HOD (Cataclysm Remastered's smt_ms_sp.hod): "
                                            "its ETSH shape on our .mex nozzles")
+    ap.add_argument("--engines-at", help="x,y,z;x,y,z;...: engine nozzles here (HWRM model space) instead of the "
+                                         ".mex Eng points (the Ramming Frigate's put two ahead of its nose, user)")
     ap.add_argument("--engines-scale", type=float, default=1.0, help="size scale for --engines-from shapes")
     ap.add_argument("--retexture", action="append", default=[],
                     help="OLD=MODEL:NEW@u0,u1,v0,v1: faces textured OLD take MODEL's (race dir/model, e.g. "
@@ -794,6 +796,9 @@ def main():
     # Each nozzle as in HODOR's engine layout (toolkit demo ship): BURN[EngineBurn<n>] with five flame divisions
     # trailing backwards and an ETSH[EngineShape<n>] quad; trails/burns need these, not just the joint.
     engines = [] if a.no_engines else [pt for pt in points if pt[0] == "Eng"]
+    engines_at = [tuple(float(c) for c in e.split(",")) for e in a.engines_at.split(";")] if a.engines_at else None
+    if engines_at:      # placed by hand (HWRM model space) instead of the .mex Eng points
+        engines = [("Eng", "", (0.0, 0.0, 0.0), (0.0, 0.0, 1.0), "") for _ in engines_at]
     cr_shapes = [sh for _, _, shp in hod_engines(a.engines_from) for sh in shp] if a.engines_from else []
     parsed = {}
     for i, pt in enumerate(engines):
@@ -843,7 +848,7 @@ def main():
         # BURN flames kept with CR's shape: CR's .ship setEngineBurn (ours too) drives them, but its own model has no
         # BURN, so CR shows no flames; without them the engines barely glowed in game (user: "add CR's stuff")
         burn = jnode(f"BURN[EngineBurn{n}]", (0, 0, 0), flames)
-        weapons += jnode(f"JNT[EngineNozzle{n}]", conv(*pos), burn + shape)
+        weapons += jnode(f"JNT[EngineNozzle{n}]", engines_at[i] if engines_at else conv(*pos), burn + shape)
     nav, nnav = ("", 0) if a.no_navlights else navlight_nodes(points, conv, a.scale)
     weapons += nav
     # resource drop-off at the collector docks (Cataclysm Remastered's sits at its Kuun-Lan's front dock)
@@ -966,7 +971,29 @@ def main():
     # every --col-slices units along its length
     col_node = ""
     if a.col_slices:
-        cv = [v for g in groups.values() for t in g["tris"] for v in t[0]]
+        # vertices in model space: an --anim-joints part's are in its joint's frame (the Ramming Frigate's whole hull
+        # hangs 56.7 back on JNT[RammingFrigate]: built from the raw ones, the mesh sat 56.7 ahead of the nose, user)
+        jw = {}
+
+        def joint_world(i):
+            if i not in jw:
+                par, m = frames[i]
+                t, rot = hwrm_local(m, s)
+                if par is None:
+                    jw[i] = (t, rot)
+                else:
+                    pt, pr = joint_world(par)
+                    jw[i] = ([pt[k] + sum(pr[k][j] * t[j] for j in range(3)) for k in range(3)],
+                             [[sum(pr[k][j] * rot[j][c] for j in range(3)) for c in range(3)] for k in range(3)])
+            return jw[i]
+
+        cv = []
+        for (owner, _), g in groups.items():
+            vs = [v for t in g["tris"] for v in t[0]]
+            if owner is not None and owner >= 0 and owner in frames:
+                t, rot = joint_world(owner)
+                vs = [tuple(t[k] + sum(rot[k][j] * v[j] for j in range(3)) for k in range(3)) for v in vs]
+            cv += vs
         z0, z1 = min(v[2] for v in cv), max(v[2] for v in cv)
         P, I = [], []
         z = z0

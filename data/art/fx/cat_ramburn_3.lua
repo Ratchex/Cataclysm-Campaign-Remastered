@@ -7,7 +7,7 @@ property_01 = { name = "Offset", type = "VARTYPE_ARRAY_TIMEVECTOR3", value = { e
 property_02 = { name = "SpinX", type = "VARTYPE_ARRAY_TIMEFLOAT", value = { 0, 0, 1, 0, }, },
 property_03 = { name = "SpinY", type = "VARTYPE_ARRAY_TIMEFLOAT", value = { 0, 0, 1, 0, }, },
 property_04 = { name = "SpinZ", type = "VARTYPE_ARRAY_TIMEFLOAT", value = { 0, 0, 1, 0, }, },
-property_05 = { name = "Colour", type = "VARTYPE_ARRAY_TIMECOLOUR", value = { entry_00 = { 0, 0.22, 0.312, 0.4, 1, }, entry_01 = { 0.11, 0.165, 0.234, 0.3, 1, }, entry_02 = { 1, 0.22, 0.312, 0.4, 1, }, }, },
+property_05 = { name = "Colour", type = "VARTYPE_ARRAY_TIMECOLOUR", value = { entry_00 = { 0, 0.165, 0.234, 0.3, 1, }, entry_01 = { 0.11, 0.124, 0.176, 0.225, 1, }, entry_02 = { 1, 0.165, 0.234, 0.3, 1, }, }, },
 property_06 = { name = "RadiusEpsilon", type = "VARTYPE_FLOAT", value = 0, },
 property_07 = { name = "RateEpsilon", type = "VARTYPE_FLOAT", value = 0, },
 property_08 = { name = "SpinEpsilonX", type = "VARTYPE_FLOAT", value = 0, },
