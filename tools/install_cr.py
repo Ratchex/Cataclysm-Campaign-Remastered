@@ -147,7 +147,8 @@ def kuunlan_engines(text, size):
     """The Kuun-Lan's engine burn (their smt_ms_sp.ship setEngineBurn 9, 0.2, 0.5, 300, 1.02, 0.1, 0.25, 380) beside a
     ship's setEngineGlow (theirs is the Kuun-Lan's already on the Processor and Ramming Frigate; user: the same
     engines as the Kuun-Lan's), its lengths (300, 380: stock HW1 frigates 60, 120, the Worker 4, 15) scaled by the
-    ship's size against the Kuun-Lan's (unscaled it was far too strong on the frigate, user)."""
+    ship's size against the Kuun-Lan's (unscaled it was far too strong on the frigate, user; the Processor keeps
+    the Kuun-Lan's own)."""
     if "setEngineBurn" in text:
         return text
     assert text.count("setEngineGlow(NewShipType") == 1
@@ -162,7 +163,7 @@ def patch_processor(text):
     (tweak.script twRepairRate 30 / s). Both only once it has the Repair upgrade (shiprules.lua CatGated). Engines: the
     Kuun-Lan's burn (their smt_ms_sp.ship setEngineBurn; its setEngineGlow is the Kuun-Lan's already; user: same
     engine glow as the Kuun-Lan's)."""
-    return repair_order(kuunlan_engines(text, 0.30), "processor")   # 340 / 1131 long
+    return repair_order(kuunlan_engines(text, 1), "processor")   # as the Kuun-Lan's (user: leave it as it was)
 
 
 def patch_worker(text):
