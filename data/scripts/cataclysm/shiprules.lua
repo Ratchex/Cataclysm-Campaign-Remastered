@@ -1227,7 +1227,8 @@ function CatRam_Tick(rec, g, id, now)
         local tg = CatShips[t].g
         SobGroup_Stop(CatShips[t].p, tg)
         CatFreeze(tg, 0)
-        -- the frigate: steering and collisions off, movement kept (with movement off its engines don't draw, even
+        SobGroup_SetGhost(tg, 0)    -- the target keeps its collisions: it shoves other ships aside (user: phased through one)
+        -- the frigate: steering and collisions off (ghosted, the pair can't push each other apart), movement kept (with movement off its engines don't draw, even
         -- forced on: user, no engines under the push burn); placed every update all the same
         if AB_Steering then SobGroup_AbilityActivate(g, AB_Steering, 0) end
         SobGroup_SetGhost(g, 1)
