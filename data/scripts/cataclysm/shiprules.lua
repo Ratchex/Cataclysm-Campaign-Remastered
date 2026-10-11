@@ -1157,7 +1157,9 @@ CAT_RAM_STILL = 0.5            -- ...and still (speed under 10) this long
 CAT_RAM_PUSH_SPEED = 252       -- the push, units a second (the frigate's top speed; Cataclysm adds 500000 force a frame,
                                -- 800000 upgraded, through physics HWRM doesn't share)...
 CAT_RAM_PUSH_RAMP = 3          -- ...reached over this many seconds
-CAT_RAM_SNUG = 10              -- the frigate held this much closer than where it latched (4 still left a gap, user)
+CAT_RAM_SNUG = 0               -- the frigate held this much closer than where it latched (4, 10 left a gap, user)
+CAT_RAM_CREEP = 10             -- MEASURING: the frigate also closes this many units a second while pushing...
+CAT_RAM_CREEP_MAX = 150        -- ...up to this (logged each second; the user says when it touched)
 -- pushed by script: both frozen (CatFreeze: ordered to fly, the target turned and steered, user: jittered, not locked
 -- in) and placed together along the frigate's heading every update.
 -- (Not HWRM's salvage tow: a lone latched salvager just holds on; the engine tows only once enough have latched,
@@ -1188,6 +1190,10 @@ end
 function CatRam_Tick(rec, g, id, now)
     local r = rec.ram
     local salcap = SobGroup_GetCurrentOrder(g) == CAT_RAM_SALCAP
+    -- the Ram order's line: Cataclysm's attack ack in the frigate's voice (the salvage-capture order's own chatter is
+    -- engine-played and HWRM has no audio for it: the order was silent, user)
+    if salcap and not rec.ramSaid then CatSay(5, g, rec.p) end
+    rec.ramSaid = salcap
     if not r then
         if not salcap then
             rec.ramStill = nil
@@ -1259,7 +1265,15 @@ function CatRam_Tick(rec, g, id, now)
     local s, tp = r.v * dt, r.tp
     tp[1], tp[2], tp[3] = tp[1] + r.f[1] * s, tp[2] + r.f[2] * s, tp[3] + r.f[3] * s
     CatPlace(trec.g, tp, r.txf)
-    CatPlace(g, { tp[1] + r.off[1], tp[2] + r.off[2], tp[3] + r.off[3] }, r.fxf)
+    local c = CAT_RAM_CREEP * (now - r.t0)
+    if c > CAT_RAM_CREEP_MAX then c = CAT_RAM_CREEP_MAX end
+    if CAT_RAM_CREEP > 0 and CAT_RAM_TRACE == 1 and now >= (r.creepLog or 0) then
+        r.creepLog = now + 1
+        print("CATACLYSM ram " .. id .. ": t+" .. floor(now - r.t0) .. " s, frigate " .. floor(CAT_RAM_SNUG + c) ..
+              " closer than where it latched")
+    end
+    CatPlace(g, { tp[1] + r.off[1] + r.f[1] * c, tp[2] + r.off[2] + r.f[2] * c, tp[3] + r.off[3] + r.f[3] * c },
+             r.fxf)
 end
 
 -- ---------------------------------------------------------------------------------------------------------------

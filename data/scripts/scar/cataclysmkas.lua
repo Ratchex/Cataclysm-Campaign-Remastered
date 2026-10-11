@@ -1157,7 +1157,7 @@ function K_496eb0(event, variable) KAS_SpeechPlay(event, variable) end          
 -- don't hold up the mission's dialogue (KAS_SpeechEnd untouched). Variable = the speaking ship's Cataclysm ShipType /
 -- the TechnologyType (catspeech_gen.lua CatSpeech_Var / CatSpeech_TechLine, tools/make_unitspeech.py).
 dofilepath("data:soundscripts/cataclysm/catspeech_gen.lua")
-CatSayEvents = {156, 157, 165, 166, 167, 168}   -- Link, Unlink, mimic, unmimic, kamikaze, disguise assumed (shiprules.lua CatSay: cat_say_<event>)
+CatSayEvents = {156, 157, 165, 166, 167, 168, 5}   -- Link, Unlink, mimic, unmimic, kamikaze, disguise assumed, the Ram order (attack; shiprules.lua CatSay: cat_say_<event>)
 CatSayLast = 0
 CatTechHad = nil
 
