@@ -1169,7 +1169,40 @@ CAT_RAM_CREEP_MAX = 150        -- ...up to this, logged each second
 CAT_RAM_SHOVE = 130            -- while pushing, other ships are shoved out to this far from the target's centre (placed
                                -- by script it collides with nothing, user: phased through a frigate; ~ the assault
                                -- frigate's centre from the frigate's when latched)
+CAT_RAM_CHARGE_DIST = 450      -- the charge: an enemy this close (centre to centre) and ahead, the latch order on...
+CAT_RAM_CHARGE_AHEAD = 0.7     -- ...within ~45 degrees of its nose (Cataclysm FUN_005c0090: inside the target's radius
+                               -- + 600 HW1 units, 210 here, it charges straight at it)...
+CAT_RAM_CHARGE_SPEED = 1.2     -- ...at this times its top speed (x2 upgraded: later, with the missions), afterburner lit
 CAT_RAM_TRACE = 1
+
+-- an enemy within CAT_RAM_CHARGE_DIST, within CAT_RAM_CHARGE_AHEAD of g's nose
+function CatRam_ChargeTarget(rec, g)
+    local m = SobGroup_GetCoordSys(g)
+    if getn(m) ~= 9 then return nil end
+    local f, p = CatAxis(m, 2), SobGroup_GetPosition(g)
+    for k, o in CatShips do
+        if o.p and o.p ~= rec.p and not o.gone and SobGroup_Empty(o.g) == 0 then
+            local q = SobGroup_GetPosition(o.g)
+            local v = { q[1] - p[1], q[2] - p[2], q[3] - p[3] }
+            local d = sqrt(v[1] * v[1] + v[2] * v[2] + v[3] * v[3])
+            if d < CAT_RAM_CHARGE_DIST and d > 1 and (v[1] * f[1] + v[2] * f[2] + v[3] * f[3]) / d > CAT_RAM_CHARGE_AHEAD then
+                return k
+            end
+        end
+    end
+    return nil
+end
+
+-- the charge's end: hit (nothing to undo but its speed) or called off (the afterburner cancelled: madstate NIS02)
+function CatRam_EndCharge(rec, g, hit)
+    if not rec.ramCharge then return end
+    rec.ramCharge = nil
+    SobGroup_SetMaxSpeedMultiplier(g, 1)
+    if not hit then
+        SobGroup_SetMadState(g, "NIS02")
+        SobGroup_AutoEngineGlow(g)
+    end
+end
 
 -- other ships too near the pushed target moved straight out from its centre (a sphere's collision)
 function CatRam_Shove(rec, tid, tp)
@@ -1221,11 +1254,19 @@ function CatRam_Tick(rec, g, id, now)
     if not r then
         if not salcap then
             rec.ramStill = nil
+            CatRam_EndCharge(rec, g)                     -- ordered elsewhere before it hit
             return
         end
         if now < (rec.ramReady or 0) then           -- still recovering from its last push: no new grapple
             SobGroup_Stop(rec.p, g)
             return
+        end
+        -- the charge: close on an enemy ahead, the afterburner lights (madstate NIS00) and it speeds up
+        if not rec.ramCharge and CatRam_ChargeTarget(rec, g) then
+            rec.ramCharge = 1
+            SobGroup_SetMaxSpeedMultiplier(g, CAT_RAM_CHARGE_SPEED)
+            SobGroup_SetMadState(g, "NIS00")
+            SobGroup_ManualEngineGlow(g, 1)
         end
         if SobGroup_GetActualSpeed(g) >= 100 then
             rec.ramStill = nil
@@ -1239,6 +1280,7 @@ function CatRam_Tick(rec, g, id, now)
         r = { t = t, t0 = now, last = now, f = (getn(m) == 9 and CatAxis(m, 2)) or { 0, 0, 1 } }
         rec.ram, rec.ramStill = r, nil
         r.v = 0
+        CatRam_EndCharge(rec, g, 1)
         CatRam_Hurt(CatShips[t].g, CAT_RAM_DAMAGE)
         -- the pair pinned as Link pins its Acolytes (CatFreeze: no movement, steering or collisions; both placed
         -- every update): moved by SetPosition alone they drifted apart to a set distance (user), the engine still
