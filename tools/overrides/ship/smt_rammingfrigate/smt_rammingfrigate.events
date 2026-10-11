@@ -1,4 +1,5 @@
 -- Somtaaw Ramming Frigate effects (Cataclysm-HWRM; installed over Cataclysm Remastered's empty one by tools/install_cr.py).
+-- RamImpact: Cataclysm's impact shock bowl on its nose tip (tools/make_ramimpact.py), at the impact.
 -- RamThrust: its push burn on its engine nozzle (tools/make_ramburn.py), while shiprules.lua CatRam_Tick
 -- pushes (started / ended by smt_rammingfrigate.madstate)
 effects =
@@ -6,9 +7,11 @@ effects =
     animations =
     {
         RamThrust = { name = "RamThrust", length = 1, loop = 1, parent = "", minimum = 0, maximum = 0, markers = { "" } },
+        RamImpact = { name = "RamImpact", length = 0.6, loop = 0, parent = "", minimum = 0, maximum = 0, markers = { "" } },
     },
     events =
     {
+        RamImpact_fx = { { "anim", "RamImpact" }, { "animtime", "0" }, { "marker", "marker_ram" }, { "fx", "cat_ramimpact" }, },
         RamThrust1_fx = { { "anim", "RamThrust" }, { "animtime", "-1" }, { "marker", "EngineNozzle1" }, { "fx", "cat_ramburn" }, },
     },
 }

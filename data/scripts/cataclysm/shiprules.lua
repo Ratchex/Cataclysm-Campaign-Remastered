@@ -1157,9 +1157,13 @@ CAT_RAM_STILL = 0.5            -- ...and still (speed under 10) this long
 CAT_RAM_PUSH_SPEED = 252       -- the push, units a second (the frigate's top speed; Cataclysm adds 500000 force a frame,
                                -- 800000 upgraded, through physics HWRM doesn't share)...
 CAT_RAM_PUSH_RAMP = 3          -- ...reached over this many seconds
-CAT_RAM_SNUG = 65              -- the frigate held this much closer than where it latched: its ram plate on the hull.
-                               -- The engine latches at its own distance (a Taiidan assault frigate's centre ~130 ahead,
-                               -- the latch joint at the nose tip or 60 past it alike); a 10/s creep touched at 5.5 s, 65 (user)
+CAT_RAM_SNUG = 65              -- the frigate held this much closer than where it latched, for a hull with no entry
+                               -- in CatHull (measured on a Taiidan assault frigate: a 10/s creep touched at 5.5 s, user).
+                               -- The engine latches at its own distance (that frigate's centre ~130 ahead, the latch
+                               -- joint at the nose tip or 60 past it alike). With CatHull (tools/make_hullinfo.py): the
+                               -- frigate's nose onto the target's nearest salvage point (else its box's near face)...
+CAT_RAM_NOSE = 45.3            -- ...its nose tip ahead of its centre (its BBOX)...
+CAT_RAM_SNUG_ADJ = -3.5        -- ...less this (that rule gave 68.5 on the assault frigate, 65 measured)
 CAT_RAM_CREEP = 0              -- measuring CAT_RAM_SNUG: the frigate also closes this many units a second while pushing...
 CAT_RAM_CREEP_MAX = 150        -- ...up to this, logged each second
 -- pushed by script: both frozen (CatFreeze: ordered to fly, the target turned and steered, user: jittered, not locked
@@ -1167,8 +1171,9 @@ CAT_RAM_CREEP_MAX = 150        -- ...up to this, logged each second
 -- (Not HWRM's salvage tow: a lone latched salvager just holds on; the engine tows only once enough have latched,
 -- home to be captured, and a script can set neither where nor how hard.)
 CAT_RAM_SHOVE = 130            -- while pushing, other ships are shoved out to this far from the target's centre (placed
-                               -- by script it collides with nothing, user: phased through a frigate; ~ the assault
-                               -- frigate's centre from the frigate's when latched)
+                               -- by script it collides with nothing, user: phased through a frigate), for a hull with
+                               -- no CatHull box; with one, out of its box (as an ellipsoid) padded by the other's size
+CAT_RAM_SHOVE_PAD = 0.6        -- the other ship's size: this times its largest half-extent (CatHull, else 10)
 CAT_RAM_CHARGE_DIST = 450      -- the charge: an enemy this close (centre to centre) and ahead, the latch order on...
 CAT_RAM_CHARGE_AHEAD = 0.7     -- ...within ~45 degrees of its nose (Cataclysm FUN_005c0090: inside the target's radius
                                -- + 600 HW1 units, 210 here, it charges straight at it)...
@@ -1204,20 +1209,86 @@ function CatRam_EndCharge(rec, g, hit)
     end
 end
 
--- other ships too near the pushed target moved straight out from its centre (a sphere's collision)
-function CatRam_Shove(rec, tid, tp)
+-- a ship type's size for the shove: CAT_RAM_SHOVE_PAD x its largest half-extent
+function CatRam_Size(t)
+    local h = CatHull and CatHull[t]
+    if not h then return 10 end
+    local b, m = h.box, 0
+    for i = 1, 3 do
+        local e = (b[i + 3] - b[i]) / 2
+        if e > m then m = e end
+    end
+    return m * CAT_RAM_SHOVE_PAD
+end
+
+-- other ships too near the pushed target moved straight out from it: out of its box taken as an ellipsoid in its own
+-- frame (r.ax: its right / up / forward, fixed while pinned), padded by the other ship's size; a sphere of
+-- CAT_RAM_SHOVE without a box
+function CatRam_Shove(rec, r, tp)
+    local h = CatHull and CatHull[CatShips[r.t].t]
     for k, o in CatShips do
-        if k ~= tid and o ~= rec and not o.gone and SobGroup_Empty(o.g) == 0 then
+        if k ~= r.t and o ~= rec and not o.gone and SobGroup_Empty(o.g) == 0 then
             local q = SobGroup_GetPosition(o.g)
-            local dx, dy, dz = q[1] - tp[1], q[2] - tp[2], q[3] - tp[3]
-            local d = sqrt(dx * dx + dy * dy + dz * dz)
-            if d < CAT_RAM_SHOVE then
-                if d < 1 then dx, dy, dz, d = 0, 1, 0, 1 end
-                local k2 = CAT_RAM_SHOVE / d
-                SobGroup_SetPosition(o.g, { tp[1] + dx * k2, tp[2] + dy * k2, tp[3] + dz * k2 })
+            if h and r.ax then
+                local b, pad, ax = h.box, CatRam_Size(o.t), r.ax
+                local v = { q[1] - tp[1], q[2] - tp[2], q[3] - tp[3] }
+                local l, half, sum = {}, {}, 0
+                for i = 1, 3 do
+                    local a = ax[i]
+                    l[i] = v[1] * a[1] + v[2] * a[2] + v[3] * a[3] - (b[i] + b[i + 3]) / 2   -- from the box's centre
+                    half[i] = (b[i + 3] - b[i]) / 2 + pad
+                    sum = sum + (l[i] / half[i]) * (l[i] / half[i])
+                end
+                if sum < 1 then
+                    local s = 1 / sqrt(sum)
+                    if sum < 0.0001 then l, s = { 0, half[2], 0 }, 1 end
+                    local w = { tp[1], tp[2], tp[3] }
+                    for i = 1, 3 do
+                        local c, a = (b[i] + b[i + 3]) / 2 + l[i] * s, ax[i]
+                        w[1], w[2], w[3] = w[1] + a[1] * c, w[2] + a[2] * c, w[3] + a[3] * c
+                    end
+                    SobGroup_SetPosition(o.g, w)
+                end
+            else
+                local dx, dy, dz = q[1] - tp[1], q[2] - tp[2], q[3] - tp[3]
+                local d = sqrt(dx * dx + dy * dy + dz * dz)
+                if d < CAT_RAM_SHOVE then
+                    if d < 1 then dx, dy, dz, d = 0, 1, 0, 1 end
+                    local k2 = CAT_RAM_SHOVE / d
+                    SobGroup_SetPosition(o.g, { tp[1] + dx * k2, tp[2] + dy * k2, tp[3] + dz * k2 })
+                end
             end
         end
     end
+end
+
+-- how much closer than where it latched the frigate is held (its nose onto the target's hull)
+function CatRam_Snug(r, p, q, ttype)
+    local h = CatHull and CatHull[ttype]
+    if not h or not r.ax then return CAT_RAM_SNUG end
+    local f, ax = r.f, r.ax
+    local nose = { p[1] + f[1] * CAT_RAM_NOSE, p[2] + f[2] * CAT_RAM_NOSE, p[3] + f[3] * CAT_RAM_NOSE }
+    local best, bd
+    for i = 1, getn(h.sp) do                         -- the target's nearest salvage point (the one it latched to)
+        local s = h.sp[i]
+        local w = { q[1], q[2], q[3] }
+        for j = 1, 3 do
+            w[1], w[2], w[3] = w[1] + ax[j][1] * s[j], w[2] + ax[j][2] * s[j], w[3] + ax[j][3] * s[j]
+        end
+        local dx, dy, dz = w[1] - nose[1], w[2] - nose[2], w[3] - nose[3]
+        local d = dx * dx + dy * dy + dz * dz
+        if not bd or d < bd then best, bd = w, d end
+    end
+    if not best then                                 -- no salvage points: its box's face toward the frigate
+        local b, c, ext = h.box, { q[1], q[2], q[3] }, 0
+        for j = 1, 3 do
+            local m = (b[j] + b[j + 3]) / 2
+            c[1], c[2], c[3] = c[1] + ax[j][1] * m, c[2] + ax[j][2] * m, c[3] + ax[j][3] * m
+            ext = ext + abs(ax[j][1] * f[1] + ax[j][2] * f[2] + ax[j][3] * f[3]) * (b[j + 3] - b[j]) / 2
+        end
+        return (c[1] - nose[1]) * f[1] + (c[2] - nose[2]) * f[2] + (c[3] - nose[3]) * f[3] - ext + CAT_RAM_SNUG_ADJ
+    end
+    return (best[1] - nose[1]) * f[1] + (best[2] - nose[2]) * f[2] + (best[3] - nose[3]) * f[3] + CAT_RAM_SNUG_ADJ
 end
 
 -- the nearest enemy ship within CAT_RAM_NEAR of g
@@ -1296,8 +1367,10 @@ function CatRam_Tick(rec, g, id, now)
         SobGroup_ManualEngineGlow(g, 1)                 -- ...over its own engines at full (frozen, they'd go dark)
         local p, q = SobGroup_GetPosition(g), SobGroup_GetPosition(tg)
         r.tp, r.txf, r.fxf = { q[1], q[2], q[3] }, SobGroup_GetCoordSys(tg), m
-        r.off = { p[1] - q[1] + r.f[1] * CAT_RAM_SNUG, p[2] - q[2] + r.f[2] * CAT_RAM_SNUG,
-                  p[3] - q[3] + r.f[3] * CAT_RAM_SNUG }
+        if getn(r.txf) == 9 then r.ax = { CatAxis(r.txf, 0), CatAxis(r.txf, 1), CatAxis(r.txf, 2) } end
+        local snug = CatRam_Snug(r, p, q, CatShips[t].t)
+        r.off = { p[1] - q[1] + r.f[1] * snug, p[2] - q[2] + r.f[2] * snug, p[3] - q[3] + r.f[3] * snug }
+        if CAT_RAM_TRACE == 1 then print("CATACLYSM ram " .. id .. ": snug " .. floor(snug * 10) / 10) end
         if CAT_RAM_TRACE == 1 then
             -- where the target's centre sits in the frigate's frame (right, up, forward), to place the latch point
             local p, q = SobGroup_GetPosition(g), SobGroup_GetPosition(CatShips[t].g)
@@ -1339,7 +1412,7 @@ function CatRam_Tick(rec, g, id, now)
     local s, tp = r.v * dt, r.tp
     tp[1], tp[2], tp[3] = tp[1] + r.f[1] * s, tp[2] + r.f[2] * s, tp[3] + r.f[3] * s
     CatPlace(trec.g, tp, r.txf)
-    CatRam_Shove(rec, r.t, tp)
+    CatRam_Shove(rec, r, tp)
     local c = CAT_RAM_CREEP * (now - r.t0)
     if c > CAT_RAM_CREEP_MAX then c = CAT_RAM_CREEP_MAX end
     if CAT_RAM_CREEP > 0 and CAT_RAM_TRACE == 1 and now >= (r.creepLog or 0) then

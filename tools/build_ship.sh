@@ -71,6 +71,8 @@ case "$NAME" in
     # but aligns the frigate by them, and at the nose tip (z 45) it latched tilted 40 off toward the target's stern
     # (user); at 105, straight (target centre 6 off its axis)
     GEO2DAE_ARGS="$GEO2DAE_ARGS --latch 0,0,105 --salvage-latch 0,0,105 --col-slices 10"
+    # its nose tip: where its impact plays (tools/make_ramimpact.py)
+    GEO2DAE_ARGS="$GEO2DAE_ARGS --marker marker_ram@0,0,46"
     # one engine nozzle, larger, centred on its rear face (y -20..32; user: one, not one per stacked nozzle; the .mex
     # put one there and two 33 ahead of the nose, user: two copies in front of the ram)
     # 12 inside the rear face (z -87.6): its glow shows as a half circle out of it (user)

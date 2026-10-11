@@ -3,7 +3,7 @@
 -- paths), and this keeps the one before, so three states cover Cataclysm's sequence (srammingfrigate.mad clips, all
 -- on its nose but the collapse / recover, which move the body too):
 --   NIS00  charge: the afterburner ignites (AftBurnIgnite, held at its end) and its push burn lights
---   NIS01  impact: the nose collapses (RamCollapse, held), the push burn stays lit (lit here if no charge came first)
+--   NIS01  impact: the shock bowl (RamImpact), the nose collapses (RamCollapse, held), the push burn stays lit (lit here if no charge came first)
 --   NIS02  after an impact: the nose recovers (RamRecover); after a charge that never hit: CancelAftBurn. Burn out.
 
 SMT_RAMMINGFRIGATE_S = {}
@@ -38,6 +38,8 @@ SMT_RAMMINGFRIGATE_NIS01_OnSet = function(ship)
     SMT_RAMMINGFRIGATE_Stop(ship, "AftBurnIgnite")
     SMT_RAMMINGFRIGATE_Stop(ship, "RamRecover")
     SMT_RAMMINGFRIGATE_Hold(ship, "RamCollapse")
+    endEffect(ship, "RamImpact")
+    startEffect(ship, "RamImpact")        -- the impact's shock bowl (Cataclysm EGT_RAMMING_FRIGATE_IMPACT_EFFECT)
     if(before ~= 0) then
         startEffect(ship, "RamThrust")
     end
