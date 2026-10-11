@@ -545,6 +545,8 @@ def main():
                          "(the effect marker); tools/make_procbeam.py animates _Yaw / _Pitch (the Processor's beams)")
     ap.add_argument("--latch", help="LatchOrientation joint at x,y,z (HWRM units): the point a collector puts on "
                                     "the asteroid's surface while harvesting")
+    ap.add_argument("--salvage-latch", help="SalvageOrientation joint at x,y,z (HWRM units): where a salvage-capture "
+                                           "latch holds the ship (stock kus_salvagecorvette's, on its nose)")
     ap.add_argument("--glow-from", help="old-format HOD whose GLOW textures (Cataclysm texture names) become our "
                                         "_GLOW maps (Cataclysm Remastered's smt_ms_sp.hod for the Kuun-Lan)")
     ap.add_argument("--glow-copy", action="append", default=[],
@@ -932,6 +934,13 @@ def main():
         weapons += jnode("JNT[LatchOrientation]", at, jnode("JNT[LatchOrientationHeading]", (0, 0, 10))
                          + jnode("JNT[LatchOrientationLeft]", (10, 0, 0)) + jnode("JNT[LatchOrientationUp]", (0, 10, 0)),
                          rot=(90.0, 0.0, 180.0))
+    if a.salvage_latch:
+        # salvage-capture latching (the Ramming Frigate's ram): stock kus_salvagecorvette also has SalvageOrientation
+        # beside its LatchOrientation, on its nose, in the ship's own axes (its rotation and joint orient cancel),
+        # with _Heading / _Left / _Up 10 out
+        at = tuple(float(c) for c in a.salvage_latch.split(","))
+        weapons += jnode("JNT[SalvageOrientation]", at, jnode("JNT[SalvageOrientationHeading]", (0, 0, 10))
+                         + jnode("JNT[SalvageOrientationLeft]", (10, 0, 0)) + jnode("JNT[SalvageOrientationUp]", (0, 10, 0)))
 
     if not a.fx_mesh:
         # repair points (stock HW1 layout: RepairPointN with _Heading / _Left / _Up, 10 out): HWRM repairs a ship only

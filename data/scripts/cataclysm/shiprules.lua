@@ -259,7 +259,7 @@ function CatShip_Update(g, p, id)
         end
     end
     rec.p = SobGroup_OwnedBy(g)
-    if CatAxesRows == nil then CatAxes_Sample(rec, g) end
+    if not CatAxesLogged then CatAxes_Sample(rec, g) end
     -- who is shooting at us, for the kill credit when we die
     SobGroup_Clear(rec.att)
     SobGroup_GetAttackers(g, rec.att)
@@ -682,8 +682,11 @@ end
 -- Which way round SobGroup_GetCoordSys really is: its columns (as NOTES.md says) or its rows. They agree for a ship
 -- facing straight ahead and part as it turns (user: the Processor's port beams fired at Workers off its starboard
 -- side once it had turned; range.lua's Recon at yaw 50 has row 3, not column 3, pointing +X). Measured in game:
--- each moving ship's travel is compared with both readings of forward; CAT_AXES_SAMPLES agreeing settle it.
-CatAxesRows = nil
+-- each moving ship's travel is compared with both readings of forward. Rows won in every session measured
+-- (2026-10-10: 12-0, 8-4), so rows from the start (a Ramming Frigate that latched before the vote was in pushed
+-- the wrong way, user); the vote is only logged now, as a check.
+CatAxesRows = 1
+CatAxesLogged = nil
 CatAxesVotes = { rows = 0, cols = 0 }
 CAT_AXES_SAMPLES = 12
 
@@ -701,15 +704,15 @@ function CatAxes_Sample(rec, g)
     local fr = (d[1] * m[7] + d[2] * m[8] + d[3] * m[9]) / n        -- row 3
     if abs(fc - fr) < 0.3 then return end                -- facing nearly straight ahead: no difference
     if fr > fc then CatAxesVotes.rows = CatAxesVotes.rows + 1 else CatAxesVotes.cols = CatAxesVotes.cols + 1 end
-    if CatAxesVotes.rows + CatAxesVotes.cols >= CAT_AXES_SAMPLES then
-        CatAxesRows = 0
-        if CatAxesVotes.rows > CatAxesVotes.cols then CatAxesRows = 1 end
-        print("CATACLYSM axes: SobGroup_GetCoordSys forward is its " .. ((CatAxesRows == 1 and "ROW") or "COLUMN") ..
+    if not CatAxesLogged and CatAxesVotes.rows + CatAxesVotes.cols >= CAT_AXES_SAMPLES then
+        CatAxesLogged = 1
+        print("CATACLYSM axes: SobGroup_GetCoordSys forward measured as its " ..
+              ((CatAxesVotes.rows > CatAxesVotes.cols and "ROW") or "COLUMN (rows assumed: check!)") ..
               " (votes rows " .. CatAxesVotes.rows .. ", columns " .. CatAxesVotes.cols .. ")")
     end
 end
 
--- axis c (0 right, 1 up, 2 forward) of a ship's orientation, by the measured layout (columns until measured)
+-- axis c (0 right, 1 up, 2 forward) of a ship's orientation (rows: CatAxesRows)
 function CatAxis(m, c)
     if CatAxesRows == 1 then return { m[c * 3 + 1], m[c * 3 + 2], m[c * 3 + 3] } end
     return { m[c + 1], m[c + 4], m[c + 7] }
@@ -1200,8 +1203,17 @@ function CatRam_Tick(rec, g, id, now)
         r = { t = t, t0 = now, last = now, push = 0, f = (getn(m) == 9 and CatAxis(m, 2)) or { 0, 0, 1 } }
         rec.ram, rec.ramStill = r, nil
         CatRam_Hurt(CatShips[t].g, CAT_RAM_DAMAGE)
-        if CAT_RAM_TRACE == 1 then print("CATACLYSM ram " .. id .. ": latched on " .. t .. " (" .. CatShips[t].t ..
-                                         "), hit for " .. CAT_RAM_DAMAGE) end
+        if CAT_RAM_TRACE == 1 then
+            -- where the target's centre sits in the frigate's frame (right, up, forward), to place the latch point
+            local p, q = SobGroup_GetPosition(g), SobGroup_GetPosition(CatShips[t].g)
+            local v = { q[1] - p[1], q[2] - p[2], q[3] - p[3] }
+            local rt, up = (getn(m) == 9 and CatAxis(m, 0)) or { 1, 0, 0 }, (getn(m) == 9 and CatAxis(m, 1)) or { 0, 1, 0 }
+            local f = r.f
+            print("CATACLYSM ram " .. id .. ": latched on " .. t .. " (" .. CatShips[t].t .. "), hit for " ..
+                  CAT_RAM_DAMAGE .. "; target centre at right " .. floor(v[1] * rt[1] + v[2] * rt[2] + v[3] * rt[3]) ..
+                  ", up " .. floor(v[1] * up[1] + v[2] * up[2] + v[3] * up[3]) .. ", forward " ..
+                  floor(v[1] * f[1] + v[2] * f[2] + v[3] * f[3]) .. " from the frigate's")
+        end
         return
     end
     local trec = CatShips[r.t]
