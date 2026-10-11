@@ -1145,8 +1145,8 @@ end
 -- far more loosely than a script could). It has no attack (no guns; install_cr.py patch_rammingfrigate): a
 -- right-click on an enemy is the latch. Learned in game (2026-10-10): latched, its order is 22 and it sits against
 -- the target (no tow home, no capture; IsDocked / IsReturningSalvage / GetSobGroupSalvagingGroup say nothing);
--- SobGroup_SalvageSobGroup from script did nothing; the target ordered to move carries the latched frigate with it
--- (smooth); a stop or move order on the frigate lets go. SobGroup_GetActualSpeed is the speed squared.
+-- SobGroup_SalvageSobGroup from script did nothing; the target moved (by order or by script) carries the latched
+-- frigate with it; a stop or move order on the frigate lets go. SobGroup_GetActualSpeed is the speed squared.
 CAT_RAM_DAMAGE = 1700          -- srammingfrigate.shp RamDamage (health is Cataclysm's 1:1, make_damage.py)
 CAT_RAM_PUSH = 30              -- RamPushTime
 CAT_RAM_WAIT = 10              -- RamWaitAfterPushTime
@@ -1154,8 +1154,12 @@ CAT_RAM_BEAM = 20              -- cuttingBeamDamagePerSecond (60 upgraded: not y
 CAT_RAM_SALCAP = 22            -- SobGroup_GetCurrentOrder while salvage-capturing
 CAT_RAM_NEAR = 150             -- latched: an enemy this close to its centre (seen: 18-32 latched by the centre)...
 CAT_RAM_STILL = 0.5            -- ...and still (speed under 10) this long
-CAT_RAM_PUSH_DIST = 5000       -- the target is ordered this far along the frigate's heading...
-CAT_RAM_PUSH_EVERY = 2         -- ...again every this many seconds (its own orders would win)
+CAT_RAM_PUSH_SPEED = 252       -- the push, units a second (the frigate's top speed; Cataclysm adds 500000 force a frame,
+                               -- 800000 upgraded, through physics HWRM doesn't share)...
+CAT_RAM_PUSH_RAMP = 3          -- ...reached over this many seconds
+-- pushed by script: the target held still (stopped, speed x0, so its engines don't fight: ordered to fly, it turned
+-- and steered, user: jittered, not locked in) and moved along the frigate's heading every update; the latched
+-- frigate comes along (experiment 2)
 CAT_RAM_TRACE = 1
 
 -- the nearest enemy ship within CAT_RAM_NEAR of g
@@ -1200,9 +1204,12 @@ function CatRam_Tick(rec, g, id, now)
         local t = CatRam_Target(rec, g)
         if not t then return end
         local m = SobGroup_GetCoordSys(g)
-        r = { t = t, t0 = now, last = now, push = 0, f = (getn(m) == 9 and CatAxis(m, 2)) or { 0, 0, 1 } }
+        r = { t = t, t0 = now, last = now, f = (getn(m) == 9 and CatAxis(m, 2)) or { 0, 0, 1 } }
         rec.ram, rec.ramStill = r, nil
+        r.v = 0
         CatRam_Hurt(CatShips[t].g, CAT_RAM_DAMAGE)
+        SobGroup_Stop(CatShips[t].p, CatShips[t].g)
+        SobGroup_SetMaxSpeedMultiplier(CatShips[t].g, 0)
         if CAT_RAM_TRACE == 1 then
             -- where the target's centre sits in the frigate's frame (right, up, forward), to place the latch point
             local p, q = SobGroup_GetPosition(g), SobGroup_GetPosition(CatShips[t].g)
@@ -1222,18 +1229,19 @@ function CatRam_Tick(rec, g, id, now)
     if not trec or trec.gone or SobGroup_Empty(trec.g) == 1 or not salcap or now - r.t0 >= CAT_RAM_PUSH then
         -- let go: the push is over, the target is gone, or the player ordered it elsewhere (which let go already)
         if salcap then SobGroup_Stop(rec.p, g) end
-        if trec and not trec.gone and SobGroup_Empty(trec.g) == 0 then SobGroup_Stop(trec.p, trec.g) end
+        if trec and not trec.gone and SobGroup_Empty(trec.g) == 0 then
+            SobGroup_SetMaxSpeedMultiplier(trec.g, 1)
+            SobGroup_Stop(trec.p, trec.g)
+        end
         rec.ram, rec.ramReady = nil, now + CAT_RAM_WAIT
         if CAT_RAM_TRACE == 1 then print("CATACLYSM ram " .. id .. ": let go after " .. floor(now - r.t0) .. " s") end
         return
     end
     CatRam_Hurt(trec.g, CAT_RAM_BEAM * dt)           -- the cutting beam
-    if now >= r.push then
-        r.push = now + CAT_RAM_PUSH_EVERY
-        local tp = SobGroup_GetPosition(trec.g)
-        SobGroup_MoveToPoint(trec.p, trec.g, { tp[1] + r.f[1] * CAT_RAM_PUSH_DIST, tp[2] + r.f[2] * CAT_RAM_PUSH_DIST,
-                                               tp[3] + r.f[3] * CAT_RAM_PUSH_DIST })
-    end
+    r.v = r.v + CAT_RAM_PUSH_SPEED / CAT_RAM_PUSH_RAMP * dt
+    if r.v > CAT_RAM_PUSH_SPEED then r.v = CAT_RAM_PUSH_SPEED end
+    local tp, s = SobGroup_GetPosition(trec.g), r.v * dt
+    SobGroup_SetPosition(trec.g, { tp[1] + r.f[1] * s, tp[2] + r.f[2] * s, tp[3] + r.f[3] * s })
 end
 
 -- ---------------------------------------------------------------------------------------------------------------
