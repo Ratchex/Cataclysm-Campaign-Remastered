@@ -1,6 +1,6 @@
 -- Somtaaw Ramming Frigate animation states (Cataclysm-HWRM; installed by tools/install_cr.py).
 -- shiprules.lua CatRam_Tick switches the state (NIS01-02: states the engine leaves alone on this ship, it has no dock
--- paths): NIS01 when its push starts lights its push flames (smt_rammingfrigate.events RamThrust), NIS02 puts them out.
+-- paths): NIS01 when its push starts lights its push burn (smt_rammingfrigate.events RamThrust), NIS02 puts them out.
 
 SMT_RAMMINGFRIGATE_NIS01_OnSet = function(ship)
     startEffect(ship, "RamThrust")

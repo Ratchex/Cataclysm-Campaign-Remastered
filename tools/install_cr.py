@@ -143,14 +143,17 @@ def repair_order(text, kind):
     return new
 
 
-def kuunlan_engines(text):
-    """The Kuun-Lan's engine burn (their smt_ms_sp.ship setEngineBurn) beside a ship's setEngineGlow (theirs is the
-    Kuun-Lan's already on the Processor and Ramming Frigate; user: the same engines as the Kuun-Lan's)."""
+def kuunlan_engines(text, size):
+    """The Kuun-Lan's engine burn (their smt_ms_sp.ship setEngineBurn 9, 0.2, 0.5, 300, 1.02, 0.1, 0.25, 380) beside a
+    ship's setEngineGlow (theirs is the Kuun-Lan's already on the Processor and Ramming Frigate; user: the same
+    engines as the Kuun-Lan's), its lengths (300, 380: stock HW1 frigates 60, 120, the Worker 4, 15) scaled by the
+    ship's size against the Kuun-Lan's (unscaled it was far too strong on the frigate, user)."""
     if "setEngineBurn" in text:
         return text
     assert text.count("setEngineGlow(NewShipType") == 1
-    return text.replace("setEngineGlow(NewShipType", "setEngineBurn(NewShipType, 9, 0.2, 0.5, 300, 1.02, 0.1, 0.25, "
-                        "380);   -- Cataclysm-HWRM: the Kuun-Lan's\nsetEngineGlow(NewShipType", 1)
+    return text.replace("setEngineGlow(NewShipType", f"setEngineBurn(NewShipType, 9, 0.2, 0.5, {300 * size:.4g}, 1.02, "
+                        f"0.1, 0.25, {380 * size:.4g});   -- Cataclysm-HWRM: the Kuun-Lan's, x{size}\n"
+                        "setEngineGlow(NewShipType", 1)
 
 
 def patch_processor(text):
@@ -159,7 +162,7 @@ def patch_processor(text):
     (tweak.script twRepairRate 30 / s). Both only once it has the Repair upgrade (shiprules.lua CatGated). Engines: the
     Kuun-Lan's burn (their smt_ms_sp.ship setEngineBurn; its setEngineGlow is the Kuun-Lan's already; user: same
     engine glow as the Kuun-Lan's)."""
-    return repair_order(kuunlan_engines(text), "processor")
+    return repair_order(kuunlan_engines(text, 0.30), "processor")   # 340 / 1131 long
 
 
 def patch_worker(text):
@@ -216,7 +219,7 @@ def patch_rammingfrigate(text):
     kus_salvagecorvette's SalCapCommand), which shiprules.lua CatRam_Tick turns into the hit, push and cutting beam.
     No attack (no guns; Cataclysm Remastered's attack run only collided): a right-click on an enemy is the latch
     (SobGroup_SalvageSobGroup from script did nothing)."""
-    text = kuunlan_engines(text)
+    text = kuunlan_engines(text, 0.121)   # 137 / 1131 long
     if '"SalCapCommand"' in text:
         return text
     text = re.sub(r'^(addAbility\(NewShipType,\s*"CanAttack".*)$', r"-- Cataclysm-HWRM (the ram is its salvage latch): \1",
