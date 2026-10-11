@@ -73,7 +73,8 @@ case "$NAME" in
     GEO2DAE_ARGS="$GEO2DAE_ARGS --latch 0,0,105 --salvage-latch 0,0,105 --col-slices 10"
     # one engine nozzle, larger, centred on its rear face (y -20..32; user: one, not one per stacked nozzle; the .mex
     # put one there and two 33 ahead of the nose, user: two copies in front of the ram)
-    GEO2DAE_ARGS="$GEO2DAE_ARGS --engines-at 0,6,-87.6"
+    # 12 inside the rear face (z -87.6): its glow shows as a half circle out of it (user)
+    GEO2DAE_ARGS="$GEO2DAE_ARGS --engines-at 0,6,-75.6"
     # engines the Kuun-Lan's (user): CR's Kuun-Lan engine shape, x0.909 (CR -> ours) x 0.121 (our frigate's length /
     # our Kuun-Lan's, 137 / 1131); its burn: install_cr.py kuunlan_engines
     GEO2DAE_ARGS="$GEO2DAE_ARGS --engines-from C:/Modding/Cataclysm-decomp/reference/cr_main/ship/smt_ms_sp/smt_ms_sp.hod --engines-scale 0.19"

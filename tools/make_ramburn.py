@@ -17,11 +17,12 @@ from PIL import Image
 
 MOD = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FX = os.path.join(MOD, "data", "art", "fx")
-SPRITES = 8          # (the Worker's burn has 6 divisions; 6 small ones read as separate dots, user)
-LENGTH = 60.0        # behind the nozzle, last sprite (the frigate is 133 long)
+SPRITES = 12         # (the Worker's burn has 6 divisions; 6 small ones read as separate dots, user)
+LENGTH = 100.0       # behind the rear face, last sprite (the frigate is 133 long; user: longer)
+INSET = 12.0         # the nozzle sits this far inside the rear face (tools/build_ship.sh): the flame starts at the face
 R0, R1 = 20.0, 7.0   # sprite radius at the nozzle and at the tip: overlapping, one flame for its three nozzles (user)
-COLOUR = tuple(round(c * 0.75, 3) for c in (0.55, 0.78, 1.0))   # the engine glow's blue (0.27, 0.47, 0.69), lifted
-                                                                # toward white: a hard burn; dimmed for a frigate (user)
+COLOUR = tuple(round(min(1.0, c * 1.15), 3) for c in (0.55, 0.78, 1.0))   # the engine glow's blue (0.27, 0.47,
+                                                                          # 0.69), lifted toward white (user: brighter)
 FLICKER = 0.12       # seconds per flicker cycle
 
 
@@ -38,7 +39,7 @@ def sprite(path, n=64):
 
 def ring(k):
     f = k / (SPRITES - 1)
-    d, rad = LENGTH * f, R0 + (R1 - R0) * f
+    d, rad = INSET + LENGTH * f, R0 + (R1 - R0) * f
     a = (1 - f) ** 1.2 * 0.9 + 0.1
     c = [round(x * a, 3) for x in COLOUR]
     lo = [round(x * 0.75, 3) for x in c]

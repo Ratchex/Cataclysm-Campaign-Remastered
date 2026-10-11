@@ -223,8 +223,11 @@ def patch_rammingfrigate(text):
     # drew a white ball as big as the frigate over its rear (user: pics/engine-normal.jpg)...
     if "setEngineBurn" not in text:
         assert text.count("setEngineGlow(NewShipType") == 1
-        text = text.replace("setEngineGlow(NewShipType", "setEngineBurn(NewShipType,6,1.7,2.55,102,1.1,0.1,0.25,204);   "
-                            "-- Cataclysm-HWRM: stock HW1 frigates' x1.7 (one nozzle for its three)\n"
+        # ...and its glow a little dimmer (user)
+        text, n = re.subn(r"\{\s*0\.27,\s*0\.47,\s*0\.69,\s*0\.25\s*\}", "{0.216, 0.376, 0.552, 0.25}", text, count=1)
+        assert n == 1
+        text = text.replace("setEngineGlow(NewShipType", "setEngineBurn(NewShipType,6,1.7,2.55,102,1.1,0.1,0.2,204);   "
+                            "-- Cataclysm-HWRM: stock HW1 frigates' x1.7 (one nozzle for its three), a little dimmer\n"
                             "setEngineGlow(NewShipType", 1)
     if '"SalCapCommand"' in text:
         return text

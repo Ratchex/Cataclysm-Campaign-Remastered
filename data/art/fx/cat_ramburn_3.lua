@@ -2,12 +2,12 @@
 fx = {
 style = "STYLE_RING",
 properties = {
-property_00 = { name = "Radius", type = "VARTYPE_ARRAY_TIMEFLOAT", value = { 0, 14.4, 0.11, 16.6, 1, 14.4, }, },
-property_01 = { name = "Offset", type = "VARTYPE_ARRAY_TIMEVECTOR3", value = { entry_00 = { 0, 0, 0, -25.7, }, entry_01 = { 1, 0, 0, -25.7, }, }, },
+property_00 = { name = "Radius", type = "VARTYPE_ARRAY_TIMEFLOAT", value = { 0, 16.5, 0.11, 18.9, 1, 16.5, }, },
+property_01 = { name = "Offset", type = "VARTYPE_ARRAY_TIMEVECTOR3", value = { entry_00 = { 0, 0, 0, -39.3, }, entry_01 = { 1, 0, 0, -39.3, }, }, },
 property_02 = { name = "SpinX", type = "VARTYPE_ARRAY_TIMEFLOAT", value = { 0, 0, 1, 0, }, },
 property_03 = { name = "SpinY", type = "VARTYPE_ARRAY_TIMEFLOAT", value = { 0, 0, 1, 0, }, },
 property_04 = { name = "SpinZ", type = "VARTYPE_ARRAY_TIMEFLOAT", value = { 0, 0, 1, 0, }, },
-property_05 = { name = "Colour", type = "VARTYPE_ARRAY_TIMECOLOUR", value = { entry_00 = { 0, 0.231, 0.328, 0.42, 1, }, entry_01 = { 0.11, 0.173, 0.246, 0.315, 1, }, entry_02 = { 1, 0.231, 0.328, 0.42, 1, }, }, },
+property_05 = { name = "Colour", type = "VARTYPE_ARRAY_TIMECOLOUR", value = { entry_00 = { 0, 0.451, 0.641, 0.714, 1, }, entry_01 = { 0.11, 0.338, 0.481, 0.535, 1, }, entry_02 = { 1, 0.451, 0.641, 0.714, 1, }, }, },
 property_06 = { name = "RadiusEpsilon", type = "VARTYPE_FLOAT", value = 0, },
 property_07 = { name = "RateEpsilon", type = "VARTYPE_FLOAT", value = 0, },
 property_08 = { name = "SpinEpsilonX", type = "VARTYPE_FLOAT", value = 0, },
