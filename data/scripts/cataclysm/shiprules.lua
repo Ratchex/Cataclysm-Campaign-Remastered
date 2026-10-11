@@ -1227,7 +1227,10 @@ function CatRam_Tick(rec, g, id, now)
         local tg = CatShips[t].g
         SobGroup_Stop(CatShips[t].p, tg)
         CatFreeze(tg, 0)
-        CatFreeze(g, 0)
+        -- the frigate: steering and collisions off, movement kept (with movement off its engines don't draw, even
+        -- forced on: user, no engines under the push burn); placed every update all the same
+        if AB_Steering then SobGroup_AbilityActivate(g, AB_Steering, 0) end
+        SobGroup_SetGhost(g, 1)
         SobGroup_SetMadState(g, "NIS01")                -- its push burn (smt_rammingfrigate.madstate)...
         SobGroup_ManualEngineGlow(g, 1)                 -- ...over its own engines at full (frozen, they'd go dark)
         local p, q = SobGroup_GetPosition(g), SobGroup_GetPosition(tg)
@@ -1255,7 +1258,8 @@ function CatRam_Tick(rec, g, id, now)
     local ordered = order ~= CAT_RAM_SALCAP and order ~= 0
     if not trec or trec.gone or SobGroup_Empty(trec.g) == 1 or ordered or now - r.t0 >= CAT_RAM_PUSH then
         -- let go: the push is over, the target is gone, or the player ordered it elsewhere (which let go already)
-        CatFreeze(g, 1)
+        if AB_Steering then SobGroup_AbilityActivate(g, AB_Steering, 1) end
+        SobGroup_SetGhost(g, 0)
         SobGroup_SetMadState(g, "NIS02")                -- push burn out
         SobGroup_AutoEngineGlow(g)
         SobGroup_Stop(rec.p, g)

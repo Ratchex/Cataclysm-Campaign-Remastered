@@ -8,5 +8,7 @@ property_02 = { name = "FX3", type = "VARTYPE_STRING", value = "CAT_RAMBURN_2", 
 property_03 = { name = "FX4", type = "VARTYPE_STRING", value = "CAT_RAMBURN_3", },
 property_04 = { name = "FX5", type = "VARTYPE_STRING", value = "CAT_RAMBURN_4", },
 property_05 = { name = "FX6", type = "VARTYPE_STRING", value = "CAT_RAMBURN_5", },
+property_06 = { name = "FX7", type = "VARTYPE_STRING", value = "CAT_RAMBURN_6", },
+property_07 = { name = "FX8", type = "VARTYPE_STRING", value = "CAT_RAMBURN_7", },
 },
 }
