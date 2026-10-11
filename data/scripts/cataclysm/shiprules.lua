@@ -1166,7 +1166,26 @@ CAT_RAM_CREEP_MAX = 150        -- ...up to this, logged each second
 -- in) and placed together along the frigate's heading every update.
 -- (Not HWRM's salvage tow: a lone latched salvager just holds on; the engine tows only once enough have latched,
 -- home to be captured, and a script can set neither where nor how hard.)
+CAT_RAM_SHOVE = 130            -- while pushing, other ships are shoved out to this far from the target's centre (placed
+                               -- by script it collides with nothing, user: phased through a frigate; ~ the assault
+                               -- frigate's centre from the frigate's when latched)
 CAT_RAM_TRACE = 1
+
+-- other ships too near the pushed target moved straight out from its centre (a sphere's collision)
+function CatRam_Shove(rec, tid, tp)
+    for k, o in CatShips do
+        if k ~= tid and o ~= rec and not o.gone and SobGroup_Empty(o.g) == 0 then
+            local q = SobGroup_GetPosition(o.g)
+            local dx, dy, dz = q[1] - tp[1], q[2] - tp[2], q[3] - tp[3]
+            local d = sqrt(dx * dx + dy * dy + dz * dz)
+            if d < CAT_RAM_SHOVE then
+                if d < 1 then dx, dy, dz, d = 0, 1, 0, 1 end
+                local k2 = CAT_RAM_SHOVE / d
+                SobGroup_SetPosition(o.g, { tp[1] + dx * k2, tp[2] + dy * k2, tp[3] + dz * k2 })
+            end
+        end
+    end
+end
 
 -- the nearest enemy ship within CAT_RAM_NEAR of g
 function CatRam_Target(rec, g)
@@ -1227,7 +1246,6 @@ function CatRam_Tick(rec, g, id, now)
         local tg = CatShips[t].g
         SobGroup_Stop(CatShips[t].p, tg)
         CatFreeze(tg, 0)
-        SobGroup_SetGhost(tg, 0)    -- the target keeps its collisions: it shoves other ships aside (user: phased through one)
         -- the frigate: steering and collisions off (ghosted, the pair can't push each other apart), movement kept (with movement off its engines don't draw, even
         -- forced on: user, no engines under the push burn); placed every update all the same
         if AB_Steering then SobGroup_AbilityActivate(g, AB_Steering, 0) end
@@ -1279,6 +1297,7 @@ function CatRam_Tick(rec, g, id, now)
     local s, tp = r.v * dt, r.tp
     tp[1], tp[2], tp[3] = tp[1] + r.f[1] * s, tp[2] + r.f[2] * s, tp[3] + r.f[3] * s
     CatPlace(trec.g, tp, r.txf)
+    CatRam_Shove(rec, r.t, tp)
     local c = CAT_RAM_CREEP * (now - r.t0)
     if c > CAT_RAM_CREEP_MAX then c = CAT_RAM_CREEP_MAX end
     if CAT_RAM_CREEP > 0 and CAT_RAM_TRACE == 1 and now >= (r.creepLog or 0) then
