@@ -24,3 +24,4 @@ CAT_BTN_MIMIC_TAI_DEFENDER = GetCommandButton("btnCat_mimic_tai_defender", "Mimi
 CAT_BTN_MIMIC_TAI_DEFENDER[1] = nil
 CAT_BTN_MIMIC_TAI_INTERCEPTOR = GetCommandButton("btnCat_mimic_tai_interceptor", "Mimic: Taiidan Interceptor", nil, "DATA:UI\\NewUI\\Taskbar\\CommandIcons\\cmd_ico_cloak.dds", "MainUI_ScarEvent( \"CatAbility('mimic_tai_interceptor')\" )")
 CAT_BTN_MIMIC_TAI_INTERCEPTOR[1] = nil
+BTN_CMD_SALCAP = GetCommandButton("btnSalCap", "Ram", 180, "DATA:UI\\NewUI\\Taskbar\\CommandIcons\\cmd_ico_resource.dds", "MainUI_UserEventData( eSalCap, 0)")

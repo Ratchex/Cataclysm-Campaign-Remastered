@@ -1157,7 +1157,7 @@ CAT_RAM_STILL = 0.5            -- ...and still (speed under 10) this long
 CAT_RAM_PUSH_SPEED = 252       -- the push, units a second (the frigate's top speed; Cataclysm adds 500000 force a frame,
                                -- 800000 upgraded, through physics HWRM doesn't share)...
 CAT_RAM_PUSH_RAMP = 3          -- ...reached over this many seconds
-CAT_RAM_SNUG = 4               -- the frigate held this much closer than where it latched (it stopped just short)
+CAT_RAM_SNUG = 10              -- the frigate held this much closer than where it latched (4 still left a gap, user)
 -- pushed by script: both frozen (CatFreeze: ordered to fly, the target turned and steered, user: jittered, not locked
 -- in) and placed together along the frigate's heading every update.
 -- (Not HWRM's salvage tow: a lone latched salvager just holds on; the engine tows only once enough have latched,

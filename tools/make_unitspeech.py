@@ -59,6 +59,8 @@ PILOT = [
     (r"COMMAND_RESOURCECOLLECTORHARVEST", 163),              # Worker: "Understood. Harvesting."
     (r"COMMAND_RESOURCESALVAGE", 150),                       # Worker: "Salvaging."
     (r"COMMAND_STARTEDREPAIRS", 146),                        # "Repairs underway."
+    # the salvage-capture order: the Ramming Frigate's Ram (shiprules.lua CatRam_Tick), Cataclysm's attack order
+    (r"COMMAND_(INFILTRATORFRIGATE|MARINEFRIGATE)_CAPTURE", 5),   # "Got it! Hitting in." / "Target acquired."
 ]
 # Cataclysm events recorded once for every ship (variable 0), used for any ship type
 GENERIC = {146}

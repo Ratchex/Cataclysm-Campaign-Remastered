@@ -86,6 +86,10 @@ def main():
             # (cooldownProgress 24 of 100: a number and a fifth of the button shaded, user); removed. Native ones
             # keep it (their energy bar)
             ui.append(f"CAT_BTN_{name.upper()}[1] = nil")
+    # the salvage-capture button is the Ramming Frigate's Ram (its only user here: shiprules.lua CatRam_Tick):
+    # Cataclysm's name (strMenuSpecialRamDesc "Ram") and the harvest button's icon (user)
+    ui.append(f'BTN_CMD_SALCAP = GetCommandButton("btnSalCap", "Ram", 180, "{ICONS}cmd_ico_resource.dds", '
+              '"MainUI_UserEventData( eSalCap, 0)")')
     folder = os.path.join(MOD, "data", "ui", "newui", "taskbar")
     os.makedirs(folder, exist_ok=True)
     with open(os.path.join(folder, "cat_abilities.lua"), "w", newline="\n") as f:
