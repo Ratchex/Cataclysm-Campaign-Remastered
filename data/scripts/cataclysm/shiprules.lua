@@ -1158,8 +1158,9 @@ CAT_RAM_PUSH_SPEED = 252       -- the push, units a second (the frigate's top sp
                                -- 800000 upgraded, through physics HWRM doesn't share)...
 CAT_RAM_PUSH_RAMP = 3          -- ...reached over this many seconds
 -- pushed by script: the target held still (stopped, speed x0, so its engines don't fight: ordered to fly, it turned
--- and steered, user: jittered, not locked in) and moved along the frigate's heading every update; the latched
--- frigate comes along (experiment 2)
+-- and steered, user: jittered, not locked in), and the pair moved together along the frigate's heading every update.
+-- (Not HWRM's salvage tow: a lone latched salvager just holds on; the engine tows only once enough have latched,
+-- home to be captured, and a script can set neither where nor how hard.)
 CAT_RAM_TRACE = 1
 
 -- the nearest enemy ship within CAT_RAM_NEAR of g
@@ -1226,7 +1227,10 @@ function CatRam_Tick(rec, g, id, now)
     local trec = CatShips[r.t]
     local dt = now - r.last
     r.last = now
-    if not trec or trec.gone or SobGroup_Empty(trec.g) == 1 or not salcap or now - r.t0 >= CAT_RAM_PUSH then
+    -- the player's own new order (anything but the latch or idle: moving the pair may drop the latch order)
+    local order = SobGroup_GetCurrentOrder(g)
+    local ordered = order ~= CAT_RAM_SALCAP and order ~= 0
+    if not trec or trec.gone or SobGroup_Empty(trec.g) == 1 or ordered or now - r.t0 >= CAT_RAM_PUSH then
         -- let go: the push is over, the target is gone, or the player ordered it elsewhere (which let go already)
         if salcap then SobGroup_Stop(rec.p, g) end
         if trec and not trec.gone and SobGroup_Empty(trec.g) == 0 then
@@ -1240,8 +1244,12 @@ function CatRam_Tick(rec, g, id, now)
     CatRam_Hurt(trec.g, CAT_RAM_BEAM * dt)           -- the cutting beam
     r.v = r.v + CAT_RAM_PUSH_SPEED / CAT_RAM_PUSH_RAMP * dt
     if r.v > CAT_RAM_PUSH_SPEED then r.v = CAT_RAM_PUSH_SPEED end
-    local tp, s = SobGroup_GetPosition(trec.g), r.v * dt
+    -- both moved as one: the latch alone dragged the frigate after the target under its own engines, and at speed
+    -- it fell further and further behind (user); Cataclysm holds the rammer at its offset from the target
+    -- (FUN_005c1d20) while it pushes
+    local tp, mp, s = SobGroup_GetPosition(trec.g), SobGroup_GetPosition(g), r.v * dt
     SobGroup_SetPosition(trec.g, { tp[1] + r.f[1] * s, tp[2] + r.f[2] * s, tp[3] + r.f[3] * s })
+    SobGroup_SetPosition(g, { mp[1] + r.f[1] * s, mp[2] + r.f[2] * s, mp[3] + r.f[3] * s })
 end
 
 -- ---------------------------------------------------------------------------------------------------------------
