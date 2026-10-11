@@ -1163,7 +1163,8 @@ CAT_RAM_SNUG = 65              -- the frigate held this much closer than where i
                                -- joint at the nose tip or 60 past it alike). With CatHull (tools/make_hullinfo.py): the
                                -- frigate's nose onto the target's nearest salvage point (else its box's near face)...
 CAT_RAM_NOSE = 45.3            -- ...its nose tip ahead of its centre (its BBOX)...
-CAT_RAM_SNUG_ADJ = -3.5        -- ...less this (that rule gave 68.5 on the assault frigate, 65 measured)
+CAT_RAM_SNUG_ADJ = -6          -- ...less this (68.5 by that rule on the assault frigate, 65 measured; at -3.5 it and
+                               -- the ion cannon frigate both clipped slightly, user)
 CAT_RAM_CREEP = 0              -- measuring CAT_RAM_SNUG: the frigate also closes this many units a second while pushing...
 CAT_RAM_CREEP_MAX = 150        -- ...up to this, logged each second
 -- pushed by script: both frozen (CatFreeze: ordered to fly, the target turned and steered, user: jittered, not locked

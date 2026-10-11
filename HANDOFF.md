@@ -52,17 +52,20 @@ findings).
   AftBurnIgnite, push burn, ManualEngineGlow 1); latched (order 22, an enemy within 150, still 0.5 s) -> hit 1700,
   nose RamCollapse (NIS01), both ships pinned (target CatFreeze'd, frigate steering / collisions off but movement
   kept so its engines draw) and placed every update along the frigate's heading, ramping to 252/s, 30 s, cutting
-  beam 20/s, other ships within 130 of the target shoved out (placed ships collide with nothing); then let go,
+  beam 20/s, other ships shoved out of the target's box (placed ships collide with nothing; impact: Cataclysm's
+  shock bowl, tools/make_ramimpact.py, on marker_ram); then let go,
   RamRecover (NIS02; CancelAftBurn after a charge that never hit), 10 s before it can grapple again.
 - Learned: SobGroup_SalvageSobGroup from script does nothing; the engine latches at its own distance (~130 to a
   Taiidan assault frigate's centre) but aligns by the LatchOrientation / SalvageOrientation joints (z 105: straight;
-  at the nose tip it latched tilted), so the frigate is snugged 65 closer (CAT_RAM_SNUG, measured by a creep);
+  at the nose tip it latched tilted), so the frigate is snugged in until its nose is on the target's nearest
+  salvage point (CatRam_Snug; tools/make_hullinfo.py -> hullinfo_gen.lua: every type's BBOX and SalvagePoints;
+  65 measured by a creep on the assault frigate, CAT_RAM_SNUG for unknown hulls);
   the model's hull hangs 56.7 back on JNT[RammingFrigate] (geo2dae --col-slices now builds through joint frames;
   --engines-at places its one nozzle, the .mex put two ahead of the nose); a frozen ship's engines don't draw.
 - Engines: stock HW1 frigate burn x1.7 (one nozzle 12 inside the rear face), Processor glow x0.8; push burn
   tools/make_ramburn.py (12 billboard sprites, smt_rammingfrigate.events RamThrust).
-- Left: impact effect, cutting beam visual, upgrades (Advanced Ion Cannon beam 60/s, afterburner x2: with the
-  missions), pushing crystals, per-hull snug / shove radius (measured on the assault frigate only).
+- Left (with their missions / upgrades): cutting beam visual and 60/s (Advanced Ion Cannon), afterburner x2,
+  pushing crystals. Assault and ion cannon frigates checked in game (user: within tolerance).
 
 ## RESUME HERE (updated 2026-10-09, after the damage conversion; see git log for the last commit)
 **Console start:** run `claude` from `C:\Modding\Homeworld` (loads the project memory), then say "resume from
