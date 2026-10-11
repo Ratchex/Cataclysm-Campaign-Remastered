@@ -67,7 +67,10 @@ case "$NAME" in
     # with a collision mesh that follows the hull (--col-slices; with none, targets were held well off). In model
     # space the hull runs z -87.6..45.3 (it hangs 56.7 back on JNT[RammingFrigate]; measured raw, the latch and the
     # collision mesh first sat 56.7 ahead of the nose and the script snugged it 65 back in)
-    GEO2DAE_ARGS="$GEO2DAE_ARGS --latch 0,0,45 --salvage-latch 0,0,45 --col-slices 10"
+    # The latch joints stay 60 ahead of the nose (z 105): the engine latches at its own distance wherever they are,
+    # but aligns the frigate by them, and at the nose tip (z 45) it latched tilted 40 off toward the target's stern
+    # (user); at 105, straight (target centre 6 off its axis)
+    GEO2DAE_ARGS="$GEO2DAE_ARGS --latch 0,0,105 --salvage-latch 0,0,105 --col-slices 10"
     # its three engine nozzles, stacked on its rear face (y -20..32; the .mex put one there and two 33 ahead of the
     # nose, user: two copies in front of the ram)
     GEO2DAE_ARGS="$GEO2DAE_ARGS --engines-at 0,23.3,-87.6;0,6,-87.6;0,-11.3,-87.6"
