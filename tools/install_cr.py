@@ -219,7 +219,12 @@ def patch_rammingfrigate(text):
     kus_salvagecorvette's SalCapCommand), which shiprules.lua CatRam_Tick turns into the hit, push and cutting beam.
     No attack (no guns; Cataclysm Remastered's attack run only collided): a right-click on an enemy is the latch
     (SobGroup_SalvageSobGroup from script did nothing)."""
-    text = kuunlan_engines(text, 1)   # the Processor's exactly (user)
+    text = kuunlan_engines(text, 1)   # the Processor's exactly (user)...
+    if "Cataclysm-HWRM: engine glow" not in text:   # ...its engine glow at half brightness (user: far too bright)
+        text, n = re.subn(r"setEngineGlow\(NewShipType,([^{]*)\{\s*0\.27,\s*0\.47,\s*0\.69,\s*0\.25\s*\}\);",
+                          r"setEngineGlow(NewShipType,\1{0.135, 0.235, 0.345, 0.25});   -- Cataclysm-HWRM: engine glow x0.5",
+                          text, count=1)
+        assert n == 1
     if '"SalCapCommand"' in text:
         return text
     text = re.sub(r'^(addAbility\(NewShipType,\s*"CanAttack".*)$', r"-- Cataclysm-HWRM (the ram is its salvage latch): \1",

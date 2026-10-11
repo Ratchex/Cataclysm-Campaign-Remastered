@@ -1157,8 +1157,9 @@ CAT_RAM_STILL = 0.5            -- ...and still (speed under 10) this long
 CAT_RAM_PUSH_SPEED = 252       -- the push, units a second (the frigate's top speed; Cataclysm adds 500000 force a frame,
                                -- 800000 upgraded, through physics HWRM doesn't share)...
 CAT_RAM_PUSH_RAMP = 3          -- ...reached over this many seconds
-CAT_RAM_SNUG = 0               -- the frigate held this much closer than where it latched (65 made contact while the
-                               -- latch point and collision mesh sat 56.7 ahead of its nose; both fixed, tools/build_ship.sh)
+CAT_RAM_SNUG = 65              -- the frigate held this much closer than where it latched: its ram plate on the hull.
+                               -- The engine latches at its own distance (a Taiidan assault frigate's centre ~130 ahead,
+                               -- the latch joint at the nose tip or 60 past it alike); a 10/s creep touched at 5.5 s, 65 (user)
 CAT_RAM_CREEP = 0              -- measuring CAT_RAM_SNUG: the frigate also closes this many units a second while pushing...
 CAT_RAM_CREEP_MAX = 150        -- ...up to this, logged each second
 -- pushed by script: both frozen (CatFreeze: ordered to fly, the target turned and steered, user: jittered, not locked
@@ -1227,7 +1228,8 @@ function CatRam_Tick(rec, g, id, now)
         SobGroup_Stop(CatShips[t].p, tg)
         CatFreeze(tg, 0)
         CatFreeze(g, 0)
-        SobGroup_SetMadState(g, "NIS01")                -- its push burn (smt_rammingfrigate.madstate)
+        SobGroup_SetMadState(g, "NIS01")                -- its push burn (smt_rammingfrigate.madstate)...
+        SobGroup_ManualEngineGlow(g, 1)                 -- ...over its own engines at full (frozen, they'd go dark)
         local p, q = SobGroup_GetPosition(g), SobGroup_GetPosition(tg)
         r.tp, r.txf, r.fxf = { q[1], q[2], q[3] }, SobGroup_GetCoordSys(tg), m
         r.off = { p[1] - q[1] + r.f[1] * CAT_RAM_SNUG, p[2] - q[2] + r.f[2] * CAT_RAM_SNUG,
@@ -1255,6 +1257,7 @@ function CatRam_Tick(rec, g, id, now)
         -- let go: the push is over, the target is gone, or the player ordered it elsewhere (which let go already)
         CatFreeze(g, 1)
         SobGroup_SetMadState(g, "NIS02")                -- push burn out
+        SobGroup_AutoEngineGlow(g)
         SobGroup_Stop(rec.p, g)
         if trec and not trec.gone and SobGroup_Empty(trec.g) == 0 then
             CatFreeze(trec.g, 1)
