@@ -1157,8 +1157,9 @@ CAT_RAM_STILL = 0.5            -- ...and still (speed under 10) this long
 CAT_RAM_PUSH_SPEED = 252       -- the push, units a second (the frigate's top speed; Cataclysm adds 500000 force a frame,
                                -- 800000 upgraded, through physics HWRM doesn't share)...
 CAT_RAM_PUSH_RAMP = 3          -- ...reached over this many seconds
--- pushed by script: the target held still (stopped, speed x0, so its engines don't fight: ordered to fly, it turned
--- and steered, user: jittered, not locked in), and the pair moved together along the frigate's heading every update.
+CAT_RAM_SNUG = 4               -- the frigate held this much closer than where it latched (it stopped just short)
+-- pushed by script: both frozen (CatFreeze: ordered to fly, the target turned and steered, user: jittered, not locked
+-- in) and placed together along the frigate's heading every update.
 -- (Not HWRM's salvage tow: a lone latched salvager just holds on; the engine tows only once enough have latched,
 -- home to be captured, and a script can set neither where nor how hard.)
 CAT_RAM_TRACE = 1
@@ -1209,8 +1210,17 @@ function CatRam_Tick(rec, g, id, now)
         rec.ram, rec.ramStill = r, nil
         r.v = 0
         CatRam_Hurt(CatShips[t].g, CAT_RAM_DAMAGE)
-        SobGroup_Stop(CatShips[t].p, CatShips[t].g)
-        SobGroup_SetMaxSpeedMultiplier(CatShips[t].g, 0)
+        -- the pair pinned as Link pins its Acolytes (CatFreeze: no movement, steering or collisions; both placed
+        -- every update): moved by SetPosition alone they drifted apart to a set distance (user), the engine still
+        -- flying the frigate. Each kept in its pose at the latch, the frigate CAT_RAM_SNUG closer.
+        local tg = CatShips[t].g
+        SobGroup_Stop(CatShips[t].p, tg)
+        CatFreeze(tg, 0)
+        CatFreeze(g, 0)
+        local p, q = SobGroup_GetPosition(g), SobGroup_GetPosition(tg)
+        r.tp, r.txf, r.fxf = { q[1], q[2], q[3] }, SobGroup_GetCoordSys(tg), m
+        r.off = { p[1] - q[1] + r.f[1] * CAT_RAM_SNUG, p[2] - q[2] + r.f[2] * CAT_RAM_SNUG,
+                  p[3] - q[3] + r.f[3] * CAT_RAM_SNUG }
         if CAT_RAM_TRACE == 1 then
             -- where the target's centre sits in the frigate's frame (right, up, forward), to place the latch point
             local p, q = SobGroup_GetPosition(g), SobGroup_GetPosition(CatShips[t].g)
@@ -1232,9 +1242,10 @@ function CatRam_Tick(rec, g, id, now)
     local ordered = order ~= CAT_RAM_SALCAP and order ~= 0
     if not trec or trec.gone or SobGroup_Empty(trec.g) == 1 or ordered or now - r.t0 >= CAT_RAM_PUSH then
         -- let go: the push is over, the target is gone, or the player ordered it elsewhere (which let go already)
-        if salcap then SobGroup_Stop(rec.p, g) end
+        CatFreeze(g, 1)
+        SobGroup_Stop(rec.p, g)
         if trec and not trec.gone and SobGroup_Empty(trec.g) == 0 then
-            SobGroup_SetMaxSpeedMultiplier(trec.g, 1)
+            CatFreeze(trec.g, 1)
             SobGroup_Stop(trec.p, trec.g)
         end
         rec.ram, rec.ramReady = nil, now + CAT_RAM_WAIT
@@ -1244,12 +1255,11 @@ function CatRam_Tick(rec, g, id, now)
     CatRam_Hurt(trec.g, CAT_RAM_BEAM * dt)           -- the cutting beam
     r.v = r.v + CAT_RAM_PUSH_SPEED / CAT_RAM_PUSH_RAMP * dt
     if r.v > CAT_RAM_PUSH_SPEED then r.v = CAT_RAM_PUSH_SPEED end
-    -- both moved as one: the latch alone dragged the frigate after the target under its own engines, and at speed
-    -- it fell further and further behind (user); Cataclysm holds the rammer at its offset from the target
-    -- (FUN_005c1d20) while it pushes
-    local tp, mp, s = SobGroup_GetPosition(trec.g), SobGroup_GetPosition(g), r.v * dt
-    SobGroup_SetPosition(trec.g, { tp[1] + r.f[1] * s, tp[2] + r.f[2] * s, tp[3] + r.f[3] * s })
-    SobGroup_SetPosition(g, { mp[1] + r.f[1] * s, mp[2] + r.f[2] * s, mp[3] + r.f[3] * s })
+    -- both placed as one pair (Cataclysm holds the rammer at its offset from the target, FUN_005c1d20)
+    local s, tp = r.v * dt, r.tp
+    tp[1], tp[2], tp[3] = tp[1] + r.f[1] * s, tp[2] + r.f[2] * s, tp[3] + r.f[3] * s
+    CatPlace(trec.g, tp, r.txf)
+    CatPlace(g, { tp[1] + r.off[1], tp[2] + r.off[2], tp[3] + r.off[3] }, r.fxf)
 end
 
 -- ---------------------------------------------------------------------------------------------------------------
