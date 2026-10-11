@@ -45,6 +45,25 @@ findings).
   Landing pads lit with the Kuun-Lan's pad glow (geo2dae --glow-copy), Cataclysm Remastered's glow elsewhere; the
   Kuun-Lan's engine shape (scaled) and setEngineBurn (install_cr.py patch_processor).
 
+## Ramming Frigate: core ram COMPLETE (2026-10-10, user-tested); upgrades wait for their missions
+- The Ram is HWRM's salvage-capture latch (SalCapCommand; no CanAttack: a right-click on an enemy is the latch; the
+  button is the harvest icon labelled "Ram"; the order speaks Cataclysm's attack ack via CatSay 5). shiprules.lua
+  CatRam_Tick: under the latch order (22), an enemy within 450 ahead -> the charge (x1.2 speed, madstate NIS00:
+  AftBurnIgnite, push burn, ManualEngineGlow 1); latched (order 22, an enemy within 150, still 0.5 s) -> hit 1700,
+  nose RamCollapse (NIS01), both ships pinned (target CatFreeze'd, frigate steering / collisions off but movement
+  kept so its engines draw) and placed every update along the frigate's heading, ramping to 252/s, 30 s, cutting
+  beam 20/s, other ships within 130 of the target shoved out (placed ships collide with nothing); then let go,
+  RamRecover (NIS02; CancelAftBurn after a charge that never hit), 10 s before it can grapple again.
+- Learned: SobGroup_SalvageSobGroup from script does nothing; the engine latches at its own distance (~130 to a
+  Taiidan assault frigate's centre) but aligns by the LatchOrientation / SalvageOrientation joints (z 105: straight;
+  at the nose tip it latched tilted), so the frigate is snugged 65 closer (CAT_RAM_SNUG, measured by a creep);
+  the model's hull hangs 56.7 back on JNT[RammingFrigate] (geo2dae --col-slices now builds through joint frames;
+  --engines-at places its one nozzle, the .mex put two ahead of the nose); a frozen ship's engines don't draw.
+- Engines: stock HW1 frigate burn x1.7 (one nozzle 12 inside the rear face), Processor glow x0.8; push burn
+  tools/make_ramburn.py (12 billboard sprites, smt_rammingfrigate.events RamThrust).
+- Left: impact effect, cutting beam visual, upgrades (Advanced Ion Cannon beam 60/s, afterburner x2: with the
+  missions), pushing crystals, per-hull snug / shove radius (measured on the assault frigate only).
+
 ## RESUME HERE (updated 2026-10-09, after the damage conversion; see git log for the last commit)
 **Console start:** run `claude` from `C:\Modding\Homeworld` (loads the project memory), then say "resume from
 Cataclysm-HWRM/HANDOFF.md". Shells: Git Bash for anything that runs HODOR (tools/build_ship.sh); `powershell -File
