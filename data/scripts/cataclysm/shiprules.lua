@@ -1224,6 +1224,7 @@ function CatRam_Tick(rec, g, id, now)
         SobGroup_Stop(CatShips[t].p, tg)
         CatFreeze(tg, 0)
         CatFreeze(g, 0)
+        SobGroup_SetMadState(g, "NIS01")                -- its push flames (smt_rammingfrigate.madstate)
         local p, q = SobGroup_GetPosition(g), SobGroup_GetPosition(tg)
         r.tp, r.txf, r.fxf = { q[1], q[2], q[3] }, SobGroup_GetCoordSys(tg), m
         r.off = { p[1] - q[1] + r.f[1] * CAT_RAM_SNUG, p[2] - q[2] + r.f[2] * CAT_RAM_SNUG,
@@ -1250,6 +1251,7 @@ function CatRam_Tick(rec, g, id, now)
     if not trec or trec.gone or SobGroup_Empty(trec.g) == 1 or ordered or now - r.t0 >= CAT_RAM_PUSH then
         -- let go: the push is over, the target is gone, or the player ordered it elsewhere (which let go already)
         CatFreeze(g, 1)
+        SobGroup_SetMadState(g, "NIS02")                -- flames out
         SobGroup_Stop(rec.p, g)
         if trec and not trec.gone and SobGroup_Empty(trec.g) == 0 then
             CatFreeze(trec.g, 1)

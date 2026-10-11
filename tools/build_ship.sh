@@ -67,6 +67,9 @@ case "$NAME" in
     # collided). Held ~17 off the target, pulled 17 in the nose was pushed out again (user): collision, the model had
     # no collision mesh; now one that follows the hull (--col-slices)
     GEO2DAE_ARGS="$GEO2DAE_ARGS --latch 0,0,105 --salvage-latch 0,0,105 --col-slices 10"
+    # engines the Kuun-Lan's (user): CR's Kuun-Lan engine shape, x0.909 (CR -> ours) x 0.121 (our frigate's length /
+    # our Kuun-Lan's, 137 / 1131); its burn: install_cr.py kuunlan_engines
+    GEO2DAE_ARGS="$GEO2DAE_ARGS --engines-from C:/Modding/Cataclysm-decomp/reference/cr_main/ship/smt_ms_sp/smt_ms_sp.hod --engines-scale 0.110"
     CLIPS="RamCollapse,RamRecover,AftBurnIgnite,AftBurnFiring,CancelAftBurn"
     ;;
   som_acolyte)
