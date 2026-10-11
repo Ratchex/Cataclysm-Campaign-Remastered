@@ -545,6 +545,8 @@ def main():
                          "(the effect marker); tools/make_procbeam.py animates _Yaw / _Pitch (the Processor's beams)")
     ap.add_argument("--latch", help="LatchOrientation joint at x,y,z (HWRM units): the point a collector puts on "
                                     "the asteroid's surface while harvesting")
+    ap.add_argument("--col-slices", type=float, help="a collision mesh: boxes following the hull every this many "
+                                                     "units along Z (else HODOR writes none)")
     ap.add_argument("--salvage-latch", help="SalvageOrientation joint at x,y,z (HWRM units): where a salvage-capture "
                                            "latch holds the ship (stock kus_salvagecorvette's, on its nose)")
     ap.add_argument("--glow-from", help="old-format HOD whose GLOW textures (Cataclysm texture names) become our "
@@ -959,6 +961,41 @@ def main():
             weapons += jnode(f"JNT[{rp}]", at, jnode(f"JNT[{rp}Heading]", (0, 0, 10))
                              + jnode(f"JNT[{rp}Left]", (10, 0, 0)) + jnode(f"JNT[{rp}Up]", (0, 10, 0)))
 
+    # collision mesh (ROOT_COL > COL[Root]): without one the engine held other ships well off this one (the Ramming
+    # Frigate's latched target sat ~17 off its ram plate, user: doesn't touch). Boxes following the hull's width
+    # every --col-slices units along its length
+    col_node = ""
+    if a.col_slices:
+        cv = [v for g in groups.values() for t in g["tris"] for v in t[0]]
+        z0, z1 = min(v[2] for v in cv), max(v[2] for v in cv)
+        P, I = [], []
+        z = z0
+        while z < z1 - 1e-6:
+            ze = min(z + a.col_slices, z1)
+            sl = [v for v in cv if z - 1e-3 <= v[2] <= ze + 1e-3]
+            if sl:
+                x0, x1 = min(v[0] for v in sl), max(v[0] for v in sl)
+                y0, y1 = min(v[1] for v in sl), max(v[1] for v in sl)
+                b = len(P)
+                P += [(x0, y0, z), (x1, y0, z), (x1, y1, z), (x0, y1, z),
+                      (x0, y0, ze), (x1, y0, ze), (x1, y1, ze), (x0, y1, ze)]
+                for q in ((0, 3, 2, 1), (4, 5, 6, 7), (0, 1, 5, 4), (2, 3, 7, 6), (1, 2, 6, 5), (0, 4, 7, 3)):
+                    I += [b + q[0], b + q[1], b + q[2], b + q[0], b + q[2], b + q[3]]   # outward winding
+            z = ze
+        flat = [c for v in P for c in v]
+        cid = "COL[Root]"
+        geoms.append(f'<geometry id="{cid}-lib" name="{cid}"><mesh>'
+                     f'<source id="{cid}-pos"><float_array id="{cid}-pos-a" count="{len(flat)}">{fl(flat)}</float_array>'
+                     f'<technique_common><accessor source="#{cid}-pos-a" count="{len(P)}" stride="3"><param name="X" '
+                     f'type="float"/><param name="Y" type="float"/><param name="Z" type="float"/></accessor>'
+                     f'</technique_common></source><vertices id="{cid}-v"><input semantic="POSITION" source="#{cid}-pos"/>'
+                     f'</vertices><triangles count="{len(I) // 3}"><input semantic="VERTEX" offset="0" source="#{cid}-v"/>'
+                     f'<p>{" ".join(map(str, I))}</p></triangles></mesh></geometry>')
+        col_node = (f'<node name="ROOT_COL" id="ROOT_COL" sid="ROOT_COLE"><translate sid="translate">0 0 0</translate>'
+                    f'<node name="{cid}" id="{cid}" sid="{cid}E"><translate sid="translate">0 0 0</translate>'
+                    f'<instance_geometry url="#{cid}-lib"/></node></node>\n')
+        print(f"collision mesh: {len(P) // 8} boxes, z {z0:.1f}..{z1:.1f}")
+
     dae = os.path.join(a.out_dir, a.name + ".dae")
     with open(dae, "w", encoding="utf-8", newline="\n") as f:
         f.write('<?xml version="1.0" encoding="utf-8"?>\n'
@@ -974,6 +1011,7 @@ def main():
                 '<node name="JNT[Root]" id="JNT[Root]" sid="JNT[Root]E"><translate sid="translate">0 0 0</translate>\n'
                 # weapon/engine/hardpoint joints inside JNT[Root], with the meshes (HODOR adds its own Root above it)
                 + "\n".join(nodes) + '\n' + weapons + '\n</node>\n' + hold_dock + '\n</node>\n'
+                + col_node +
                 '<node name="ROOT_INFO" id="ROOT_INFO" sid="ROOT_INFOE"><translate sid="translate">0 0 0</translate>'
                 '<node name="Class[MultiMesh]_Version[512]" id="Class[MultiMesh]_Version[512]" sid="ClassE"/>'
                 '<node name="UVSets[1]" id="UVSets[1]" sid="UVSetsE"/></node>\n'

@@ -63,10 +63,10 @@ case "$NAME" in
     ANIM="RammingFrigate,RammingFrigateNose,GunHousing,Gun"
     GEO2DAE_ARGS="$GEO2DAE_ARGS --anim-joints $ANIM"
     # its ram is HWRM's salvage latch (shiprules.lua CatRam_Tick): LatchOrientation / SalvageOrientation (stock
-    # salvage corvette's pair) toward the nose tip (z 106.2; user: on the very front, latched by its centre it
-    # collided). At 107 the latch held it ~17 out (a Taiidan ion frigate's centre 139 ahead; its salvage points sit
-    # 14-19 off its centre; user: doesn't touch), so 17 further in
-    GEO2DAE_ARGS="$GEO2DAE_ARGS --latch 0,0,90 --salvage-latch 0,0,90"
+    # salvage corvette's pair) at the ram plate's tip (z 106.2; user: on the very front, latched by its centre it
+    # collided). Held ~17 off the target, pulled 17 in the nose was pushed out again (user): collision, the model had
+    # no collision mesh; now one that follows the hull (--col-slices)
+    GEO2DAE_ARGS="$GEO2DAE_ARGS --latch 0,0,105 --salvage-latch 0,0,105 --col-slices 10"
     CLIPS="RamCollapse,RamRecover,AftBurnIgnite,AftBurnFiring,CancelAftBurn"
     ;;
   som_acolyte)
