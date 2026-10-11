@@ -1,5 +1,5 @@
 -- Somtaaw Ramming Frigate effects (Cataclysm-HWRM; installed over Cataclysm Remastered's empty one by tools/install_cr.py).
--- RamThrust: its push burn on its three engine nozzles (tools/make_ramburn.py), while shiprules.lua CatRam_Tick
+-- RamThrust: its push burn on its engine nozzle (tools/make_ramburn.py), while shiprules.lua CatRam_Tick
 -- pushes (started / ended by smt_rammingfrigate.madstate)
 effects =
 {
@@ -10,7 +10,5 @@ effects =
     events =
     {
         RamThrust1_fx = { { "anim", "RamThrust" }, { "animtime", "-1" }, { "marker", "EngineNozzle1" }, { "fx", "cat_ramburn" }, },
-        RamThrust2_fx = { { "anim", "RamThrust" }, { "animtime", "-1" }, { "marker", "EngineNozzle2" }, { "fx", "cat_ramburn" }, },
-        RamThrust3_fx = { { "anim", "RamThrust" }, { "animtime", "-1" }, { "marker", "EngineNozzle3" }, { "fx", "cat_ramburn" }, },
     },
 }

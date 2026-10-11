@@ -18,8 +18,8 @@ from PIL import Image
 MOD = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FX = os.path.join(MOD, "data", "art", "fx")
 SPRITES = 8          # (the Worker's burn has 6 divisions; 6 small ones read as separate dots, user)
-LENGTH = 40.0        # behind the nozzle, last sprite (the frigate is 133 long; its nozzles ~17 apart)
-R0, R1 = 12.0, 4.0   # sprite radius at the nozzle and at the tip: overlapping, one flame
+LENGTH = 60.0        # behind the nozzle, last sprite (the frigate is 133 long)
+R0, R1 = 20.0, 7.0   # sprite radius at the nozzle and at the tip: overlapping, one flame for its three nozzles (user)
 COLOUR = tuple(round(c * 0.75, 3) for c in (0.55, 0.78, 1.0))   # the engine glow's blue (0.27, 0.47, 0.69), lifted
                                                                 # toward white: a hard burn; dimmed for a frigate (user)
 FLICKER = 0.12       # seconds per flicker cycle

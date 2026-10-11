@@ -223,8 +223,9 @@ def patch_rammingfrigate(text):
     # drew a white ball as big as the frigate over its rear (user: pics/engine-normal.jpg)...
     if "setEngineBurn" not in text:
         assert text.count("setEngineGlow(NewShipType") == 1
-        text = text.replace("setEngineGlow(NewShipType", "setEngineBurn(NewShipType,6,1,1.5,60,1.1,0.1,0.25,120);   "
-                            "-- Cataclysm-HWRM: stock HW1 frigates'\nsetEngineGlow(NewShipType", 1)
+        text = text.replace("setEngineGlow(NewShipType", "setEngineBurn(NewShipType,6,1.7,2.55,102,1.1,0.1,0.25,204);   "
+                            "-- Cataclysm-HWRM: stock HW1 frigates' x1.7 (one nozzle for its three)\n"
+                            "setEngineGlow(NewShipType", 1)
     if '"SalCapCommand"' in text:
         return text
     text = re.sub(r'^(addAbility\(NewShipType,\s*"CanAttack".*)$', r"-- Cataclysm-HWRM (the ram is its salvage latch): \1",

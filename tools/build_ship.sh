@@ -71,12 +71,12 @@ case "$NAME" in
     # but aligns the frigate by them, and at the nose tip (z 45) it latched tilted 40 off toward the target's stern
     # (user); at 105, straight (target centre 6 off its axis)
     GEO2DAE_ARGS="$GEO2DAE_ARGS --latch 0,0,105 --salvage-latch 0,0,105 --col-slices 10"
-    # its three engine nozzles, stacked on its rear face (y -20..32; the .mex put one there and two 33 ahead of the
-    # nose, user: two copies in front of the ram)
-    GEO2DAE_ARGS="$GEO2DAE_ARGS --engines-at 0,23.3,-87.6;0,6,-87.6;0,-11.3,-87.6"
+    # one engine nozzle, larger, centred on its rear face (y -20..32; user: one, not one per stacked nozzle; the .mex
+    # put one there and two 33 ahead of the nose, user: two copies in front of the ram)
+    GEO2DAE_ARGS="$GEO2DAE_ARGS --engines-at 0,6,-87.6"
     # engines the Kuun-Lan's (user): CR's Kuun-Lan engine shape, x0.909 (CR -> ours) x 0.121 (our frigate's length /
     # our Kuun-Lan's, 137 / 1131); its burn: install_cr.py kuunlan_engines
-    GEO2DAE_ARGS="$GEO2DAE_ARGS --engines-from C:/Modding/Cataclysm-decomp/reference/cr_main/ship/smt_ms_sp/smt_ms_sp.hod --engines-scale 0.110"
+    GEO2DAE_ARGS="$GEO2DAE_ARGS --engines-from C:/Modding/Cataclysm-decomp/reference/cr_main/ship/smt_ms_sp/smt_ms_sp.hod --engines-scale 0.19"
     CLIPS="RamCollapse,RamRecover,AftBurnIgnite,AftBurnFiring,CancelAftBurn"
     ;;
   som_acolyte)
