@@ -652,6 +652,8 @@ end
 function KAS_FleetAwaitHyperspace()
     if SobGroup_Count("KAS_ArrivalMS") == 0 then return nil end
     SobGroup_DockSobGroupInstant("KAS_ArrivalDocked", "KAS_ArrivalMS")
+    KAS_FaceArrival()
+    KAS_LogBow("turned, before hyperspace")
     SobGroup_Despawn("KAS_ArrivalMS")
     KAS_FleetWaiting = 1
     print("CKAS: fleet waits in hyperspace (" .. SobGroup_Count("KAS_ArrivalDocked") .. " ships docked)")
@@ -665,29 +667,22 @@ KAS_ArrivalCameraDistance = 1760
 -- SobGroup_HyperspaceTo brings the Kuun-Lan in bow +Z whatever the start point's heading: turned KAS_ArrivalYaw
 -- degrees left about up (the mission's, build_mission.py ARRIVAL_YAW; Mission01: straight away from the sensor net,
 -- user). Rows of the matrix are its right, up and forward (NOTES.md: SobGroup_GetCoordSys / SetTransform).
--- Turned only, it came in that way and then steered back to bow +Z (user): the arrival leaves it that heading to
--- hold. So no steering while it arrives (KAS_ArrivalSteer 0), and once out a short move straight along its new bow
--- (KAS_ArrivalSettle) gives it the new heading to hold.
+-- Turned as it came in, the hyperspace exit turned it back once the effect was over (and moved it a little: user):
+-- the exit keeps the heading it went in with, so it is turned before it is despawned too (KAS_FleetAwaitHyperspace)
 function KAS_FaceArrival()
     if KAS_ArrivalYaw == nil or KAS_ArrivalYaw == 0 then return end
     local c, s = cos(KAS_ArrivalYaw), sin(KAS_ArrivalYaw)          -- (Lua 4: degrees)
     SobGroup_SetTransform("KAS_ArrivalMS", { c, 0, -s, 0, 1, 0, s, 0, c })
 end
 
-function KAS_ArrivalSteer(on)
-    if KAS_ArrivalYaw == nil or KAS_ArrivalYaw == 0 or AB_Steering == nil then return end
-    SobGroup_AbilityActivate("KAS_ArrivalMS", AB_Steering, on)
-end
-
-KAS_ArrivalSettleDistance = 300
-function KAS_ArrivalSettle()
-    if KAS_ArrivalYaw == nil or KAS_ArrivalYaw == 0 then return end
-    KAS_FaceArrival()
-    KAS_ArrivalSteer(1)
-    local p = SobGroup_GetPosition("KAS_ArrivalMS")
-    local d = KAS_ArrivalSettleDistance
-    SobGroup_MoveToPoint(0, "KAS_ArrivalMS",
-                         { p[1] + d * sin(KAS_ArrivalYaw), p[2], p[3] + d * cos(KAS_ArrivalYaw) })
+-- the Kuun-Lan's bow in the log (checking the arrival turn)
+function KAS_LogBow(when)
+    if KAS_ArrivalYaw == nil or KAS_ArrivalYaw == 0 or SobGroup_Count("KAS_ArrivalMS") == 0 then return end
+    local m = SobGroup_GetCoordSys("KAS_ArrivalMS")
+    if m and getn(m) == 9 then
+        print(format("CKAS: Kuun-Lan bow %s: (%.2f, %.2f, %.2f) (wanted (%.2f, 0, %.2f))", when, m[7], m[8], m[9],
+                     sin(KAS_ArrivalYaw), cos(KAS_ArrivalYaw)))
+    end
 end
 
 function K_498230()
@@ -698,7 +693,7 @@ function K_498230()
     KAS_FleetWaiting = nil
     SobGroup_HyperspaceTo("KAS_ArrivalMS", "StartPointPlayer")
     KAS_FaceArrival()
-    KAS_ArrivalSteer(0)
+    KAS_LogBow("hyperspacing in")
     SobGroup_SetHidden("KAS_ArrivalMS", 0)
     Camera_UseCameraPoint("KAS_ArrivalCamera")    -- mission2level.py: below the port bow, looking up
     KAS_ArrivalStarted = Universe_GameTime()
@@ -714,17 +709,26 @@ function KAS_ArrivalWatch()
         -- point's distance (Gearbox's hyperspace focus call). Camera_FocusSobGroup(g, 0, 0, 0) zoomed right in:
         -- the start view stayed at the hangar however far out the camera point was put (1x, 2x, 6x)
         KAS_ArrivalFocused = 1
+        KAS_LogBow("in space, before turning again")
         KAS_FaceArrival()                     -- again, now it is in space (no-op if it already faces that way)
         Camera_FocusSobGroupWithBuffer("KAS_ArrivalMS", KAS_ArrivalCameraDistance, 0, 0)
     end
     if t < 2 then return end
     if SobGroup_GetCurrentOrder("KAS_ArrivalMS") ~= COMMAND_Idle and t < 30 then return end
     Rule_Remove("KAS_ArrivalWatch")
-    KAS_ArrivalSettle()
+    KAS_LogBow("out of hyperspace")
+    if KAS_ArrivalYaw and KAS_ArrivalYaw ~= 0 then Rule_AddInterval("KAS_ArrivalBowLog", 2) end
     SobGroup_Launch("KAS_ArrivalDocked", "KAS_ArrivalMS")
     KAS_Vars[KAS_Key_ShipsHaveArrived] = 1
     print("CKAS: fleet out of hyperspace after " .. t .. "s; launching " .. SobGroup_Count("KAS_ArrivalDocked")
           .. " ships; G_ShipsHaveArrived")
+end
+
+KAS_ArrivalBowLogs = 0
+function KAS_ArrivalBowLog()
+    KAS_ArrivalBowLogs = KAS_ArrivalBowLogs + 1
+    KAS_LogBow("+" .. (2 * KAS_ArrivalBowLogs) .. "s after")
+    if KAS_ArrivalBowLogs >= 5 then Rule_Remove("KAS_ArrivalBowLog") end
 end
 
 -- Player 2 (when the level has one) is the allied Kushan fleet. Applied at start and again on the first tick.
