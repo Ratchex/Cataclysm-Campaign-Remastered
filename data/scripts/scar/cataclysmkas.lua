@@ -1905,6 +1905,37 @@ function KAS_HyperspaceAllow()
 end
 
 KAS_HyperspaceLastState = -1
+-- The roll call's Go Now is Cataclysm's Emergency Hyperspace (user: it instantly jumps every hyperspace capable ship
+-- and leaves everything else; part of the tension of some missions). Decompiled: its roll call offers Go Now
+-- (0x5173a0: every ship still out docked instantly, then the jump) or Emergency Hyperspace (0x5174b0: every ship
+-- still out flagged left behind, the hyperspace capable ones jump), the second when any player ship has a state
+-- not identified yet (0x518f50: bytes 0x35a / 0x35b). Here always the second (data/ui/hyperspacerollcallscreen.lua
+-- calls this; Gearbox's normal roll call, everything docked, is untouched). Ships already docked go with their
+-- carrier; Gearbox's state machine then watches the jump (HYPERSPACE_SHIPSLEAVING, substate 2): white-out, mission
+-- complete. Ships left behind are not in hyperspace when it completes.
+function KAS_EmergencyHyperspace()
+    if spGameInfo_hyperspaceState ~= HYPERSPACE_WAITINGROLLCALL then return end
+    print("CKAS: EMERGENCY HYPERSPACE")
+    SobGroup_CreateIfNotExist("KAS_LeftBehind")
+    SobGroup_CreateIfNotExist("KAS_Jumpers")
+    Player_GetShipsByFilterExclude(0, "KAS_LeftBehind", "Ability", "HyperSpaceCommand")
+    SobGroup_FilterExclude("KAS_LeftBehind", "KAS_LeftBehind", "Docked", "")
+    singlePlayerHyperspaceSkipNonDockers("KAS_LeftBehind")
+    SobGroup_Stop(0, "KAS_LeftBehind")
+    Player_GetShipsByFilterInclude(0, "KAS_Jumpers", "Ability", "HyperSpaceCommand")
+    print("CKAS: " .. SobGroup_Count("KAS_Jumpers") .. " ships jump, " .. SobGroup_Count("KAS_LeftBehind")
+          .. " left behind")
+    SobGroup_EnterHyperSpaceOffMap("KAS_Jumpers")
+    spGameInfo_screenSkipped = 1
+    if spGameInfo_screenLoaded ~= 0 then
+        MainUI_ActivateScreen("HyperspaceRollCallScreen", 0)
+        MainUI_UnloadScreen("HyperspaceRollCallScreen")
+        spGameInfo_screenLoaded = 0
+    end
+    spGameInfo_hyperspaceState = HYPERSPACE_SHIPSLEAVING
+    spGameInfo_hyperspaceSubState = 2
+end
+
 function KAS_DevHyperspace()
     Rule_Remove("KAS_DevHyperspace")
     KAS_HyperspaceAllow()
