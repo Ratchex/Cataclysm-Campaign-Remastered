@@ -261,6 +261,8 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
 - Every crash writes `Bin/Release/<date>_ErrorLog.txt` (+ minidumps): faulting address and stack. The exe is loaded
   at 0x00da0000 here; its Ghidra image base is 0x400000 (project `Cataclysm-decomp/project_hwrm`, copy of the exe;
   `scripts/DecompileAt.java`). Source file/line strings in the exe name the subsystem (e.g. sctobjectload.cpp).
+- A subsystem with no model (a .subs copied without its .hod, and no LoadSharedModel) crashes the load in
+  solStartSubSystemWeaponConfig (null model +0x298, read of 0x10; tools/make_variants.py copies the .hod).
 - `.ship`: StartShipWeaponConfig / StartShipHardPointConfig must come after `LoadModel(NewShipType,1)`;
   solStartShipHardPointConfig reads the joint from the loaded HOD (null -> access violation at load).
 - Build families must be declared in scripts/familylist.lua ("could not find family ..."); dock path MAD must be a

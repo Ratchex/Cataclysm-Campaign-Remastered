@@ -55,8 +55,8 @@ def scaled_weapon(copy, w, pct):
 
 
 def subsystem_copy(sub, pct):
-    """<sub>_d<pct>: the innate turret subsystem with its weapons at pct % (its .subs and .events; its model is shared
-    by name, LoadSharedModel); its name and the files written"""
+    """<sub>_d<pct>: the innate turret subsystem with its weapons at pct % (its .subs and its other files; some share
+    another's model by name, LoadSharedModel, the rest carry their own .hod); its name and the files written"""
     src = make_damage.find("subsystem", sub, ".subs")
     if not src:
         return None, []
@@ -74,10 +74,14 @@ def subsystem_copy(sub, pct):
     with open(os.path.join(folder, copy + ".subs"), "w", encoding="latin-1", newline="") as f:
         f.write(st)
     written.append(f"subsystem/{copy}/{copy}.subs")
-    ev = os.path.join(os.path.dirname(src), os.path.basename(src)[:-5] + ".events")
-    if os.path.exists(ev):
-        shutil.copyfile(ev, os.path.join(folder, copy + ".events"))
-        written.append(f"subsystem/{copy}/{copy}.events")
+    # its other files under the copy's name: .events, and its own model where it has one (.hod, .mad, .madstate;
+    # without it the engine crashed loading the weapon config, access violation: the subsystem had no model)
+    base = os.path.basename(src)[:-5]
+    for ext in (".events", ".hod", ".mad", ".madstate"):
+        f = os.path.join(os.path.dirname(src), base + ext)
+        if os.path.exists(f):
+            shutil.copyfile(f, os.path.join(folder, copy + ext))
+            written.append(f"subsystem/{copy}/{copy}{ext}")
     return copy, written
 
 

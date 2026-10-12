@@ -2477,15 +2477,18 @@
 /subsystem/ksh_sec_seraphengine/ksh_sec_seraphengine.subs
 /subsystem/kus_cruiserion/kus_cruiserion.hod
 /subsystem/kus_destroyergun_d10/kus_destroyergun_d10.events
+/subsystem/kus_destroyergun_d10/kus_destroyergun_d10.hod
 /subsystem/kus_destroyergun_d10/kus_destroyergun_d10.subs
 /subsystem/kus_destroyerion1/kus_destroyerion1.events
 /subsystem/kus_destroyerion1/kus_destroyerion1.hod
 /subsystem/kus_destroyerion1_d10/kus_destroyerion1_d10.events
+/subsystem/kus_destroyerion1_d10/kus_destroyerion1_d10.hod
 /subsystem/kus_destroyerion1_d10/kus_destroyerion1_d10.subs
 /subsystem/kus_destroyerion2/kus_destroyerion2.events
 /subsystem/kus_destroyerion2_d10/kus_destroyerion2_d10.events
 /subsystem/kus_destroyerion2_d10/kus_destroyerion2_d10.subs
 /subsystem/kus_multigun1_d10/kus_multigun1_d10.events
+/subsystem/kus_multigun1_d10/kus_multigun1_d10.hod
 /subsystem/kus_multigun1_d10/kus_multigun1_d10.subs
 /subsystem/kus_multigun2_d10/kus_multigun2_d10.events
 /subsystem/kus_multigun2_d10/kus_multigun2_d10.subs
@@ -2544,6 +2547,7 @@
 /subsystem/smt_seraph_ioncannon/smt_seraph_ioncannon.subs
 /subsystem/tai_assaultcannon2/tai_assaultcannon2.subs
 /subsystem/tai_destroyergun_d10/tai_destroyergun_d10.events
+/subsystem/tai_destroyergun_d10/tai_destroyergun_d10.hod
 /subsystem/tai_destroyergun_d10/tai_destroyergun_d10.subs
 /subsystem/tdn_heavycruiser_ionbeamturret/tdn_heavycruiser_ionbeamturret.events
 /subsystem/tdn_heavycruiser_ionbeamturret/tdn_heavycruiser_ionbeamturret.hod
