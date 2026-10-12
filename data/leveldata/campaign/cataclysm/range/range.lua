@@ -70,40 +70,52 @@ function Range_Upgrade()
     print("CATACLYSM range: placed ships upgraded")
 end
 
--- TEST (user: ion beams charge and sound but draw nothing and deal nothing since Mission01's damage factors stuck):
--- the Taiidan ion frigate attacks our ships at full damage, then at 10% (the ship rules' cat_dmgf groups, as
--- cataclysmkas.lua K_493980), then full again; does the beam vanish only at 10%?
+-- TEST (user: ion beams stop firing once a damage multiplier is set, and stay off when set back): what does
+-- SobGroup_SetDamageMultiplier do: replace the multiplier, compound it, or break beams below 1? The Taiidan ion
+-- frigate fires at our Processor; its health loss is logged every 5 s through: nothing set, 0.5, 0.5 again, 2.
 RANGE_BEAM_TEST = 1
 RangeBeamStart = nil
 RangeBeamPhase = 0
+RangeBeamLog = 0
+RangeBeamHP = nil
 function Range_BeamSay(text)
     print("CATACLYSM range beam test: " .. text)
     if Subtitle_Message then Subtitle_Message("BEAM TEST: " .. text, 6) end
 end
 function Range_BeamTest()
     local t = Universe_GameTime()
-    if RangeBeamStart == nil then RangeBeamStart = t end
+    if RangeBeamStart == nil then
+        RangeBeamStart = t
+        SobGroup_CreateIfNotExist("TestTarget")
+        SobGroup_Clear("TestTarget")
+        SobGroup_FillShipsByType("TestTarget", "Player_Ships0", "smt_processor")
+    end
     local s = t - RangeBeamStart
+    local hp = SobGroup_HealthPercentage("TestTarget") * SobGroup_MaxHealthTotal("TestTarget")
+    if RangeBeamPhase > 0 and s >= RangeBeamLog then
+        RangeBeamLog = s + 5
+        print("CATACLYSM range beam test: t+" .. floor(s) .. " phase " .. RangeBeamPhase .. ", Processor lost " ..
+              floor((RangeBeamHP or hp) - hp) .. " in 5 s (health " .. floor(hp) .. ")")
+        RangeBeamHP = hp
+    end
     if RangeBeamPhase == 0 and s >= 15 then
-        RangeBeamPhase = 1
-        SobGroup_Attack(1, "TargetIon", "Player_Ships0")
-        Range_BeamSay("ion frigate attacking at FULL damage")
-    elseif RangeBeamPhase == 1 and s >= 45 then
+        RangeBeamPhase, RangeBeamLog, RangeBeamHP = 1, s + 5, hp
+        SobGroup_Attack(1, "TargetIon", "TestTarget")
+        Range_BeamSay("phase 1: ion frigate attacking the Processor, multiplier untouched")
+    elseif RangeBeamPhase == 1 and s >= 40 then
         RangeBeamPhase = 2
-        SobGroup_CreateIfNotExist("cat_dmgf")
-        SobGroup_CreateIfNotExist("cat_dmgf_10")
-        SobGroup_SobGroupAdd("cat_dmgf", "TargetIon")
-        SobGroup_SobGroupAdd("cat_dmgf_10", "TargetIon")
-        SobGroup_SetDamageMultiplier("TargetIon", 0.1)
-        SobGroup_Attack(1, "TargetIon", "Player_Ships0")
-        Range_BeamSay("ion frigate now at 10% damage")
-    elseif RangeBeamPhase == 2 and s >= 75 then
+        SobGroup_SetDamageMultiplier("TargetIon", 0.5)
+        Range_BeamSay("phase 2: multiplier set to 0.5")
+    elseif RangeBeamPhase == 2 and s >= 65 then
         RangeBeamPhase = 3
-        SobGroup_Clear("cat_dmgf")
-        SobGroup_Clear("cat_dmgf_10")
-        SobGroup_SetDamageMultiplier("TargetIon", 1)
-        SobGroup_Attack(1, "TargetIon", "Player_Ships0")
-        Range_BeamSay("ion frigate back at FULL damage")
+        SobGroup_SetDamageMultiplier("TargetIon", 0.5)
+        Range_BeamSay("phase 3: multiplier set to 0.5 again")
+    elseif RangeBeamPhase == 3 and s >= 90 then
+        RangeBeamPhase = 4
+        SobGroup_SetDamageMultiplier("TargetIon", 2)
+        Range_BeamSay("phase 4: multiplier set to 2")
+    elseif RangeBeamPhase == 4 and s >= 115 then
+        Range_BeamSay("done")
         Rule_Remove("Range_BeamTest")
     end
 end
