@@ -50,8 +50,8 @@ def scaled_weapon(copy, w, pct):
         return None, None
     name = f"cat_{copy}_{w}".lower()
     wt = open(src, encoding="latin-1").read()
-    wt = make_damage.HIT.sub(lambda m: f"{m.group(1)}{float(m.group(2)) * pct / 100:.4g}{m.group(3)}"
-                                       f"{float(m.group(4)) * pct / 100:.4g}", wt)
+    wt = make_damage.HIT.sub(lambda m: f"{m.group(1)}{make_damage.num(m.group(2)) * pct / 100:.4g}{m.group(3)}"
+                                       f"{make_damage.num(m.group(4)) * pct / 100:.4g}", wt)
     return name, make_damage.write_weapon(name, wt)
 
 

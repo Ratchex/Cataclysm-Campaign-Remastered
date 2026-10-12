@@ -59,7 +59,16 @@ def active(text):
     return "\n".join(l for l in text.split("\n") if not l.lstrip().startswith("--"))
 
 
-HIT = re.compile(r'(AddWeaponResult\(NewWeaponType,\s*"Hit",\s*"DamageHealth",\s*"Target",\s*)([\d.]+)(,\s*)([\d.]+)')
+# damage values: a number or a product / quotient of numbers (tai_cruiserion's 2400*2: read as no damage, it was
+# left at HWRM's 4800 a hit, and Mission01's Taiidan heavy cruiser beat the Kushan at full strength, user)
+_VAL = r"[\d.]+(?:\s*[*/]\s*[\d.]+)*"
+HIT = re.compile(r'(AddWeaponResult\(NewWeaponType,\s*"Hit",\s*"DamageHealth",\s*"Target",\s*)(' + _VAL + r')(,\s*)('
+                 + _VAL + r')')
+
+
+def num(v):
+    """a damage value (number, or a product / quotient of numbers) as a float"""
+    return float(eval(v, {"__builtins__": {}}))
 SPAWN = re.compile(r'AddWeaponResult\(NewWeaponType,\s*"Hit",\s*"SpawnWeaponFire",\s*"Target",[^)]*?"([^"]+)"\s*\)')
 
 
@@ -90,7 +99,7 @@ def weapon(name):
         hit = HIT.search(active(open(sp, encoding="latin-1").read())) if sp else None
         if not hit:
             return None
-    dmg = (float(hit.group(2)) + float(hit.group(4))) / 2
+    dmg = (num(hit.group(2)) + num(hit.group(4))) / 2
     return {"type": a[1], "spf": fire / duty if fire > 0 else None, "dmg": dmg, "holder": holder}
 
 
@@ -185,7 +194,7 @@ def set_health(ship, health):
 
 def scaled(text, factor):
     """Damage x factor; every armour family alike (setPenetration's default 1, no per-family list)."""
-    text = HIT.sub(lambda m: f"{m.group(1)}{float(m.group(2)) * factor:.4g}{m.group(3)}{float(m.group(4)) * factor:.4g}",
+    text = HIT.sub(lambda m: f"{m.group(1)}{num(m.group(2)) * factor:.4g}{m.group(3)}{num(m.group(4)) * factor:.4g}",
                    text)
     return re.sub(r"setPenetration\(NewWeaponType,\s*([\d.]+)\s*,.*?\}\s*\)", r"setPenetration(NewWeaponType, \1, 1)",
                   text, flags=re.S)

@@ -1324,9 +1324,29 @@ function KAS_Owner(sel) return SobGroup_GetPlayerOwner(sel) end
 function K_491cb0() KAS_MissionFailed() end                                                          -- kasfMissionFailed
 -- Formations: a strike group of the ships the team has in space; a team still launching (Mission01's first pester
 -- wing, user: not in delta like the second) gets it again once it has launched (K_4948a0).
+-- Ships just out of a hangar ignored it (the first wing asked one state after launching): formed again 3 and 8 s on.
 KAS_TeamFormation = {}
-function K_492780() KAS_TeamFormation[KAS_Team] = "Delta" KAS_SetFormation(KAS_Team, "Delta") end   -- kasfFormationDelta
-function K_492810() KAS_TeamFormation[KAS_Team] = "Claw" KAS_SetFormation(KAS_Team, "Claw") end     -- kasfFormationClaw
+KAS_FormAgain = {}
+function KAS_Form(name)
+    KAS_TeamFormation[KAS_Team] = name
+    KAS_SetFormation(KAS_Team, name)
+    local t = Universe_GameTime()
+    KAS_FormAgain[KAS_Team] = { t + 3, t + 8 }
+    if Rule_Exists("KAS_FormAgainTick") == 0 then Rule_AddInterval("KAS_FormAgainTick", 1) end
+end
+function KAS_FormAgainTick()
+    local t = Universe_GameTime()
+    for team, at in KAS_FormAgain do
+        if SobGroup_Count(team) == 0 then
+            KAS_FormAgain[team] = nil
+        elseif at[1] and t >= at[1] then
+            KAS_SetFormation(team, KAS_TeamFormation[team])
+            if at[2] then KAS_FormAgain[team] = { at[2] } else KAS_FormAgain[team] = nil end
+        end
+    end
+end
+function K_492780() KAS_Form("Delta") end                                                            -- kasfFormationDelta
+function K_492810() KAS_Form("Claw") end                                                             -- kasfFormationClaw
 -- kasfGuardShips (HW1 aimCreateGuardShips: the protect command, the guards around the guarded ships). HWRM's guard
 -- order only trails them (user: Mission01's carrier defenders should hold a sphere round the carrier): each guard
 -- ship is sent to its own point on a sphere of KAS_GuardRadius round them (KAS_GuardTick), and with an enemy within
