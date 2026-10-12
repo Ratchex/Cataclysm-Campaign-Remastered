@@ -719,6 +719,10 @@ function KAS_ArrivalWatch()
     Rule_Remove("KAS_ArrivalWatch")
     if KAS_ArrivalYaw and KAS_ArrivalYaw ~= 0 then Rule_AddInterval("KAS_ArrivalBowLog", 2) end
     KAS_Autolaunch()
+    if KAS_DevHyperspaceAfter then
+        print("CKAS: DEV HYPERSPACE button in " .. KAS_DevHyperspaceAfter .. "s")
+        Rule_AddInterval("KAS_DevHyperspace", KAS_DevHyperspaceAfter)
+    end
     KAS_Vars[KAS_Key_ShipsHaveArrived] = 1
     print("CKAS: fleet out of hyperspace after " .. t .. "s; launching " .. SobGroup_Count("KAS_ArrivalDocked")
           .. " ships; G_ShipsHaveArrived")
@@ -759,6 +763,9 @@ end
 -- DEVELOPMENT ONLY: research the missions don't allow yet, unlocked for testing a later mission's mechanics
 -- (keep empty in commits that aren't a test)
 KAS_DevTechs = {}
+-- DEVELOPMENT ONLY: the HYPERSPACE button this many seconds after the warp-in (testing the end of a mission without
+-- playing it; nil in commits that aren't a test)
+KAS_DevHyperspaceAfter = 60
 KAS_DevModules = {}     -- ...and the Kuun-Lan modules they need (e.g. { "smt_kl_weapons" } for TECH_MISSILE)
 
 function KAS_RestrictTechs()
@@ -1896,6 +1903,11 @@ function KAS_HyperspaceAllow()
 end
 
 KAS_HyperspaceLastState = -1
+function KAS_DevHyperspace()
+    Rule_Remove("KAS_DevHyperspace")
+    KAS_HyperspaceAllow()
+end
+
 function KAS_HyperspaceTick()
     singlePlayerHyperspaceStateUpdate()
     if spGameInfo_hyperspaceState ~= KAS_HyperspaceLastState then
