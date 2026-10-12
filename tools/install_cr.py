@@ -64,6 +64,15 @@ def patch_ms_sp(text):
     if "TODistanceFade0" not in text:
         assert 'NewShipType.TOIcon="Flagship"' in text
         text = text.replace('NewShipType.TOIcon="Flagship"', 'NewShipType.TOIcon="Flagship"\n' + TO_MOTHERSHIP, 1)
+    # Cataclysm's guns, not theirs (user): smothership.shp GUN1-6, six large hidden gimbals (GUN0 is the siege
+    # cannon, its module's); data/weapon/cat_kuunlan_gun*
+    if "cat_kuunlan_gun" not in text:
+        text = re.sub(r'^(StartShipWeaponConfig\(NewShipType, "Bst_MSTurret1?",)', r"-- Cataclysm-HWRM: \1", text,
+                      flags=re.M)
+        guns = "\n".join(f'StartShipWeaponConfig(NewShipType,"cat_kuunlan_gun{"" if k <= 4 else "60"}",'
+                         f'"Weapon_GUN{k}","Weapon_GUN{k}");' for k in range(1, 7))
+        text = text.replace("LoadModel(NewShipType, 1);", "LoadModel(NewShipType, 1);\n"
+                            "-- Cataclysm-HWRM: Cataclysm's Kuun-Lan guns (GUN1-4 85 deg, GUN5-6 60 deg)\n" + guns, 1)
     if "HW1_ResearchModule" in text:
         return text
     return text.replace("LoadModel(NewShipType, 1);",

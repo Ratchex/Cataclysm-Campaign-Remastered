@@ -1,0 +1,29 @@
+-- Cataclysm-HWRM: the Kuun-Lan's guns (Cataclysm smothership.shp GUN 1-6: GUN_HiddenGimble, GUNSIZE_LARGE,
+-- WEAPON_PROJECTILE, DamageMult 1.1, FireTime 0.25, BulletSpeed / BulletRange 6000 x 0.35, MaxAngle 60);
+-- damage 40 (large projectile vs armour 0, table 0x72b228) x 1.1. Bullet look, accuracy and the rest: Cataclysm
+-- Remastered's Bst_MSTurret (user: Cataclysm's weapon setup, not theirs).
+StartWeaponConfig(NewWeaponType,"Gimble","Bullet","kinetic_large","Normal Only",2100,2100,0,0,0,0,1,1,1,0.25,0,0,1,1,60,60,0.1,"Normal",1,0,0)
+
+AddWeaponResult(NewWeaponType,"Hit","DamageHealth","Target",44,44,"")
+
+setAngles(NewWeaponType,180,0,0,0,0)
+
+setMiscValues(NewWeaponType,0,0)
+
+setPenetration(NewWeaponType, 50, 1, { MimicArmour = 3.3333 })
+
+setAccuracy(NewWeaponType,1,
+{Fighter=0.2, damage=1,},
+{Corvette=0.2, damage=1,},
+{Frigate=1, damage=1,},
+{Utility=1,},
+{munition=0.05,},
+{SmallCapitalShip=1, damage=1,},
+{BigCapitalShip=1, damage=1,},
+{Mothership=1,},
+{Emplacement=1,},
+{UnAttackable=1,},
+{SubSystem=1,},
+{Resource=1,},
+{ResourceLarge=1, damage=1,},
+{Capturer=1,})
