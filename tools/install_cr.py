@@ -677,6 +677,19 @@ def main():
     # damage-factor ship copies (<ship>_d<pct>: Cataclysm's low kasfShipsSetDamageFactor; tools/make_variants.py)
     import make_variants
     copied += make_variants.install()
+    # ships on stock HW1 death effects (tools/make_events.py) last as long as the stock ship (sobDieTime): theirs took
+    # the Ramming Frigate at 1 s, before its death blasts at ~1.3 s (user: no proper explosion), the fighters at 0.1
+    import make_events
+    for ship, src in make_events.SHIPS.items():
+        stock = open(os.path.join(make_events.STOCK, src, src + ".ship"), encoding="latin-1").read()
+        want = float(re.search(r"sobDieTime\s*=\s*([\d.]+)", stock).group(1))
+        path = os.path.join(DATA, "ship", ship, ship + ".ship")
+        text = open(path, encoding="latin-1").read()
+        m = re.search(r'(NewShipType(?:\["sobDieTime"\]|\.sobDieTime)\s*=\s*)([\d.]+)', text)
+        if m and float(m.group(2)) < want:
+            text = text[:m.start(2)] + f"{want:g}" + text[m.end(2):]
+            open(path, "w", encoding="latin-1", newline="").write(text)
+            print(f"  {ship}: sobDieTime {m.group(2)} -> {want:g} (stock {src}'s, for its death effects)")
     # the HW1 resource collectors' harvesting at Cataclysm's pace (after make_shipcode copies their .ship)
     for ship, cat in HARVEST.items():
         harvest_rate(ship, cat)
