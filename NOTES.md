@@ -249,6 +249,13 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
 - Not converted yet: music (startMusic), subtitle text cards, lights/ambient, lens flares, the planet backdrop,
   buoys, colour schemes, FOV changes inside a shot, Kuun-Lan mesh animations (DockOpen/DockClose; Worker ones are), remainAtEnd (the real ships are hidden during the intro instead; Gearbox keeps the NIS ships).
 
+## Damage multipliers (measured 2026-10-12)
+- SobGroup_SetDamageMultiplier COMPOUNDS (0.5 then 0.5 = 0.25; then 2 = 0.5): set it by ratio from one place only.
+- Ion beams (InstantHit) stop firing below a 0.5 multiplier (fire at 0.5, cut out at 0.4); low weapon damage itself is
+  fine (a 10 % weapon copy fires). Factors below 0.5: weapon copies (tools/make_variants.py).
+- SobGroup_CreateShip builds docked inside a ship that can build and returns no usable group (Gearbox, KASUtil
+  KAS_RequestShips): spawn in space with SobGroup_SpawnNewShipInSobGroup instead.
+
 ## Debugging crashes (Phase 1)
 - **Crash on exit with no ErrorLog** = heap corruption (Windows Application log: ntdll, 0xc0000374). HWRM's own
   handler doesn't catch it. Catch it with Sysinternals ProcDump (`C:\Modding\tools\procdump`): launch, then

@@ -990,7 +990,7 @@ dofilepath("data:scripts/playerspatch_speech_util.lua")
 
 -- TRACE (user: Mission01's Kushan fleet still wiped out): every 15 s each team's ships, average health and how many
 -- are damage copies (tools/make_variants.py), in the log ("CKAS battle")
-KAS_BattleReport = 1
+KAS_BattleReport = 0             -- (on: the 15 s team report in the log)
 KAS_BattleStart = nil
 function KAS_BattleTick()
     if KAS_BattleStart == nil then KAS_BattleStart = Universe_GameTime() end

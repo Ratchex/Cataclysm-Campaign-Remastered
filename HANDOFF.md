@@ -67,6 +67,18 @@ findings).
 - Left (with their missions / upgrades): cutting beam visual and 60/s (Advanced Ion Cannon), afterburner x2,
   pushing crystals. Assault and ion cannon frigates checked in game (user: within tolerance).
 
+## Mission01 fixes (2026-10-12, user-tested: "battle is perfect and lasts the whole mission")
+- Damage factors: SobGroup_SetDamageMultiplier COMPOUNDS and ion beams cut out below 0.5 (range tests). Only the ship
+  rules set it, by ratio, floored at 0.5 (shiprules.lua CatShip_ApplyMultipliers). Factors under 50 % use weaker
+  weapon copies: tools/make_variants.py (<type>_d<pct>, turret subsystems copied with their .hod),
+  tools/damage_variants.py places them for teams whose state chain sets such a factor (build_mission.py), later
+  factors apply as a ratio to the copy's. Damage values written as expressions (2400*2) are now converted.
+- KAS runtime: kasfTeamFinishedLaunching also when none docked / 20 s after the order; original team sizes recorded
+  at the start; ship creation spawns in space beside the given ships, owned like them; kasfFirstShip = one ship;
+  formations formed again after launch (and 3 / 8 s on); kasfGuardShips holds a sphere; sensor net shown Open.
+- Balance: Taiidan collectors at Cataclysm's 0.5 RU/s; Worker on the collector ratio (144); two extra Kushan
+  main-guard ion frigates (tools/level_extras.py).
+
 ## RESUME HERE (updated 2026-10-09, after the damage conversion; see git log for the last commit)
 **Console start:** run `claude` from `C:\Modding\Homeworld` (loads the project memory), then say "resume from
 Cataclysm-HWRM/HANDOFF.md". Shells: Git Bash for anything that runs HODOR (tools/build_ship.sh); `powershell -File
