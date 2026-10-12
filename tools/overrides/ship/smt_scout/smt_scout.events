@@ -1,6 +1,5 @@
--- Cataclysm-HWRM: the Recon's effects. Cataclysm Remastered's smt_scout.events is empty (no death explosion,
--- user); stock HW1 kus_scout.events (closest ship), less its speed burst and second gun (ours: one mount,
--- Weapon_GUN0)
+-- Cataclysm-HWRM: smt_scout's effects (Cataclysm Remastered's file is empty: no death explosion), from
+-- stock HW1 kus_scout.events by tools/make_events.py (generated; its markers and mounts are this ship's)
 effects =
 {
     animations =
@@ -14,7 +13,7 @@ effects =
             minimum = 0,
             maximum = 0,
             markers = {""}
-        },        
+        },
         animation2 =
         {
             name = "Deathtrail",
@@ -25,17 +24,7 @@ effects =
             maximum = 0,
             markers = {""}
         },
-				animation3 =
-        {
-            name = "Weapon_GUN0",
-            length = 1,
-            loop = 0,
-            parent = "",
-            minimum = 0,
-            maximum = 0,
-            markers = {""}
-        },
-				animation5 =
+        animation5 =
         {
             name = "PowerOff",
             length = 2,
@@ -45,7 +34,7 @@ effects =
             maximum = 0,
             markers = {""}
         },
-				animation7 =
+        animation7 =
         {
             name = "Damage",
             length = 1,
@@ -64,8 +53,8 @@ effects =
             minimum = 0.75,
             maximum = 1,
             markers = {""}
-        },  
-				animationrad =
+        },
+        animationrad =
         {
             name = "Radiation",
             length = 2,
@@ -75,10 +64,11 @@ effects =
             maximum = 0,
             markers = {""}
         },
+        Weapon_GUN0 = { name = "Weapon_GUN0", length = 1, loop = 0, parent = "", minimum = 0, maximum = 0, markers = { "" } },
     },
     events =
-    {        
-				death0 =
+    {
+        death0 =
         {
             { "anim", "Death" },
             { "animtime", "0" },
@@ -87,7 +77,7 @@ effects =
             { "sound", "EXPLOSION/SMALL/ETG_EXPLODE_SMALL_PLASMA" },
             { "fx_scale", "0.75" },
         },
-				death1 =
+        death1 =
         {
             { "anim", "Death" },
             { "animtime", "0.85" },
@@ -146,16 +136,7 @@ effects =
             { "fx", "fiery_trail_shockwave_small" },
             { "fx_scale", "entity" },
         },
-				wpn1 =
-        {
-            { "anim", "Weapon_GUN0" },
-            { "animtime", "0" },
-            { "marker", "Weapon_GUN0_Muzzle" },
-            { "fx", "muzzle_flash_combo" },
-            { "sound", "WEAPON/FIGHTER/FIRE/WEAPON_FIGHTER_KINETIC_AUTOGUN_BURSTFIRE" },
-            { "fx_scale", "0.5" },
-        },
-				dmg1 =
+        dmg1 =
         {
             { "anim", "dmg01" },
             { "animtime", "-1" },
@@ -164,17 +145,16 @@ effects =
             { "sound", "DAMAGE/SMOKE/DAMAGE_SMOKE_EXHAUST_HEAVY" },
             { "fx_scale", "1.5" },
             { "fx_nlips", "on" },
-        },  
-				--chunck fast				
-				chunckfast1 = 
+        },
+        chunckfast1 = 
 				{ 
 						{ "anim", "death", }, 
 						{ "animtime", "0.86", }, 						
 						{ "marker", "Root", }, 
 						{ "fx", "dmg_capital_explosion_large_hull_flare_cf_noscar_35_final_fast2", },                 
 						{ "fx_scale", "0.5", }, 
-				},	
-				eventPowerOff = 
+				},
+        eventPowerOff = 
 				{ 
 						{ "anim", "PowerOff", }, 
 						{ "animtime", "0", }, 
@@ -183,15 +163,16 @@ effects =
 						{ "sound", "SPECIAL/SPECIAL_ABILITIES_PHASE_OFF", }, 
 						{ "fx_scale", "5", }, 
 				},
-				Radiation =
+        Radiation =
         {
             { "anim", "Radiation", },
             { "animtime", "-1", },
             { "marker", "Root", },
             { "fx", "sparks_small_spray_rad", }, 
-						--{ "sound", "SPECIAL/SPECIAL_ABILITIES_PHASE_OFF", }, 
+						
             { "fx_scale", "6", },
             { "fx_nlips", "on" },
-        },				
-    }
+        },
+        wpn0 = { { "anim", "Weapon_GUN0" }, { "animtime", "0" }, { "marker", "Weapon_GUN0_Muzzle" }, { "fx", "muzzle_flash_combo" }, { "sound", "WEAPON/FIGHTER/FIRE/WEAPON_FIGHTER_KINETIC_AUTOGUN_BURSTFIRE" }, { "fx_scale", "0.5" } },
+    },
 }
