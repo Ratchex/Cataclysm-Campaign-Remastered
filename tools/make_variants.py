@@ -17,8 +17,10 @@ import make_damage  # noqa: E402
 
 MOD = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(MOD, "data")
-# (ship, percent): TEST first, a Taiidan ion frigate at 10 % (do its beams still fire at low weapon damage?)
-VARIANTS = [("tai_ioncannonfrigate", 10)]
+# (ship, percent): Mission01's 10 % teams at their start (its Kushan main guard and the Taiidan they fight; the level
+# places these for them: mission2level.py DAMAGE_VARIANTS). The beams fire at 10 % weapon damage (range test).
+VARIANTS = [("kus_interceptor", 10), ("kus_ioncannonfrigate", 10), ("kus_multiguncorvette", 10), ("kus_destroyer", 10),
+            ("tai_interceptor", 10), ("tai_ioncannonfrigate", 10), ("tai_destroyer", 10), ("tai_defender", 10)]
 
 
 # the models and events of stock HW1 ships are in the HW1Ships layer (not one of make_damage's weapon sources)
@@ -40,6 +42,45 @@ def find_file(ship, ext):
     return None
 
 
+def scaled_weapon(copy, w, pct):
+    """cat_<copy>_<weapon>: the weapon (data/'s converted file) at pct % damage; its name, or None"""
+    src = make_damage.find("weapon", w, ".wepn")
+    if not src:
+        return None, None
+    name = f"cat_{copy}_{w}".lower()
+    wt = open(src, encoding="latin-1").read()
+    wt = make_damage.HIT.sub(lambda m: f"{m.group(1)}{float(m.group(2)) * pct / 100:.4g}{m.group(3)}"
+                                       f"{float(m.group(4)) * pct / 100:.4g}", wt)
+    return name, make_damage.write_weapon(name, wt)
+
+
+def subsystem_copy(sub, pct):
+    """<sub>_d<pct>: the innate turret subsystem with its weapons at pct % (its .subs and .events; its model is shared
+    by name, LoadSharedModel); its name and the files written"""
+    src = make_damage.find("subsystem", sub, ".subs")
+    if not src:
+        return None, []
+    copy = f"{sub}_d{pct}".lower()
+    folder = os.path.join(DATA, "subsystem", copy)
+    os.makedirs(folder, exist_ok=True)
+    written = []
+    st = open(src, encoding="latin-1").read()
+    for w in sorted(set(re.findall(r'StartSubSystemWeaponConfig\(NewSubSystemType,\s*"([^"]+)"', st))):
+        name, path = scaled_weapon(copy, w, pct)
+        if name:
+            written.append(path)
+            st = re.sub(r'(StartSubSystemWeaponConfig\(NewSubSystemType,\s*")' + re.escape(w) + r'(")',
+                        lambda m: m.group(1) + name + m.group(2), st)
+    with open(os.path.join(folder, copy + ".subs"), "w", encoding="latin-1", newline="") as f:
+        f.write(st)
+    written.append(f"subsystem/{copy}/{copy}.subs")
+    ev = os.path.join(os.path.dirname(src), os.path.basename(src)[:-5] + ".events")
+    if os.path.exists(ev):
+        shutil.copyfile(ev, os.path.join(folder, copy + ".events"))
+        written.append(f"subsystem/{copy}/{copy}.events")
+    return copy, written
+
+
 def make(ship, pct):
     copy = f"{ship}_d{pct}"
     folder = os.path.join(DATA, "ship", copy)
@@ -51,18 +92,22 @@ def make(ship, pct):
             shutil.copyfile(src, os.path.join(folder, copy + ext))
             written.append(f"ship/{copy}/{copy}{ext}")
     text = open(os.path.join(DATA, "ship", ship, ship + ".ship"), encoding="latin-1").read()
+    done = set()
     for w, via in make_damage.ship_weapons(ship):
-        if via != "ship":
-            print(f"  variants: {copy}: {w} is on subsystem {via}: not scaled (only ship weapons so far)")
+        if (w, via) in done:
             continue
-        src = make_damage.find("weapon", w, ".wepn")
-        if not src:
+        done.add((w, via))
+        if via != "ship":                         # an innate turret subsystem: a copy of it with scaled weapons
+            sub, files = subsystem_copy(via, pct)
+            if sub:
+                written += files
+                text = re.sub(r'(StartShipHardPointConfig\(NewShipType,[^\n]*?"Innate",\s*"[^"]*",\s*")'
+                              + re.escape(via) + r'(")', lambda m: m.group(1) + sub + m.group(2), text, flags=re.I)
             continue
-        name = f"cat_{copy}_{w}".lower()
-        wt = open(src, encoding="latin-1").read()
-        wt = make_damage.HIT.sub(lambda m: f"{m.group(1)}{float(m.group(2)) * pct / 100:.4g}{m.group(3)}"
-                                           f"{float(m.group(4)) * pct / 100:.4g}", wt)
-        written.append(make_damage.write_weapon(name, wt))
+        name, path = scaled_weapon(copy, w, pct)
+        if not name:
+            continue
+        written.append(path)
         text = re.sub(r'(StartShipWeaponConfig\(NewShipType,\s*")' + re.escape(w) + r'(")',
                       lambda m: m.group(1) + name + m.group(2), text, flags=re.I)
     with open(os.path.join(folder, copy + ".ship"), "w", encoding="latin-1", newline="") as f:
@@ -76,6 +121,12 @@ def install():
     out = []
     for ship, pct in VARIANTS:
         out += make(ship, pct)
+    # their names for the scripts: cataclysmkas.lua (no multiplier on them) and shiprules.lua
+    lua = os.path.join(DATA, "scripts", "cataclysm", "variants_damage_gen.lua")
+    with open(lua, "w", newline="\n") as f:
+        f.write("-- Generated by tools/make_variants.py: damage-factor ship copies, copy -> { base, percent }\n"
+                "CatDamageVariants = {\n" + "".join(f'    ["{s}_d{p}"] = {{ "{s}", {p} }},\n' for s, p in VARIANTS)
+                + "}\n")
     return out
 
 

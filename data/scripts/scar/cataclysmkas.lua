@@ -760,7 +760,8 @@ function KAS_RestrictStructuralModules()
 end
 
 -- Cataclysm's proximity sensor arrays (Mission01's Kushan picket) are never ordered anywhere and hold position; in
--- HWRM the stock kus_proximitysensor drifted off with no order given, so non-player sensors lose their engines.
+-- HWRM the stock kus_proximitysensor drifted off with no order given, so non-player sensors lose their engines, and
+-- are shown deployed.
 KAS_SensorTypes = { "kus_proximitysensor", "tai_proximitysensor" }
 function KAS_FreezeSensorArrays()
     SobGroup_CreateIfNotExist("KAS_Sensors")
@@ -772,6 +773,8 @@ function KAS_FreezeSensorArrays()
             SobGroup_FilterInclude("KAS_Sensors", "Player_Ships" .. p, "ShipType", KAS_SensorTypes[i])
             if SobGroup_Count("KAS_Sensors") > 0 then
                 SobGroup_AbilityActivate("KAS_Sensors", AB_Move, 0)
+                -- deployed, panels open (kus_proximitysensor.madstate Open; user: the sensor net in its deployed look)
+                SobGroup_SetMadState("KAS_Sensors", "Open")
                 print("CKAS: " .. SobGroup_Count("KAS_Sensors") .. " " .. KAS_SensorTypes[i] .. " of player " .. p .. " hold position")
             end
             i = i + 1
@@ -913,9 +916,28 @@ end
 -- list offers it instead of the base (KAS_VariantBuildWatch), unless the mission has the base's construction off.
 dofilepath("data:scripts/cataclysm/variants_gen.lua")
 KAS_ConstructionOff = {}
+-- Damage-factor copies (tools/make_variants.py: <type>_d<pct>, weaker weapons, placed by the level for teams whose
+-- kasfShipsSetDamageFactor HWRM's multiplier can't give): selected with their base type too.
+dofilepath("data:scripts/cataclysm/variants_damage_gen.lua")
+KAS_DamageCopies = {}
+for copy, v in CatDamageVariants do
+    if KAS_DamageCopies[v[1]] == nil then KAS_DamageCopies[v[1]] = {} end
+    tinsert(KAS_DamageCopies[v[1]], copy)
+end
 
 function KAS_FillShipsByType(n, src, t)
     SobGroup_FillShipsByType(n, src, t)
+    local d = KAS_DamageCopies[strlower(t)]
+    if d then
+        SobGroup_CreateIfNotExist("KAS_VariantTemp")
+        local j = 1
+        while j <= getn(d) do
+            SobGroup_Clear("KAS_VariantTemp")
+            SobGroup_FillShipsByType("KAS_VariantTemp", src, d[j])
+            SobGroup_SobGroupAdd(n, "KAS_VariantTemp")
+            j = j + 1
+        end
+    end
     local v = CatVariants and CatVariants[t]
     if v == nil then return end
     SobGroup_CreateIfNotExist("KAS_VariantTemp")
@@ -1414,10 +1436,26 @@ function K_495f00() KAS_Harvest(KAS_Owner(KAS_Team), KAS_Team) end              
 function K_493980(sel, pct)                                                                            -- kasfShipsSetDamageFactor
     local q = floor(pct / 5 + 0.5) * 5
     if q < 5 then q = 5 elseif q > 100 then q = 100 end
+    -- not the damage copies: their weapons carry the factor already
+    SobGroup_CreateIfNotExist("KAS_DmgfSel")
+    SobGroup_CreateIfNotExist("KAS_DmgfCopy")
+    SobGroup_CreateIfNotExist("KAS_DmgfRest")
+    SobGroup_Clear("KAS_DmgfSel")
+    SobGroup_SobGroupAdd("KAS_DmgfSel", sel)
+    for copy, _ in CatDamageVariants do
+        SobGroup_Clear("KAS_DmgfCopy")
+        SobGroup_FillShipsByType("KAS_DmgfCopy", "KAS_DmgfSel", copy)
+        if SobGroup_Count("KAS_DmgfCopy") > 0 then
+            SobGroup_Clear("KAS_DmgfRest")
+            SobGroup_FillSubstract("KAS_DmgfRest", "KAS_DmgfSel", "KAS_DmgfCopy")
+            SobGroup_Clear("KAS_DmgfSel")
+            SobGroup_SobGroupAdd("KAS_DmgfSel", "KAS_DmgfRest")
+        end
+    end
     SobGroup_CreateIfNotExist("cat_dmgf")
     SobGroup_CreateIfNotExist("cat_dmgf_" .. q)
-    SobGroup_SobGroupAdd("cat_dmgf", sel)
-    SobGroup_SobGroupAdd("cat_dmgf_" .. q, sel)
+    SobGroup_SobGroupAdd("cat_dmgf", "KAS_DmgfSel")
+    SobGroup_SobGroupAdd("cat_dmgf_" .. q, "KAS_DmgfSel")
 end
 function K_493a10(sel, v) KAS_NoOp("493a10", "kasfShipsSetRepairFactor") end
 function K_4939d0(sel) KAS_NoOp("4939d0", "kasfShipsClearRepairFactor") end

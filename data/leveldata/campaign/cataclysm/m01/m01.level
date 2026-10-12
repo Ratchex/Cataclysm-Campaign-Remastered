@@ -36,32 +36,32 @@ function DetermChunk()
     addSquadron("TaiidanResourcerDefense0", "tai_defender", {15061.042, -7010.535, -24055.29}, 1, {0, -258, 0}, 0, 0) -- RACE_TAIDAN tHeavyDefender
     addSquadron("TaiidanResourcerDefense1", "tai_defender", {15061.042, -7010.535, -24055.29}, 1, {0, -258, 0}, 0, 0) -- RACE_TAIDAN tHeavyDefender
     addSquadron("TaiidanResourcerDefense2", "tai_defender", {15061.042, -7010.535, -24055.29}, 1, {0, -258, 0}, 0, 0) -- RACE_TAIDAN tHeavyDefender
-    addSquadron("KushanMainGuardFrigates0", "kus_ioncannonfrigate", {14031.412, -1228.605, 14340.48}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kIonCannonFrigate
-    addSquadron("KushanMainGuardFrigates1", "kus_ioncannonfrigate", {14031.412, -1228.605, 14340.48}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kIonCannonFrigate
-    addSquadron("KushanMainGuardFrigates2", "kus_ioncannonfrigate", {14031.412, -1228.605, 14340.48}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kIonCannonFrigate
-    addSquadron("KushanMainGuardFrigates3", "kus_ioncannonfrigate", {14031.412, -1228.605, 14340.48}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kIonCannonFrigate
-    addSquadron("KushanMainGuardCorvettes0", "kus_multiguncorvette", {10447.657, 0, 13624.38}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kMultiGunCorvette
-    addSquadron("KushanMainGuardCorvettes1", "kus_multiguncorvette", {10447.657, 0, 13624.38}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kMultiGunCorvette
-    addSquadron("KushanMainGuardCorvettes2", "kus_multiguncorvette", {10447.657, 0, 13624.38}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kMultiGunCorvette
-    addSquadron("KushanMainGuardCorvettes3", "kus_multiguncorvette", {10447.657, 0, 13624.38}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kMultiGunCorvette
-    addSquadron("TaiHInt10", "tai_interceptor", {10411.065, 2497.372, 28136.115}, 1, {0, -264, 0}, 0, 0) -- RACE_TAIDAN tHeavyInterceptor
-    addSquadron("TaiHInt11", "tai_interceptor", {10411.065, 2497.372, 28136.115}, 1, {0, -264, 0}, 0, 0) -- RACE_TAIDAN tHeavyInterceptor
-    addSquadron("TaiHInt12", "tai_interceptor", {10411.065, 2497.372, 28136.115}, 1, {0, -264, 0}, 0, 0) -- RACE_TAIDAN tHeavyInterceptor
-    addSquadron("TaiHInt13", "tai_interceptor", {10411.065, 2497.372, 28136.115}, 1, {0, -264, 0}, 0, 0) -- RACE_TAIDAN tHeavyInterceptor
-    addSquadron("TaiHInt14", "tai_interceptor", {10411.065, 2497.372, 28136.115}, 1, {0, -264, 0}, 0, 0) -- RACE_TAIDAN tHeavyInterceptor
-    addSquadron("TaiHInt15", "tai_interceptor", {10411.065, 2497.372, 28136.115}, 1, {0, -264, 0}, 0, 0) -- RACE_TAIDAN tHeavyInterceptor
+    addSquadron("KushanMainGuardFrigates0", "kus_ioncannonfrigate_d10", {14031.412, -1228.605, 14340.48}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kIonCannonFrigate
+    addSquadron("KushanMainGuardFrigates1", "kus_ioncannonfrigate_d10", {14031.412, -1228.605, 14340.48}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kIonCannonFrigate
+    addSquadron("KushanMainGuardFrigates2", "kus_ioncannonfrigate_d10", {14031.412, -1228.605, 14340.48}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kIonCannonFrigate
+    addSquadron("KushanMainGuardFrigates3", "kus_ioncannonfrigate_d10", {14031.412, -1228.605, 14340.48}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kIonCannonFrigate
+    addSquadron("KushanMainGuardCorvettes0", "kus_multiguncorvette_d10", {10447.657, 0, 13624.38}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kMultiGunCorvette
+    addSquadron("KushanMainGuardCorvettes1", "kus_multiguncorvette_d10", {10447.657, 0, 13624.38}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kMultiGunCorvette
+    addSquadron("KushanMainGuardCorvettes2", "kus_multiguncorvette_d10", {10447.657, 0, 13624.38}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kMultiGunCorvette
+    addSquadron("KushanMainGuardCorvettes3", "kus_multiguncorvette_d10", {10447.657, 0, 13624.38}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kMultiGunCorvette
+    addSquadron("TaiHInt10", "tai_interceptor_d10", {10411.065, 2497.372, 28136.115}, 1, {0, -264, 0}, 0, 0) -- RACE_TAIDAN tHeavyInterceptor
+    addSquadron("TaiHInt11", "tai_interceptor_d10", {10411.065, 2497.372, 28136.115}, 1, {0, -264, 0}, 0, 0) -- RACE_TAIDAN tHeavyInterceptor
+    addSquadron("TaiHInt12", "tai_interceptor_d10", {10411.065, 2497.372, 28136.115}, 1, {0, -264, 0}, 0, 0) -- RACE_TAIDAN tHeavyInterceptor
+    addSquadron("TaiHInt13", "tai_interceptor_d10", {10411.065, 2497.372, 28136.115}, 1, {0, -264, 0}, 0, 0) -- RACE_TAIDAN tHeavyInterceptor
+    addSquadron("TaiHInt14", "tai_interceptor_d10", {10411.065, 2497.372, 28136.115}, 1, {0, -264, 0}, 0, 0) -- RACE_TAIDAN tHeavyInterceptor
+    addSquadron("TaiHInt15", "tai_interceptor_d10", {10411.065, 2497.372, 28136.115}, 1, {0, -264, 0}, 0, 0) -- RACE_TAIDAN tHeavyInterceptor
     addSquadron("KushanCarriers0", "kus_carrier", {9644.46, 0, 13408.447}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kCarrier
     addSquadron("TaiidanMainCarrier0", "tai_carrier", {10751.107, 2503.987, 28173.547}, 1, {0, -167, 0}, 0, 0) -- RACE_TAIDAN tCarrier
-    addSquadron("TaiidanMissileDestroyers0", "tai_destroyer", {13201.23, 2504.25, 24672.322}, 1, {0, -168, 0}, 0, 0) -- RACE_TAIDAN tStandardDestroyer
-    addSquadron("KushanMainGuardDestroyers0", "kus_destroyer", {9660.525, -626.482, 13179.6}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kStandardDestroyer
-    addSquadron("KushanMainGuardDestroyers1", "kus_destroyer", {9660.525, -626.482, 13179.6}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kStandardDestroyer
-    addSquadron("KushanMainGuardFighters10", "kus_interceptor", {10193.137, 0, 11078.182}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
-    addSquadron("KushanMainGuardFighters11", "kus_interceptor", {10193.137, 0, 11078.182}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
-    addSquadron("KushanMainGuardFighters12", "kus_interceptor", {10193.137, 0, 11078.182}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
-    addSquadron("KushanMainGuardFighters13", "kus_interceptor", {10193.137, 0, 11078.182}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
-    addSquadron("KushanMainGuardFighters14", "kus_interceptor", {10193.137, 0, 11078.182}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
-    addSquadron("KushanMainGuardFighters15", "kus_interceptor", {10193.137, 0, 11078.182}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
-    addSquadron("KushanMainGuardFighters16", "kus_interceptor", {10193.137, 0, 11078.182}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
+    addSquadron("TaiidanMissileDestroyers0", "tai_destroyer_d10", {13201.23, 2504.25, 24672.322}, 1, {0, -168, 0}, 0, 0) -- RACE_TAIDAN tStandardDestroyer
+    addSquadron("KushanMainGuardDestroyers0", "kus_destroyer_d10", {9660.525, -626.482, 13179.6}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kStandardDestroyer
+    addSquadron("KushanMainGuardDestroyers1", "kus_destroyer_d10", {9660.525, -626.482, 13179.6}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kStandardDestroyer
+    addSquadron("KushanMainGuardFighters10", "kus_interceptor_d10", {10193.137, 0, 11078.182}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
+    addSquadron("KushanMainGuardFighters11", "kus_interceptor_d10", {10193.137, 0, 11078.182}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
+    addSquadron("KushanMainGuardFighters12", "kus_interceptor_d10", {10193.137, 0, 11078.182}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
+    addSquadron("KushanMainGuardFighters13", "kus_interceptor_d10", {10193.137, 0, 11078.182}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
+    addSquadron("KushanMainGuardFighters14", "kus_interceptor_d10", {10193.137, 0, 11078.182}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
+    addSquadron("KushanMainGuardFighters15", "kus_interceptor_d10", {10193.137, 0, 11078.182}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
+    addSquadron("KushanMainGuardFighters16", "kus_interceptor_d10", {10193.137, 0, 11078.182}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
     addSquadron("TaiidanDestroyer0", "tai_heavycruiser", {10696.665, 2503.987, 27102.075}, 1, {0, -167, 0}, 0, 0) -- RACE_TAIDAN tHeavyCruiser
     addSquadron("TaiidanCarrier20", "tai_carrier", {-11076.24, 5147.205, 46704.315}, 1, {0, -241, 0}, 0, 0) -- RACE_TAIDAN tCarrier
     addSquadron("TaiidanC2Interceptor10", "tai_interceptor", {-9326.625, 3186.225, 47715.78}, 1, {0, -120, 0}, 0, 0) -- RACE_TAIDAN tHeavyInterceptor
@@ -81,12 +81,12 @@ function DetermChunk()
     addSquadron("TaiidanC2MGCorv12", "tai_multiguncorvette", {-8449.927, 0, 46437.405}, 1, {0, -120, 0}, 0, 0) -- RACE_TAIDAN tMultiGunCorvette
     addSquadron("TaiidanC2MGCorv13", "tai_multiguncorvette", {-8449.927, 0, 46437.405}, 1, {0, -120, 0}, 0, 0) -- RACE_TAIDAN tMultiGunCorvette
     addSquadron("TaiidanC2MGCorv14", "tai_multiguncorvette", {-8449.927, 0, 46437.405}, 1, {0, -120, 0}, 0, 0) -- RACE_TAIDAN tMultiGunCorvette
-    addSquadron("TaiidanDefendCruiser0", "tai_defender", {11140.552, 2429.91, 29584.012}, 1, {0, -167, 0}, 0, 0) -- RACE_TAIDAN tHeavyDefender
-    addSquadron("TaiidanDefendCruiser1", "tai_defender", {11140.552, 2429.91, 29584.012}, 1, {0, -167, 0}, 0, 0) -- RACE_TAIDAN tHeavyDefender
-    addSquadron("TaiidanDefendCruiser2", "tai_defender", {11140.552, 2429.91, 29584.012}, 1, {0, -167, 0}, 0, 0) -- RACE_TAIDAN tHeavyDefender
-    addSquadron("TaiidanDefendCruiser3", "tai_defender", {11140.552, 2429.91, 29584.012}, 1, {0, -167, 0}, 0, 0) -- RACE_TAIDAN tHeavyDefender
-    addSquadron("TaiidanDefendCruiser4", "tai_defender", {11140.552, 2429.91, 29584.012}, 1, {0, -167, 0}, 0, 0) -- RACE_TAIDAN tHeavyDefender
-    addSquadron("TaiidanDefendCruiser5", "tai_defender", {11140.552, 2429.91, 29584.012}, 1, {0, -167, 0}, 0, 0) -- RACE_TAIDAN tHeavyDefender
+    addSquadron("TaiidanDefendCruiser0", "tai_defender_d10", {11140.552, 2429.91, 29584.012}, 1, {0, -167, 0}, 0, 0) -- RACE_TAIDAN tHeavyDefender
+    addSquadron("TaiidanDefendCruiser1", "tai_defender_d10", {11140.552, 2429.91, 29584.012}, 1, {0, -167, 0}, 0, 0) -- RACE_TAIDAN tHeavyDefender
+    addSquadron("TaiidanDefendCruiser2", "tai_defender_d10", {11140.552, 2429.91, 29584.012}, 1, {0, -167, 0}, 0, 0) -- RACE_TAIDAN tHeavyDefender
+    addSquadron("TaiidanDefendCruiser3", "tai_defender_d10", {11140.552, 2429.91, 29584.012}, 1, {0, -167, 0}, 0, 0) -- RACE_TAIDAN tHeavyDefender
+    addSquadron("TaiidanDefendCruiser4", "tai_defender_d10", {11140.552, 2429.91, 29584.012}, 1, {0, -167, 0}, 0, 0) -- RACE_TAIDAN tHeavyDefender
+    addSquadron("TaiidanDefendCruiser5", "tai_defender_d10", {11140.552, 2429.91, 29584.012}, 1, {0, -167, 0}, 0, 0) -- RACE_TAIDAN tHeavyDefender
     addSquadron("TaiidanProxAttackAbomb10", "tai_interceptor", {-48046.95, 12180, -38552.377}, 1, {0, -106, 0}, 0, 0) -- RACE_TAIDAN tHeavyInterceptor
     addSquadron("TaiidanProxAttackAbomb11", "tai_interceptor", {-48046.95, 12180, -38552.377}, 1, {0, -106, 0}, 0, 0) -- RACE_TAIDAN tHeavyInterceptor
     addSquadron("TaiidanProxAttackAbomb12", "tai_interceptor", {-48046.95, 12180, -38552.377}, 1, {0, -106, 0}, 0, 0) -- RACE_TAIDAN tHeavyInterceptor
@@ -99,9 +99,9 @@ function DetermChunk()
     addSquadron("TaiidanProxAttackHInt13", "tai_interceptor", {-47564.895, 12109.125, -38306.52}, 1, {0, -106, 0}, 0, 0) -- RACE_TAIDAN tHeavyInterceptor
     addSquadron("TaiidanProxAttackHInt14", "tai_interceptor", {-47564.895, 12109.125, -38306.52}, 1, {0, -106, 0}, 0, 0) -- RACE_TAIDAN tHeavyInterceptor
     addSquadron("TaiidanProxAttackHInt15", "tai_interceptor", {-47564.895, 12109.125, -38306.52}, 1, {0, -106, 0}, 0, 0) -- RACE_TAIDAN tHeavyInterceptor
-    addSquadron("TaiICFrig10", "tai_ioncannonfrigate", {9289.245, 2612.295, 26026.087}, 1, {0, -167, 0}, 0, 0) -- RACE_TAIDAN tIonCannonFrigate
-    addSquadron("TaiICFrig11", "tai_ioncannonfrigate", {9289.245, 2612.295, 26026.087}, 1, {0, -167, 0}, 0, 0) -- RACE_TAIDAN tIonCannonFrigate
-    addSquadron("TaiICFrig12", "tai_ioncannonfrigate", {9289.245, 2612.295, 26026.087}, 1, {0, -167, 0}, 0, 0) -- RACE_TAIDAN tIonCannonFrigate
+    addSquadron("TaiICFrig10", "tai_ioncannonfrigate_d10", {9289.245, 2612.295, 26026.087}, 1, {0, -167, 0}, 0, 0) -- RACE_TAIDAN tIonCannonFrigate
+    addSquadron("TaiICFrig11", "tai_ioncannonfrigate_d10", {9289.245, 2612.295, 26026.087}, 1, {0, -167, 0}, 0, 0) -- RACE_TAIDAN tIonCannonFrigate
+    addSquadron("TaiICFrig12", "tai_ioncannonfrigate_d10", {9289.245, 2612.295, 26026.087}, 1, {0, -167, 0}, 0, 0) -- RACE_TAIDAN tIonCannonFrigate
     addSquadron("TaiidanProxAttackMGCorv10", "tai_multiguncorvette", {-47500.477, 12423.39, -38296.597}, 1, {0, -106, 0}, 0, 0) -- RACE_TAIDAN tMultiGunCorvette
     addSquadron("TaiidanProxAttackMGCorv11", "tai_multiguncorvette", {-47500.477, 12423.39, -38296.597}, 1, {0, -106, 0}, 0, 0) -- RACE_TAIDAN tMultiGunCorvette
     addSquadron("KushanProxDefend10", "kus_interceptor", {-36442.192, -158.025, -9592.905}, 2, {0, -92, 0}, 0, 0) -- RACE_KUSHAN kHeavyInterceptor
