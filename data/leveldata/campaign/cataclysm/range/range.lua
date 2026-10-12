@@ -70,49 +70,48 @@ function Range_Upgrade()
     print("CATACLYSM range: placed ships upgraded")
 end
 
--- TEST (user: weaker weapon copies for Mission01's 10 % teams): do ion beams fire at 10 % WEAPON damage? The normal
--- Taiidan ion frigate fires at our Processor, its 10 % copy (tai_ioncannonfrigate_d10, tools/make_variants.py) at our
--- Ramming Frigate; each target's loss is logged every 5 s. (Found before: SobGroup_SetDamageMultiplier compounds and
--- stops beams below ~0.5.)
-RANGE_BEAM_TEST = 0           -- done: beams fire at 10 % weapon damage (tools/make_variants.py)
+-- TEST (user): the damage multiplier stepped down 0.1 at a time, where do ion beams cut out? The normal Taiidan ion
+-- frigate fires at our Processor from 15 s; every RANGE_STEP s its multiplier goes 1.0, 0.9 ... 0.1 (set as the ratio
+-- to the last: SobGroup_SetDamageMultiplier compounds), each step on screen and logged with the Processor's loss.
+RANGE_BEAM_TEST = 1
+RANGE_STEP = 20
 RangeBeamStart = nil
-RangeBeamLog = 0
+RangeBeamMult = 1
+RangeBeamNext = 0
 RangeBeamHP = nil
 function Range_BeamSay(text)
     print("CATACLYSM range beam test: " .. text)
-    if Subtitle_Message then Subtitle_Message("BEAM TEST: " .. text, 6) end
-end
-function Range_BeamHP(g)
-    return SobGroup_HealthPercentage(g) * SobGroup_MaxHealthTotal(g)
+    if Subtitle_Message then Subtitle_Message("BEAM TEST: " .. text, 8) end
 end
 function Range_BeamTest()
     local t = Universe_GameTime()
     if RangeBeamStart == nil then
         RangeBeamStart = t
-        SobGroup_CreateIfNotExist("TestTargetA")
-        SobGroup_CreateIfNotExist("TestTargetB")
-        SobGroup_FillShipsByType("TestTargetA", "Player_Ships0", "smt_processor")
-        SobGroup_FillShipsByType("TestTargetB", "Player_Ships0", "smt_rammingfrigate")
+        SobGroup_CreateIfNotExist("TestTarget")
+        SobGroup_FillShipsByType("TestTarget", "Player_Ships0", "smt_processor")
     end
     local s = t - RangeBeamStart
     if s < 15 then return end
-    local a, b = Range_BeamHP("TestTargetA"), Range_BeamHP("TestTargetB")
+    local hp = SobGroup_HealthPercentage("TestTarget") * SobGroup_MaxHealthTotal("TestTarget")
     if RangeBeamHP == nil then
-        RangeBeamHP = { a, b }
-        RangeBeamLog = s + 5
-        SobGroup_Attack(1, "TargetIon", "TestTargetA")
-        SobGroup_Attack(1, "TargetIon10", "TestTargetB")
-        Range_BeamSay("normal ion frigate on the Processor, its 10% copy (to its right) on the Ramming Frigate")
+        RangeBeamHP, RangeBeamNext = hp, s + RANGE_STEP
+        SobGroup_Attack(1, "TargetIon", "TestTarget")
+        Range_BeamSay("ion frigate attacking the Processor, multiplier 1.0")
         return
     end
-    if s >= RangeBeamLog then
-        RangeBeamLog = s + 5
-        print("CATACLYSM range beam test: t+" .. floor(s) .. " Processor lost " .. floor(RangeBeamHP[1] - a) ..
-              ", Ramming Frigate lost " .. floor(RangeBeamHP[2] - b) .. " in 5 s")
-        RangeBeamHP = { a, b }
-    end
-    if s >= 90 then
-        Range_BeamSay("done")
-        Rule_Remove("Range_BeamTest")
+    if s >= RangeBeamNext then
+        print("CATACLYSM range beam test: at multiplier " .. RangeBeamMult .. " the Processor lost " ..
+              floor(RangeBeamHP - hp) .. " in " .. RANGE_STEP .. " s")
+        RangeBeamHP, RangeBeamNext = hp, s + RANGE_STEP
+        local new = floor(RangeBeamMult * 10 - 1 + 0.5) / 10
+        if new < 0.1 then
+            Range_BeamSay("done")
+            Rule_Remove("Range_BeamTest")
+            return
+        end
+        SobGroup_SetDamageMultiplier("TargetIon", new / RangeBeamMult)
+        RangeBeamMult = new
+        SobGroup_Attack(1, "TargetIon", "TestTarget")
+        Range_BeamSay("multiplier now " .. new)
     end
 end
