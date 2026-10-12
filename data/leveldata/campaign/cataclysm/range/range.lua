@@ -40,6 +40,7 @@ function OnInit()
     Rule_AddInterval("Range_CoordSys", 1)
     Rule_AddInterval("Range_Damage", 2)
     if RANGE_GRANT_ALL == 1 then Rule_AddInterval("Range_Upgrade", 2) end
+    if RANGE_BEAM_TEST == 1 then Rule_AddInterval("Range_BeamTest", 1) end
 end
 
 -- SobGroup_GetCoordSys's layout: its 9 numbers beside the engine's own columns, for the tilted Recon
@@ -67,4 +68,42 @@ function Range_Upgrade()
     Rule_Remove("Range_Upgrade")
     K_498c70("Player_Ships0")
     print("CATACLYSM range: placed ships upgraded")
+end
+
+-- TEST (user: ion beams charge and sound but draw nothing and deal nothing since Mission01's damage factors stuck):
+-- the Taiidan ion frigate attacks our ships at full damage, then at 10% (the ship rules' cat_dmgf groups, as
+-- cataclysmkas.lua K_493980), then full again; does the beam vanish only at 10%?
+RANGE_BEAM_TEST = 1
+RangeBeamStart = nil
+RangeBeamPhase = 0
+function Range_BeamSay(text)
+    print("CATACLYSM range beam test: " .. text)
+    if Subtitle_Message then Subtitle_Message("BEAM TEST: " .. text, 6) end
+end
+function Range_BeamTest()
+    local t = Universe_GameTime()
+    if RangeBeamStart == nil then RangeBeamStart = t end
+    local s = t - RangeBeamStart
+    if RangeBeamPhase == 0 and s >= 15 then
+        RangeBeamPhase = 1
+        SobGroup_Attack(1, "TargetIon", "Player_Ships0")
+        Range_BeamSay("ion frigate attacking at FULL damage")
+    elseif RangeBeamPhase == 1 and s >= 45 then
+        RangeBeamPhase = 2
+        SobGroup_CreateIfNotExist("cat_dmgf")
+        SobGroup_CreateIfNotExist("cat_dmgf_10")
+        SobGroup_SobGroupAdd("cat_dmgf", "TargetIon")
+        SobGroup_SobGroupAdd("cat_dmgf_10", "TargetIon")
+        SobGroup_SetDamageMultiplier("TargetIon", 0.1)
+        SobGroup_Attack(1, "TargetIon", "Player_Ships0")
+        Range_BeamSay("ion frigate now at 10% damage")
+    elseif RangeBeamPhase == 2 and s >= 75 then
+        RangeBeamPhase = 3
+        SobGroup_Clear("cat_dmgf")
+        SobGroup_Clear("cat_dmgf_10")
+        SobGroup_SetDamageMultiplier("TargetIon", 1)
+        SobGroup_Attack(1, "TargetIon", "Player_Ships0")
+        Range_BeamSay("ion frigate back at FULL damage")
+        Rule_Remove("Range_BeamTest")
+    end
 end

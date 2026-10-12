@@ -42,6 +42,8 @@ function DetermChunk()
     addSquadron("TargetCorvette1", "tai_lightcorvette", {-1000, 0, 6800}, 1, {0, 180, 0}, 0, 0)
     addSquadron("TargetFrigate0", "tai_assaultfrigate", {-500, 0, 9000}, 1, {0, 180, 0}, 0, 0)
     addSquadron("TargetFrigate1", "tai_ioncannonfrigate", {500, 0, 9000}, 1, {0, 180, 0}, 0, 0)
+    createSOBGroup("TargetIon")
+    addToSOBGroup("TargetFrigate1", "TargetIon")
 
     addSphere("Everything", {0, 0, 0}, 30000)
     addCamera("Camera_Startpos", {0, 0, 2200}, {2200, 1600, -1200})
