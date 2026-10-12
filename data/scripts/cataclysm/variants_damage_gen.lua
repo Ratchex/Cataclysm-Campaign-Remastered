@@ -8,4 +8,5 @@ CatDamageVariants = {
     ["tai_ioncannonfrigate_d10"] = { "tai_ioncannonfrigate", 10 },
     ["tai_destroyer_d10"] = { "tai_destroyer", 10 },
     ["tai_defender_d10"] = { "tai_defender", 10 },
+    ["tai_heavycruiser_d10"] = { "tai_heavycruiser", 10 },
 }

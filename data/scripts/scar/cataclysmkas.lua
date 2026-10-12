@@ -989,6 +989,7 @@ end
 dofilepath("data:scripts/playerspatch_speech_util.lua")
 
 function KAS_StartEngine()
+    Rule_AddInterval("KAS_RecordTeamCounts", 1)
     SpeechRaceHelper()
     KAS_ApplyColourSchemes()
     Rule_AddInterval("CatAbilityTick", 0.25)
@@ -1392,8 +1393,21 @@ function K_492b20() return floor(KAS_TeamHealth(KAS_Team)) end                  
 function K_493aa0(pct) SobGroup_SetHealth(KAS_Team, pct / 100) end                                  -- kasfTeamSetPercentDamaged
 function K_493cf0(team, sel) SobGroup_SobGroupAdd(team, sel) end                                    -- kasfReinforceTeamWithShips
 
--- kasfTeamCountOriginal: ship count when the team was first asked (Gearbox registers at team creation).
+-- kasfTeamCountOriginal: the team's ship count at its creation (Gearbox registers it then). Recorded for every team
+-- once it has ships (KAS_RecordTeamCounts, from KAS_StartEngine): cached on first ask, Mission01's PesterHInt1 first
+-- asked after its wing died, got 0, and "reinforced" itself with nothing (user: no second wing).
 KAS_TeamOriginalCounts = {}
+function KAS_RecordTeamCounts()
+    local i, left = 0, 0
+    while KASNumberTeams and i < KASNumberTeams do
+        local t = KASTeams[i]
+        if KAS_TeamOriginalCounts[t] == nil then
+            if SobGroup_Count(t) > 0 then KAS_TeamOriginalCounts[t] = SobGroup_Count(t) else left = left + 1 end
+        end
+        i = i + 1
+    end
+    if KASNumberTeams and KASNumberTeams > 0 and left == 0 then Rule_Remove("KAS_RecordTeamCounts") end
+end
 function K_493e00()
     if KAS_TeamOriginalCounts[KAS_Team] == nil then
         KAS_TeamOriginalCounts[KAS_Team] = SobGroup_Count(KAS_Team)
@@ -1434,28 +1448,24 @@ function K_495f00() KAS_Harvest(KAS_Owner(KAS_Team), KAS_Team) end              
 -- (shiprules.lua CatShip_ApplyMultipliers: rank x this factor, floored, by ratio); this only puts the ships in
 -- cat_dmgf (any factor) and cat_dmgf_<pct> (rounded to 5) for them (another Lua state).
 function K_493980(sel, pct)                                                                            -- kasfShipsSetDamageFactor
+    SobGroup_CreateIfNotExist("KAS_DmgfTmp")
     local q = floor(pct / 5 + 0.5) * 5
     if q < 5 then q = 5 elseif q > 100 then q = 100 end
-    -- not the damage copies: their weapons carry the factor already
-    SobGroup_CreateIfNotExist("KAS_DmgfSel")
-    SobGroup_CreateIfNotExist("KAS_DmgfCopy")
-    SobGroup_CreateIfNotExist("KAS_DmgfRest")
-    SobGroup_Clear("KAS_DmgfSel")
-    SobGroup_SobGroupAdd("KAS_DmgfSel", sel)
-    for copy, _ in CatDamageVariants do
-        SobGroup_Clear("KAS_DmgfCopy")
-        SobGroup_FillShipsByType("KAS_DmgfCopy", "KAS_DmgfSel", copy)
-        if SobGroup_Count("KAS_DmgfCopy") > 0 then
-            SobGroup_Clear("KAS_DmgfRest")
-            SobGroup_FillSubstract("KAS_DmgfRest", "KAS_DmgfSel", "KAS_DmgfCopy")
-            SobGroup_Clear("KAS_DmgfSel")
-            SobGroup_SobGroupAdd("KAS_DmgfSel", "KAS_DmgfRest")
-        end
-    end
+    -- (damage copies too: the ship rules take the factor as a ratio to the copy's own)
     SobGroup_CreateIfNotExist("cat_dmgf")
     SobGroup_CreateIfNotExist("cat_dmgf_" .. q)
-    SobGroup_SobGroupAdd("cat_dmgf", "KAS_DmgfSel")
-    SobGroup_SobGroupAdd("cat_dmgf_" .. q, "KAS_DmgfSel")
+    local p = 5
+    while p <= 100 do                     -- out of any earlier factor's group: the latest one counts
+        if p ~= q then
+            SobGroup_CreateIfNotExist("cat_dmgf_" .. p)
+            SobGroup_FillSubstract("KAS_DmgfTmp", "cat_dmgf_" .. p, sel)
+            SobGroup_Clear("cat_dmgf_" .. p)
+            SobGroup_SobGroupAdd("cat_dmgf_" .. p, "KAS_DmgfTmp")
+        end
+        p = p + 5
+    end
+    SobGroup_SobGroupAdd("cat_dmgf", sel)
+    SobGroup_SobGroupAdd("cat_dmgf_" .. q, sel)
 end
 function K_493a10(sel, v) KAS_NoOp("493a10", "kasfShipsSetRepairFactor") end
 function K_4939d0(sel) KAS_NoOp("4939d0", "kasfShipsClearRepairFactor") end
@@ -1481,14 +1491,22 @@ function K_497ed0(sel) end
 function K_499870(sel) return 1 end
 
 -- 0x499c70(dst, shipType, count, nearShips, player): creates count ships of the type next to nearShips.
+-- In space beside them, as Cataclysm: SobGroup_CreateShip builds inside a ship that can build and returns no group
+-- (Gearbox, KASUtil KAS_RequestShips), so Mission01's second pester wing never existed for its team (user).
+KAS_SpawnSerial = 0
 function K_499c70(dst, shipType, count, near, player)
+    SobGroup_CreateIfNotExist(dst)
     SobGroup_Clear(dst)
     if count <= 0 or SobGroup_Count(near) == 0 then return end
     local t = KAS_HWRMType(shipType)
+    local c = SobGroup_GetPosition(near)
     local i = 0
     while i < count do
-        local g = SobGroup_CreateShip(near, t)
-        if g and g ~= "" then SobGroup_SobGroupAdd(dst, g) end
+        KAS_SpawnSerial = KAS_SpawnSerial + 1
+        local vol = "KAS_SpawnVol" .. KAS_SpawnSerial
+        Volume_AddSphere(vol, { c[1] + random(-300, 300), c[2] + random(-100, 100), c[3] + random(-300, 300) }, 1)
+        SobGroup_SpawnNewShipInSobGroup(player, t, "KAS_Spawned" .. KAS_SpawnSerial, dst, vol)
+        Volume_Delete(vol)
         i = i + 1
     end
 end

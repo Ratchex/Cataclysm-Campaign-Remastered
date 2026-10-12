@@ -351,14 +351,20 @@ function CatShip_UpdateRank(rec, announce)
     CatShip_ApplyMultipliers(rec)
 end
 
--- a mission's kasfShipsSetDamageFactor on this ship (cataclysmkas.lua K_493980: groups cat_dmgf, cat_dmgf_<pct>)
+-- a mission's kasfShipsSetDamageFactor on this ship (cataclysmkas.lua K_493980: groups cat_dmgf, cat_dmgf_<pct>), as
+-- a multiplier: on a damage copy (tools/make_variants.py <type>_d<p>, its weapons at p %) the ratio to p (none set:
+-- its weapons as they are), so a later factor still applies (Mission01's heavy cruiser: 10 % copy, 50 % later = x5)
 function CatShip_KasDamage(rec)
+    if rec.dcopy == nil then
+        local v = CatDamageVariants and CatDamageVariants[strlower(SobGroup_GetShipType(rec.g) or "")]
+        rec.dcopy = (v and v[2] / 100) or 1
+    end
     SobGroup_CreateIfNotExist("cat_dmgf")
     if SobGroup_GroupInGroup(rec.g, "cat_dmgf") ~= 1 then return 1 end
     for q = 5, 100, 5 do
         local name = "cat_dmgf_" .. q
         SobGroup_CreateIfNotExist(name)
-        if SobGroup_GroupInGroup(rec.g, name) == 1 then return q / 100 end
+        if SobGroup_GroupInGroup(rec.g, name) == 1 then return q / 100 / rec.dcopy end
     end
     return 1
 end

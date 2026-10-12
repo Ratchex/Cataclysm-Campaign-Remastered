@@ -20,7 +20,8 @@ DATA = os.path.join(MOD, "data")
 # (ship, percent): Mission01's 10 % teams at their start (its Kushan main guard and the Taiidan they fight; the level
 # places these for them: mission2level.py DAMAGE_VARIANTS). The beams fire at 10 % weapon damage (range test).
 VARIANTS = [("kus_interceptor", 10), ("kus_ioncannonfrigate", 10), ("kus_multiguncorvette", 10), ("kus_destroyer", 10),
-            ("tai_interceptor", 10), ("tai_ioncannonfrigate", 10), ("tai_destroyer", 10), ("tai_defender", 10)]
+            ("tai_interceptor", 10), ("tai_ioncannonfrigate", 10), ("tai_destroyer", 10), ("tai_defender", 10),
+            ("tai_heavycruiser", 10)]
 
 
 # the models and events of stock HW1 ships are in the HW1Ships layer (not one of make_damage's weapon sources)

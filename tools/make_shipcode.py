@@ -132,6 +132,7 @@ def install():
            'dofilepath("data:scripts/cataclysm/upgrades_gen.lua")',
            'dofilepath("data:scripts/cataclysm/variants_gen.lua")',
            'dofilepath("data:scripts/cataclysm/hullinfo_gen.lua")',
+           'dofilepath("data:scripts/cataclysm/variants_damage_gen.lua")',
            'dofilepath("data:scripts/cataclysm/shiprules.lua")', "",
            "CatClass = {"] + [f'    ["{s}"] = {info[s][0]},' for s in sorted(chains)] + ["}",
            "CatName = {"] + [f'    ["{s}"] = "{info[s][1]}",' for s in sorted(chains)] + ["}", ""]
