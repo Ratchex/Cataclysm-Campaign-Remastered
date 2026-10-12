@@ -1524,6 +1524,10 @@
 /ship/tai_interceptor/tai_interceptor.ship
 /ship/tai_ioncannonfrigate/tai_ioncannonfrigate.lua
 /ship/tai_ioncannonfrigate/tai_ioncannonfrigate.ship
+/ship/tai_ioncannonfrigate_d10/tai_ioncannonfrigate_d10.events
+/ship/tai_ioncannonfrigate_d10/tai_ioncannonfrigate_d10.hod
+/ship/tai_ioncannonfrigate_d10/tai_ioncannonfrigate_d10.lua
+/ship/tai_ioncannonfrigate_d10/tai_ioncannonfrigate_d10.ship
 /ship/tai_lightcorvette/singleplayer/props/default.lua
 /ship/tai_lightcorvette/tai_lightcorvette.ship
 /ship/tai_minelayercorvette/singleplayer/props/default.lua
@@ -2715,6 +2719,7 @@
 /weapon/bst_turretedpulsarcannondriver2/bst_turretedpulsarcannondriver2.wepn
 /weapon/bst_vulcankineticturret/bst_vulcankineticturret.wepn
 /weapon/cat_tai_carrier_hw1_mothershipgun2/cat_tai_carrier_hw1_mothershipgun2.wepn
+/weapon/cat_tai_ioncannonfrigate_d10_tai_ioncannon/cat_tai_ioncannonfrigate_d10_tai_ioncannon.wepn
 /weapon/hgn_antishipbomblauncher/hgn_antishipbomblauncher.wepn
 /weapon/hgn_antisubsystembomblauncher/hgn_antisubsystembomblauncher.wepn
 /weapon/hgn_battlecruiserkineticburstcannon/hgn_battlecruiserkineticburstcannon.wepn
