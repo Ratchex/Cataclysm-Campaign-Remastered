@@ -56,9 +56,8 @@ case "$NAME" in
     ANIM="grav_generator"
     CLIPS="GravRotate"
     GEO2DAE_ARGS="$GEO2DAE_ARGS --anim-joints $ANIM --anim-geo $(geo $ANIM_SRC)"
-    # the rear guns (GUN3-6, z -422) sit on the upper engines module, inside its box (x +-132, y -130..198, z -672..-303
-    # with its hardpoint): their bullets burst at the muzzle on its collision (user); muzzles 30 out clear it (~20 needed)
-    for g in GUN3 GUN4 GUN5 GUN6; do GEO2DAE_ARGS="$GEO2DAE_ARGS --muzzle-out $g@30"; done
+    # the rear guns (GUN3-6) sit on the upper engines module: their muzzles stay on the hull, the modules have no
+    # collision of their own (tools/build_kuunlan.sh --col-none; muzzles moved 30 out still burst on it, user)
     ;;
   som_rammingfrigate)
     # its ram: the nose collapses on impact and recovers (RamCollapse / RamRecover), the afterburner ignites and fires
