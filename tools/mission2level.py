@@ -24,6 +24,7 @@ Usage: mission2level.py <mission_dir> <out.level> [--shipmap shipmap.tsv] [--pla
                        line beside StartPointPlayer (first one on the point)
 """
 import argparse
+import math
 import csv
 import os
 import sys
@@ -49,14 +50,21 @@ RADIUS_SCALE, OUTER = SCALE / 2, 1.2
 # confirmed-angle distance, ~2200 from the ship centre = cataclysmkas.lua KAS_ArrivalCameraDistance (the focus;
 # 3700 was too far).
 # (1x, 2x and 6x all started at the hangar: the old focus call zoomed in). Level addCamera(name, target, eye).
+# 0.8: a little closer (user, Mission01; cataclysmkas.lua KAS_ArrivalCameraDistance with it).
+# --arrival-yaw: the Kuun-Lan is turned that many degrees left once in (cataclysmkas.lua KAS_FaceArrival, the
+# mission's KAS_ArrivalYaw), the camera with it.
 ARRIVAL_TARGET = (0.0, 0.0, 600.0)
 ARRIVAL_DIRECTION = (900.0, -200.0, 1380.0)     # eye - target, confirmed angle
-ARRIVAL_DISTANCE_SCALE = 1.0
+ARRIVAL_DISTANCE_SCALE = 0.8
 ARRIVAL_EYE = tuple(ARRIVAL_TARGET[k] + ARRIVAL_DISTANCE_SCALE * ARRIVAL_DIRECTION[k] for k in range(3))
+ARRIVAL_YAW = 0.0
 
 
 def arrival_camera(p, rot):
-    def world(v):
+    c, s = math.cos(math.radians(ARRIVAL_YAW)), math.sin(math.radians(ARRIVAL_YAW))
+
+    def world(v):       # turned left (bow +Z toward port +X) about up
+        v = (v[0] * c + v[2] * s, v[1], -v[0] * s + v[2] * c)
         return tuple(p[k] + v[k] for k in range(3))
     return world(ARRIVAL_TARGET), world(ARRIVAL_EYE)
 
@@ -310,7 +318,9 @@ if __name__ == "__main__":
     ap.add_argument("--background")
     ap.add_argument("--player-start-ship")
     ap.add_argument("--player-fleet")
+    ap.add_argument("--arrival-yaw", type=float, default=0.0, help="degrees the Kuun-Lan turns left on arrival")
     a = ap.parse_args()
+    ARRIVAL_YAW = a.arrival_yaw
     lv = convert(a.mission_dir, a.out, load_shipmap(a.shipmap), a.placeholder,
                  {0: a.player_race, 1: a.enemy_race, 2: a.ally_race},
                  a.background, a.player_start_ship, a.player_fleet)

@@ -658,8 +658,18 @@ function KAS_FleetAwaitHyperspace()
     return 1
 end
 
--- camera distance from the Kuun-Lan's centre on arrival: KAS_ArrivalCamera's (mission2level ARRIVAL_*, 1x; 3700 was too far)
-KAS_ArrivalCameraDistance = 2200
+-- camera distance from the Kuun-Lan's centre on arrival: KAS_ArrivalCamera's (mission2level ARRIVAL_*; 3700 was too
+-- far, 2200 a little (user, Mission01: zoom in a bit))
+KAS_ArrivalCameraDistance = 1760
+
+-- SobGroup_HyperspaceTo brings the Kuun-Lan in bow +Z whatever the start point's heading: turned KAS_ArrivalYaw
+-- degrees left about up (the mission's, build_mission.py ARRIVAL_YAW; Mission01: straight away from the sensor net,
+-- user). Rows of the matrix are its right, up and forward (NOTES.md: SobGroup_GetCoordSys / SetTransform)
+function KAS_FaceArrival()
+    if KAS_ArrivalYaw == nil or KAS_ArrivalYaw == 0 then return end
+    local c, s = cos(KAS_ArrivalYaw), sin(KAS_ArrivalYaw)          -- (Lua 4: degrees)
+    SobGroup_SetTransform("KAS_ArrivalMS", { c, 0, -s, 0, 1, 0, s, 0, c })
+end
 
 function K_498230()
     if KAS_FleetWaiting == nil then           -- no Kuun-Lan held back: only the signal
@@ -668,6 +678,7 @@ function K_498230()
     end
     KAS_FleetWaiting = nil
     SobGroup_HyperspaceTo("KAS_ArrivalMS", "StartPointPlayer")
+    KAS_FaceArrival()
     SobGroup_SetHidden("KAS_ArrivalMS", 0)
     Camera_UseCameraPoint("KAS_ArrivalCamera")    -- mission2level.py: below the port bow, looking up
     KAS_ArrivalStarted = Universe_GameTime()
@@ -683,6 +694,7 @@ function KAS_ArrivalWatch()
         -- point's distance (Gearbox's hyperspace focus call). Camera_FocusSobGroup(g, 0, 0, 0) zoomed right in:
         -- the start view stayed at the hangar however far out the camera point was put (1x, 2x, 6x)
         KAS_ArrivalFocused = 1
+        KAS_FaceArrival()                     -- again, now it is in space (no-op if it already faces that way)
         Camera_FocusSobGroupWithBuffer("KAS_ArrivalMS", KAS_ArrivalCameraDistance, 0, 0)
     end
     if t < 2 then return end
@@ -901,6 +913,19 @@ function CatAbilityTick()
     end
 end
 
+-- research the player starts the mission with (the mission's KAS_StartResearch, build_mission.py START_RESEARCH;
+-- after KAS_RestrictTechs): Mission01's fighter drive (user)
+function KAS_GrantStartResearch()
+    if KAS_StartResearch == nil then return end
+    local i = 1
+    while i <= getn(KAS_StartResearch) do
+        Player_UnrestrictResearchOption(0, KAS_StartResearch[i])
+        Player_GrantResearchOption(0, KAS_StartResearch[i])
+        print("CKAS: start research " .. KAS_StartResearch[i])
+        i = i + 1
+    end
+end
+
 -- engine abilities our upgrade system switches per ship (tools/make_race.py RUNTIME_RESEARCH, KAS_RuntimeResearch in
 -- cataclysmtech.lua): granted to the human
 function KAS_GrantRuntimeResearch()
@@ -1025,6 +1050,7 @@ function KAS_StartEngine()
     KAS_DisableCPUPlayers()
     KAS_ApplyAlliances()
     KAS_RestrictTechs()
+    KAS_GrantStartResearch()
     Rule_AddInterval("KAS_EngineTick", 0.5)
     Rule_AddInterval("KAS_RURegen", KAS_RU_REGEN_SECONDS)
 end
