@@ -1365,7 +1365,7 @@ end
 KAS_MothershipTypes = { "smt_ms_sp", "smt_ms", "Kus_Mothership" }   -- Kuun-Lan (Cataclysm Remastered), Kushan stand-in
 
 function K_498790(sel)                                                                            -- kasfGetPlayerMothership
-    KAS_PlayerMothership(sel, 0)          -- (the real one: not an NIS's despawned copy)
+    KAS_KuunLan(sel, 0)                   -- (the real one: not an NIS's despawned copy)
 end
 
 -- ================================================================== Mission01 API (stubs implemented)
@@ -1898,6 +1898,8 @@ end
 function KAS_HyperspaceAllow()
     print("CKAS: end-of-mission hyperspace allowed")
     spGameInfo_currentMission = spGameInfo_currentMission or 0     -- (Gearbox's flow names it in a message)
+    KAS_KuunLan("KAS_MothershipGroup0", 0)  -- Gearbox's KAS_PlayerMothership takes it from here
+    print("CKAS: roll call mothership x" .. SobGroup_Count("KAS_MothershipGroup0"))
     singlePlayerHyperspaceButtonEnable()
     if Rule_Exists("KAS_HyperspaceTick") == 0 then Rule_AddInterval("KAS_HyperspaceTick", 0.25) end
 end
@@ -1916,10 +1918,12 @@ function KAS_HyperspaceTick()
     end
 end
 
--- Gearbox's mothership lookup (KASUtil.lua, used by the roll call, which wants exactly one) knows only the stock
--- motherships: the Kuun-Lan, the player's real one (KAS_ArrivalMS): by type it also found the intro NIS's despawned
--- copy, two, and the HYPERSPACE button did nothing ("no mothership", user)
-function KAS_PlayerMothership(sobGroupName, playerIndex)
+-- The player's Kuun-Lan: the real one (KAS_ArrivalMS) once captured, else the first by type (by type alone the
+-- intro NIS's despawned copy is found too). Gearbox's KAS_PlayerMothership (the roll call's, which wants exactly
+-- one) can't be redefined ("Cannot overwrite function": every attempt was dropped, the HYPERSPACE button found
+-- "no mothership", user): it copies its cache group KAS_MothershipGroup<player> when that has ships, so
+-- KAS_HyperspaceAllow fills that with this.
+function KAS_KuunLan(sobGroupName, playerIndex)
     SobGroup_CreateIfNotExist("KAS_ArrivalMS")
     SobGroup_CreateIfNotExist(sobGroupName)
     SobGroup_Clear(sobGroupName)
