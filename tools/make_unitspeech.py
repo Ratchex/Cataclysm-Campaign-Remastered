@@ -33,7 +33,8 @@ MOTHERSHIP = 18           # ShipType of the Kuun-Lan (sMothership): Fleet Comman
 # HWRM pilot event (regex on the upper-case name) -> Cataclysm event, spoken by the ship's own type
 PILOT = [
     (r"COMMAND_(CAPITAL)?SELECTED", 0),                     # "Roger, command." / "Carrier here."
-    (r"COMMAND_(MOVE|STRIKEGROUP_MOVE|WAYPOINT|ORDEREDTOENTERNEBULA|GUARD|CAP_GUARD)", 1),   # "moving out"
+    (r"COMMAND_(MOVE|STRIKEGROUP_MOVE|WAYPOINT|ORDEREDTOENTERNEBULA)", 1),   # "moving out"
+    # (Guard: Fleet Command's, not the ship's: FLEET COMMAND_GUARD_1, catspeech.lua CatSpeech_ToFleet)
     (r"COMMAND_MOVECANCELLED", 2),                           # "Standing by, command."
     (r"COMMAND_(ANYSHIPGENERICDOCK\w*|STRIKECRAFTDOCK|\w*RETIRE)", 3),   # "Returning to Hangar."
     (r"(STATUS_CAPITALSHIPSSHIPDOCKED|CHATTER_ANYSHIPDOCKING)", 4),    # "Docked and locked."
@@ -70,7 +71,9 @@ GENERIC_SKIP = {146: {"sprocessor"}}
 # HWRM announcer event (exact upper-case name) -> (Cataclysm event, variable)
 FLEET = {
     "COMMAND_SELECTED_1": (0, MOTHERSHIP), "COMMAND_MOVE_1": (1, MOTHERSHIP), "COMMAND_WAYPOINT_1": (1, MOTHERSHIP),
-    "COMMAND_GUARD_1": (1, MOTHERSHIP), "COMMAND_MOVECANCELLED_1": (2, MOTHERSHIP), "COMMAND_ATTACK": (5, MOTHERSHIP),
+    # Guard: Fleet Command's "Escorts assigned." for any ship ordered (user: Cataclysm voices it from Fleet
+    # Command, not the ships)
+    "COMMAND_GUARD_1": (97, 0), "COMMAND_MOVECANCELLED_1": (2, MOTHERSHIP), "COMMAND_ATTACK": (5, MOTHERSHIP),
     "COMMAND_MOVEATTACK_1": (5, MOTHERSHIP), "COMMAND_COMBATMAN_1": (5, MOTHERSHIP),
     "COMMAND_ATTACK_CANCELLED_1": (6, MOTHERSHIP), "COMMAND_FORCEATTACKFRIENDLY_1": (7, MOTHERSHIP),
     "COMMAND_FORCEATTACK_1": (8, MOTHERSHIP),

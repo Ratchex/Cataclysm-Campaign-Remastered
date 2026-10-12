@@ -47,9 +47,15 @@ if CatSpeech_Loaded == nil then
         return nil
     end
 
+    -- ship events Cataclysm's Fleet Command says instead of the ship (user: the Guard order, "Escorts assigned.")
+    CatSpeech_ToFleet = { COMMAND_GUARD = "COMMAND_GUARD_1", COMMAND_CAP_GUARD = "COMMAND_GUARD_1" }
+
     -- for a Somtaaw ship: the replacement event, actor, count, or nil (nothing to play)
     function CatSpeech_Route(event, actor)
         local key = strupper(event)
+        if CatSpeech_ToFleet[key] ~= nil and CatSpeech_Fleet[CatSpeech_ToFleet[key]] ~= nil then
+            return CatSpeech_Fleet[CatSpeech_ToFleet[key]], "cat_fleet", 0
+        end
         if actor ~= nil and CatSpeech_Announcers[strupper(actor)] ~= nil then
             if CatSpeech_Fleet[key] ~= nil then
                 return CatSpeech_Fleet[key], "cat_fleet", 0
