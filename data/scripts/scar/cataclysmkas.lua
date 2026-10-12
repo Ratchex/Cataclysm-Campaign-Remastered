@@ -1275,7 +1275,47 @@ function KAS_Owner(sel) return SobGroup_GetPlayerOwner(sel) end
 function K_491cb0() KAS_MissionFailed() end                                                          -- kasfMissionFailed
 function K_492780() KAS_SetFormation(KAS_Team, "Delta") end                                          -- kasfFormationDelta
 function K_492810() KAS_SetFormation(KAS_Team, "Claw") end                                           -- kasfFormationClaw
-function K_492960(sel) KAS_EndPatrol() SobGroup_GuardSobGroup(KAS_Team, sel) end                                     -- kasfGuardShips
+-- kasfGuardShips (HW1 aimCreateGuardShips: the protect command, the guards around the guarded ships). HWRM's guard
+-- order only trails them (user: Mission01's carrier defenders should hold a sphere round the carrier): each guard
+-- ship is sent to its own point on a sphere of KAS_GuardRadius round them (KAS_GuardTick), and with an enemy within
+-- KAS_GuardAlarm of them the team takes HWRM's guard order (it engages), back to the sphere once clear.
+KAS_Guards = {}
+KAS_GuardRadius = 450
+KAS_GuardAlarm = 3000
+function K_492960(sel)                                                                                -- kasfGuardShips
+    KAS_EndPatrol()
+    SobGroup_GuardSobGroup(KAS_Team, sel)
+    KAS_Guards[KAS_Team] = { sel = sel, engaged = 1 }
+    if Rule_Exists("KAS_GuardTick") == 0 then Rule_AddInterval("KAS_GuardTick", 2) end
+end
+function KAS_GuardTick()
+    SobGroup_CreateIfNotExist("KAS_GuardOne")
+    SobGroup_CreateIfNotExist("KAS_GuardFoes")
+    for team, g in KAS_Guards do
+        local n = SobGroup_Count(team)
+        if n == 0 or SobGroup_Count(g.sel) == 0 then
+            KAS_Guards[team] = nil
+        elseif KAS_FillEnemiesNear("KAS_GuardFoes", g.sel, KAS_GuardAlarm) > 0 then
+            if g.engaged == nil then SobGroup_GuardSobGroup(team, g.sel) end
+            g.engaged = 1
+        else
+            g.engaged = nil
+            local c, owner = SobGroup_GetPosition(g.sel), KAS_Owner(team)
+            local i = 0
+            while i < n do               -- even points on a sphere (golden-angle spiral)
+                local y = 1 - 2 * (i + 0.5) / n
+                local r = sqrt(1 - y * y)
+                local a = i * 137.508      -- degrees (Lua 4 trig)
+                SobGroup_Clear("KAS_GuardOne")
+                SobGroup_FillShipsByIndexRange("KAS_GuardOne", team, i, 1)
+                SobGroup_MoveToPoint(owner, "KAS_GuardOne", { c[1] + KAS_GuardRadius * r * cos(a),
+                                                               c[2] + KAS_GuardRadius * y,
+                                                               c[3] + KAS_GuardRadius * r * sin(a) })
+                i = i + 1
+            end
+        end
+    end
+end
 -- kasfPatrolPath: SobGroup_FollowPath (Gearbox's emulation) is an attack-move (COMMAND_AttackMove, 20): the ships
 -- engage whatever their side sees, and Mission01's Kushan picket (33 proximity sensors) sees across the map, so the
 -- picket's interceptor wings left their patrol for the Taiidan interceptors on the far side (trace: order 20, then
@@ -1284,7 +1324,7 @@ function K_492960(sel) KAS_EndPatrol() SobGroup_GuardSobGroup(KAS_Team, sel) end
 -- m<NN>_paths.lua), around a closed path, back and forth along an open one; any other order ends it.
 KAS_Patrols = {}
 KAS_PatrolReach = 600          -- a team is at a waypoint when its centre is this close (or it has stopped)
-function KAS_EndPatrol() KAS_Patrols[KAS_Team] = nil end
+function KAS_EndPatrol() KAS_Patrols[KAS_Team] = nil if KAS_Guards then KAS_Guards[KAS_Team] = nil end end
 function KAS_PatrolGo(team)
     local p = KAS_Patrols[team]
     SobGroup_MoveToPoint(KAS_Owner(team), team, KAS_Paths[p.path][p.i])
@@ -1345,8 +1385,19 @@ function K_4941a0(vec)                                                          
     if SobGroup_Count(KAS_Team) > 0 then SobGroup_MoveToPoint(KAS_Owner(KAS_Team), KAS_Team, vec) end
 end
 function K_494750(host) SobGroup_DockSobGroupInstant(KAS_Team, host) end                            -- kasfDockInstant
-function K_4947c0() KAS_Launch(KAS_Team) end                                                         -- kasfLaunch
-function K_4948a0() return KAS_B(KAS_TeamFinishedLaunching(KAS_Team) ~= 0) end                      -- kasfTeamFinishedLaunching
+-- kasfTeamFinishedLaunching: KASUtil's flag (set by the launch order, cleared as each ship leaves its hangar) never
+-- cleared for a team that wasn't docked (Mission01's PesterHInt1 launched and waited forever, user: no patrols), so a
+-- team ordered to launch has also finished once none of it is docked, or KAS_LaunchGiveUp seconds after the order.
+KAS_LaunchAt = {}
+KAS_LaunchGiveUp = 20
+function K_4947c0() KAS_LaunchAt[KAS_Team] = Universe_GameTime() KAS_Launch(KAS_Team) end            -- kasfLaunch
+function K_4948a0()                                                                                  -- kasfTeamFinishedLaunching
+    if KAS_TeamFinishedLaunching(KAS_Team) ~= 0 then return KAS_B(1) end
+    local t = KAS_LaunchAt[KAS_Team]
+    if t == nil or SobGroup_Count(KAS_Team) == 0 then return KAS_B(nil) end
+    local since = Universe_GameTime() - t
+    return KAS_B(since > 1 and (SobGroup_IsDocked(KAS_Team) == 0 or since > KAS_LaunchGiveUp))
+end
 function K_494940() return KAS_B(SobGroup_IsDockedCompletely(KAS_Team) == 1) end                   -- kasfTeamDockedReadyForLaunch
 function K_495eb0()                                                                                  -- kasfStop
     KAS_EndPatrol()
@@ -1355,7 +1406,19 @@ end
 function K_495f00() KAS_Harvest(KAS_Owner(KAS_Team), KAS_Team) end                                  -- kasfHarvest
 
 -- ------------------------------------------------------------------ ships
-function K_493980(sel, pct) SobGroup_SetDamageMultiplier(sel, pct / 100) end                        -- kasfShipsSetDamageFactor
+-- kasfShipsSetDamageFactor (HW1 KASFunc.c: damage the ships deal x pct / 100). The ship rules set every ship's
+-- multiplier from its rank (shiprules.lua CatShip_ApplyMultipliers), which overwrote this: Mission01's 10% teams dealt
+-- full damage and its fights ended early (user). So the ships also go in cat_dmgf (any factor) and cat_dmgf_<pct>
+-- (rounded to 5), which the ship rules (another Lua state) multiply into their rank multiplier.
+function K_493980(sel, pct)                                                                            -- kasfShipsSetDamageFactor
+    SobGroup_SetDamageMultiplier(sel, pct / 100)
+    local q = floor(pct / 5 + 0.5) * 5
+    if q < 5 then q = 5 elseif q > 100 then q = 100 end
+    SobGroup_CreateIfNotExist("cat_dmgf")
+    SobGroup_CreateIfNotExist("cat_dmgf_" .. q)
+    SobGroup_SobGroupAdd("cat_dmgf", sel)
+    SobGroup_SobGroupAdd("cat_dmgf_" .. q, sel)
+end
 function K_493a10(sel, v) KAS_NoOp("493a10", "kasfShipsSetRepairFactor") end
 function K_4939d0(sel) KAS_NoOp("4939d0", "kasfShipsClearRepairFactor") end
 

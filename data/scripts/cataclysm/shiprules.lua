@@ -351,13 +351,27 @@ function CatShip_UpdateRank(rec, announce)
     CatShip_ApplyMultipliers(rec)
 end
 
--- FUN_005148f0 (damage) and FUN_00514940 (speed, less when damaged)
+-- a mission's kasfShipsSetDamageFactor on this ship (cataclysmkas.lua K_493980: groups cat_dmgf, cat_dmgf_<pct>)
+function CatShip_KasDamage(rec)
+    SobGroup_CreateIfNotExist("cat_dmgf")
+    if SobGroup_GroupInGroup(rec.g, "cat_dmgf") ~= 1 then return 1 end
+    for q = 5, 100, 5 do
+        local name = "cat_dmgf_" .. q
+        SobGroup_CreateIfNotExist(name)
+        if SobGroup_GroupInGroup(rec.g, name) == 1 then return q / 100 end
+    end
+    return 1
+end
+
+-- FUN_005148f0 (damage) and FUN_00514940 (speed, less when damaged). Damage: its rank's, times a mission's damage
+-- factor (this alone overwrote it: Mission01's 10% teams dealt full damage, user: fights ended early)
 function CatShip_ApplyMultipliers(rec)
     if SobGroup_Empty(rec.g) == 1 then return end
     local mult = CatRankMult[rec.rank]
-    if rec.dmg ~= mult then
-        SobGroup_SetDamageMultiplier(rec.g, mult)
-        rec.dmg = mult
+    local dmg = mult * CatShip_KasDamage(rec)
+    if rec.dmg ~= dmg then
+        SobGroup_SetDamageMultiplier(rec.g, dmg)
+        rec.dmg = dmg
     end
     local h, spd = SobGroup_HealthPercentage(rec.g), mult
     -- Advanced Drive upgrades (ability bits 0-2): +0.15 (0x72af78)

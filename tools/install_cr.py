@@ -312,10 +312,10 @@ def use_our_events(ship, src, names):
 # Mothership (user), so it keeps their speed.
 SPEED_CLASS = {"scout": 490 / 1000, "interceptor": 487 / 875, "collector": 110 / 325,
                "frigate": 206 / 325}   # (tai_assaultfrigate 206 / tStandardFrigate 325)
-# The Worker on Gearbox's collector ratio (144) was a bit slow (user): the scout ratio (208); the original's Worker
-# runs at 0.52x an Acolyte, the interceptor ratio would be 237.
+# The Worker on Gearbox's collector ratio (144); the scout ratio (208, user: 144 was a bit slow) had it outpace the
+# Processor (user, Mission01), so back to 144. (The original's Worker runs at 0.52x an Acolyte, 1.7x the Processor.)
 SPEEDS = {"smt_scout": ("srecon", "scout"), "smt_acolyte": ("sacolyte", "interceptor"),
-          "smt_worker": ("sworker", "scout"), "smt_acv": ("sacv", "interceptor"), "smt_mimic": ("smimic", "interceptor"),
+          "smt_worker": ("sworker", "collector"), "smt_acv": ("sacv", "interceptor"), "smt_mimic": ("smimic", "interceptor"),
           "smt_rammingfrigate": ("srammingfrigate", "frigate"), "smt_processor": ("sprocessor", "scout")}   # (the Workers' ratio, user)
 
 
