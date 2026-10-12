@@ -510,3 +510,14 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
   from the source layers, never data/ (no double scaling). Our cat_* weapons carry Cataclysm's values (Acolyte
   missile 420). Not converted: Beast ships, mines, Somtaaw ramming frigate (no Cataclysm guns), armour levels, the
   Energy upgrade's damage. Beam tick confirmed 16/s (HW1 Collision.c).
+
+## Animatics (2026-10-12, confirmed in game with Animatic01)
+- Cataclysm's `Movies/AnimaticNN.bik` are silent 640x480; the script (`movies/animaticNN.script`) plays music and
+  narration at runtime. `tools/make_animatics.py` bakes that mix into `data/animatics/animaticNN.webm` (VP8/Vorbis) as
+  HWRM's own animatics carry their sound; the campaign's `postload` calls `playAnimatic(lua, 0, 0)`.
+- `AddSubtitleEvent(time sss.ff, actor, "$id", seconds)`: the 4th argument is the display time (0 = gone at once).
+  It also plays `<SetSpeechFolder>/<id>.wav`, so the folder must not hold the baked-in narration (it played twice).
+- HWRM speech actors (decoded from HomeworldRM.exe): 0 FleetIntel, 1 FleetCommand, 10 AllShips (Hiigaran pilots),
+  15 LocationCard, 16 HW1_FleetCommand (mothership icon), 17 HW1_FleetIntel, 18 HW1_BentusiTraders, 19 HW1_Kadesh,
+  20 HW1_AllShipsEnemy (Taiidan pilots), 21 HW1_Ambassador, 22 HW1_Defector, 23 HW1_Emperor, 24 HW1_KharSelim,
+  26-32 Generic1-7. nis2hwrm.py picks them from tools/speech_speakers.tsv ("Taiidan pilot" / "Hiigaran pilot").

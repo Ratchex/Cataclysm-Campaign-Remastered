@@ -53,6 +53,7 @@ Mission[3] =
 -- Phase 0.7: Cataclysm Mission01, translated from cataclysm.exe (stand-in ships; most KAS functions stubbed).
 Mission[4] =
 {
+    postload    = function () playAnimatic("data:animatics/animatic01.lua", 0, 0) end, -- Animatic01 (tools/make_animatics.py)
     directory   = "m01",
     level       = "m01.level",
     postlevel   = function ( bWin ) postLevelComplete() end,

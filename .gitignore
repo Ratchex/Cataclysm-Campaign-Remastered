@@ -9,3 +9,6 @@ build/
 
 # Generated music audio (tools/build_music.py)
 data/sound/music/cataclysm/
+
+# Generated animatics (tools/make_animatics.py)
+data/animatics/*.webm

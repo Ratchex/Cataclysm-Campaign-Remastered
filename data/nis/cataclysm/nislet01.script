@@ -72,9 +72,9 @@ with kus_destroyer1
     at frame 1400
         health(0.2)
     at frame 2200
-        speechEventActor("$2207375", 16, 2)
+        speechEventActor("$2207375", 20, 2)
     at frame 2550
-        speechEventActor("$2207378", 16, 2)
+        speechEventActor("$2207378", 10, 2)
     at frame 2580
     at frame 2514
         attack("tai_missiledestroyer1")
@@ -175,7 +175,7 @@ with kus_ioncannonfrigate3
         health(0.05)
         show()
     at frame 975
-        speechEventActor("$2207382", 16, 2)
+        speechEventActor("$2207382", 10, 2)
     at frame 1030
         death("deathCannon")
 }
@@ -203,7 +203,7 @@ with kus_ioncannonfrigate5
     at frame 2880
         show()
     at frame 2900
-        speechEventActor("$2207386", 16, 2)
+        speechEventActor("$2207386", 10, 2)
     at frame 2910
     at frame 2844
         attack("tai_ioncannonfrigate2")
@@ -560,7 +560,7 @@ with tai_interceptor8
     at frame 1920
         show()
     at frame 2360
-        speechEventActor("$2207379", 16, 2)
+        speechEventActor("$2207379", 20, 2)
     at frame 2761
         hide()
 }
@@ -636,7 +636,7 @@ with tai_interceptor14
     at frame 1980
         show()
     at frame 1990
-        speechEventActor("$2207380", 16, 2)
+        speechEventActor("$2207380", 20, 2)
     at frame 2520
         attack("kus_destroyer1")
     at frame 2580
@@ -651,7 +651,7 @@ with tai_interceptor15
         colourSchemeTrail({0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "imperial taiidan.tga", {0.992, 0.929, 0.145}, "")
         show()
     at frame 500
-        speechEventActor("$2207384", 16, 2)
+        speechEventActor("$2207384", 20, 2)
     at frame 800
         attack("kus_ioncannonfrigate3")
     at frame 930
@@ -668,7 +668,7 @@ with tai_interceptor16
     at frame 800
         attack("kus_ioncannonfrigate3")
     at frame 620
-        speechEventActor("$2207385", 16, 2)
+        speechEventActor("$2207385", 20, 2)
     at frame 820
     at frame 840
     at frame 930
@@ -696,7 +696,7 @@ with tai_attackbomber2
     at frame 1830
         show()
     at frame 1900
-        speechEventActor("$2207381", 16, 2)
+        speechEventActor("$2207381", 20, 2)
     at frame 2000
         hide()
 }
@@ -728,11 +728,11 @@ with tai_missiledestroyer2
         show()
         health(0.4)
     at frame 2090
-        speechEventActor("$2207376", 16, 2)
+        speechEventActor("$2207376", 20, 2)
     at frame 2300
         hide()
     at frame 2620
-        speechEventActor("$2207377", 16, 2)
+        speechEventActor("$2207377", 20, 2)
 }
 with Asteroid11
 {

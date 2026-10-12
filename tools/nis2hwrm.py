@@ -509,8 +509,10 @@ def translate_script(src, objects, nisname, speech, fps, end_frame, cam_events, 
             speaker = SPEAKERS.get(ev & 0x3FFC00, f"actor bits {ev & 0x3FFC00:#x}")
             # HWRM actors (logged in game): 16 Fleet Command, 17 Fleet Intel. Cataclysm 0x1000 = Fleet Command; a
             # known speaker (tools/speech_speakers.tsv) overrides the bits (n01's Fleet Command line has 0x800)
+            # Pilots' icons (HWRM Actor_ enum, decoded from HomeworldRM.exe): 20 HW1_AllShipsEnemy, 10 AllShips
             fc = known == "Fleet Command" if known else ev & 0x1000
-            emit(f'speechEventActor("${sid}", {16 if fc else 17}, 2)')
+            actor = {"Taiidan pilot": 20, "Hiigaran pilot": 10}.get(known, 16 if fc else 17)
+            emit(f'speechEventActor("${sid}", {actor}, 2)')
             who = f", {known}" if known else ""
             if text:
                 note(f"speech ${sid} ({speaker}{who}, {secs:.1f}s, subtitled): speechEventActor - \"{text[:60]}\"")
