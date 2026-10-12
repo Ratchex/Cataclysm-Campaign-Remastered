@@ -652,6 +652,7 @@ end
 function KAS_FleetAwaitHyperspace()
     if SobGroup_Count("KAS_ArrivalMS") == 0 then return nil end
     SobGroup_DockSobGroupInstant("KAS_ArrivalDocked", "KAS_ArrivalMS")
+    KAS_ArrivalPlaceBehind()
     SobGroup_Despawn("KAS_ArrivalMS")
     KAS_FleetWaiting = 1
     print("CKAS: fleet waits in hyperspace (" .. SobGroup_Count("KAS_ArrivalDocked") .. " ships docked)")
@@ -662,17 +663,18 @@ end
 -- far, 2200 a little (user, Mission01: zoom in a bit))
 KAS_ArrivalCameraDistance = 1760
 
--- SobGroup_HyperspaceTo brings the Kuun-Lan in bow +Z whatever the start point's heading: turned KAS_ArrivalYaw
--- degrees left about up (the mission's, build_mission.py ARRIVAL_YAW; Mission01: straight away from the sensor net,
--- user). Rows of the matrix are its right, up and forward (NOTES.md: SobGroup_GetCoordSys / SetTransform).
--- The hyperspace exit puts it in at bow +Z and holds that heading as its goal (measured, KAS_LogBow: turned as it
--- came in, it steered back over ~15 s; turned before going into hyperspace, it came out at +Z anyway). So it is held
--- turned every 0.1 s while it comes out (KAS_ArrivalHold), then a short move along the new bow from where it is makes
--- that the heading it holds (a move order replaces the exit's goal; user: the ship followed one)
-function KAS_FaceArrival()
+-- The Kuun-Lan's heading on arrival: SobGroup_HyperspaceTo ignores the start point's rotation, and the exit flies it
+-- in along its line from where it was (despawned on the start point itself: no line, so bow +Z, and turning it by
+-- script was steered back: user). So it waits in hyperspace KAS_ArrivalBack behind the start point, opposite the
+-- way it should face (KAS_ArrivalYaw degrees left of +Z: the mission's, build_mission.py ARRIVAL_YAW; Mission01:
+-- straight away from the sensor net, user)
+KAS_ArrivalBack = 5000
+function KAS_ArrivalPlaceBehind()
     if KAS_ArrivalYaw == nil or KAS_ArrivalYaw == 0 then return end
-    local c, s = cos(KAS_ArrivalYaw), sin(KAS_ArrivalYaw)          -- (Lua 4: degrees)
-    SobGroup_SetTransform("KAS_ArrivalMS", { c, 0, -s, 0, 1, 0, s, 0, c })
+    local p = Volume_GetPosition("StartPointPlayer")
+    if p == nil then return end
+    local d = KAS_ArrivalBack
+    SobGroup_SetPosition("KAS_ArrivalMS", { p[1] - d * sin(KAS_ArrivalYaw), p[2], p[3] - d * cos(KAS_ArrivalYaw) })
 end
 
 -- the Kuun-Lan's bow in the log (checking the arrival turn)
@@ -692,8 +694,7 @@ function K_498230()
     end
     KAS_FleetWaiting = nil
     SobGroup_HyperspaceTo("KAS_ArrivalMS", "StartPointPlayer")
-    KAS_FaceArrival()
-    if KAS_ArrivalYaw and KAS_ArrivalYaw ~= 0 then Rule_AddInterval("KAS_ArrivalHold", 0.1) end
+
     SobGroup_SetHidden("KAS_ArrivalMS", 0)
     Camera_UseCameraPoint("KAS_ArrivalCamera")    -- mission2level.py: below the port bow, looking up
     KAS_ArrivalStarted = Universe_GameTime()
@@ -714,27 +715,11 @@ function KAS_ArrivalWatch()
     if t < 2 then return end
     if SobGroup_GetCurrentOrder("KAS_ArrivalMS") ~= COMMAND_Idle and t < 30 then return end
     Rule_Remove("KAS_ArrivalWatch")
-    KAS_ArrivalSettle()
+    if KAS_ArrivalYaw and KAS_ArrivalYaw ~= 0 then Rule_AddInterval("KAS_ArrivalBowLog", 2) end
     SobGroup_Launch("KAS_ArrivalDocked", "KAS_ArrivalMS")
     KAS_Vars[KAS_Key_ShipsHaveArrived] = 1
     print("CKAS: fleet out of hyperspace after " .. t .. "s; launching " .. SobGroup_Count("KAS_ArrivalDocked")
           .. " ships; G_ShipsHaveArrived")
-end
-
-function KAS_ArrivalHold()
-    KAS_FaceArrival()
-end
-
-KAS_ArrivalSettleDistance = 300
-function KAS_ArrivalSettle()
-    if KAS_ArrivalYaw == nil or KAS_ArrivalYaw == 0 then return end
-    if Rule_Exists("KAS_ArrivalHold") == 1 then Rule_Remove("KAS_ArrivalHold") end
-    KAS_FaceArrival()
-    local p = SobGroup_GetPosition("KAS_ArrivalMS")
-    local d = KAS_ArrivalSettleDistance
-    SobGroup_MoveToPoint(0, "KAS_ArrivalMS", { p[1] + d * sin(KAS_ArrivalYaw), p[2], p[3] + d * cos(KAS_ArrivalYaw) })
-    KAS_ArrivalBowLogs = 0
-    Rule_AddInterval("KAS_ArrivalBowLog", 2)
 end
 
 KAS_ArrivalBowLogs = 0
