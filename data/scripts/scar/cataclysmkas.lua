@@ -1358,13 +1358,7 @@ end
 KAS_MothershipTypes = { "smt_ms_sp", "smt_ms", "Kus_Mothership" }   -- Kuun-Lan (Cataclysm Remastered), Kushan stand-in
 
 function K_498790(sel)                                                                            -- kasfGetPlayerMothership
-    SobGroup_Clear(sel)
-    local i = 1
-    while i <= getn(KAS_MothershipTypes) do
-        Player_FillShipsByType(sel, 0, KAS_MothershipTypes[i])
-        if SobGroup_Count(sel) > 0 then return end
-        i = i + 1
-    end
+    KAS_PlayerMothership(sel, 0)          -- (the real one: not an NIS's despawned copy)
 end
 
 -- ================================================================== Mission01 API (stubs implemented)
@@ -1910,14 +1904,28 @@ function KAS_HyperspaceTick()
     end
 end
 
--- Gearbox's mothership lookup (KASUtil.lua, used by the roll call) knows only the stock motherships: the Kuun-Lan
+-- Gearbox's mothership lookup (KASUtil.lua, used by the roll call, which wants exactly one) knows only the stock
+-- motherships: the Kuun-Lan, the player's real one (KAS_ArrivalMS): by type it also found the intro NIS's despawned
+-- copy, two, and the HYPERSPACE button did nothing ("no mothership", user)
 function KAS_PlayerMothership(sobGroupName, playerIndex)
+    SobGroup_CreateIfNotExist("KAS_ArrivalMS")
     SobGroup_CreateIfNotExist(sobGroupName)
     SobGroup_Clear(sobGroupName)
+    if (playerIndex or 0) == 0 and sobGroupName ~= "KAS_ArrivalMS" and SobGroup_Count("KAS_ArrivalMS") > 0 then
+        SobGroup_SobGroupAdd(sobGroupName, "KAS_ArrivalMS")
+        return
+    end
+    SobGroup_CreateIfNotExist("KAS_MothershipAll")
     local i = 1
     while i <= getn(KAS_MothershipTypes) do
-        Player_FillShipsByType(sobGroupName, playerIndex or 0, KAS_MothershipTypes[i])
-        if SobGroup_Count(sobGroupName) > 0 then return end
+        SobGroup_Clear("KAS_MothershipAll")
+        Player_FillShipsByType("KAS_MothershipAll", playerIndex or 0, KAS_MothershipTypes[i])
+        local n = SobGroup_Count("KAS_MothershipAll")
+        if n > 0 then
+            if n > 1 then print("CKAS: " .. n .. " " .. KAS_MothershipTypes[i] .. " for player " .. (playerIndex or 0) .. ": the first") end
+            SobGroup_FillShipsByIndexRange(sobGroupName, "KAS_MothershipAll", 0, 1)
+            return
+        end
         i = i + 1
     end
 end
