@@ -1558,6 +1558,10 @@ function K_499c70(dst, shipType, count, near, player)
     if count <= 0 or SobGroup_Count(near) == 0 then return end
     local t = KAS_HWRMType(shipType)
     local c = SobGroup_GetPosition(near)
+    -- owned like the ships they appear beside: Cataclysm asks for its Kushan as the human's (kasfTeamSwitchPlayerOwner
+    -- hands them over; here they stay on allied player 2), so the Kushan carrier's interceptors went to the player
+    local owner = SobGroup_GetPlayerOwner(near)
+    if owner and owner >= 0 then player = owner end
     local i = 0
     while i < count do
         KAS_SpawnSerial = KAS_SpawnSerial + 1
