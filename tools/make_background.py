@@ -100,6 +100,10 @@ BACKGROUNDS = {}
 # mission01.hsf has a high pale-yellow ambient, a moderate orange key and a weak red fill, stock ez14 two key lights
 # above 1.0 and little ambient). Written to data/background/<sky>/<sky>_light.hod by tools/install_cr.py.
 RELIGHT = {"ez14": "mission01"}
+# ...and with a glow in their sky texture dimmed: sky -> (u, v centre, u, v radius (Gaussian sigma), r, g, b cut at the
+# centre). ez14: the bright glow behind its main nebula (user: the nebula is supposed to be a dark smear; reduce the
+# light behind it a decent amount). Blue cut most, red least: cut evenly the white core went grey.
+DARKEN = {"ez14": (0.533, 0.508, 0.13, 0.15, (0.35, 0.5, 0.65))}
 HSF_DIR = r"C:\Modding\Cataclysm-decomp\extracted\big\hsf"
 BIGFILE = r"C:\Program Files (x86)\Steam\steamapps\common\Homeworld\HomeworldRM\Data\HWBackgrounds.big"
 
@@ -169,10 +173,38 @@ def relight(sky, mission):
             struct.pack_into("<6f", d, f + 12, *(light[2] + light[2]))
         print(f"  {sky} {name}: {'off' if light is None else tuple(round(c, 3) for c in light[2])}")
         q = f + 44
+    if sky in DARKEN:
+        d = darken(bytes(d), *DARKEN[sky])
     out = os.path.join(MOD, "data", "background", sky, sky + "_light.hod")
     os.makedirs(os.path.dirname(out), exist_ok=True)
     open(out, "wb").write(d)
     return [f"background/{sky}/{sky}_light.hod"]
+
+
+def darken(hod, cu, cv, ru, rv, cut):
+    """The sky texture (one 8888 LMIP, RGBA, its pixels in the compressed POOL: tools/hodpool.py) with a Gaussian
+    patch dimmed by <cut> per channel at its centre; mips rebuilt from it; stored unpacked."""
+    import numpy as np
+    from PIL import Image
+    import hodpool
+    i = hod.index(b"LMIP")
+    n = struct.unpack_from("<I", hod, i + 8)[0]
+    fmt = hod[i + 12 + n:i + 16 + n]
+    if fmt != b"8888":
+        raise SystemExit(f"darken: texture format {fmt}, only 8888")
+    mips = struct.unpack_from("<I", hod, i + 16 + n)[0]
+    dims = [struct.unpack_from("<II", hod, i + 20 + n + 8 * k) for k in range(mips)]
+    data = hodpool.texture_data(hod)
+    w, h = dims[0]
+    img = np.frombuffer(data[:w * h * 4], np.uint8).reshape(h, w, 4).astype(np.float32)
+    v, u = np.mgrid[0:h, 0:w]
+    g = np.exp(-(((u / w - cu) / ru) ** 2 + ((v / h - cv) / rv) ** 2) / 2)[:, :, None]
+    img[:, :, :3] *= 1 - np.array(cut, np.float32) * g
+    top = Image.fromarray(img.clip(0, 255).astype(np.uint8), "RGBA")
+    out = b"".join(top.resize((mw, mh), Image.BOX).tobytes() if k else top.tobytes()
+                   for k, (mw, mh) in enumerate(dims))
+    print(f"  darkened: glow at ({cu}, {cv}), cut {cut}, {mips} mips")
+    return hodpool.replace_texture_data(hod, out)
 
 
 def convert(btg, name, theta=0.0, phi=0.0):
