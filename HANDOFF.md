@@ -32,6 +32,8 @@ findings).
   Processor's automatic side beams: CatProcessor_Tick. Every model has RepairPoint0 (geo2dae) declared as RepCap.
 - **Pending (user):** ships need more than one repair point so several craft can repair one target. Worker salvage
   untested.
+- **Pending (user):** the Clee-San (a Kushan destroyer) becomes a recoloured stock HWRM destroyer (model and effects
+  both; tools/make_events.py leaves it out). The Sentinel's weapons name a mount (Weapon_Autogun) its CR model lacks.
 
 ## Processor: COMPLETE (2026-10-10, user-tested)
 - Four automatic side beams (shiprules.lua CatProcessor_Tick): each picks the nearest damaged friendly in its 90°
