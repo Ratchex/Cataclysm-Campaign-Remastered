@@ -19,15 +19,19 @@ for spec in $(python tools/make_modules.py --list-builds); do
     # on the Kuun-Lan: recentred, its hardpoint at its centre (HWRM draws a subsystem's health bar at its hardpoint:
     # at the shared origin every bar sat in the middle of the ship); Support already sits on its dock points
     ORIGIN=""; [ "$key" != support ] && ORIGIN="--origin auto"
-    GEO2DAE_ARGS="$MODARGS $ORIGIN" bash tools/build_ship.sh "race_sect/$cat" "smt_kl_$key" | tail -1
+    # on the Kuun-Lan no collision of its own (--col-none; the core's box takes it in, tools/kl_bounds.py): as a
+    # subsystem its own stopped the guns mounted on it, the rear guns' shots burst at the muzzle (user)
+    GEO2DAE_ARGS="$MODARGS $ORIGIN --col-none" bash tools/build_ship.sh "race_sect/$cat" "smt_kl_$key" | tail -1
     # loose (jettisoned modules, NIS dummies): in the Kuun-Lan's frame, placed where the Kuun-Lan is
     if [ -n "$ORIGIN" ]; then
         GEO2DAE_ARGS="$MODARGS" bash tools/build_ship.sh "race_sect/$cat" "smt_kl_${key}_dummy" | tail -1
     fi
 done
+# one collision box around the whole ship, modules included (Cataclysm's: a box per ship from its model's bounds)
+COLBOX=$(python tools/kl_bounds.py)
 HARDPOINTS="Hardpoint_Research $(python tools/make_modules.py --list-hardpoints)" \
 GEO2DAE_ARGS="--glow-from $GLOW --engines-from $GLOW --engines-scale 0.909 --dock-from C:/Modding/Cataclysm-decomp/reference/cr_beast/ship/smt_ms/smt_ms.hod --dock-scale 0.909 \
 --points-from $SECT/smothershipengineslower/rl0/lod0/smothershipengineslower.geo \
---points-from $SECT/smothershipenginesupper/rl0/lod0/smothershipenginesupper.geo" \
+--points-from $SECT/smothershipenginesupper/rl0/lod0/smothershipenginesupper.geo --col-box $COLBOX" \
     bash tools/build_ship.sh race_sect/smothership som_mothership $(python tools/make_modules.py --list-core) | tail -1
 python tools/make_modules.py   # installs the module models (data/subsystem, data/ship/*_dummy)

@@ -551,6 +551,12 @@ def main():
                                     "the asteroid's surface while harvesting")
     ap.add_argument("--col-slices", type=float, help="a collision mesh: boxes following the hull every this many "
                                                      "units along Z (else HODOR writes none)")
+    ap.add_argument("--col-box", action="append", metavar="X0,Y0,Z0,X1,Y1,Z1", nargs="?", const="",
+                    help="a collision mesh: one box around the model, grown to take in each given box (the Kuun-Lan "
+                         "core: the whole ship with its modules, Cataclysm's one box per ship)")
+    ap.add_argument("--col-none", action="store_true",
+                    help="a collision mesh of one 1-unit box at the origin: no collision of its own (a Kuun-Lan "
+                         "module, inside the core's box; its own stopped the Kuun-Lan's guns mounted on it)")
     ap.add_argument("--salvage-latch", help="SalvageOrientation joint at x,y,z (HWRM units): where a salvage-capture "
                                            "latch holds the ship (stock kus_salvagecorvette's, on its nose)")
     ap.add_argument("--glow-from", help="old-format HOD whose GLOW textures (Cataclysm texture names) become our "
@@ -975,7 +981,7 @@ def main():
     # Frigate's latched target sat ~17 off its ram plate, user: doesn't touch). Boxes following the hull's width
     # every --col-slices units along its length
     col_node = ""
-    if a.col_slices:
+    if a.col_slices or a.col_box or a.col_none:
         # vertices in model space: an --anim-joints part's are in its joint's frame (the Ramming Frigate's whole hull
         # hangs 56.7 back on JNT[RammingFrigate]: built from the raw ones, the mesh sat 56.7 ahead of the nose, user)
         jw = {}
@@ -999,20 +1005,29 @@ def main():
                 t, rot = joint_world(owner)
                 vs = [tuple(t[k] + sum(rot[k][j] * v[j] for j in range(3)) for k in range(3)) for v in vs]
             cv += vs
-        z0, z1 = min(v[2] for v in cv), max(v[2] for v in cv)
         P, I = [], []
-        z = z0
+
+        def box(x0, y0, z, x1, y1, ze):
+            b = len(P)
+            P.extend([(x0, y0, z), (x1, y0, z), (x1, y1, z), (x0, y1, z),
+                      (x0, y0, ze), (x1, y0, ze), (x1, y1, ze), (x0, y1, ze)])
+            for q in ((0, 3, 2, 1), (4, 5, 6, 7), (0, 1, 5, 4), (2, 3, 7, 6), (1, 2, 6, 5), (0, 4, 7, 3)):
+                I.extend([b + q[0], b + q[1], b + q[2], b + q[0], b + q[2], b + q[3]])   # outward winding
+        if a.col_none:
+            cv = [(-0.5, -0.5, -0.5), (0.5, 0.5, 0.5)]
+        for spec in a.col_box or []:
+            if spec:
+                c = [float(t) for t in spec.split(",")]
+                cv += [tuple(c[:3]), tuple(c[3:])]
+        z0, z1 = min(v[2] for v in cv), max(v[2] for v in cv)
+        if a.col_none or a.col_box:
+            box(min(v[0] for v in cv), min(v[1] for v in cv), z0, max(v[0] for v in cv), max(v[1] for v in cv), z1)
+        z = z1 if (a.col_none or a.col_box) else z0
         while z < z1 - 1e-6:
             ze = min(z + a.col_slices, z1)
             sl = [v for v in cv if z - 1e-3 <= v[2] <= ze + 1e-3]
             if sl:
-                x0, x1 = min(v[0] for v in sl), max(v[0] for v in sl)
-                y0, y1 = min(v[1] for v in sl), max(v[1] for v in sl)
-                b = len(P)
-                P += [(x0, y0, z), (x1, y0, z), (x1, y1, z), (x0, y1, z),
-                      (x0, y0, ze), (x1, y0, ze), (x1, y1, ze), (x0, y1, ze)]
-                for q in ((0, 3, 2, 1), (4, 5, 6, 7), (0, 1, 5, 4), (2, 3, 7, 6), (1, 2, 6, 5), (0, 4, 7, 3)):
-                    I += [b + q[0], b + q[1], b + q[2], b + q[0], b + q[2], b + q[3]]   # outward winding
+                box(min(v[0] for v in sl), min(v[1] for v in sl), z, max(v[0] for v in sl), max(v[1] for v in sl), ze)
             z = ze
         flat = [c for v in P for c in v]
         cid = "COL[Root]"
@@ -1026,7 +1041,8 @@ def main():
         col_node = (f'<node name="ROOT_COL" id="ROOT_COL" sid="ROOT_COLE"><translate sid="translate">0 0 0</translate>'
                     f'<node name="{cid}" id="{cid}" sid="{cid}E"><translate sid="translate">0 0 0</translate>'
                     f'<instance_geometry url="#{cid}-lib"/></node></node>\n')
-        print(f"collision mesh: {len(P) // 8} boxes, z {z0:.1f}..{z1:.1f}")
+        print(f"collision mesh: {len(P) // 8} boxes, x {min(v[0] for v in P):.1f}..{max(v[0] for v in P):.1f} "
+              f"y {min(v[1] for v in P):.1f}..{max(v[1] for v in P):.1f} z {z0:.1f}..{z1:.1f}")
 
     dae = os.path.join(a.out_dir, a.name + ".dae")
     with open(dae, "w", encoding="utf-8", newline="\n") as f:

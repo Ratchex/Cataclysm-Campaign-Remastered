@@ -1,0 +1,59 @@
+-- Somtaaw Ramming Frigate animation states (Cataclysm-HWRM; installed by tools/install_cr.py).
+-- shiprules.lua CatRam_Tick switches the state (NIS00-02: states the engine leaves alone on this ship, it has no dock
+-- paths), and this keeps the one before, so three states cover Cataclysm's sequence (srammingfrigate.mad clips, all
+-- on its nose but the collapse / recover, which move the body too):
+--   NIS00  charge: the afterburner ignites (AftBurnIgnite, held at its end) and its push burn lights
+--   NIS01  impact: the shock bowl (RamImpact), the nose collapses (RamCollapse, held), the push burn stays lit (lit here if no charge came first)
+--   NIS02  after an impact: the nose recovers (RamRecover); after a charge that never hit: CancelAftBurn. Burn out.
+
+SMT_RAMMINGFRIGATE_S = {}
+
+-- a clip played once and held on its last frame (paused a hair before the end: at the end itself it played on)
+SMT_RAMMINGFRIGATE_Hold = function(ship, clip)
+    if(isAnimRunning(ship, clip) == 1) then
+        stopAnim(ship, clip)
+    end
+    startAnim(ship, clip)
+    setTime(ship, clip, 0)
+    setPauseTime(ship, clip, getAnimLength(ship, clip) - 0.01)
+end
+
+SMT_RAMMINGFRIGATE_Stop = function(ship, clip)
+    if(isAnimRunning(ship, clip) == 1) then
+        stopAnim(ship, clip)
+    end
+end
+
+SMT_RAMMINGFRIGATE_NIS00_OnSet = function(ship)
+    SMT_RAMMINGFRIGATE_S[ship] = 0
+    SMT_RAMMINGFRIGATE_Stop(ship, "RamRecover")
+    SMT_RAMMINGFRIGATE_Stop(ship, "CancelAftBurn")
+    SMT_RAMMINGFRIGATE_Hold(ship, "AftBurnIgnite")
+    startEffect(ship, "RamThrust")
+end
+
+SMT_RAMMINGFRIGATE_NIS01_OnSet = function(ship)
+    local before = SMT_RAMMINGFRIGATE_S[ship]
+    SMT_RAMMINGFRIGATE_S[ship] = 1
+    SMT_RAMMINGFRIGATE_Stop(ship, "AftBurnIgnite")
+    SMT_RAMMINGFRIGATE_Stop(ship, "RamRecover")
+    SMT_RAMMINGFRIGATE_Hold(ship, "RamCollapse")
+    endEffect(ship, "RamImpact")
+    startEffect(ship, "RamImpact")        -- the impact's shock bowl (Cataclysm EGT_RAMMING_FRIGATE_IMPACT_EFFECT)
+    if(before ~= 0) then
+        startEffect(ship, "RamThrust")
+    end
+end
+
+SMT_RAMMINGFRIGATE_NIS02_OnSet = function(ship)
+    local before = SMT_RAMMINGFRIGATE_S[ship]
+    SMT_RAMMINGFRIGATE_S[ship] = 2
+    endEffect(ship, "RamThrust")
+    if(before == 1) then
+        SMT_RAMMINGFRIGATE_Stop(ship, "RamCollapse")
+        SMT_RAMMINGFRIGATE_Hold(ship, "RamRecover")
+    elseif(before == 0) then
+        SMT_RAMMINGFRIGATE_Stop(ship, "AftBurnIgnite")
+        SMT_RAMMINGFRIGATE_Hold(ship, "CancelAftBurn")
+    end
+end
