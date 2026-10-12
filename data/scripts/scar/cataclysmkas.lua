@@ -1074,6 +1074,7 @@ function KAS_StartEngine()
     KAS_ApplyAlliances()
     KAS_RestrictTechs()
     KAS_GrantStartResearch()
+    singlePlayerHyperspaceButtonDisable()     -- (Gearbox's singlePlayerStartGame): shown by K_497290
     Rule_AddInterval("KAS_EngineTick", 0.5)
     Rule_AddInterval("KAS_RURegen", KAS_RU_REGEN_SECONDS)
 end
@@ -1841,7 +1842,36 @@ function K_4980c0(shipType, race, on)
     KAS_VariantBuildWatch()
 end
 
--- 0x497290(flag, destination): end-of-mission hyperspace ("Hiigara", "~ End of Mission").
+-- 0x497290(flag, destination): end-of-mission hyperspace ("Hiigara", "~ End of Mission"): Cataclysm's HYPERSPACE
+-- button. Gearbox's HW1 one as it is (SinglePlayerHyperspace.lua, user: steal HW1RM's end): flag 1 shows the
+-- taskbar button; pressed, the roll call (strike craft dock, the rest parade, Go Now), everyone still out docked
+-- instantly, all into hyperspace off the map, white-out, setMissionComplete(1). The engine keeps the fleet in
+-- hyperspace (squadrons, holds, Kuun-Lan modules, research, RUs) for the next mission (persistence). Its state
+-- machine runs on KAS_HyperspaceTick, not Gearbox's singlePlayerGameUpdate (that fails the mission without a
+-- Kus_Mothership).
 function K_497290(flag, dest)
-    print("CKAS: hyperspace destination '" .. dest .. "' (" .. flag .. ") - mission end flow not ported yet")
+    print("CKAS: end-of-mission hyperspace " .. ((flag == 1 and "allowed") or "withdrawn") .. " ('" .. dest .. "')")
+    spGameInfo_currentMission = spGameInfo_currentMission or 0     -- (Gearbox's flow names it in a message)
+    if flag == 1 then
+        singlePlayerHyperspaceButtonEnable()
+        if Rule_Exists("KAS_HyperspaceTick") == 0 then Rule_AddInterval("KAS_HyperspaceTick", 0.25) end
+    else
+        singlePlayerHyperspaceButtonDisable()
+    end
+end
+
+function KAS_HyperspaceTick()
+    singlePlayerHyperspaceStateUpdate()
+end
+
+-- Gearbox's mothership lookup (KASUtil.lua, used by the roll call) knows only the stock motherships: the Kuun-Lan
+function KAS_PlayerMothership(sobGroupName, playerIndex)
+    SobGroup_CreateIfNotExist(sobGroupName)
+    SobGroup_Clear(sobGroupName)
+    local i = 1
+    while i <= getn(KAS_MothershipTypes) do
+        Player_FillShipsByType(sobGroupName, playerIndex or 0, KAS_MothershipTypes[i])
+        if SobGroup_Count(sobGroupName) > 0 then return end
+        i = i + 1
+    end
 end
