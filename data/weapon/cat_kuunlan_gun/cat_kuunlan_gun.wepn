@@ -2,7 +2,10 @@
 -- WEAPON_PROJECTILE, DamageMult 1.1, FireTime 0.25, BulletSpeed / BulletRange 6000 x 0.35, MaxAngle 85: the setAngles cone);
 -- damage 40 (large projectile vs armour 0, table 0x72b228) x 1.1. Bullet look, accuracy and the rest: Cataclysm
 -- Remastered's Bst_MSTurret (user: Cataclysm's weapon setup, not theirs).
-StartWeaponConfig(NewWeaponType,"Gimble","Bullet","kinetic_large","Normal Only",2100,2100,0,0,0,0,1,1,1,0.25,0,0,1,1,90,90,0.1,"Normal",1,0,0)
+-- No line-of-fire check (as stock HW1 HW1_MothershipGun; Cataclysm hidden gimbals have none): with it the rear guns
+-- held fire behind their own hull (user). Each gun picks its own target (shoot at secondaries / surroundings: 1, 1),
+-- HWRM's form of the Kuun-Lan's canTargetMultipleTargets.
+StartWeaponConfig(NewWeaponType,"Gimble","Bullet","kinetic_large","Normal Only",2100,2100,0,0,0,0,1,1,0,0.25,0,0,1,1,90,90,0.1,"Normal",1,0,0)
 
 AddWeaponResult(NewWeaponType,"Hit","DamageHealth","Target",44,44,"")
 
