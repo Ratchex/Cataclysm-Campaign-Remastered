@@ -172,6 +172,10 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
   docked instantly, the Kuun-Lan `SobGroup_Despawn`ed; then `SobGroup_HyperspaceTo(ms, "StartPointPlayer")`, launch
   once its order is COMMAND_Idle, then G_ShipsHaveArrived.
 - HyperspaceTo brings the ship in unrotated (bow +Z, port +X), ignoring the point's rotation.
+  Its heading comes from where the ship was: the exit flies it in along the line from its old position to the point
+  (despawned on the point itself: no line, bow +Z). Turning it by script fails: the exit keeps +Z as its heading
+  goal and steers back (logged). So it waits KAS_ArrivalBack behind the point (cataclysmkas.lua
+  KAS_ArrivalPlaceBehind, build_mission.py ARRIVAL_YAW; user-confirmed, Mission01).
 - Camera: level `addCamera(name, target, eye)` + `Camera_UseCameraPoint`, then
   `Camera_FocusSobGroupWithBuffer(g, distance, 0, 0)`. `Camera_FocusSobGroup(g, 0, 0, 0)` zooms right in, whatever
   the camera point.
