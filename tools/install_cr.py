@@ -665,6 +665,9 @@ def main():
     copied += make_shipcode.install()
     # Cataclysm's health and weapon damage (user: all ships, Cataclysm's scale 1:1)
     copied += make_damage.apply(make_damage.plan())
+    # damage-factor ship copies (<ship>_d<pct>: Cataclysm's low kasfShipsSetDamageFactor; tools/make_variants.py)
+    import make_variants
+    copied += make_variants.install()
     # the HW1 resource collectors' harvesting at Cataclysm's pace (after make_shipcode copies their .ship)
     for ship, cat in HARVEST.items():
         harvest_rate(ship, cat)

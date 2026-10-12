@@ -44,6 +44,10 @@ function DetermChunk()
     addSquadron("TargetFrigate1", "tai_ioncannonfrigate", {500, 0, 9000}, 1, {0, 180, 0}, 0, 0)
     createSOBGroup("TargetIon")
     addToSOBGroup("TargetFrigate1", "TargetIon")
+    -- its 10 % damage copy (tools/make_variants.py), for the beam test in range.lua
+    addSquadron("TargetFrigate2", "tai_ioncannonfrigate_d10", {1500, 0, 9000}, 1, {0, 180, 0}, 0, 0)
+    createSOBGroup("TargetIon10")
+    addToSOBGroup("TargetFrigate2", "TargetIon10")
 
     addSphere("Everything", {0, 0, 0}, 30000)
     addCamera("Camera_Startpos", {0, 0, 2200}, {2200, 1600, -1200})
