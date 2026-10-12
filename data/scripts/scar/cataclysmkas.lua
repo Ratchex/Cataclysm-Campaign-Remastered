@@ -988,8 +988,34 @@ end
 -- Fleet Command, data/soundscripts/cataclysm/catspeech.lua)
 dofilepath("data:scripts/playerspatch_speech_util.lua")
 
+-- TRACE (user: Mission01's Kushan fleet still wiped out): every 15 s each team's ships, average health and how many
+-- are damage copies (tools/make_variants.py), in the log ("CKAS battle")
+KAS_BattleReport = 1
+KAS_BattleStart = nil
+function KAS_BattleTick()
+    if KAS_BattleStart == nil then KAS_BattleStart = Universe_GameTime() end
+    SobGroup_CreateIfNotExist("KAS_BattleCopies")
+    local i = 0
+    while KASNumberTeams and i < KASNumberTeams do
+        local t = KASTeams[i]
+        local n = SobGroup_Count(t)
+        if n > 0 then
+            local copies = 0
+            for copy, _ in CatDamageVariants do
+                SobGroup_Clear("KAS_BattleCopies")
+                SobGroup_FillShipsByType("KAS_BattleCopies", t, copy)
+                copies = copies + SobGroup_Count("KAS_BattleCopies")
+            end
+            print("CKAS battle t+" .. floor(Universe_GameTime() - KAS_BattleStart) .. " " .. t .. ": " .. n ..
+                  " ships, health " .. floor(SobGroup_HealthPercentage(t) * 100) .. "%, copies " .. copies)
+        end
+        i = i + 1
+    end
+end
+
 function KAS_StartEngine()
     Rule_AddInterval("KAS_RecordTeamCounts", 1)
+    if KAS_BattleReport == 1 then Rule_AddInterval("KAS_BattleTick", 15) end
     SpeechRaceHelper()
     KAS_ApplyColourSchemes()
     Rule_AddInterval("CatAbilityTick", 0.25)
@@ -1296,8 +1322,11 @@ function KAS_Owner(sel) return SobGroup_GetPlayerOwner(sel) end
 
 -- ------------------------------------------------------------------ mission / team
 function K_491cb0() KAS_MissionFailed() end                                                          -- kasfMissionFailed
-function K_492780() KAS_SetFormation(KAS_Team, "Delta") end                                          -- kasfFormationDelta
-function K_492810() KAS_SetFormation(KAS_Team, "Claw") end                                           -- kasfFormationClaw
+-- Formations: a strike group of the ships the team has in space; a team still launching (Mission01's first pester
+-- wing, user: not in delta like the second) gets it again once it has launched (K_4948a0).
+KAS_TeamFormation = {}
+function K_492780() KAS_TeamFormation[KAS_Team] = "Delta" KAS_SetFormation(KAS_Team, "Delta") end   -- kasfFormationDelta
+function K_492810() KAS_TeamFormation[KAS_Team] = "Claw" KAS_SetFormation(KAS_Team, "Claw") end     -- kasfFormationClaw
 -- kasfGuardShips (HW1 aimCreateGuardShips: the protect command, the guards around the guarded ships). HWRM's guard
 -- order only trails them (user: Mission01's carrier defenders should hold a sphere round the carrier): each guard
 -- ship is sent to its own point on a sphere of KAS_GuardRadius round them (KAS_GuardTick), and with an enemy within
@@ -1428,11 +1457,20 @@ KAS_LaunchAt = {}
 KAS_LaunchGiveUp = 20
 function K_4947c0() KAS_LaunchAt[KAS_Team] = Universe_GameTime() KAS_Launch(KAS_Team) end            -- kasfLaunch
 function K_4948a0()                                                                                  -- kasfTeamFinishedLaunching
-    if KAS_TeamFinishedLaunching(KAS_Team) ~= 0 then return KAS_B(1) end
     local t = KAS_LaunchAt[KAS_Team]
-    if t == nil or SobGroup_Count(KAS_Team) == 0 then return KAS_B(nil) end
+    if KAS_TeamFinishedLaunching(KAS_Team) ~= 0 then
+        if t and t ~= -1 and KAS_TeamFormation[KAS_Team] then KAS_SetFormation(KAS_Team, KAS_TeamFormation[KAS_Team]) end
+        if t then KAS_LaunchAt[KAS_Team] = -1 end
+        return KAS_B(1)
+    end
+    if t == nil or t == -1 or SobGroup_Count(KAS_Team) == 0 then return KAS_B(nil) end
     local since = Universe_GameTime() - t
-    return KAS_B(since > 1 and (SobGroup_IsDocked(KAS_Team) == 0 or since > KAS_LaunchGiveUp))
+    local done = since > 1 and (SobGroup_IsDocked(KAS_Team) == 0 or since > KAS_LaunchGiveUp)
+    if done and KAS_TeamFormation[KAS_Team] and KAS_LaunchAt[KAS_Team] ~= -1 then
+        KAS_SetFormation(KAS_Team, KAS_TeamFormation[KAS_Team])      -- formed again now it is all in space
+    end
+    if done then KAS_LaunchAt[KAS_Team] = -1 end
+    return KAS_B(done)
 end
 function K_494940() return KAS_B(SobGroup_IsDockedCompletely(KAS_Team) == 1) end                   -- kasfTeamDockedReadyForLaunch
 function K_495eb0()                                                                                  -- kasfStop
