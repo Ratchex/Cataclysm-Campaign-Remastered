@@ -262,6 +262,27 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
 - SobGroup_CreateShip builds docked inside a ship that can build and returns no usable group (Gearbox, KASUtil
   KAS_RequestShips): spawn in space with SobGroup_SpawnNewShipInSobGroup instead.
 
+## Resource ships' cargo on death (2026-10-12, decompiled, confirmed in game)
+- Cataclysm (FUN_00548e00, as HW1 UnivUpdate.c): a dying ship of class Resource with RU aboard leaves dust cloud type
+  0 worth its RU x DUSTCLOUD_RCOLLECTOR_BLOWUP_SCALE (1.0, resource.script), shrunk by value (dustcloud0.shp: 50 RU
+  full size, min 0.2).
+- HWRM already does it: SpawnDustCloudOnDeath / SpawnSalvageOnDeath / SpawnAsteroidOnDeath (handlers 0x60d088 /
+  0x60d2d4, kinds 5 / 4 / 3) all store name, count, then **build cost %, held RU %, parent RU %, absolute RU** first
+  (the error strings' "position X..." names misled). At death (FUN_00668fc6) the dying ship's build cost / held RU /
+  parent RU are shared between its entries by those weights (one entry: all of it); absolute RU / count otherwise; a
+  dust cloud spawns only with RU > 0, its size = size + random x sizeRandom (not by value). Stock collectors (Worker
+  included): `SpawnDustCloudOnDeath(..., "DustCloud_0", 1, 0,70,0,0, ...)` = held weight 70 = the whole cargo.
+- **Confirmed in game:** the cloud carries the cargo and is harvested by a Harvest order's own target search (button /
+  hotkey, user), but it **can't be clicked** as a target: HWRM's level functions (addDustCloud / addAsteroid /
+  addSalvage, 0x50e6xx-0x50ebxx) and the reactive fleet OR a runtime-set attribute mask (DAT_009dc978, .bss) into the
+  new resource's +0x15c; the death spawner (FUN_00668fc6) doesn't. Stock DustCloud_0 also has selectionPriority 0 and
+  no blobRadius; ours is HW1's dust cloud 0 (DustCloud0_hw1, install_cr.py patch_cargo_clouds), as Cataclysm drops.
+  The dust cloud factory FUN_0066daa2: RU = arg (absolute) << 10, or a % of the type's resourceValue when its 7th
+  argument is set.
+- Dead end: SpawnAsteroidOnDeath with a dust cloud type crashes the load (null model, 0x5044d6): it loads only from
+  data:Resource\Asteroid (category table 0x8bcd5c: Ship, WeaponFire, Volume, Asteroid, Salvage, DustCloud, ...), and a
+  StartDustCloudConfig there gets no model either.
+
 ## Debugging crashes (Phase 1)
 - **Crash on exit with no ErrorLog** = heap corruption (Windows Application log: ntdll, 0xc0000374). HWRM's own
   handler doesn't catch it. Catch it with Sysinternals ProcDump (`C:\Modding\tools\procdump`): launch, then

@@ -379,6 +379,29 @@ def cataclysm_costs():
     return costs
 
 
+# A resource ship's cargo as a dust cloud where it dies (Cataclysm FUN_00548e00: class Resource with RU aboard ->
+# dust cloud 0 worth its RU x 1.0). HWRM's collectors already do it (NOTES.md "Resource ships' cargo on death":
+# SpawnDustCloudOnDeath's held RU weight), but with type DustCloud_0, selectionPriority 0 and no blobRadius: it
+# could not be clicked, so not harvested (user). HW1's dust cloud 0 (stock Homeworld2 DustCloud0_hw1: priority 35,
+# blob 100, HW1's soft dots) is the one Cataclysm drops.
+CARGO_CLOUD_TYPE = "DustCloud0_hw1"
+
+
+def patch_cargo_clouds():
+    done = []
+    for ship in sorted(os.listdir(os.path.join(DATA, "ship"))):
+        path = os.path.join(DATA, "ship", ship, ship + ".ship")
+        if not os.path.exists(path):
+            continue
+        text = open(path, encoding="latin-1").read()
+        new = re.sub(r'^([ \t]*SpawnDustCloudOnDeath\(NewShipType,\s*)"DustCloud_0"', rf'\1"{CARGO_CLOUD_TYPE}"', text,
+                     flags=re.M)
+        if new != text:
+            open(path, "w", encoding="latin-1", newline="").write(new)
+            done.append(ship)
+    print(f"  cargo dust clouds ({CARGO_CLOUD_TYPE}) on {len(done)} ships: {', '.join(done)}")
+
+
 def set_costs():
     n = 0
     for ship, (cat, cost, time) in sorted(cataclysm_costs().items()):
@@ -637,6 +660,7 @@ def main():
     for ship, (cat, cls) in SPEEDS.items():
         set_speed(ship, cat, cls)
     set_costs()
+    patch_cargo_clouds()
     set_trails()
     drop_weapons()
     for root, _, files in os.walk(OVERRIDES):   # our own versions of their files (.events / .madstate)
