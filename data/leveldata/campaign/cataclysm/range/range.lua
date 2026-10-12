@@ -74,7 +74,7 @@ end
 -- Taiidan ion frigate fires at our Processor, its 10 % copy (tai_ioncannonfrigate_d10, tools/make_variants.py) at our
 -- Ramming Frigate; each target's loss is logged every 5 s. (Found before: SobGroup_SetDamageMultiplier compounds and
 -- stops beams below ~0.5.)
-RANGE_BEAM_TEST = 1
+RANGE_BEAM_TEST = 0           -- done: beams fire at 10 % weapon damage (tools/make_variants.py)
 RangeBeamStart = nil
 RangeBeamLog = 0
 RangeBeamHP = nil
