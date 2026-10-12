@@ -73,7 +73,7 @@ end
 -- TEST (user): the damage multiplier stepped down 0.1 at a time, where do ion beams cut out? The normal Taiidan ion
 -- frigate fires at our Processor from 15 s; every RANGE_STEP s its multiplier goes 1.0, 0.9 ... 0.1 (set as the ratio
 -- to the last: SobGroup_SetDamageMultiplier compounds), each step on screen and logged with the Processor's loss.
-RANGE_BEAM_TEST = 1
+RANGE_BEAM_TEST = 0           -- done: beams fire at 0.5, cut out at 0.4 (user, 2026-10-12)
 RANGE_STEP = 20
 RangeBeamStart = nil
 RangeBeamMult = 1

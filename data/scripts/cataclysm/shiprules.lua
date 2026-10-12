@@ -372,8 +372,8 @@ end
 -- FUN_005148f0 (damage) and FUN_00514940 (speed, less when damaged). Damage: its rank's, times a mission's damage
 -- factor (its rank's alone overwrote it: Mission01's 10% teams dealt full damage, user: fights ended early), the factor
 -- no lower than CAT_DMGF_MIN. SobGroup_SetDamageMultiplier compounds (range test: 0.5 twice = 0.25), so it is set by
--- the ratio to what this last set (rec.dmg, 1 for a new ship), and only here; ion beams stop firing below about 0.5
--- (0.25 silenced them: user saw beams charge and nothing fire, Mission01's 10% teams).
+-- the ratio to what this last set (rec.dmg, 1 for a new ship), and only here; ion beams fire at 0.5 and cut out at
+-- 0.4 (stepped down 0.1 at a time in the range, user), so lower factors are weaker weapon copies (make_variants.py).
 CAT_DMGF_MIN = 0.5
 function CatShip_ApplyMultipliers(rec)
     if SobGroup_Empty(rec.g) == 1 then return end
