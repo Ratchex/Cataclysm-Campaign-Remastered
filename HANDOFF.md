@@ -36,6 +36,9 @@ findings).
   line-of-fire check); the core has one collision box around the whole ship (geo2dae --col-box, tools/kl_bounds.py), the
   modules none (--col-none: their own stopped the rear guns' shots). Death effects (user-tested): tools/make_events.py
   gives the ships CR left empty stock HW1 effects; install_cr.py keeps every Somtaaw ship alive past its last death blast.
+- **Pending (user, after the mission work):** the Guard order is voiced by Fleet Command in Cataclysm, not by the
+  ordered ships. Carry-over between missions: HWRM persistence (Mission02+ levels with no player fleet; test missions
+  moved behind the real ones in cataclysm.campaign).
 - **Pending (user):** the Clee-San (a Kushan destroyer) becomes a recoloured stock HWRM destroyer (model and effects
   both; tools/make_events.py leaves it out). The Sentinel's weapons name a mount (Weapon_Autogun) its CR model lacks.
 
