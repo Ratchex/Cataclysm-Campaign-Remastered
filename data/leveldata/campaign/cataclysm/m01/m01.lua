@@ -15,9 +15,11 @@ dofilepath("data:leveldata/campaign/cataclysm/m01/m01_kas.lua")
 
 -- Kuun-Lan modules at the start (the mission's IncludeShips sMothership<Module>; tools/make_modules.py)
 KAS_StartModules = { "smt_kl_dockingbay", "smt_kl_engineslower", "smt_kl_enginesupper", "smt_kl_lowerspine", "smt_kl_orecanarmour" }
--- research the player starts with, and the Kuun-Lan's turn on arrival (build_mission.py START_RESEARCH, ARRIVAL_YAW)
+-- research the player starts with, the Kuun-Lan's turn on arrival, the opening lock (build_mission.py START_RESEARCH,
+-- ARRIVAL_YAW, OPENING_LOCK)
 KAS_StartResearch = { "TECH_DRIVE_FIGHTER" }
 KAS_ArrivalYaw = 90
+KAS_OpeningLock = 1
 
 function OnStartOrLoad()
     print("CATACLYSM Mission01: OnStartOrLoad")
