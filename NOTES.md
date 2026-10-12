@@ -130,8 +130,8 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
     a DIFF are deleted (HODOR would pick them up).
   - RODOH only reads HW2 Classic HODs (does nothing on HWRM ones). The .hod texture data is one compressed POOL
     chunk: u32 3518, then three pools (packed, unpacked, data); pool 1 = all LMIPs' pixel data in order. Codec
-    decompiled from HODOR.exe (a flag-word LZ, tools/hodpool.py reads it; packed == unpacked = stored, which the
-    game takes: ez14's sky texture is edited that way, make_background.py DARKEN).
+    decompiled from HODOR.exe (a flag-word LZ, tools/hodpool.py reads it; packed == unpacked = stored, which HODOR's
+    reader takes (the game: to confirm): ez14's sky texture is edited that way, make_background.py DARKEN).
   - Kuun-Lan modules reach the game through `make_modules.py` (data/subsystem, data/ship/*_dummy), not
     install_cr.py: build_kuunlan.sh runs it at the end (a rebuild once never reached the game).
 - HW1 model space is X up, Y right, Z forward; HWRM = 0.35 * (-y, x, z) (proper rotation, winding kept: HW1
