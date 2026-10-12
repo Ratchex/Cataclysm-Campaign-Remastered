@@ -434,7 +434,11 @@ def navlight_nodes(points, conv, scale):
             continue
         if mex not in shps:
             shps[mex] = shp_navlights(mex)
-        on, off, delay, size = shps[mex].get(lbl.lower(), (1.0, 1.0, 0.0, 30.0))
+        if lbl.lower() not in shps[mex]:
+            # HW1 draws only the lights its .shp declares: the Acolyte's are commented out, the ACV's "NONE", the
+            # Mimic's and Lower Spine's absent; their .mex points are leftovers (user: no lights there)
+            continue
+        on, off, delay, size = shps[mex][lbl.lower()]
         period = max(on + off, 0.01)
         stem = re.sub(r"\W", "", lbl) or "Nav"
         name, k = stem, 1
