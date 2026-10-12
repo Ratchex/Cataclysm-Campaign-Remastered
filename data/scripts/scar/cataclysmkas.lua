@@ -730,41 +730,18 @@ function KAS_ArrivalBowLog()
     if KAS_ArrivalBowLogs >= 5 then Rule_Remove("KAS_ArrivalBowLog") end
 end
 
--- Every Cataclysm mission starts with Fleet Command's "Autolaunch set" and the docked ships flying out into parade
--- formation round the Kuun-Lan (user). HW1's arrival (SinglePlayer.c HYPERSPACE_SHIPSARRIVING): clAutoLaunch
--- restores autolaunch, launching everything inside and saying COMM_F_AutolaunchOn (event 169, Fleet Command);
--- each ship that has launched is grouped into the military parade round the ship it left (CommandLayer.c
--- COMMAND_LAUNCH_SHIP -> GroupShip -> GroupShipIntoMilitaryParade). Their flight paths: the Kuun-Lan's launch
--- paths, then each to its parade slot.
-KAS_AUTOLAUNCH_EVENT = 169 + 4096         -- (KAS_SpeechPlay: 0x1000 = Fleet Command)
+-- Every Cataclysm mission starts with Fleet Command's "Autolaunch set" and the docked ships flying out into the
+-- Kuun-Lan's parade (user). HW1's arrival (SinglePlayer.c HYPERSPACE_SHIPSARRIVING): clAutoLaunch turns autolaunch
+-- back on, launching everything inside with the line; each launched ship joins the parade round the ship it left
+-- (CommandLayer.c GroupShip), as HWRM's launches do on their own: Cataclysm's layout is the Kuun-Lan's paradeData
+-- (tools/make_parade.py). Cataclysm's line is its event 104 ("auto launch set"; out/speech_text_sect.tsv), not
+-- HW1's 169 (Cataclysm's: "Swarmer is locked on", user).
+KAS_AUTOLAUNCH_EVENT = 104 + 4096         -- (KAS_SpeechPlay: 0x1000 = Fleet Command)
 function KAS_Autolaunch()
     SobGroup_SetAutoLaunch("KAS_ArrivalMS", ShipHoldLaunch)
     if SobGroup_Count("KAS_ArrivalDocked") == 0 then return end
     SobGroup_Launch("KAS_ArrivalDocked", "KAS_ArrivalMS")
     KAS_SpeechPlay(KAS_AUTOLAUNCH_EVENT, 0)
-    SobGroup_CreateIfNotExist("KAS_Paraded")
-    SobGroup_Clear("KAS_Paraded")
-    KAS_ParadeUntil = Universe_GameTime() + 90
-    Rule_AddInterval("KAS_ParadeLaunched", 0.5)
-end
-
--- the arrival's ships that have finished launching (out, no launch order left) into the parade, once each
-function KAS_ParadeLaunched()
-    SobGroup_CreateIfNotExist("KAS_ParadeOut")
-    SobGroup_CreateIfNotExist("KAS_ParadeNew")
-    SobGroup_Clear("KAS_ParadeOut")
-    SobGroup_FilterExclude("KAS_ParadeOut", "KAS_ArrivalDocked", "Docked", "")
-    SobGroup_FilterExclude("KAS_ParadeOut", "KAS_ParadeOut", "CurrentCommand", "COMMAND_Launch")
-    SobGroup_Clear("KAS_ParadeNew")
-    SobGroup_FillSubstract("KAS_ParadeNew", "KAS_ParadeOut", "KAS_Paraded")
-    if SobGroup_Count("KAS_ParadeNew") > 0 and SobGroup_Count("KAS_ArrivalMS") > 0 then
-        SobGroup_ParadeSobGroup("KAS_ParadeNew", "KAS_ArrivalMS", 0)
-        SobGroup_SobGroupAdd("KAS_Paraded", "KAS_ParadeNew")
-    end
-    if SobGroup_Count("KAS_Paraded") >= SobGroup_Count("KAS_ArrivalDocked") or Universe_GameTime() > KAS_ParadeUntil then
-        Rule_Remove("KAS_ParadeLaunched")
-        print("CKAS: " .. SobGroup_Count("KAS_Paraded") .. " launched ships in parade")
-    end
 end
 
 -- Player 2 (when the level has one) is the allied Kushan fleet. Applied at start and again on the first tick.
@@ -1822,13 +1799,13 @@ function KAS_UniverseHold(on)
     end
 end
 
--- Player control off / on: orders, camera, the sensors manager toggle (Gearbox's spMainScreenAndLockout /
--- spUnlockout, without leaving the sensors manager: Cataclysm's briefings play in it). KAS_OpeningLock (the
+-- Player control off / on: orders and the sensors manager toggle (Gearbox's spMainScreenAndLockout / spUnlockout,
+-- without leaving the sensors manager: Cataclysm's briefings play in it); the camera stays the player's (user).
+-- KAS_OpeningLock (the
 -- mission's, build_mission.py OPENING_LOCK) keeps it off from the warp-in to the end of the first briefing.
 function KAS_Lockout(on)
     if on == 0 and KAS_OpeningLock == 1 then return end
     Universe_AllowPlayerOrders(1 - on)
-    Camera_AllowControl(1 - on)
     Sensors_EnableToggle(1 - on)
     if on == 1 then SobGroup_DeSelectAll() end
     print("CKAS: player control " .. ((on == 1 and "locked") or "unlocked"))
