@@ -2,6 +2,11 @@
 -- Mod campaigns are "Extra" content (contentType 2), following the stock rr_oem.campaign and the
 -- Taiidan Republic mod. The campaign list tile is leveldata/campaign/cataclysm.dds (1024x512);
 -- per-mission thumbnails live in ui/mapthumbnails/campaign/cataclysm/<directory>.dds.
+--
+-- Fleet carry-over: winning Mission[n] (hyperspace, setMissionComplete(1)) makes the engine write the fleet in
+-- hyperspace to <profile>/Campaign/CATACLYSM/persist<n+1>.lua, which Mission[n+1] loads. So Mission[n] is Cataclysm's
+-- Mission n, in order with no gaps, and the unit test range stays after the last mission.
+-- Animatics follow HWRM's HW1 campaign: Mission[n].postload plays AnimaticNN (the one before mission n).
 
 displayName = "Homeworld Cataclysm"
 
@@ -16,8 +21,33 @@ contentSort = 0.3
 
 Mission = {}
 
--- Unit test range: Somtaaw ships and systems away from the missions (range/range.lua has its switches).
+-- Cataclysm Mission01, translated from cataclysm.exe.
 Mission[1] =
+{
+    postload    = function () playAnimatic("data:animatics/animatic01.lua", 0, 0) end,
+    directory   = "m01",
+    level       = "m01.level",
+    postlevel   = function ( bWin ) postLevelComplete() end,
+
+    displayName = "Mission 1 (translated)",
+    description = "Cataclysm Mission01 running on translated mission code.",
+}
+
+-- Cataclysm Mission02 (not ported yet; uncomment with its level). Loads persist2.lua, Mission 1's fleet.
+-- Mission[2] =
+-- {
+--     postload    = function () playAnimatic("data:animatics/animatic02.lua", 0, 0) end,
+--     directory   = "m02",
+--     level       = "m02.level",
+--     postlevel   = function ( bWin ) postLevelComplete() end,
+--
+--     displayName = "Mission 2 (translated)",
+--     description = "Cataclysm Mission02 running on translated mission code.",
+-- }
+
+-- Unit test range: Somtaaw ships and systems away from the missions (range/range.lua has its switches).
+-- Keep it last (after the highest ported mission) so it never sits between two missions' carry-over.
+Mission[2] =
 {
     directory   = "range",
     level       = "range.level",
@@ -25,39 +55,4 @@ Mission[1] =
 
     displayName = "Unit test range",
     description = "The Kuun-Lan, Acolytes, ACVs, Workers and a Recon, with Taiidan targets. All research done.",
-}
-
--- Phase 0.1 smoke test: proves the campaign loads, a level spawns ships and the KAS layer runs.
-Mission[2] =
-{
-    directory   = "m00_test",
-    level       = "m00_test.level",
-    postlevel   = function ( bWin ) postLevelComplete() end,
-
-    displayName = "Pipeline test",
-    description = "Phase 0 smoke test mission.",
-}
-
-
--- Phase 0.2 check: Cataclysm Mission01's converted layout (no mission logic; placeholder ships and background).
-Mission[3] =
-{
-    directory   = "m01_layout",
-    level       = "m01_layout.level",
-    postlevel   = function ( bWin ) postLevelComplete() end,
-
-    displayName = "Layout check: Mission 1",
-    description = "Converted Cataclysm Mission01 ship layout, no scripting.",
-}
-
--- Phase 0.7: Cataclysm Mission01, translated from cataclysm.exe (stand-in ships; most KAS functions stubbed).
-Mission[4] =
-{
-    postload    = function () playAnimatic("data:animatics/animatic01.lua", 0, 0) end, -- Animatic01 (tools/make_animatics.py)
-    directory   = "m01",
-    level       = "m01.level",
-    postlevel   = function ( bWin ) postLevelComplete() end,
-
-    displayName = "Mission 1 (translated)",
-    description = "Cataclysm Mission01 running on translated mission code.",
 }

@@ -44,8 +44,11 @@ findings).
   can't be redefined (HWRM refuses): KAS_KuunLan, and Gearbox's cache group KAS_MothershipGroup0 for the roll call.
   KAS_DevHyperspaceAfter (seconds) shows the button early for testing.
 - **Pending (user, after the mission work):** the Guard order is voiced by Fleet Command in Cataclysm, not by the
-  ordered ships. Carry-over between missions: HWRM persistence (Mission02+ levels with no player fleet; test missions
-  moved behind the real ones in cataclysm.campaign).
+  ordered ships (done). Carry-over between missions: HWRM persistence. Winning Mission[n] writes
+  Profiles/<p>/Campaign/CATACLYSM/persist<n+1>.lua (confirmed: Mission 1 saved the Kuun-Lan, scouts, workers,
+  research, RUs). cataclysm.campaign now has Mission[n] = Cataclysm mission n and the range last; test missions
+  deleted. Mission02's level: no player fleet, OnInit loads it as HW1's mission02.lua does
+  (SobGroup_LoadPersistantData(<mothership type>)).
 - **Pending (user):** the Clee-San (a Kushan destroyer) becomes a recoloured stock HWRM destroyer (model and effects
   both; tools/make_events.py leaves it out). The Sentinel's weapons name a mount (Weapon_Autogun) its CR model lacks.
 
