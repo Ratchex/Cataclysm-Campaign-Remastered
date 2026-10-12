@@ -32,6 +32,10 @@ findings).
   Processor's automatic side beams: CatProcessor_Tick. Every model has RepairPoint0 (geo2dae) declared as RepCap.
 - **Pending (user):** ships need more than one repair point so several craft can repair one target. Worker salvage
   untested.
+- Kuun-Lan (user-tested): Cataclysm's six large guns (data/weapon/cat_kuunlan_gun*: setAngles cone 85 / 60, no
+  line-of-fire check); the core has one collision box around the whole ship (geo2dae --col-box, tools/kl_bounds.py), the
+  modules none (--col-none: their own stopped the rear guns' shots). Death effects (user-tested): tools/make_events.py
+  gives the ships CR left empty stock HW1 effects; install_cr.py keeps every Somtaaw ship alive past its last death blast.
 - **Pending (user):** the Clee-San (a Kushan destroyer) becomes a recoloured stock HWRM destroyer (model and effects
   both; tools/make_events.py leaves it out). The Sentinel's weapons name a mount (Weapon_Autogun) its CR model lacks.
 
