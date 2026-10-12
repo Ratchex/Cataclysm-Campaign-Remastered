@@ -319,6 +319,34 @@ SPEEDS = {"smt_scout": ("srecon", "scout"), "smt_acolyte": ("sacolyte", "interce
           "smt_rammingfrigate": ("srammingfrigate", "frigate"), "smt_processor": ("sprocessor", "scout")}   # (the Workers' ratio, user)
 
 
+# Harvesting: Cataclysm's .shp harvestRate (an asteroid eaten every n + 1 frames, 16 frames a second) x harvestAmount
+# RUs, and resourcesAtOneTime per trip, into HWRM's Harvest ability (enabled, capacity, RUs a second, distance).
+# Gearbox's HW1 collectors take 10 RUs a second, 20x Cataclysm's 0.5: Mission01's Taiidan resourcers stripped their
+# field early and went into parade with their carrier (user: their field should last).
+HARVEST = {"tai_resourcecollector": "race_taidan/tresourcecollector"}   # (Cataclysm has no Kushan collector)
+
+
+def harvest_rate(ship, cat):
+    path = os.path.join(DATA, "ship", ship, ship + ".ship")
+    shp = os.path.join(r"C:\Modding\Cataclysm-decomp\extracted\big", *cat.split("/")) + ".shp"
+    if not os.path.exists(path) or not os.path.exists(shp):
+        return
+    v = {}
+    for line in open(shp, encoding="latin-1"):
+        m = re.match(r"\s*(harvestRate|harvestAmount|resourcesAtOneTime)\s+([\d.]+)", line)
+        if m:
+            v[m.group(1)] = float(m.group(2))
+    rate = 16 / (v.get("harvestRate", 31) + 1) * v.get("harvestAmount", 1)
+    cap = v.get("resourcesAtOneTime", 250)
+    text = open(path, encoding="latin-1").read()
+    text, n = re.subn(r'addAbility\(NewShipType,\s*"Harvest",\s*1,\s*[\d.]+,\s*[\d.]+,\s*([\d.]+)\);',
+                      lambda m: f'addAbility(NewShipType,"Harvest",1,{cap:g},{rate:g},{m.group(1)});   '
+                                f'-- Cataclysm-HWRM: Cataclysm\'s pace ({cat})', text, count=1)
+    if n:
+        open(path, "w", encoding="latin-1", newline="").write(text)
+        print(f"  {ship}: harvests {rate:g} RU/s, {cap:g} a trip (Cataclysm's)")
+
+
 # Build cost and time: Cataclysm's own (the .shp buildCost / buildTime, 1:1: RUs are Cataclysm's too, asteroids by
 # mission2level.py ru_percent), not theirs (their Acolyte cost 130 to Cataclysm's 75). Every ship of theirs that
 # tools/shipmap.tsv maps a Cataclysm Somtaaw / Beast ship to.
@@ -637,6 +665,9 @@ def main():
     copied += make_shipcode.install()
     # Cataclysm's health and weapon damage (user: all ships, Cataclysm's scale 1:1)
     copied += make_damage.apply(make_damage.plan())
+    # the HW1 resource collectors' harvesting at Cataclysm's pace (after make_shipcode copies their .ship)
+    for ship, cat in HARVEST.items():
+        harvest_rate(ship, cat)
     # every Somtaaw ship repairable (Cataclysm's repair beams take anything; HWRM repairs only ships with
     # CanBeRepaired: theirs left out the fighters, the ACV...: user, the Processor's ordered repair did nothing).
     # HWRM repairs only at RepCap latch points ("marked as repairable ... but has no repair points!"): our models
