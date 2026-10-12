@@ -1403,15 +1403,33 @@ function K_495eb0()                                                             
     KAS_EndPatrol()
     if SobGroup_Count(KAS_Team) > 0 then SobGroup_Stop(KAS_Owner(KAS_Team), KAS_Team) end
 end
-function K_495f00() KAS_Harvest(KAS_Owner(KAS_Team), KAS_Team) end                                  -- kasfHarvest
+-- kasfHarvest. A HWRM collector with nothing left to harvest goes into parade with its carrier (user: Mission01's
+-- Taiidan resourcers did once the cloud was gone; not Cataclysm's): a harvesting team that turns to parade
+-- (COMMAND_Parade 8) is stopped there instead (KAS_HarvestTick).
+KAS_Harvesters = {}
+function K_495f00()                                                                                  -- kasfHarvest
+    KAS_Harvest(KAS_Owner(KAS_Team), KAS_Team)
+    KAS_Harvesters[KAS_Team] = 1
+    if Rule_Exists("KAS_HarvestTick") == 0 then Rule_AddInterval("KAS_HarvestTick", 3) end
+end
+function KAS_HarvestTick()
+    for team, _ in KAS_Harvesters do
+        if SobGroup_Count(team) == 0 then
+            KAS_Harvesters[team] = nil
+        elseif SobGroup_GetCurrentOrder(team) == (COMMAND_Parade or 8) then
+            SobGroup_Stop(KAS_Owner(team), team)
+            KAS_Harvesters[team] = nil
+        end
+    end
+end
 
 -- ------------------------------------------------------------------ ships
--- kasfShipsSetDamageFactor (HW1 KASFunc.c: damage the ships deal x pct / 100). The ship rules set every ship's
--- multiplier from its rank (shiprules.lua CatShip_ApplyMultipliers), which overwrote this: Mission01's 10% teams dealt
--- full damage and its fights ended early (user). So the ships also go in cat_dmgf (any factor) and cat_dmgf_<pct>
--- (rounded to 5), which the ship rules (another Lua state) multiply into their rank multiplier.
+-- kasfShipsSetDamageFactor (HW1 KASFunc.c: damage the ships deal x pct / 100). SobGroup_SetDamageMultiplier
+-- COMPOUNDS (measured, range test 2026-10-12: 0.5 then 0.5 again = 0.25, then 2 = 0.5) and ion beams stop firing
+-- below about 0.5 (user: no beam, no damage, and Mission01's battle never resolved). So only the ship rules set it
+-- (shiprules.lua CatShip_ApplyMultipliers: rank x this factor, floored, by ratio); this only puts the ships in
+-- cat_dmgf (any factor) and cat_dmgf_<pct> (rounded to 5) for them (another Lua state).
 function K_493980(sel, pct)                                                                            -- kasfShipsSetDamageFactor
-    SobGroup_SetDamageMultiplier(sel, pct / 100)
     local q = floor(pct / 5 + 0.5) * 5
     if q < 5 then q = 5 elseif q > 100 then q = 100 end
     SobGroup_CreateIfNotExist("cat_dmgf")

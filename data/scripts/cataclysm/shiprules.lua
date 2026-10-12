@@ -364,13 +364,20 @@ function CatShip_KasDamage(rec)
 end
 
 -- FUN_005148f0 (damage) and FUN_00514940 (speed, less when damaged). Damage: its rank's, times a mission's damage
--- factor (this alone overwrote it: Mission01's 10% teams dealt full damage, user: fights ended early)
+-- factor (its rank's alone overwrote it: Mission01's 10% teams dealt full damage, user: fights ended early), the factor
+-- no lower than CAT_DMGF_MIN. SobGroup_SetDamageMultiplier compounds (range test: 0.5 twice = 0.25), so it is set by
+-- the ratio to what this last set (rec.dmg, 1 for a new ship), and only here; ion beams stop firing below about 0.5
+-- (0.25 silenced them: user saw beams charge and nothing fire, Mission01's 10% teams).
+CAT_DMGF_MIN = 0.5
 function CatShip_ApplyMultipliers(rec)
     if SobGroup_Empty(rec.g) == 1 then return end
     local mult = CatRankMult[rec.rank]
-    local dmg = mult * CatShip_KasDamage(rec)
-    if rec.dmg ~= dmg then
-        SobGroup_SetDamageMultiplier(rec.g, dmg)
+    local f = CatShip_KasDamage(rec)
+    if f < CAT_DMGF_MIN then f = CAT_DMGF_MIN end
+    local dmg = mult * f
+    local now = rec.dmg or 1
+    if abs(dmg - now) > 0.001 then
+        SobGroup_SetDamageMultiplier(rec.g, dmg / now)
         rec.dmg = dmg
     end
     local h, spd = SobGroup_HealthPercentage(rec.g), mult

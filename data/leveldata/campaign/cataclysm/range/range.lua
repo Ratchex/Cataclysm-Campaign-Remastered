@@ -73,7 +73,7 @@ end
 -- TEST (user: ion beams stop firing once a damage multiplier is set, and stay off when set back): what does
 -- SobGroup_SetDamageMultiplier do: replace the multiplier, compound it, or break beams below 1? The Taiidan ion
 -- frigate fires at our Processor; its health loss is logged every 5 s through: nothing set, 0.5, 0.5 again, 2.
-RANGE_BEAM_TEST = 1
+RANGE_BEAM_TEST = 0           -- done: it compounds; beams stop below ~0.5 (shiprules.lua CatShip_ApplyMultipliers)
 RangeBeamStart = nil
 RangeBeamPhase = 0
 RangeBeamLog = 0
