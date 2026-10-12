@@ -491,9 +491,11 @@ def hod_engines(path):
     return [(nz, world(nz), shapes.get(nz, [])) for nz in sorted(n for n in joints if n.startswith("EngineNozzle"))]
 
 
-def weapon_nodes(points, conv, convn):
+def weapon_nodes(points, conv, convn, muzzle_out=None):
     """JNT[Weapon_<GUNn>_Position] with _Direction (up), _Rest (firing direction), _Muzzle children (the layout of
-    the HWRM Blender toolkit's hardpoint tool); the position joint itself is not rotated."""
+    the HWRM Blender toolkit's hardpoint tool); the position joint itself is not rotated. muzzle_out {GUNn: d}: the
+    muzzle d further along the firing direction (guns on a module: their bullets spawned inside its collision)."""
+    muzzle_out = muzzle_out or {}
     out = []
     for typ, lbl, pos, nrm, _ in points:
         if typ != "Gun":
@@ -505,7 +507,7 @@ def weapon_nodes(points, conv, convn):
         base = f"Weapon_{lbl}"
         kids = (jnode(f"JNT[{base}_Direction]", tuple(10 * c for c in up))
                 + jnode(f"JNT[{base}_Rest]", tuple(10 * c for c in n))
-                + jnode(f"JNT[{base}_Muzzle]", tuple(0.1 * c for c in n)))
+                + jnode(f"JNT[{base}_Muzzle]", tuple((0.1 + muzzle_out.get(lbl, 0.0)) * c for c in n)))
         out.append(jnode(f"JNT[{base}_Position]", conv(*pos), kids))
     return "".join(out), len(out)
 
@@ -513,6 +515,8 @@ def weapon_nodes(points, conv, convn):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("geo")
+    ap.add_argument("--muzzle-out", action="append", default=[], metavar="GUNn@D",
+                    help="move that gun's muzzle D further along its firing direction (out of a module's collision)")
     ap.add_argument("out_dir")
     ap.add_argument("name")
     ap.add_argument("--scale", type=float, default=0.35)
@@ -785,7 +789,8 @@ def main():
     dok_points = {pt[1]: pt for pt in points if pt[0] == "Dok"}
     if a.no_docks:
         points = [pt for pt in points if pt[0] != "Dok"]
-    weapons, nweap = weapon_nodes(points, conv, convn)
+    weapons, nweap = weapon_nodes(points, conv, convn,
+                                  {k: float(d) for k, d in (m.split("@") for m in a.muzzle_out)})
     # collector paths borrowed from another model, moved onto our Cataclysm RES points (LATCH_OFFSET off the hull)
     anchors = [conv(*(pos[k] + nrm[k] * LATCH_OFFSET for k in range(3)))
                for typ, lbl, pos, nrm, _ in points if typ == "Dok" and re.match(r"RES\d+$", lbl)]
