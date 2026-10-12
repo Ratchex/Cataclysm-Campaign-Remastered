@@ -1611,7 +1611,12 @@ function K_4985f0(n, o, v)
     return KAS_SelectAll(n, o)
 end
 
-function K_498d90(dst, src) SobGroup_Clear(dst) SobGroup_SobGroupAdd(dst, src) end                -- kasfFirstShip (all, for now)
+-- kasfFirstShip: the selection's first ship. (It took all of them: Mission01's sensor-net raiders, told to move to
+-- the "first" sensor, flew to the centre of the whole net, the map origin, after two kills; user.)
+function K_498d90(dst, src)                                                                          -- kasfFirstShip
+    SobGroup_Clear(dst)
+    if SobGroup_Count(src) > 0 then SobGroup_FillShipsByIndexRange(dst, src, 0, 1) end
+end
 function K_49a100(sel, vec) end                                                                    -- sort by distance: order unused
 
 -- Enemies are relative to the asking team's owner: players 0 (human) and 2 (allied Kushan) are allied, 1 is the

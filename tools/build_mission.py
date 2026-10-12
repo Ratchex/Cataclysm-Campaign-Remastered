@@ -113,6 +113,8 @@ def main():
     run(os.path.join(HERE, "kas2lua.py"), DECOMP, f"Mission{nn}", src, os.path.join(out, f"m{nn}_kas.lua"))
     # the teams with a damage factor HWRM's multiplier can't give get weaker weapon copies (make_variants.py)
     run(os.path.join(HERE, "damage_variants.py"), os.path.join(out, f"m{nn}.level"), os.path.join(out, f"m{nn}_kas.lua"))
+    # extra ships where HWRM's combat lands a fight differently (level_extras.py)
+    run(os.path.join(HERE, "level_extras.py"), nn, os.path.join(out, f"m{nn}.level"))
     with open(os.path.join(out, f"m{nn}.lua"), "w", newline="\n") as f:
         f.write(WRAPPER.format(nn=nn, intro=a.intro, modules=", ".join(f'"{m}"' for m in start_modules(src, nn))))
     run(os.path.join(HERE, "make_colours.py"))   # (teamcolour.lua: written by mission2level.py)

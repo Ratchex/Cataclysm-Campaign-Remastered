@@ -37,6 +37,8 @@ function DetermChunk()
     addSquadron("TaiidanResourcerDefense1", "tai_defender", {15061.042, -7010.535, -24055.29}, 1, {0, -258, 0}, 0, 0) -- RACE_TAIDAN tHeavyDefender
     addSquadron("TaiidanResourcerDefense2", "tai_defender", {15061.042, -7010.535, -24055.29}, 1, {0, -258, 0}, 0, 0) -- RACE_TAIDAN tHeavyDefender
     addSquadron("KushanMainGuardFrigates0", "kus_ioncannonfrigate_d10", {14031.412, -1228.605, 14340.48}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kIonCannonFrigate
+    addSquadron("KushanMainGuardFrigatesExtra1", "kus_ioncannonfrigate_d10", {14031.412, -1228.605, 14340.48}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kIonCannonFrigate   -- extra (tools/level_extras.py)
+    addSquadron("KushanMainGuardFrigatesExtra0", "kus_ioncannonfrigate_d10", {14031.412, -1228.605, 14340.48}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kIonCannonFrigate   -- extra (tools/level_extras.py)
     addSquadron("KushanMainGuardFrigates1", "kus_ioncannonfrigate_d10", {14031.412, -1228.605, 14340.48}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kIonCannonFrigate
     addSquadron("KushanMainGuardFrigates2", "kus_ioncannonfrigate_d10", {14031.412, -1228.605, 14340.48}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kIonCannonFrigate
     addSquadron("KushanMainGuardFrigates3", "kus_ioncannonfrigate_d10", {14031.412, -1228.605, 14340.48}, 2, {0, -264, 0}, 0, 0) -- RACE_KUSHAN kIonCannonFrigate
@@ -207,6 +209,8 @@ function DetermChunk()
     addToSOBGroup("KushanMainGuardFrigates1", "KushanMainGuardFrigates")
     addToSOBGroup("KushanMainGuardFrigates2", "KushanMainGuardFrigates")
     addToSOBGroup("KushanMainGuardFrigates3", "KushanMainGuardFrigates")
+    addToSOBGroup("KushanMainGuardFrigatesExtra0", "KushanMainGuardFrigates")
+    addToSOBGroup("KushanMainGuardFrigatesExtra1", "KushanMainGuardFrigates")
     createSOBGroup("KushanMainGuardCorvettes")
     addToSOBGroup("KushanMainGuardCorvettes0", "KushanMainGuardCorvettes")
     addToSOBGroup("KushanMainGuardCorvettes1", "KushanMainGuardCorvettes")
