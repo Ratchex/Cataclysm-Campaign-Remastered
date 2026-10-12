@@ -690,6 +690,26 @@ def main():
             text = text[:m.start(2)] + f"{want:g}" + text[m.end(2):]
             open(path, "w", encoding="latin-1", newline="").write(text)
             print(f"  {ship}: sobDieTime {m.group(2)} -> {want:g} (stock {src}'s, for its death effects)")
+    # and any Somtaaw ship outlives its own last death blast (+0.5 s): theirs took the Processor at 1 s (its blasts
+    # to 3.4 s, user: no second explosion), the Mimic at 0.1
+    for d in sorted(os.listdir(os.path.join(DATA, "ship"))):
+        ev, path = (os.path.join(DATA, "ship", d, d + x) for x in (".events", ".ship"))
+        if not (d.startswith("smt_") and os.path.exists(ev) and os.path.exists(path)):
+            continue
+        anims, events = make_events.sections(open(ev, encoding="latin-1").read())
+        length = next((float(re.search(r"length\s*=\s*([\d.]+)", e).group(1)) for _, e in anims
+                       if (make_events.anim_name(e) or "").lower() == "death"), None)
+        times = [float(make_events.field(e, "animtime")) for _, e in events
+                 if (make_events.field(e, "anim") or "").lower() == "death" and make_events.field(e, "animtime")]
+        text = open(path, encoding="latin-1").read()
+        m = re.search(r'(NewShipType(?:\["sobDieTime"\]|\.sobDieTime)\s*=\s*)([\d.]+)', text)
+        if not (length and times and m):
+            continue
+        want = round(max(times) * length + 0.5, 1)
+        if float(m.group(2)) < max(times) * length:
+            text = text[:m.start(2)] + f"{want:g}" + text[m.end(2):]
+            open(path, "w", encoding="latin-1", newline="").write(text)
+            print(f"  {d}: sobDieTime {m.group(2)} -> {want:g} (its last death blast {max(times) * length:.2f} s in)")
     # the HW1 resource collectors' harvesting at Cataclysm's pace (after make_shipcode copies their .ship)
     for ship, cat in HARVEST.items():
         harvest_rate(ship, cat)
