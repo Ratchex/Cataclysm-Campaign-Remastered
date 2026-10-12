@@ -765,7 +765,7 @@ end
 KAS_DevTechs = {}
 -- DEVELOPMENT ONLY: the HYPERSPACE button this many seconds after the warp-in (testing the end of a mission without
 -- playing it; nil in commits that aren't a test)
-KAS_DevHyperspaceAfter = 60
+KAS_DevHyperspaceAfter = nil
 KAS_DevModules = {}     -- ...and the Kuun-Lan modules they need (e.g. { "smt_kl_weapons" } for TECH_MISSILE)
 
 function KAS_RestrictTechs()

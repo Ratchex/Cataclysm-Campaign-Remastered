@@ -36,6 +36,13 @@ findings).
   line-of-fire check); the core has one collision box around the whole ship (geo2dae --col-box, tools/kl_bounds.py), the
   modules none (--col-none: their own stopped the rear guns' shots). Death effects (user-tested): tools/make_events.py
   gives the ships CR left empty stock HW1 effects; install_cr.py keeps every Somtaaw ship alive past its last death blast.
+- Mission start / end (user-tested): the Kuun-Lan arrives facing its ARRIVAL_YAW (it waits in hyperspace behind
+  the start point, cataclysmkas.lua KAS_ArrivalPlaceBehind), control locked through Fleet Intel briefings (Mission01
+  from the warp-in, camera free), "Autolaunch set" (event 104), parade from Cataclysm's layout (tools/make_parade.py).
+  End: the "Hyperspace" objective shows Gearbox's HYPERSPACE button; roll call, its Go Now replaced by Cataclysm's
+  Emergency Hyperspace (KAS_EmergencyHyperspace). 0x497290 is Cataclysm's autosave. Gearbox's KAS_PlayerMothership
+  can't be redefined (HWRM refuses): KAS_KuunLan, and Gearbox's cache group KAS_MothershipGroup0 for the roll call.
+  KAS_DevHyperspaceAfter (seconds) shows the button early for testing.
 - **Pending (user, after the mission work):** the Guard order is voiced by Fleet Command in Cataclysm, not by the
   ordered ships. Carry-over between missions: HWRM persistence (Mission02+ levels with no player fleet; test missions
   moved behind the real ones in cataclysm.campaign).
