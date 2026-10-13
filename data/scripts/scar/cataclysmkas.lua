@@ -1099,6 +1099,7 @@ function KAS_StartEngine()
     KAS_GrantStartResearch()
     singlePlayerHyperspaceButtonDisable()     -- (Gearbox's singlePlayerStartGame): shown by K_497290
     Rule_AddInterval("KAS_EngineTick", 0.5)
+    Rule_AddInterval("KAS_MoveFireTick", 1)
     Rule_AddInterval("KAS_RURegen", KAS_RU_REGEN_SECONDS)
 end
 
@@ -1463,7 +1464,11 @@ end
 -- m<NN>_paths.lua), around a closed path, back and forth along an open one; any other order ends it.
 KAS_Patrols = {}
 KAS_PatrolReach = 600          -- a team is at a waypoint when its centre is this close (or it has stopped)
-function KAS_EndPatrol() KAS_Patrols[KAS_Team] = nil if KAS_Guards then KAS_Guards[KAS_Team] = nil end end
+function KAS_EndPatrol()
+    KAS_Patrols[KAS_Team] = nil
+    if KAS_Guards then KAS_Guards[KAS_Team] = nil end
+    if KAS_Moves then KAS_Moves[KAS_Team] = nil end
+end
 function KAS_PatrolGo(team)
     local p = KAS_Patrols[team]
     SobGroup_MoveToPoint(KAS_Owner(team), team, KAS_Paths[p.path][p.i])
@@ -1508,9 +1513,6 @@ end
 function K_492b20() return floor(KAS_TeamHealth(KAS_Team)) end                                      -- kasfTeamHealthAverage
 function K_493aa0(pct)                                                                              -- kasfTeamSetPercentDamaged
     SobGroup_SetHealth(KAS_Team, pct / 100)
-    -- (diagnostic: Mission01's crippled heavy cruiser stops firing, user; its guns are hardpoint subsystems)
-    print("CKAS: " .. KAS_Team .. " health " .. pct .. "%, Weapon_Gun0 " .. SobGroup_GetHardPointHealth(KAS_Team, "Weapon_Gun0")
-          .. ", Weapon_Ion1 " .. SobGroup_GetHardPointHealth(KAS_Team, "Weapon_Ion1"))
 end
 function K_493cf0(team, sel) SobGroup_SobGroupAdd(team, sel) end                                    -- kasfReinforceTeamWithShips
 
@@ -1539,7 +1541,10 @@ end
 -- ------------------------------------------------------------------ orders
 function K_4941a0(vec)                                                                              -- kasfMoveTo
     KAS_EndPatrol()
-    if SobGroup_Count(KAS_Team) > 0 then SobGroup_MoveToPoint(KAS_Owner(KAS_Team), KAS_Team, KAS_Pos(vec)) end
+    if SobGroup_Count(KAS_Team) > 0 then
+        KAS_Moves[KAS_Team] = KAS_Pos(vec)
+        SobGroup_MoveToPoint(KAS_Owner(KAS_Team), KAS_Team, KAS_Moves[KAS_Team])
+    end
 end
 function K_494750(host) SobGroup_DockSobGroupInstant(KAS_Team, host) end                            -- kasfDockInstant
 -- kasfTeamFinishedLaunching: KASUtil's flag (set by the launch order, cleared as each ship leaves its hangar) never
@@ -2233,4 +2238,55 @@ function K_49ad80(out, sel)
     SobGroup_Clear(out)
     if SobGroup_Count(sel) > 0 then SobGroup_GetSobGroupDockedWithGroup(sel, out) end
     return SobGroup_Count(out)
+end
+
+-- ================================================================== firing while moving
+-- A ship given a plain move (SobGroup_MoveToPoint, FollowPath alike) aims its turrets but fires nothing: no shot,
+-- turrets lagging and snapping (user, range tests 2026-10-13: any moving HWRM capital ship, Mission01's fleeing
+-- heavy cruiser). HWRM keeps firing only when the move is given while an attack is the ship's current command (HWRM
+-- FUN_006808df: the move goes onto the attack, "firing while moving"; the UI does it for the player). HW1 ships fire on
+-- whatever is in range while they travel, so a computer team on a scripted route (kasfPatrolPath, kasfMoveTo) with
+-- enemies within KAS_MoveFireRange gets, each second in turn, an attack on them and its move again (confirmed in the
+-- range: turrets and flight correct). Strike craft are left out (fixed guns; an attack starts a dogfight).
+KAS_Moves = {}
+KAS_MoveFireRange = 6000
+KAS_MoveFireNext = {}
+function KAS_MoveFireTeam(team, again)
+    if SobGroup_Count(team) == 0 or KAS_Owner(team) == 0 then return end
+    SobGroup_CreateIfNotExist("KAS_MoveFireSc")
+    SobGroup_Clear("KAS_MoveFireSc")
+    SobGroup_FilterExclude("KAS_MoveFireSc", team, "DisplayFamily", "Fighter")
+    if SobGroup_Count("KAS_MoveFireSc") == 0 then return end
+    SobGroup_CreateIfNotExist("KAS_MoveFireFoes")
+    if KAS_FillEnemiesNear("KAS_MoveFireFoes", team, KAS_MoveFireRange) == 0 then
+        KAS_MoveFireNext[team] = nil
+        return
+    end
+    if KAS_MoveFireNext[team] ~= "move" then
+        SobGroup_Attack(KAS_Owner(team), team, "KAS_MoveFireFoes")
+        KAS_MoveFireNext[team] = "move"
+    else
+        again(team)
+        KAS_MoveFireNext[team] = "attack"
+    end
+end
+function KAS_MoveFireAgainPatrol(team) KAS_PatrolGo(team) end
+function KAS_MoveFireAgainMove(team) SobGroup_MoveToPoint(KAS_Owner(team), team, KAS_Moves[team]) end
+function KAS_MoveFireTick()
+    for team, p in KAS_Patrols do KAS_MoveFireTeam(team, KAS_MoveFireAgainPatrol) end
+    local done = {}
+    for team, w in KAS_Moves do
+        local a = SobGroup_GetPosition(team)
+        if SobGroup_Count(team) == 0 or sqrt((a[1] - w[1]) * (a[1] - w[1]) + (a[2] - w[2]) * (a[2] - w[2])
+                                             + (a[3] - w[3]) * (a[3] - w[3])) < KAS_PatrolReach then
+            done[getn(done) + 1] = team
+        else
+            KAS_MoveFireTeam(team, KAS_MoveFireAgainMove)
+        end
+    end
+    local i = 1
+    while i <= getn(done) do
+        KAS_Moves[done[i]] = nil
+        i = i + 1
+    end
 end

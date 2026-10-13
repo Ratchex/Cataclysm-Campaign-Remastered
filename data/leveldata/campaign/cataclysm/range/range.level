@@ -49,6 +49,34 @@ function DetermChunk()
     createSOBGroup("TargetIon10")
     addToSOBGroup("TargetFrigate2", "TargetIon10")
 
+    -- Mission01's crippled heavy cruiser (its 10 % damage copy) side by side with a sound one (range.lua
+    -- RANGE_CRUISER_TEST: turret tracking at 20 % health, user)
+    addSquadron("TargetCruiser0", "tai_heavycruiser_d10", {-1500, 0, 12000}, 1, {0, 180, 0}, 0, 0)
+    createSOBGroup("TargetCruiserSound")
+    addToSOBGroup("TargetCruiser0", "TargetCruiserSound")
+    addSquadron("TargetCruiser1", "tai_heavycruiser_d10", {1500, 0, 12000}, 1, {0, 180, 0}, 0, 0)
+    createSOBGroup("TargetCruiserCrippled")
+    addToSOBGroup("TargetCruiser1", "TargetCruiserCrippled")
+
+    -- a hostile Kushan destroyer flying the same way (user: does the turret tracking on moving ships hit other types?)
+    addSquadron("TargetDestroyer0", "kus_destroyer", {4500, 0, 12000}, 1, {0, 180, 0}, 0, 0)
+    createSOBGroup("TargetDestroyer")
+    addToSOBGroup("TargetDestroyer0", "TargetDestroyer")
+    addPoint("RangeFleeDestroyer_0", {4500, 0, 12000}, {0, 0, 0})
+    addPoint("RangeFleeDestroyer_1", {4500, 0, 24000}, {0, 0, 0})
+    addPath("RangeFleeDestroyerPath", "RangeFleeDestroyer_0", "RangeFleeDestroyer_1")
+
+    -- a Kushan destroyer of the player's beside the Kuun-Lan: does a ship under a player's move order fire on the way?
+    addSquadron("PlayerDestroyer0", "kus_destroyer", {-3000, 0, 2000}, 0, {0, 0, 0}, 0, 0)
+
+    -- its flight for RANGE_CRUISER_STEP 4 (SobGroup_FollowPath takes a level path)
+    addPoint("RangeFlee_0", {1500, 0, 12000}, {0, 0, 0})
+    addPoint("RangeFlee_1", {1500, 0, 24000}, {0, 0, 0})
+    addPath("RangeFleePath", "RangeFlee_0", "RangeFlee_1")
+    addPoint("RangeFleeSound_0", {-1500, 0, 12000}, {0, 0, 0})
+    addPoint("RangeFleeSound_1", {-1500, 0, 24000}, {0, 0, 0})
+    addPath("RangeFleeSoundPath", "RangeFleeSound_0", "RangeFleeSound_1")
+
     addSphere("Everything", {0, 0, 0}, 30000)
     addCamera("Camera_Startpos", {0, 0, 2200}, {2200, 1600, -1200})
     setWorldBoundsInner({0, 0, 0}, {30000, 15000, 30000})

@@ -409,6 +409,38 @@ def make_cargo_cloud():
         dc + "\n-- Cataclysm-HWRM: resourcers' cargo (install_cr.py make_cargo_cloud)\n" + "".join(extra))
 
 
+# Turret turn speeds from Cataclysm's .shp (maxanglespeed / maxdeclinationspeed, degrees/s) for the weapons whose
+# directory names contain the key (their per-ship copies too: cat_<ship>_<weapon>). HWRM's HW1 heavy cruiser guns turn
+# at 33 / 20, Cataclysm's tHeavyCruiser's all ten at 360 / 360: on a moving cruiser HWRM's lagged and snapped (user;
+# range test: any moving cruiser, sound or crippled). StartWeaponConfig arguments 19 and 20 (after NewWeaponType).
+TURRET_SPEEDS = {"tai_cruisergun": (360, 360), "tai_cruiserion": (360, 360)}
+# and HWRM's slow-down once on target (argument 21: speed x this when pointing at it; 0.1 kept them snapping, user):
+# HW1 has none (Gun.c: the turn speed is the aim error x angletracking, capped at the maximum)
+TURRET_ON_TARGET = 1
+
+
+def patch_turret_speeds():
+    done = []
+    for w in sorted(os.listdir(os.path.join(DATA, "weapon"))):
+        speeds = next((v for k, v in TURRET_SPEEDS.items() if k in w.lower()), None)
+        path = os.path.join(DATA, "weapon", w, w + ".wepn")
+        if speeds is None or not os.path.exists(path):
+            continue
+        text = open(path, encoding="latin-1").read()
+        m = re.search(r"StartWeaponConfig\(([^)]*)\)", text)
+        if not m:
+            continue
+        args = [a.strip() for a in m.group(1).split(",")]
+        if len(args) < 21:
+            continue
+        args[19], args[20], args[21] = str(speeds[0]), str(speeds[1]), str(TURRET_ON_TARGET)
+        new = text[:m.start(1)] + ",".join(args) + text[m.end(1):]
+        if new != text:
+            open(path, "w", encoding="latin-1", newline="").write(new)
+            done.append(w)
+    print(f"  Cataclysm turret speeds on {len(done)} weapons: {', '.join(done)}")
+
+
 def patch_cargo_clouds():
     make_cargo_cloud()
     done = []
@@ -724,6 +756,7 @@ def main():
     # damage-factor ship copies (<ship>_d<pct>: Cataclysm's low kasfShipsSetDamageFactor; tools/make_variants.py)
     import make_variants
     copied += make_variants.install()
+    # patch_turret_speeds()   # (off: no change on moving ships, user; HWRM's stock tracking is the same on all of them)
     # ships on stock HW1 death effects (tools/make_events.py) last as long as the stock ship (sobDieTime): theirs took
     # the Ramming Frigate at 1 s, before its death blasts at ~1.3 s (user: no proper explosion), the fighters at 0.1
     import make_events

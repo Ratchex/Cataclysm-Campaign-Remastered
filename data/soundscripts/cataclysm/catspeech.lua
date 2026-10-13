@@ -48,7 +48,30 @@ if CatSpeech_Loaded == nil then
     end
 
     -- ship events Cataclysm's Fleet Command says instead of the ship (user: the Guard order, "Escorts assigned.")
-    CatSpeech_ToFleet = { COMMAND_GUARD = "COMMAND_GUARD_1", COMMAND_CAP_GUARD = "COMMAND_GUARD_1" }
+    -- and the group keys (user: "Stand by. Group n." when the group's key is pressed)
+    CatSpeech_ToFleet = { COMMAND_GUARD = "COMMAND_GUARD_1", COMMAND_CAP_GUARD = "COMMAND_GUARD_1",
+        COMMAND_SELECTGROUP01 = "COMMAND_SELECTGROUP01", COMMAND_SELECTGROUP02 = "COMMAND_SELECTGROUP02",
+        COMMAND_SELECTGROUP03 = "COMMAND_SELECTGROUP03", COMMAND_SELECTGROUP04 = "COMMAND_SELECTGROUP04",
+        COMMAND_SELECTGROUP05 = "COMMAND_SELECTGROUP05", COMMAND_SELECTGROUP06 = "COMMAND_SELECTGROUP06",
+        COMMAND_SELECTGROUP07 = "COMMAND_SELECTGROUP07", COMMAND_SELECTGROUP08 = "COMMAND_SELECTGROUP08",
+        COMMAND_SELECTGROUP09 = "COMMAND_SELECTGROUP09", COMMAND_SELECTGROUP10 = "COMMAND_SELECTGROUP10" }
+
+    -- Repeat limits, as Cataclysm's speech queue (HW1 SpeechEvent.c): a Fleet Command line is dropped while the same
+    -- line is still playing (user: construction complete / destroyed / "Group n reports hostiles" spam), so its
+    -- repeat interval (the play call's frequency: HWRM's only throttle, no clock here) is at least its own length;
+    -- warnings about a hotkey group under attack wait SPEECH_WARNING_TIME, 30 s (Cataclysm soundevent.script)
+    CatSpeech_WarningTime = 30
+    CatSpeech_Warnings = { STATUS_ASSIGNEDGROUPUNDERATTACK_REPORT_G = 1 }
+    function CatSpeech_Freq(key, freq)
+        local f = freq or 0
+        if CatSpeech_Secs ~= nil and CatSpeech_Secs[key] ~= nil and CatSpeech_Secs[key] + 0.5 > f then
+            f = CatSpeech_Secs[key] + 0.5
+        end
+        if CatSpeech_Warnings[strsub(key, 1, 40)] ~= nil and CatSpeech_WarningTime > f then
+            f = CatSpeech_WarningTime
+        end
+        return f
+    end
 
     -- for a Somtaaw ship: the replacement event, actor, count, or nil (nothing to play)
     function CatSpeech_Route(event, actor)
@@ -81,7 +104,7 @@ if CatSpeech_Loaded == nil then
         if CatSpeech_IsCatFleet(actor) ~= nil then
             local key = strupper(event)
             if CatSpeech_Fleet[key] ~= nil then
-                return playSpeechActor(CatSpeech_Fleet[key], "cat_fleet", 0, freq)
+                return playSpeechActor(CatSpeech_Fleet[key], "cat_fleet", 0, CatSpeech_Freq(CatSpeech_Fleet[key], freq))
             end
             return 0
         end
@@ -92,14 +115,14 @@ if CatSpeech_Loaded == nil then
         if e == nil then
             return 0
         end
-        return playSpeechActor(e, a, c, freq)
+        return playSpeechActor(e, a, c, CatSpeech_Freq(e, freq))
     end
 
     function CatSpeech_PlayLinked(event, actor, count, freq, link)
         if CatSpeech_IsCatFleet(actor) ~= nil then
             local key = strupper(event)
             if CatSpeech_Fleet[key] ~= nil then
-                return playSpeechActorLinked(CatSpeech_Fleet[key], "cat_fleet", 0, freq, link)
+                return playSpeechActorLinked(CatSpeech_Fleet[key], "cat_fleet", 0, CatSpeech_Freq(CatSpeech_Fleet[key], freq), link)
             end
             return 0
         end
@@ -110,7 +133,7 @@ if CatSpeech_Loaded == nil then
         if e == nil then
             return 0
         end
-        return playSpeechActorLinked(e, a, c, freq, link)
+        return playSpeechActorLinked(e, a, c, CatSpeech_Freq(e, freq), link)
     end
 
     -- construction complete: Cataclysm's Fleet Command names the new ship ("Acolyte. Construction completed.");
@@ -118,12 +141,12 @@ if CatSpeech_Loaded == nil then
     function CatSpeech_Built(builtItem)
         local key = strupper(builtItem or "")
         if CatSpeech_Module[key] ~= nil then          -- a Kuun-Lan module: "Hangar module is now online."
-            playSpeechActor(CatSpeech_Module[key], "cat_fleet", 0, 0.5)
+            playSpeechActor(CatSpeech_Module[key], "cat_fleet", 0, CatSpeech_Freq(CatSpeech_Module[key], 0.5))
             return 1
         end
         local t = CatSpeech_Type[key]
         if t ~= nil then
-            playSpeechActor("CAT_BUILT_" .. t, "cat_fleet", 0, 0.5)
+            playSpeechActor("CAT_BUILT_" .. t, "cat_fleet", 0, CatSpeech_Freq("CAT_BUILT_" .. t, 0.5))
             return 1
         end
         return nil
@@ -134,7 +157,7 @@ if CatSpeech_Loaded == nil then
     function CatSpeech_Available(shipName)
         local t = CatSpeech_Type[strupper(shipName or "")]
         if t ~= nil then
-            playSpeechActor("CAT_AVAILABLE_" .. t, "cat_fleet", 0, 0.5)
+            playSpeechActor("CAT_AVAILABLE_" .. t, "cat_fleet", 0, CatSpeech_Freq("CAT_AVAILABLE_" .. t, 0.5))
             return 1
         end
         return nil
@@ -144,7 +167,7 @@ if CatSpeech_Loaded == nil then
     function CatSpeech_Destroyed(shipName)
         local t = CatSpeech_Type[strupper(shipName or "")]
         if t ~= nil then
-            playSpeechActor("CAT_DESTROYED_" .. t, "cat_fleet", 0, 0.5)
+            playSpeechActor("CAT_DESTROYED_" .. t, "cat_fleet", 0, CatSpeech_Freq("CAT_DESTROYED_" .. t, 0.5))
             return 1
         end
         return nil

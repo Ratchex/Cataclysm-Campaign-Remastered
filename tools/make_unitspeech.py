@@ -94,6 +94,11 @@ for g in range(1, 11):    # hotkey groups: the variable is the group number ("..
     FLEET[f"COMMAND_GROUP_ASSIGNED_{gg}"] = (99, g)                    # "Setting assigned. Group n."
     FLEET[f"STATUS_HOTKEYGROUP_VICTORY_{gg}"] = (94, g)                # "Group n. Reports that enemy has retreated."
     FLEET[f"STATUS_HOTKEYGROUP_DEFEAT_{gg}"] = (118, 0)                # "Group destroyed."
+    # the group's key pressed (HWRM CommandHotKeyGroupSelected, ACT_Selected: a pilot's COMMAND_SelectGroup0n; Fleet
+    # Command's in Cataclysm, catspeech.lua CatSpeech_ToFleet)
+    FLEET[f"COMMAND_SELECTGROUP{gg}"] = (92, g)                           # "Stand by. Group n."
+    # ships added to the group (HWRM CommandHotKeyGroupSelected, ACT_Reinforced; its group 10 event is "_20_2")
+    FLEET[f"STATUS_HOTKEYGROUP_ADDED_{'20' if g == 10 else gg}_2"] = (100, g)   # "Adding ships to... Group n."
 # per ship type announcer lines, played by catspeech.lua itself: CAT_BUILT_<type>, CAT_DESTROYED_<type>,
 # CAT_AVAILABLE_<type> ("<ship> is now available for construction")
 PER_TYPE = {"CAT_BUILT": 61, "CAT_DESTROYED": 101, "CAT_AVAILABLE": 52}
@@ -123,19 +128,34 @@ def write_clip(files, out, rate):
     return False
 
 
+def wav_secs(path):
+    import wave
+    with wave.open(path) as w:
+        return w.getnframes() / w.getframerate()
+
+
+FLEET_SECS = {}   # announcer event -> its longest recording, seconds (catspeech.lua: no repeat while it plays)
+
+
 def write_fleet(fleet_dir, key, variants, rate, ce):
     """An announcer line: every Cataclysm recording of it, played at random (user: selecting the Kuun-Lan always said
     "Bridge"). One recording: <key>.wav, flat as stock "fleet"; more: <key>/<key>.lua (a random sample container, as
     Cataclysm Remastered's Beast announcer) + <key>_<n>.wav. True if anything was written."""
     variants = [f for f in variants if all(os.path.exists(os.path.join(SPEECH, x)) for x in f)]
     if len(variants) == 1:
-        return write_clip(variants[0], os.path.join(fleet_dir, key.lower() + ".wav"), rate)
+        out = os.path.join(fleet_dir, key.lower() + ".wav")
+        if write_clip(variants[0], out, rate):
+            FLEET_SECS[key] = wav_secs(out)
+            return True
+        return False
     if not variants:
         return False
     d = os.path.join(fleet_dir, key.lower())
     os.makedirs(d, exist_ok=True)
     for k, files in enumerate(variants):
-        write_clip(files, os.path.join(d, f"{key.lower()}_{k + 1}.wav"), rate)
+        out = os.path.join(d, f"{key.lower()}_{k + 1}.wav")
+        if write_clip(files, out, rate):
+            FLEET_SECS[key] = max(FLEET_SECS.get(key, 0), wav_secs(out))
     with open(os.path.join(d, key.lower() + ".lua"), "w", newline="\n") as f:
         f.write("-- Cataclysm-HWRM: Cataclysm speech event %d (tools/make_unitspeech.py)\n"
                 "version = 4\nrandSampContainer = 1\n" % ce)
@@ -245,6 +265,9 @@ def main():
         f.write("}\nCatSpeech_Var = {        -- our ship type -> Cataclysm ShipType (the speech variable; mission barks)\n")
         for k in sorted(var_of):
             f.write(f'    ["{k}"] = {var_of[k]},\n')
+        f.write("}\nCatSpeech_Secs = {       -- announcer event -> its length, seconds (the longest recording)\n")
+        for k in sorted(FLEET_SECS):
+            f.write(f"    {k} = {FLEET_SECS[k]:.2f},\n")
         f.write("}\nCatSpeech_TechLine = {   -- research -> its \"<tech> available\" line (event %d variable)\n" % TECH_LINE)
         for k in sorted(tech_line):
             f.write(f'    {k} = {tech_line[k]},\n')

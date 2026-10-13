@@ -541,3 +541,16 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
   (a dropped kasAITeamShipsPtr before a no-argument call is its argument). out/m02_stubs.c has the decompiles.
 - Open: autosave "invalid key for `next'" in Campaign_QuickSaveNb (both missions); Mission01's crippled heavy cruiser
   stops firing (diagnostic print in K_493aa0); CR's smt_swarmer.lua has a syntax error (lines 2-3).
+
+## Firing while moving (2026-10-13, range tests, confirmed in game)
+- A scripted move (SobGroup_MoveToPoint, FollowPath = AttackMoveCommand, any ROE, after combat or not) leaves turreted
+  capital ships aiming but not firing: turrets lag and snap, the firing effect plays with no shot (any HWRM capital
+  under way, stock or ours; not health, damage factor, ROE or turret speeds: Cataclysm's 360/360 tried, reverted).
+- HWRM FUN_006808df (every move, UI or script): if the ship's current command is an attack with a live target, the move
+  goes onto it (event 9, "firing while moving"); otherwise a new MoveCommand / AttackMoveCommand replaces it. The UI
+  gets there because an engaged ship already has its attack. Scripts: cataclysmkas.lua KAS_MoveFireTick, each second
+  per computer route team (kasfPatrolPath / kasfMoveTo) with enemies within 6000: attack them, then the move again.
+- Known HWRM difference kept: the heavy cruiser's forward ion cannons only engage larger targets (user).
+- Speech repeat limits: the 4th playSpeechActor argument (repeat interval) is HWRM's only throttle; catspeech.lua
+  CatSpeech_Freq sets each Fleet Command line's to its length + 0.5 s and "group under attack" warnings to 30 s (HW1
+  SpeechEvent.c: same line dropped while playing, SPEECH_WARNING_TIME). Group select / add-to-group lines mapped.
