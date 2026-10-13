@@ -62,10 +62,17 @@ if CatSpeech_Loaded == nil then
     -- warnings about a hotkey group under attack wait SPEECH_WARNING_TIME, 30 s (Cataclysm soundevent.script)
     CatSpeech_WarningTime = 30
     CatSpeech_Warnings = { STATUS_ASSIGNEDGROUPUNDERATTACK_REPORT_G = 1 }
-    function CatSpeech_Freq(key, freq)
+    -- Ship barks (selection, orders: Cataclysm FUN_00522560 queues them with no wait, 0 s, on the pilots' channel and
+    -- drops one that repeats the last queued event; user: selection / order spam): the same, with a ship voice's
+    -- line (base: its folder) at least its own length (catspeech_gen.lua CatSpeech_Lines)
+    function CatSpeech_Freq(key, freq, base)
         local f = freq or 0
         if CatSpeech_Secs ~= nil and CatSpeech_Secs[key] ~= nil and CatSpeech_Secs[key] + 0.5 > f then
             f = CatSpeech_Secs[key] + 0.5
+        end
+        if base ~= nil and CatSpeech_Lines[base] ~= nil and CatSpeech_Lines[base][key] ~= nil
+           and CatSpeech_Lines[base][key] + 0.5 > f then
+            f = CatSpeech_Lines[base][key] + 0.5
         end
         if CatSpeech_Warnings[strsub(key, 1, 40)] ~= nil and CatSpeech_WarningTime > f then
             f = CatSpeech_WarningTime
@@ -115,7 +122,7 @@ if CatSpeech_Loaded == nil then
         if e == nil then
             return 0
         end
-        return playSpeechActor(e, a, c, CatSpeech_Freq(e, freq))
+        return playSpeechActor(e, a, c, CatSpeech_Freq(e, freq, a))
     end
 
     function CatSpeech_PlayLinked(event, actor, count, freq, link)
@@ -133,7 +140,7 @@ if CatSpeech_Loaded == nil then
         if e == nil then
             return 0
         end
-        return playSpeechActorLinked(e, a, c, CatSpeech_Freq(e, freq), link)
+        return playSpeechActorLinked(e, a, c, CatSpeech_Freq(e, freq, a), link)
     end
 
     -- construction complete: Cataclysm's Fleet Command names the new ship ("Acolyte. Construction completed.");
@@ -141,7 +148,8 @@ if CatSpeech_Loaded == nil then
     function CatSpeech_Built(builtItem)
         local key = strupper(builtItem or "")
         if CatSpeech_Module[key] ~= nil then          -- a Kuun-Lan module: "Hangar module is now online."
-            playSpeechActor(CatSpeech_Module[key], "cat_fleet", 0, CatSpeech_Freq(CatSpeech_Module[key], 0.5))
+            -- played by the mission runtime (cataclysmkas.lua CatModuleTick), which can wait for Fleet Intel's
+            -- briefing as Cataclysm's queue does (user: it played over mission dialogue)
             return 1
         end
         local t = CatSpeech_Type[key]

@@ -4,7 +4,7 @@
 -- Watch_Mission02 @ 005e0bb0
 function Watch_Mission02(TeamName)
   KAS_Team = TeamName
-  local iVar1, iVar2, extraout_EAX, p1, extraout_EAX_00, extraout_EAX_01, p3, pcVar3 = 0, 0, 0, 0, 0, 0, 0, 0
+  local iVar1, iVar2, extraout_EAX, p1, p3, pcVar3 = 0, 0, 0, 0, 0, 0
   local _pc, _sw = 0, 0
   while 1 do
     if _pc == 0 then
@@ -196,7 +196,7 @@ function Watch_Mission02(TeamName)
     elseif _pc == 46 then
       iVar1 = KAS_GS("sMothershipMicro")
       extraout_EAX = K_493400(iVar1)  -- kasfTeamAttributesBitSet
-      if (extraout_EAX_00 == 0) then _pc = 48 else _pc = 49 end
+      if (extraout_EAX == 0) then _pc = 48 else _pc = 49 end
     elseif _pc == 47 then
       _pc = 45
     elseif _pc == 48 then
@@ -227,7 +227,7 @@ function Watch_Mission02(TeamName)
       _pc = 51
     elseif _pc == 54 then
       extraout_EAX = K_4967b0("sMothershipMicro")
-      if (extraout_EAX_01 ~= 0) then _pc = 56 else _pc = 57 end
+      if (extraout_EAX ~= 0) then _pc = 56 else _pc = 57 end
     elseif _pc == 55 then
       iVar1 = K_491e30(71552184)  -- kasfVarValueGet
       if (iVar1 == 0) then _pc = 58 else _pc = 59 end

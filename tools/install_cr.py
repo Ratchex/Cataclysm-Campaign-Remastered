@@ -133,16 +133,28 @@ def patch_race(text):
 REPAIR_FAMILIES = ("Fighter", "Fighter_hw1", "Corvette", "Corvette_hw1", "Utility", "Resource", "ResourceLarge",
                    "NonCombat", "Frigate", "SmallCapitalShip", "BigCapitalShip", "Mothership")
 REPAIR_BEAMS = {   # ship: (RepairCommand range, attack style)
-    "worker": (150, "Frontal_CatRepair"),   # parks within the beam reach (shiprules.lua CAT_WORKER_REACH)
     "processor": (1400, "Broadside_CatRepair"),
 }
+# The Worker: HWRM's own latching repair (4th argument 0, as the HW2 collectors; the engine heals at 30 / s), in the
+# stock approach styles (user: back to regular healing; latching onto fighters to be solved later)
+WORKER_REPAIR_STYLES = {"Fighter": "Frontal_SupportFrigate", "Fighter_hw1": "Frontal_SupportFrigate",
+                        "Corvette": "Frontal_SupportFrigate", "Corvette_hw1": "Frontal_SupportFrigate",
+                        "Utility": "Frontal_SupportFrigate", "Resource": "Frontal_SupportFrigate",
+                        "ResourceLarge": "Frontal_RepairFrigate_SmallCap", "NonCombat": "Frontal_SupportFrigate",
+                        "Frigate": "Frontal_RepairFrigate_Frigate", "SmallCapitalShip": "Frontal_RepairFrigate_SmallCap",
+                        "BigCapitalShip": "Frontal_RepairFrigate_BigCap",
+                        "Mothership": "Frontal_RepairFrigate_Mothership"}
 
 
 def repair_order(text, kind):
-    """Their RepairCommand (or a new one after RetireAbility) replaced by our non-latching one."""
-    rng, style = REPAIR_BEAMS[kind]
-    order = (f'addAbility(NewShipType,"RepairCommand",1,{rng},30,1,"{style}",{{EndRepairRates=0}},'
-             + ",".join('{%s="%s"}' % (f, style) for f in REPAIR_FAMILIES) + ");   -- Cataclysm-HWRM")
+    """Their RepairCommand (or a new one after RetireAbility) replaced by ours."""
+    if kind == "worker":
+        order = ('addAbility(NewShipType,"RepairCommand",1,500,30,0,"Frontal_SupportFrigate",{EndRepairRates=0},'
+                 + ",".join('{%s="%s"}' % kv for kv in WORKER_REPAIR_STYLES.items()) + ");   -- Cataclysm-HWRM")
+    else:
+        rng, style = REPAIR_BEAMS[kind]
+        order = (f'addAbility(NewShipType,"RepairCommand",1,{rng},30,1,"{style}",{{EndRepairRates=0}},'
+                 + ",".join('{%s="%s"}' % (f, style) for f in REPAIR_FAMILIES) + ");   -- Cataclysm-HWRM")
     new, n = re.subn(r'^\s*addAbility\(NewShipType,\s*"RepairCommand".*?\);[^\n]*$', order, text,
                      count=1, flags=re.M | re.S)
     if not n:

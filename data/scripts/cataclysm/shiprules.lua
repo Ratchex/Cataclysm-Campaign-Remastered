@@ -1497,6 +1497,7 @@ CAT_REPAIR_SIZE = { smt_ms_sp = 600, smt_processor = 116, smt_rammingfrigate = 5
 CAT_REPAIR_TRACE = 1        -- TEST: log the ordered repair each second
 
 function CatRepair_Tick(rec, g, id, now)
+    if rec.t ~= "smt_processor" then return end   -- the Worker: HWRM's own latching repair (install_cr.py, user)
     local dt = now - (rec.repLast or now)
     rec.repLast = now
     if not rec.up.REPAIR or SobGroup_IsDoingAbility(g, AB_Repair) ~= 1 then

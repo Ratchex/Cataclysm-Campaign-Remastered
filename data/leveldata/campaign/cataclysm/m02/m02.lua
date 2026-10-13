@@ -28,6 +28,7 @@ end
 
 function OnInit()
     print("CATACLYSM Mission02: OnInit")
+    KAS_PersistFleet = 1
     SobGroup_LoadPersistantData("smt_ms_sp")
     KAS_StartEngine()
     KAS_CreateStartModules()

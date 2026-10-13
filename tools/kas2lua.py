@@ -440,6 +440,10 @@ class Translator:
         return self.fnames.get(addr, f"F_{addr:06x}")
 
     def lua_ident(self, name):
+        # Ghidra's extraout_EAX_00, _01 ... are the EAX a call left behind, like extraout_EAX: one Lua variable, the
+        # last call's result (Mission02 tested extraout_EAX_01, never set, so "building the Engineering Module" was 0)
+        if re.match(r"extraout_EAX_\d+$", name):
+            return "extraout_EAX"
         return name + "_" if name in LUA_RESERVED else name
 
     def label_str(self, h, kind):
@@ -1055,7 +1059,8 @@ class Translator:
         def collect(node):
             if isinstance(node, tuple):
                 if node[0] == "decl":
-                    locals_.append(self.lua_ident(node[1]))
+                    if self.lua_ident(node[1]) not in locals_:
+                        locals_.append(self.lua_ident(node[1]))
                 for x in node[1:]:
                     collect(x)
             elif isinstance(node, list):

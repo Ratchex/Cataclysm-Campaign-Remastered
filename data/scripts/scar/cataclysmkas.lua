@@ -652,6 +652,9 @@ end
 
 function KAS_FleetAwaitHyperspace()
     if SobGroup_Count("KAS_ArrivalMS") == 0 then return nil end
+    -- a carried-over fleet (persistence, KAS_PersistFleet from build_mission.py): HWRM's loader brings it in itself
+    -- (the Processor warped in on its own; despawned for our own warp-in, the Kuun-Lan just sat there, user)
+    if KAS_PersistFleet == 1 then return nil end
     SobGroup_DockSobGroupInstant("KAS_ArrivalDocked", "KAS_ArrivalMS")
     KAS_ArrivalPlaceBehind()
     SobGroup_Despawn("KAS_ArrivalMS")
@@ -671,11 +674,12 @@ KAS_ArrivalCameraDistance = 1760
 -- straight away from the sensor net, user)
 KAS_ArrivalBack = 5000
 function KAS_ArrivalPlaceBehind()
-    if KAS_ArrivalYaw == nil or KAS_ArrivalYaw == 0 then return end
+    -- (also with no turn: placed on the start point itself it "arrived" in place in 2.5 s, no flight in: Mission02, user)
+    local yaw = KAS_ArrivalYaw or 0
     local p = Volume_GetPosition("StartPointPlayer")
     if p == nil then return end
     local d = KAS_ArrivalBack
-    SobGroup_SetPosition("KAS_ArrivalMS", { p[1] - d * sin(KAS_ArrivalYaw), p[2], p[3] - d * cos(KAS_ArrivalYaw) })
+    SobGroup_SetPosition("KAS_ArrivalMS", { p[1] - d * sin(yaw), p[2], p[3] - d * cos(yaw) })
 end
 
 -- the Kuun-Lan's bow in the log (checking the arrival turn)
@@ -690,6 +694,14 @@ end
 
 function K_498230()
     if KAS_FleetWaiting == nil then           -- no Kuun-Lan held back: only the signal
+        if KAS_PersistFleet == 1 and SobGroup_Count("KAS_ArrivalMS") > 0 then
+            -- the loader's own arrival: launch with Fleet Command's line once the Kuun-Lan is in and idle
+            KAS_ArrivalStarted = Universe_GameTime()
+            KAS_ArrivalFocused = 1
+            Rule_AddInterval("KAS_ArrivalWatch", 0.5)
+            print("CKAS: carried-over fleet: HWRM's own arrival")
+            return
+        end
         KAS_ShipsArriveAt = Universe_GameTime() + 3
         return
     end
@@ -717,6 +729,11 @@ function KAS_ArrivalWatch()
     if t < 2 then return end
     if SobGroup_GetCurrentOrder("KAS_ArrivalMS") ~= COMMAND_Idle and t < 30 then return end
     Rule_Remove("KAS_ArrivalWatch")
+    if KAS_PersistFleet == 1 then
+        -- HWRM's carried-over arrival runs in the starting letterbox without UI; Gearbox ends it once the mothership
+        -- is idle (KASUtil KAS_EndStartingLetterbox). Without: no UI, nothing but sensors worked (Mission02, user)
+        Camera_SetLetterboxStateNoUI(0, 2)
+    end
     if KAS_ArrivalYaw and KAS_ArrivalYaw ~= 0 then Rule_AddInterval("KAS_ArrivalBowLog", 2) end
     KAS_Autolaunch()
     if KAS_DevHyperspaceAfter then
@@ -744,6 +761,12 @@ end
 KAS_AUTOLAUNCH_EVENT = 104 + 4096         -- (KAS_SpeechPlay: 0x1000 = Fleet Command)
 function KAS_Autolaunch()
     SobGroup_SetAutoLaunch("KAS_ArrivalMS", ShipHoldLaunch)
+    -- and whatever the previous mission's fleet brought docked (persistence loads it inside: Mission02's Acolytes and
+    -- ACVs stayed in, user)
+    SobGroup_CreateIfNotExist("KAS_ArrivalAboard")
+    SobGroup_Clear("KAS_ArrivalAboard")
+    SobGroup_GetSobGroupDockedWithGroup("KAS_ArrivalMS", "KAS_ArrivalAboard")
+    SobGroup_SobGroupAdd("KAS_ArrivalDocked", "KAS_ArrivalAboard")
     if SobGroup_Count("KAS_ArrivalDocked") == 0 then return end
     SobGroup_Launch("KAS_ArrivalDocked", "KAS_ArrivalMS")
     KAS_SpeechPlay(KAS_AUTOLAUNCH_EVENT, 0)
@@ -997,6 +1020,24 @@ for copy, v in CatDamageVariants do
 end
 
 function KAS_FillShipsByType(n, src, t)
+    -- a Kuun-Lan module (Cataclysm ship type sMothership<Module> -> our dummy ship smt_kl_<key>_dummy): in HWRM a
+    -- subsystem of the Kuun-Lan, so the Kuun-Lan when it has it (Mission02 looked for its docking bay among the
+    -- player's ships, found none and reported it destroyed, user)
+    if strsub(strlower(t), 1, 7) == "smt_kl_" and strsub(strlower(t), -6) == "_dummy" then
+        local sub = strsub(strlower(t), 1, strlen(t) - 6)
+        SobGroup_CreateIfNotExist("KAS_ModuleHost")
+        SobGroup_Clear("KAS_ModuleHost")
+        SobGroup_FillShipsByType("KAS_ModuleHost", src, "smt_ms_sp")
+        if SobGroup_Count("KAS_ModuleHost") > 0 and SobGroup_HasSubsystem("KAS_ModuleHost", sub) == 1 then
+            SobGroup_SobGroupAdd(n, "KAS_ModuleHost")
+            if sub == "smt_kl_orecanarmour" then KAS_OreCanSel = n end   -- (the canister scene's camera target)
+        elseif sub == "smt_kl_orecanarmour" and SobGroup_Count("KAS_JettCan") > 0 then
+            -- jettisoned: in Cataclysm still a ship of that type, flying off (Mission02 focuses on it 3 s later)
+            SobGroup_SobGroupAdd(n, "KAS_JettCan")
+            KAS_OreCanSel = n
+        end
+        return
+    end
     SobGroup_FillShipsByType(n, src, t)
     local d = KAS_DamageCopies[strlower(t)]
     if d then
@@ -1100,6 +1141,7 @@ function KAS_StartEngine()
     singlePlayerHyperspaceButtonDisable()     -- (Gearbox's singlePlayerStartGame): shown by K_497290
     Rule_AddInterval("KAS_EngineTick", 0.5)
     Rule_AddInterval("KAS_MoveFireTick", 1)
+    Rule_AddInterval("KAS_JettisonWatch", 0.25)
     Rule_AddInterval("KAS_RURegen", KAS_RU_REGEN_SECONDS)
 end
 
@@ -1267,10 +1309,47 @@ function KAS_SpeechPlay(event, variable)
     local actor = Actor_HW1_FleetIntel
     if mod(floor(event / 4096), 2) == 1 then actor = Actor_HW1_FleetCommand end
     local secs = (KAS_SpeechDurations[id] or 3000) / 1000
+    -- Cataclysm's speech queue (HW1 SpeechEvent.c speechEventFleet: one line at a time per speaker, a line waits up to
+    -- 5 s, then is dropped; user: lines played over each other after Mission02's Engineering Module)
+    local now = Universe_GameTime()
+    local free = KAS_SpeechBusy[actor] or 0
+    if free > now then
+        if free - now > KAS_SpeechWait then
+            print("CKAS speech event " .. ev .. " dropped (speaker busy " .. (free - now) .. "s)")
+            return
+        end
+        tinsert(KAS_SpeechQueue, { at = free, actor = actor, id = id, secs = secs, ev = ev })
+        KAS_SpeechBusy[actor] = free + secs
+        if KAS_SpeechEnd == nil or KAS_SpeechEnd < free + secs then KAS_SpeechEnd = free + secs end
+        if Rule_Exists("KAS_SpeechQueueTick") == 0 then Rule_AddInterval("KAS_SpeechQueueTick", 0.1) end
+        print("CKAS speech event " .. ev .. " -> $" .. id .. " queued " .. (free - now) .. "s")
+        return
+    end
+    KAS_SpeechSay(actor, id, secs, ev)
+end
+KAS_SpeechWait = 5
+KAS_SpeechBusy = {}
+KAS_SpeechQueue = {}
+function KAS_SpeechSay(actor, id, secs, ev)
     local t = Subtitle_AddSkippable(actor, "$" .. id, secs)
     if t and t > secs then secs = t end
-    KAS_SpeechEnd = Universe_GameTime() + secs
+    KAS_SpeechBusy[actor] = Universe_GameTime() + secs
+    if KAS_SpeechEnd == nil or KAS_SpeechEnd < Universe_GameTime() + secs then KAS_SpeechEnd = Universe_GameTime() + secs end
     print("CKAS speech event " .. ev .. " -> $" .. id .. " (" .. secs .. "s)")
+end
+function KAS_SpeechQueueTick()
+    local now = Universe_GameTime()
+    local i = 1
+    while i <= getn(KAS_SpeechQueue) do
+        local q = KAS_SpeechQueue[i]
+        if q.at <= now then
+            tremove(KAS_SpeechQueue, i)
+            KAS_SpeechSay(q.actor, q.id, q.secs, q.ev)
+        else
+            i = i + 1
+        end
+    end
+    if getn(KAS_SpeechQueue) == 0 then Rule_Remove("KAS_SpeechQueueTick") end
 end
 
 function K_496eb0(event, variable) KAS_SpeechPlay(event, variable) end                              -- kasfSpeechEvent
@@ -1283,6 +1362,65 @@ dofilepath("data:soundscripts/cataclysm/catspeech_gen.lua")
 CatSayEvents = {156, 157, 165, 166, 167, 168, 5}   -- Link, Unlink, mimic, unmimic, kamikaze, disguise assumed, the Ram order (attack; shiprules.lua CatSay: cat_say_<event>)
 CatSayLast = 0
 CatTechHad = nil
+
+function KAS_BarkId(ev, variable)
+    local e = KAS_SpeechEvents and KAS_SpeechEvents["sect" .. ev]
+    if e == nil or variable == nil or variable < 0 or variable >= e[2] then
+        return nil
+    end
+    local ids = {}
+    for v = 0, e[1] - 1 do
+        local i = KAS_SpeechBankBase.sect + e[3] + v * e[2] + variable
+        if KAS_SpeechDurations[i] then tinsert(ids, i) end
+    end
+    if getn(ids) > 0 then return ids[random(1, getn(ids))] end
+    return KAS_SpeechBankBase.sect + e[3] + variable
+end
+
+-- A Fleet Command line outside the mission's script (a Kuun-Lan module coming online, event 48): Cataclysm queues it
+-- on Fleet Command's channel (FUN_00522560: Fleet Command 0x1000 and the Tactical Officer 0x2000 share it) with a
+-- 5 s wait (0x40a00000): it plays once the line speaking ends, if that is within 5 s, else it is dropped
+function KAS_SpeechFleetLine(ev, variable)
+    local id = KAS_BarkId(ev, variable)
+    if id == nil then return end
+    local secs = (KAS_SpeechDurations[id] or 2000) / 1000
+    local now = Universe_GameTime()
+    local fc, fi = Actor_HW1_FleetCommand, Actor_HW1_FleetIntel
+    local free = KAS_SpeechBusy[fc] or 0
+    if (KAS_SpeechBusy[fi] or 0) > free then free = KAS_SpeechBusy[fi] end
+    if free > now then
+        if free - now > KAS_SpeechWait then
+            print("CKAS fleet line " .. ev .. "/" .. variable .. " dropped (channel busy " .. (free - now) .. "s)")
+            return
+        end
+        tinsert(KAS_SpeechQueue, { at = free, actor = fc, id = id, secs = secs, ev = ev })
+        if Rule_Exists("KAS_SpeechQueueTick") == 0 then Rule_AddInterval("KAS_SpeechQueueTick", 0.1) end
+    else
+        free = now
+        KAS_SpeechSay(fc, id, secs, ev)
+    end
+    -- the channel is taken: the mission's next lines wait for it
+    KAS_SpeechBusy[fc], KAS_SpeechBusy[fi] = free + secs, free + secs
+    if KAS_SpeechEnd == nil or KAS_SpeechEnd < free + secs then KAS_SpeechEnd = free + secs end
+end
+
+-- modules coming online (catspeech.lua leaves them to this): Cataclysm's module index, the event 48 variable
+-- (tools/make_unitspeech.py MODULES)
+CatModuleOnline = { smt_kl_dockingbay = 0, smt_kl_armour = 1, smt_kl_micro = 2, smt_kl_special = 3, smt_kl_weapons = 4 }
+CatModuleHad = nil
+function CatModuleTick()
+    SobGroup_CreateIfNotExist("CatModuleMS")
+    SobGroup_Clear("CatModuleMS")
+    KAS_KuunLan("CatModuleMS", 0)
+    if SobGroup_Count("CatModuleMS") == 0 then return end
+    local first = CatModuleHad == nil
+    if first then CatModuleHad = {} end
+    for sub, v in CatModuleOnline do
+        local has = SobGroup_HasSubsystem("CatModuleMS", sub)
+        if not first and has == 1 and CatModuleHad[sub] ~= 1 then KAS_SpeechFleetLine(48, v) end
+        CatModuleHad[sub] = has
+    end
+end
 
 function KAS_SpeechBark(ev, variable, actor)
     local e = KAS_SpeechEvents and KAS_SpeechEvents["sect" .. ev]
@@ -1304,6 +1442,7 @@ end
 
 function CatSayTick()
     local now = Universe_GameTime()
+    CatModuleTick()
     for i = 1, getn(CatSayEvents) do
         local grp = "cat_say_" .. CatSayEvents[i]
         if SobGroup_Exists(grp) == 1 and SobGroup_Count(grp) > 0 then
@@ -1622,8 +1761,22 @@ end
 -- teams it gives the player; here allies stay with player 2 and are never carried, so nothing to do.
 function K_497ed0(sel) end
 
--- 0x499870(team): 1 if any ship lacks the data at ship+0x370 (Mission01: decides whether to hunt Workers).
-function K_499870(sel) return 1 end
+-- 0x499870(team): 1 if any ship has no command (ship+0x370, the command pointer: idle). Mission02's patrols wait on it
+-- for their move to end before the next waypoint (always 1 made all six re-order every half second: the game stuttered,
+-- user); Mission01 decides with it whether to hunt Workers.
+function K_499870(sel)
+    local n = SobGroup_Count(sel)
+    if n == 0 then return 0 end
+    SobGroup_CreateIfNotExist("KAS_IdleOne")
+    local i = 0
+    while i < n do
+        SobGroup_Clear("KAS_IdleOne")
+        SobGroup_FillShipsByIndexRange("KAS_IdleOne", sel, i, 1)
+        if SobGroup_GetCurrentOrder("KAS_IdleOne") == COMMAND_Idle then return 1 end
+        i = i + 1
+    end
+    return 0
+end
 
 -- 0x499c70(dst, shipType, count, nearShips, player): creates count ships of the type next to nearShips.
 -- In space beside them, as Cataclysm: SobGroup_CreateShip builds inside a ship that can build and returns no group
@@ -1730,7 +1883,7 @@ function K_4931a0(sel, vec, radius)
     SobGroup_Clear(sel)
     if SobGroup_Count(KAS_Team) == 0 then return 0 end
     local enemies = KAS_EnemyPlayers(SobGroup_GetPlayerOwner(KAS_Team))
-    Volume_AddSphere("KAS_FindVol", vec, KAS_Dist(radius))
+    Volume_AddSphere("KAS_FindVol", KAS_Pos(vec), KAS_Dist(radius))
     SobGroup_CreateIfNotExist("KAS_EnemyTmp")
     local i = 1
     while i <= getn(enemies) do
@@ -1749,7 +1902,7 @@ function K_495e50(sel, name) KAS_PingRemove(name, name) KAS_PingAddShips(sel, na
 -- small sphere made at the point.
 function K_495e80(vec, name)                                                                        -- kasfPingAddPoint
     KAS_PingRemove(name, name)
-    Volume_AddSphere("KAS_Ping_" .. name, vec, 10)
+    Volume_AddSphere("KAS_Ping_" .. name, KAS_Pos(vec), 10)
     KAS_PingAddPoint("KAS_Ping_" .. name, name, name)
 end
 function K_495ea0(name) KAS_PingRemove(name, name) end                                            -- kasfPingRemove
@@ -1771,7 +1924,20 @@ function K_4964e0(name)                                                         
 end
 function K_496530() KASPointer_RemoveAll() KAS_Pointers = {} end                                 -- kasfTutRemoveAllPointers
 function K_496870(sel) KAS_FocusShips(sel) end                                                   -- kasfTutCameraFocus
-function K_496ae0() KAS_FocusCancel() end                                                        -- kasfTutCameraFocusCancel
+function K_496ae0()
+    -- Mission02 cancels its focus at the end of Fleet Command's line, about when the canister goes: the camera stays
+    -- on it until the blast and holds there a moment (user, the original)
+    if KAS_JettFocus and KAS_Jett and (KAS_Jett.blown == nil or Universe_GameTime() - KAS_Jett.blown < KAS_JettisonHold) then
+        Rule_AddInterval("KAS_JettisonCancelTick", 0.1)
+        return
+    end
+    KAS_JettisonFocusEnd()
+end
+function KAS_JettisonCancelTick()
+    if KAS_Jett.blown == nil or Universe_GameTime() - KAS_Jett.blown < KAS_JettisonHold then return end
+    Rule_Remove("KAS_JettisonCancelTick")
+    KAS_JettisonFocusEnd()
+end                                                        -- kasfTutCameraFocusCancel
 
 -- ------------------------------------------------------------------ sensors, camera, screen
 function K_496bc0(flags) KAS_SensorsToggle(1, flags) end                                        -- kasfOpenSensors
@@ -1893,10 +2059,21 @@ end
 -- "SavedGames\SinglePlayer\<mission> - <label>": Mission01's "Hiigara" after the warp-in, "~ End of Mission" with
 -- the Hyperspace objective). Taken first for the end-of-mission hyperspace, it showed the button at the warp-in
 -- (user). HWRM's campaign quicksave, as Gearbox's KAS_SetLetterboxState saves.
+-- Saved from a plain rule a moment later: called inside a KAS team rule (Rule_AddIntervalParam, while the rule
+-- system walks its rules) the save failed with "invalid key for `next'" and aborted the calling script (Mission02's
+-- watch never started Fleet Intel's briefing, user); Gearbox saves from a plain rule (KAS_EndStartingLetterbox)
 function K_497290(mission, label)
-    print("CKAS: autosave '" .. format("%02d", mission) .. " - " .. label .. "'")
-    Campaign_QuickSaveNb(mission, label)
+    print("CKAS: autosave '" .. format("%02d", mission) .. " - " .. label .. "' (queued)")
+    KAS_SaveMission, KAS_SaveLabel = mission, label
+    if Rule_Exists("KAS_DoSave") == 0 then Rule_AddInterval("KAS_DoSave", 0.1) end
 end
+function KAS_DoSave()
+    Rule_Remove("KAS_DoSave")
+    print("CKAS: autosave '" .. format("%02d", KAS_SaveMission) .. " - " .. KAS_SaveLabel .. "'")
+    Campaign_QuickSaveNb(KAS_SaveMission, KAS_SaveLabel)
+    print("CKAS: autosave done")
+end
+
 
 -- The end of a mission: the "Hyperspace" objective is no objective, it shows the HYPERSPACE button (HW1; Gearbox's
 -- KASObjective_Add, K_494e70 here). Gearbox's HW1 hyperspace as it is (SinglePlayerHyperspace.lua, user: steal
@@ -2168,20 +2345,194 @@ function K_495640(n, o, class)
     return SobGroup_Count(n)
 end
 function K_496150() end                                                -- kasfBuilderRestrictNone
--- 0x4967b0(type): a build job of that type running for the player (Mission02's Micro module hints)
+-- 0x4967b0(type): a build job of that type running for the player (FUN_00534040: the player's build queues).
+-- Mission02 starts its ore canister sequence when the Engineering Module (sMothershipMicro) is being built.
+function KAS_BuildName(t)
+    local h = KAS_ShipTypes[strlower(t)]
+    if h == nil then return nil end
+    if strsub(h, -6) == "_dummy" then h = strsub(h, 1, -7) end   -- a Kuun-Lan module: its subsystem
+    return h
+end
 function K_4967b0(t)
-    KAS_NoOp("4967b0", "player building " .. t .. " (not tracked)")
+    local h = KAS_BuildName(t)
+    if h == nil then return 0 end
+    if Player_HasQueuedBuild(0, h) ~= 0 then return 1 end
     return 0
 end
+
+-- The Engineering Module takes the ore canister's place (Cataclysm: building it ejects the canister, Fleet Command
+-- "Ore transferred to aux storage bays. Jettisoning canister. Triggering canister destruct to keep it out of pirate
+-- hands.", event 363, played by Mission02 itself; user: the canister jettison before the Engineering Module). Ours
+-- is a subsystem: when the player queues the module while the Kuun-Lan carries the canister, the subsystem is
+-- destroyed, its loose model (the NIS dummy, built in the Kuun-Lan's frame) put where it was, and blown up a few
+-- seconds later.
+-- The canister's flight is cataclysm.exe's module jettison (FUN_005af940, fitting an Armour / Weapons / Special /
+-- Engineering module: FUN_00466b00; per frame FUN_005af800): a force along the Kuun-Lan's up axis x [0.4, 0.5] plus its
+-- right axis x [-0.3, 0.3] and again x [-0.02, 0.02] (table 0x8c3608 row 0; the exe reads the right axis twice),
+-- normalised, x [50000, 70000] (0x8c35fc), on the canister's mass 1000, its speed capped at 1000 (smothershiporecan-
+-- armour.shp), pushed for 7 + 10 s (0x87929c, 0x8792a0), then an ordinary ship death, still moving; spinning about
+-- an axis 0.05 rad a universe update (16 a second; 0x8c35f8). The jettison is when the module latches on to its slot
+-- (FUN_00466b00 from the dock state machine, case 4), at the start of its build: Mission02 sees the build, letterboxes
+-- and focuses on the canister 3 s later (its Default timer). The spin (the draw, FUN_00577xxx: glRotatef about +0x660
+-- after the model's matrix) is about the canister's world up axis at the jettison (+0x98, HW1's column 1) taken in
+-- the model's own frame: for a level Kuun-Lan (HW1's world up is z) that is the model's heading axis, end over end.
+-- Distances at the models' scale (0.35).
+KAS_JettisonCamera = 900       -- camera distance from it (the mission's kasfTutCameraFocusFar sets its own)
+KAS_JettisonCentre = { 0, 102.6076, -45.4616 }   -- its centre in the Kuun-Lan's frame (the loose model's Root is the
+                                                 -- Kuun-Lan's centre: build/ships/smt_kl_orecanarmour/origin.txt)
+KAS_JettisonUp = { 0.4, 0.5 }
+KAS_JettisonRight = { -0.3, 0.3 }
+KAS_JettisonRight2 = { -0.02, 0.02 }
+KAS_JettisonForce = { 50000, 70000 }
+KAS_JettisonMass, KAS_JettisonMaxSpeed = 1000, 1000
+KAS_JettisonPush = 17
+KAS_JettisonSpin = 0.05 * 16
+KAS_JettisonScale = 0.35
+KAS_JettisonBlast, KAS_JettisonBlastScale = "dmg_cloud_main_explosion_combo", 7
+KAS_JettisonDeath = 2          -- its death after the first blast: flying on, smaller blasts following it (seconds)
+KAS_JettisonSmall, KAS_JettisonSmallScale = "dmg_cloud_explosion_large_nodebris", 3
+-- the sounds: Cataclysm's canister explodes as ET_FrigateExplosion (smothershiporecanarmour.shp); our frigates' death
+-- sounds (bst_fieldfrigate.events)
+KAS_JettisonSound = "data:sound/sfx/etg/explosion/medium/etg_explode_medium_firey"
+KAS_JettisonSmallSound = "data:sound/sfx/etg/explosion/small/etg_explode_small_firey"
+KAS_JettisonHold = 1           -- the scene's focus kept on the blast this long before it ends (user, the original)
+function KAS_JettisonStart()
+    SobGroup_CreateIfNotExist("KAS_JettMS")
+    KAS_KuunLan("KAS_JettMS", 0)
+    if SobGroup_Count("KAS_JettMS") == 0 or SobGroup_HasSubsystem("KAS_JettMS", "smt_kl_orecanarmour") ~= 1 then return end
+    KAS_Jettisoned = 1            -- once
+    local pos, m = SobGroup_GetPosition("KAS_JettMS"), SobGroup_GetCoordSys("KAS_JettMS")
+    SobGroup_SetHardPointHealth("KAS_JettMS", "Ore Canister", 0)   -- (the hardpoint's name, smt_ms_sp.ship)
+    SobGroup_CreateIfNotExist("KAS_JettCan")
+    SobGroup_Clear("KAS_JettCan")
+    Volume_AddSphere("KAS_JettVol", pos, 1)
+    SobGroup_SpawnNewShipInSobGroup(0, "smt_kl_orecanarmour_dummy", "KAS_JettCanShip", "KAS_JettCan", "KAS_JettVol")
+    Volume_Delete("KAS_JettVol")
+    SobGroup_SetPosition("KAS_JettCan", pos)
+    SobGroup_SetTransform("KAS_JettCan", m)
+    -- the direction from the Kuun-Lan's axes (the coordsys' rows: right 1-3, up 4-6, bow 7-9, as the arrival check
+    -- reads the bow; world = local x M)
+    local up, right = { m[4], m[5], m[6] }, { m[1], m[2], m[3] }
+    local a = RandomRange(KAS_JettisonUp[1], KAS_JettisonUp[2])
+    local r = RandomRange(KAS_JettisonRight[1], KAS_JettisonRight[2]) + RandomRange(KAS_JettisonRight2[1], KAS_JettisonRight2[2])
+    local dir = { a * up[1] + r * right[1], a * up[2] + r * right[2], a * up[3] + r * right[3] }
+    local l = sqrt(dir[1] * dir[1] + dir[2] * dir[2] + dir[3] * dir[3])
+    dir = { dir[1] / l, dir[2] / l, dir[3] / l }
+    local c, k = KAS_JettisonCentre, 1
+    local centre = {}
+    while k <= 3 do
+        centre[k] = pos[k] + c[1] * m[k] + c[2] * m[k + 3] + c[3] * m[k + 6]
+        k = k + 1
+    end
+    KAS_Jett = { m = m, centre = centre, dir = dir, start = Universe_GameTime(), last = Universe_GameTime(),
+                 accel = RandomRange(KAS_JettisonForce[1], KAS_JettisonForce[2]) / KAS_JettisonMass * KAS_JettisonScale,
+                 vmax = KAS_JettisonMaxSpeed * KAS_JettisonScale, v = 0, s = 0, g = "KAS_JettCan" }
+    Rule_AddInterval("KAS_JettisonFly", 0.05)
+    print("CKAS: ore canister jettisoned (its replacement's build started)")
+end
+-- the model placed so the canister's centre is at c, turned th about its own heading axis (the bow row kept, the
+-- right and up rows turned in their plane)
+function KAS_JettisonPlace(c, th, g)
+    local m0, cs, sn = KAS_Jett.m, cos(th * 57.29578), sin(th * 57.29578)    -- (Lua 4 sin / cos take degrees)
+    local m = {}
+    local i = 1
+    while i <= 3 do
+        m[i] = m0[i] * cs + m0[i + 3] * sn
+        m[i + 3] = m0[i + 3] * cs - m0[i] * sn
+        m[i + 6] = m0[i + 6]
+        i = i + 1
+    end
+    local k, o, lc = 1, {}, KAS_JettisonCentre
+    while k <= 3 do
+        o[k] = c[k] - (lc[1] * m[k] + lc[2] * m[k + 3] + lc[3] * m[k + 6])
+        k = k + 1
+    end
+    SobGroup_SetPosition(g, o)
+    SobGroup_SetTransform(g, m)
+end
+function KAS_JettisonBlastAt(c, fx, scale, n, snd)
+    Volume_AddSphere("KAS_JettBlast" .. n, c, 1)
+    FX_PlayEffect(fx, "KAS_JettBlast" .. n, scale)
+    Sound_SFXPlay3D(snd, "KAS_JettBlast" .. n)
+end
+-- HW1's camera, its focus ship dying, stays where it is; HWRM's keeps following a ship that is still there. So at the
+-- blast the focused canister is swapped for an unfocused copy that flies on, and the camera is left behind (user)
+function KAS_JettisonSwap(c, th)
+    SobGroup_CreateIfNotExist("KAS_JettCan2")
+    SobGroup_Clear("KAS_JettCan2")
+    Volume_AddSphere("KAS_JettSwapVol", c, 1)
+    SobGroup_SpawnNewShipInSobGroup(0, "smt_kl_orecanarmour_dummy", "KAS_JettCan2Ship", "KAS_JettCan2", "KAS_JettSwapVol")
+    Volume_Delete("KAS_JettSwapVol")
+    KAS_JettisonPlace(c, th, "KAS_JettCan2")
+    SobGroup_Despawn("KAS_JettCan")
+    KAS_Jett.g = "KAS_JettCan2"
+end
+function KAS_JettisonFocusEnd()
+    KAS_JettFocus = nil
+    KAS_FocusCancel()
+end
+function KAS_JettisonFly()
+    local j = KAS_Jett
+    local now = Universe_GameTime()
+    local t, dt = now - j.start, now - j.last
+    j.last = now
+    if j.blown == nil or now - j.blown < KAS_JettisonDeath then
+        if j.blown == nil then
+            j.v = j.v + j.accel * dt
+            if j.v > j.vmax then j.v = j.vmax end
+        end
+        j.s = j.s + j.v * dt
+        local c = { j.centre[1] + j.dir[1] * j.s, j.centre[2] + j.dir[2] * j.s, j.centre[3] + j.dir[3] * j.s }
+        if SobGroup_Count(j.g) > 0 then KAS_JettisonPlace(c, KAS_JettisonSpin * t, j.g) end
+        if j.blown == nil and t >= KAS_JettisonPush then
+            -- the death: the big blast where it is, the canister flying on; a camera still on it stays on that spot
+            -- (only while the mission's focus on it lasts: user, a refocus after the scene snapped the camera back)
+            j.blown, j.blasts = now, 0
+            KAS_JettisonBlastAt(c, KAS_JettisonBlast, KAS_JettisonBlastScale, 0, KAS_JettisonSound)
+            if KAS_JettFocus then KAS_JettisonSwap(c, KAS_JettisonSpin * t) end
+            print("CKAS: ore canister destructed, " .. floor(j.v / KAS_JettisonScale) .. " a second")
+        elseif j.blown and now - j.blown >= (j.blasts + 1) * 0.5 then
+            j.blasts = j.blasts + 1
+            KAS_JettisonBlastAt(c, KAS_JettisonSmall, KAS_JettisonSmallScale, j.blasts, KAS_JettisonSmallSound)
+        end
+        return
+    end
+    Rule_Remove("KAS_JettisonFly")
+    if SobGroup_Count(j.g) > 0 then SobGroup_Despawn(j.g) end
+end
 -- camera: 0x496930 sets the distance, 0x496950 focuses ships (the tutorial camera; Fleet Intel's briefing views)
-function K_496930(d) KAS_NoOp("496930", "camera distance") end
-function K_496950(sel) KAS_NoOp("496950", "camera focus") end
+-- (Mission02's canister scene focuses on the loose canister; KAS_JettFocus while that focus lasts)
+KAS_CamDist = nil
+function K_496930(d) KAS_CamDist = KAS_Dist(d) end
+function K_496950(sel)
+    if sel == KAS_OreCanSel and KAS_Jettisoned == nil then KAS_JettisonStart() end   -- (the watch missed the build)
+    local g = sel
+    if sel == KAS_OreCanSel and SobGroup_Count("KAS_JettCan") > 0 then g = "KAS_JettCan" end
+    KAS_JettFocus = nil
+    if g == "KAS_JettCan" then KAS_JettFocus = 1 end
+    if SobGroup_Count(g) > 0 then Camera_FocusSobGroupWithBuffer(g, KAS_CamDist or KAS_JettisonCamera, 0, 0) end
+end
+-- the jettison at the start of an Armour / Weapons / Special / Engineering module's build (FUN_00466b00's types)
+KAS_JettisonModules = { "smt_kl_armour", "smt_kl_weapons", "smt_kl_special", "smt_kl_micro" }
+function KAS_JettisonWatch()
+    if KAS_Jettisoned then Rule_Remove("KAS_JettisonWatch") return end
+    local i = 1
+    while KAS_JettisonModules[i] do
+        if Player_HasQueuedBuild(0, KAS_JettisonModules[i]) ~= 0 then
+            KAS_JettisonStart()
+            return
+        end
+        i = i + 1
+    end
+end
 function K_496d40(tech) return Player_HasResearch(0, tech) end                                    -- kasfCanPlayerResearch
 -- 0x496e00(player): the player's RUs (Mission02: under 500, Fleet Intel says to harvest)
 function K_496e00(p) return Player_GetRU(p) end
 -- 0x497420(n) / 0x498250(on): game UI modes not identified (Mission02's Fleet Intel briefings)
-function K_497420(n) KAS_NoOp("497420", "UI mode " .. n) end
-function K_498250(on) KAS_NoOp("498250", "UI mode end") end
+-- 0x497420(frames): the same code as kasfWideScreenIn (0x497580): letterbox in (Mission02's canister scene, 90)
+function K_497420(frames) K_497580(frames) end
+-- 0x498250(on): 1 locks the interface (FUN_00518e10(7)), 0 releases it (FUN_00518f00, as kasfWideScreenOut does)
+function K_498250(on) KAS_Lockout(on) end
 -- 0x497850(team): removes the ships from the game outright
 function K_497850(sel) SobGroup_Despawn(sel) end
 -- 0x497f10(index, type) / 0x497f70(index, n): per-player numbered ship-type lists for a UI menu ("%d. %s",
@@ -2290,3 +2641,4 @@ function KAS_MoveFireTick()
         i = i + 1
     end
 end
+

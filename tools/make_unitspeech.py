@@ -201,15 +201,17 @@ def main():
                 continue
             d = os.path.join(ALLSHIPS, base + "1", ev_name.lower())
             os.makedirs(d, exist_ok=True)
-            k = 0
+            k, secs = 0, 0
             for files in variants:
-                if write_clip(files, os.path.join(d, f"{ev_name.lower()}_{k + 1}.wav"), a.rate):
+                out = os.path.join(d, f"{ev_name.lower()}_{k + 1}.wav")
+                if write_clip(files, out, a.rate):
+                    secs = max(secs, wav_secs(out))
                     k += 1
             if k:
                 with open(os.path.join(d, ev_name.lower() + ".lua"), "w", newline="\n") as f:
                     f.write("-- Cataclysm-HWRM: Cataclysm speech event %d (tools/make_unitspeech.py)\n"
                             "version = 4\nrandSampContainer = 1\n" % ce)
-                got[ev_name] = 1
+                got[ev_name] = secs
                 n_pilot += k
         if got:
             for name in hwrm[cat]:
@@ -249,9 +251,10 @@ def main():
         f.write("CatSpeech_Folders = {   -- our ship type -> its voice folder base (folder <base>1)\n")
         for k in sorted(folders):
             f.write(f'    ["{k.upper()}"] = "{folders[k]}",\n')
-        f.write("}\nCatSpeech_Lines = {     -- voice folder base -> the events it has lines for\n")
+        f.write("}\nCatSpeech_Lines = {     -- voice folder base -> its events: the longest recording, seconds\n")
         for b in sorted(lines):
-            f.write(f'    ["{b}"] = {{ ' + ", ".join(f"{e} = 1" for e in sorted(lines[b]) if re.fullmatch(r"\w+", e))
+            f.write(f'    ["{b}"] = {{ ' + ", ".join(f"{e} = {lines[b][e]:.2f}" for e in sorted(lines[b])
+                                              if re.fullmatch(r"\w+", e))
                     + " },\n")
         f.write("}\nCatSpeech_Fleet = {      -- announcer events with a Fleet Command line (cat_fleet/<event>.wav)\n")
         for k in sorted(fleet):
