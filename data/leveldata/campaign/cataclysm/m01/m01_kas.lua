@@ -1208,7 +1208,7 @@ function F_5da2c0(TeamName)
       K_497ad0()
       K_491d70(109086661, 1)  -- UnPauseUniverse; kasfVarValueSet
       K_491d70(211831571, 1)  -- UnpauseOtherKAS; kasfVarValueSet
-      iVar1 = KAS_ShipsVector(213123832)
+      iVar1 = KAS_ShipsVector(KAS_GS("gs_0cb402f8"))
       K_49a2a0(iVar1)
       iVar1 = KAS_GS("gs_0cb402f8")
       K_4963a0("ProxPointer", iVar1)  -- kasfTutSetPointerTargetShip
@@ -2179,7 +2179,7 @@ function F_5d8750(TeamName)
   iVar1 = KAS_GS("ToAttack")
   K_492d10(iVar1)  -- kasfGrowSelectionClear
   p4 = 10000
-  iVar1 = KAS_ShipsVector(211966048)  -- Mothership
+  iVar1 = KAS_ShipsVector(KAS_GS("Mothership"))
   p2 = KAS_GS("Enemy")
   p1 = KAS_GS("ToAttack")
   K_495a50(p1, p2, iVar1, p4)  -- kasfShipsSelectNearby
@@ -2353,7 +2353,7 @@ function F_5d89d0(TeamName)
   iVar1 = KAS_GS("gs_0b87dad3")
   iVar2 = KAS_GS("FirstShip")
   K_498d90(iVar2, iVar1)  -- kasfFirstShip
-  iVar1 = KAS_ShipsVector(126432768)  -- FirstShip
+  iVar1 = KAS_ShipsVector(KAS_GS("FirstShip"))
   K_4941a0(iVar1)  -- kasfMoveTo
   K_491f90(150120898, 6)  -- kasfTimerCreateSetStart
   do return end
@@ -2383,7 +2383,7 @@ function F_5d8a60(TeamName)
         iVar1 = KAS_GS("gs_0b87dad3")
         iVar2 = KAS_GS("FirstShip")
         K_498d90(iVar2, iVar1)  -- kasfFirstShip
-        iVar1 = KAS_ShipsVector(126432768)  -- FirstShip
+        iVar1 = KAS_ShipsVector(KAS_GS("FirstShip"))
         K_4941a0(iVar1)  -- kasfMoveTo
       end
     else
