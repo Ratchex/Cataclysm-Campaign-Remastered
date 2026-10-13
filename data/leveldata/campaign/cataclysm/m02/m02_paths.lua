@@ -2,5 +2,11 @@
 KAS_Paths = {
 }
 KAS_Universe = { 65625, 65625, 65625 }
+KAS_MeteorPlayer = 3
+KAS_MeteorStorms = {
+	{ group = "KAS_Meteors0", n = 140, v = {-18.614, -198.559, 141.672}, ext = {65625, 65625, 65625} },
+	{ group = "KAS_Meteors1", n = 140, v = {-220.434, -198.559, -25.786}, ext = {65625, 65625, 65625} },
+	{ group = "KAS_Meteors2", n = 140, v = {-26.342, -198.559, -132.626}, ext = {65625, 65625, 65625} },
+}
 KAS_TeamSchemes = {
 }

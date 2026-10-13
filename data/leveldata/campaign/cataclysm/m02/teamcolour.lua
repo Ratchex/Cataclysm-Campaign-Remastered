@@ -4,4 +4,5 @@ teamcolours = {
 	[0] = {{0.259, 0.424, 0.792}, {1.000, 1.000, 1.000}, "DATA:Badges/kiith somtaaw.tga", {1.000, 1.000, 1.000}, "data:/effect/trails/kus_trail_clr.tga"},   -- Somtaaw: scheme 0, Kiith Somtaaw
 	[1] = {{0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "DATA:Badges/imperial taiidan.tga", {0.992, 0.929, 0.145}, "data:/effect/trails/tai_trail_clr.tga"},   -- Taiidan: scheme 2, Taiidan Imperialists
 	[2] = {{0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "DATA:Badges/imperial taiidan.tga", {0.992, 0.929, 0.145}, "data:/effect/trails/tai_trail_clr.tga"},   -- Kushan: scheme 2, Taiidan Imperialists
+	[3] = {{0.992, 0.929, 0.145}, {0.671, 0.176, 0.078}, "DATA:Badges/imperial taiidan.tga", {0.992, 0.929, 0.145}, "data:/effect/trails/tai_trail_clr.tga"},   -- Kushan: scheme 2, Taiidan Imperialists
 }

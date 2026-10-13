@@ -60,6 +60,426 @@ function DetermChunk()
     addSquadron("Backup0", "tur_p1mothership", {105779.572, 139617.66, -104357.767}, 1, {0, -166, 0}, 0, 0) -- RACE_P1 p1Mothership
     addSquadron("kDestroyer0", "kus_destroyer", {-8919.12, 0, 67934.947}, 2, {0, -90, 0}, 0, 0) -- RACE_KUSHAN kStandardDestroyer
     addSquadron("dMessagePod0", "Kus_Scout", {-20589.502, 0, 67438.56}, 1, {0, -90, 0}, 0, 0) -- RACE_DERELICT dMessagePod
+    addSquadron("KAS_Meteors0_0", "cat_meteor4", {3396.157, 14528.434, -36637.258}, 3, {130.222, 218.455, 50.655}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_1", "cat_meteor4", {4183.895, -34144.625, -49649.741}, 3, {7.38, 43.286, 200.85}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_2", "cat_meteor4", {3936.358, -39918.118, -54092.493}, 3, {249.909, 271.89, 6.307}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_3", "cat_meteor4", {8802.615, -13470.247, -42769.366}, 3, {47.767, 226.781, 7.724}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_4", "cat_meteor4", {7748.349, 51967.948, -19502.762}, 3, {289.544, 77.413, 64.101}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_5", "cat_meteor4", {2146.343, -29453.763, -46280.816}, 3, {275.377, 350.751, 166.235}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_6", "cat_meteor4", {3320.47, -37652.838, -52895.136}, 3, {250.387, 31.141, 37.158}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_7", "cat_meteor4", {5492.374, 33762.474, -23787.247}, 3, {306.037, 246.402, 34.735}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_8", "cat_meteor4", {12575.818, -8947.694, -35301.237}, 3, {313.075, 110.771, 0.849}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_9", "cat_meteor4", {874.153, -28840.793, -48235.523}, 3, {170.664, 154.29, 87.063}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_10", "cat_meteor4", {1844.721, -23518.555, -42579.613}, 3, {91.466, 293.185, 3.162}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_11", "cat_meteor4", {11177.658, -7744.136, -34315.323}, 3, {28.421, 266.134, 135.324}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_12", "cat_meteor4", {11611.408, 22848.177, -30380.48}, 3, {271.651, 101.68, 159.087}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_13", "cat_meteor4", {9185.982, -37566.56, -54350.117}, 3, {33.85, 167.059, 178.839}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_14", "cat_meteor4", {10416.94, 44935.252, -15927.255}, 3, {348.05, 59.474, 69.177}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_15", "cat_meteor4", {4205.314, -22517.569, -43513.012}, 3, {300.51, 195.654, 170.398}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_16", "cat_meteor4", {5475.204, -18360.191, -38522.882}, 3, {348.581, 21.37, 53.293}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_17", "cat_meteor4", {6304.215, -1287.551, -35038.19}, 3, {301.124, 161.395, 254.212}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_18", "cat_meteor4", {8625.737, 20917.765, -24856.309}, 3, {93.581, 256.159, 69.643}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_19", "cat_meteor4", {9319.612, -18870.202, -43612.654}, 3, {63.373, 293.275, 144.348}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_20", "cat_meteor4", {1740.045, -23238.748, -50355.074}, 3, {163.777, 325.386, 329.419}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_21", "cat_meteor4", {3422.048, 43507.693, -23200.669}, 3, {51.586, 12.432, 111.947}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_22", "cat_meteor4", {7916.86, -41347.084, -52451.145}, 3, {23.061, 354.332, 117.336}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_23", "cat_meteor4", {564.444, -20465.795, -41753.906}, 3, {148.231, 292.65, 230.557}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_24", "cat_meteor4", {12237.639, 37244.239, -22969.659}, 3, {317.527, 126.992, 243.073}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_25", "cat_meteor4", {6896.205, 41754.918, -21817.07}, 3, {183.005, 222.534, 313.068}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_26", "cat_meteor4", {2127.427, 41656.878, -17185.305}, 3, {297.728, 312.851, 193.35}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_27", "cat_meteor4", {10370.474, -8507.114, -35183.098}, 3, {32.49, 305.22, 78.326}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_28", "cat_meteor4", {8934.213, 46199.592, -23175.309}, 3, {112.17, 66.082, 58.878}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_29", "cat_meteor4", {2702.947, 5223.471, -30915.185}, 3, {233.94, 259.887, 111.841}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_30", "cat_meteor4", {9255.187, 35351.453, -28463.829}, 3, {146.765, 111.414, 275.113}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_31", "cat_meteor4", {5391.008, -28171.697, -53080.779}, 3, {135.332, 150.763, 171.595}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_32", "cat_meteor4", {8831.775, -26252.86, -51252.158}, 3, {178.347, 263.132, 240.044}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_33", "cat_meteor4", {5134.51, 3416.898, -33130.694}, 3, {199.771, 359.853, 237.246}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_34", "cat_meteor4", {1159.976, -47233.472, -55806.792}, 3, {182.51, 229.575, 267.279}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_35", "cat_meteor4", {9141.316, 16220.853, -31528.123}, 3, {171.75, 207.555, 64.552}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_36", "cat_meteor4", {9157.029, 4480.061, -38238.06}, 3, {167.211, 233.914, 184.395}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_37", "cat_meteor4", {10111.922, 29095.228, -28651.34}, 3, {85.112, 223.594, 111.724}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_38", "cat_meteor4", {9347.952, -52044.184, -54580.584}, 3, {147.473, 70.479, 230.027}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_39", "cat_meteor4", {6573.354, 22375.968, -35467.953}, 3, {185.744, 116.392, 110.833}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_40", "cat_meteor4", {9718.707, 3635.081, -29653.02}, 3, {299.242, 324.331, 128.126}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_41", "cat_meteor4", {3306.435, -10322.483, -46579.019}, 3, {318.488, 72.216, 295.498}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_42", "cat_meteor4", {1112.333, 34731.01, -19260.698}, 3, {253.431, 281.933, 181.862}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_43", "cat_meteor4", {3021.01, -11161.702, -44286.951}, 3, {322.847, 214.184, 320.546}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_44", "cat_meteor4", {7748.737, 13779.103, -35823.222}, 3, {282.5, 284.422, 28.926}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_45", "cat_meteor4", {859.965, -41804.934, -51056.961}, 3, {61.091, 42.383, 300.61}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_46", "cat_meteor4", {1192.594, 39463.416, -23852.493}, 3, {239.829, 99.65, 215.792}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_47", "cat_meteor4", {861.626, -19853.617, -40986.315}, 3, {286.872, 159.657, 6.802}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_48", "cat_meteor4", {9873.593, 9677.997, -34085.742}, 3, {320.136, 114.701, 55.315}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_49", "cat_meteor4", {13060.579, -3607.012, -36892.092}, 3, {246.46, 127.878, 9.534}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_50", "cat_meteor4", {8953.222, 29621.453, -33319.747}, 3, {96.055, 303.806, 298.311}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_51", "cat_meteor4", {6356.59, 28140.961, -21403.246}, 3, {129.498, 27.425, 20.209}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_52", "cat_meteor4", {4589.038, -52143.856, -55212.162}, 3, {124.091, 324.22, 154.607}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_53", "cat_meteor4", {13230.667, -25374.185, -51916.699}, 3, {256.324, 5.815, 8.391}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_54", "cat_meteor4", {1678.718, -48338.974, -57948.204}, 3, {84.244, 192.626, 339.143}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_55", "cat_meteor4", {10380.431, 16760.16, -29638.512}, 3, {266.227, 160.711, 169.708}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_56", "cat_meteor4", {6884.436, -20713.279, -43535.462}, 3, {108.019, 49.704, 343.098}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_57", "cat_meteor4", {5306.467, -6934.647, -37682.129}, 3, {225.372, 148.1, 210.479}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_58", "cat_meteor4", {9556.163, -5377.354, -33578.274}, 3, {224.222, 188.157, 346.683}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_59", "cat_meteor4", {2665.437, 35662.97, -30467.332}, 3, {329.604, 261.365, 1.354}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_60", "cat_meteor4", {6148.594, -20241.819, -38281.888}, 3, {287.22, 283.959, 23.911}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_61", "cat_meteor4", {12026.498, 30318.839, -32623.689}, 3, {314.824, 252.514, 68.445}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_62", "cat_meteor4", {6368.012, -7159.968, -38551.147}, 3, {284.331, 197.153, 40.287}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_63", "cat_meteor4", {3863.844, -264.291, -38897.458}, 3, {171.628, 73.78, 253.564}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_64", "cat_meteor4", {2866.546, -19856.752, -44669.059}, 3, {262.604, 265.298, 46.727}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_65", "cat_meteor4", {7192.292, 19478.212, -29042.784}, 3, {71.381, 288.814, 271.094}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_66", "cat_meteor4", {2764.164, 11885.845, -27107.317}, 3, {94.875, 32.48, 191.986}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_67", "cat_meteor4", {4703.075, -10638.878, -37708.345}, 3, {218.405, 111.915, 254.313}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_68", "cat_meteor4", {7639.938, 45212.593, -20368.475}, 3, {8.274, 255.061, 66.671}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_69", "cat_meteor4", {8292.579, -50619.528, -58994.226}, 3, {56.612, 291.46, 271.064}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_70", "cat_meteor4", {4063.141, -41789.828, -57713.482}, 3, {40.392, 254.551, 304.738}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_71", "cat_meteor4", {523.713, -15175.231, -37466.275}, 3, {148.689, 35.877, 282.512}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_72", "cat_meteor4", {9027.941, -42650.061, -54821.278}, 3, {90.92, 271.644, 119.186}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_73", "cat_meteor4", {3190.627, -50280.884, -57322.336}, 3, {304.625, 100.731, 37.697}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_74", "cat_meteor4", {9496.5, -40861.449, -52154.695}, 3, {356.976, 267.994, 85.855}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_75", "cat_meteor4", {10829.208, 10001.755, -29144.895}, 3, {358.793, 313.004, 235.928}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_76", "cat_meteor4", {6172.921, -1135.722, -33334.841}, 3, {359.147, 128.128, 145.404}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_77", "cat_meteor4", {5617.089, 33295.145, -27402.552}, 3, {117.123, 241.272, 169.034}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_78", "cat_meteor4", {4730.938, -12518.657, -45254.141}, 3, {13.029, 191.35, 331.344}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_79", "cat_meteor4", {4232.696, -8836.682, -42816.05}, 3, {41.57, 142.988, 350.443}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_80", "cat_meteor4", {8205.315, -40037.911, -49950.08}, 3, {307.909, 85.914, 17.398}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_81", "cat_meteor4", {6504.421, -30812.013, -48212.164}, 3, {273.226, 64.376, 285.774}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_82", "cat_meteor4", {4755.093, 39066.918, -22148.52}, 3, {197.371, 304.962, 129.586}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_83", "cat_meteor4", {1061.594, -22456.97, -38928.843}, 3, {344.74, 235.175, 126.151}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_84", "cat_meteor4", {2025.775, 32885.361, -24460.526}, 3, {34.701, 73.944, 18.748}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_85", "cat_meteor4", {9440.137, 53224.639, -13409.104}, 3, {209.687, 21.913, 340.774}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_86", "cat_meteor4", {2376.398, -25484.294, -45254.464}, 3, {7.249, 298.75, 40.868}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_87", "cat_meteor4", {3647.193, 48956.491, -14655.69}, 3, {181.266, 96.191, 167.313}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_88", "cat_meteor4", {9482.95, 52696.665, -20128.866}, 3, {38.258, 267.769, 117.77}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_89", "cat_meteor4", {11817.612, -24047.037, -43324.381}, 3, {257.773, 227.571, 315.722}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_90", "cat_meteor4", {11825.275, -52716.502, -51999.955}, 3, {309.193, 86.6, 195.266}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_91", "cat_meteor4", {6999.492, 20391.304, -35653.443}, 3, {35.621, 334.678, 150.464}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_92", "cat_meteor4", {4570.291, -3507.819, -39963.411}, 3, {63.91, 257.248, 202.989}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_93", "cat_meteor4", {8876.78, 41651.739, -24574.104}, 3, {69.686, 176.931, 309.216}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_94", "cat_meteor4", {5473.068, 18568.775, -27991.104}, 3, {127.252, 348.631, 259.554}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_95", "cat_meteor4", {11891.004, -12624.209, -39669.045}, 3, {170.039, 69.351, 318.205}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_96", "cat_meteor4", {8860.343, 22626.535, -35465.113}, 3, {205.099, 226.564, 267.996}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_97", "cat_meteor4", {11497.594, 7759.02, -33873.085}, 3, {21.779, 24.988, 160.721}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_98", "cat_meteor4", {2250.765, -25278.77, -46714.868}, 3, {213.894, 303.19, 333.524}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_99", "cat_meteor4", {7738.889, -12236.618, -45536.557}, 3, {321.73, 147.859, 130.795}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_100", "cat_meteor4", {1640.522, 29682.15, -30774.339}, 3, {170.563, 358.628, 289.908}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_101", "cat_meteor4", {4575.074, -21203.907, -49246.851}, 3, {21.729, 116.683, 268.668}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_102", "cat_meteor4", {11647.14, -48943.492, -53774.032}, 3, {332.739, 55.801, 224.721}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_103", "cat_meteor4", {8419.065, 29217.371, -30851.674}, 3, {195.575, 224.403, 172.228}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_104", "cat_meteor4", {11123.385, -48351.333, -56235.044}, 3, {22.939, 314.991, 221.692}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_105", "cat_meteor4", {8161.392, 11171.718, -40016.619}, 3, {134.633, 206.047, 46.758}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_106", "cat_meteor4", {12041.163, -27196.722, -42880.534}, 3, {219.894, 125.925, 346.96}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_107", "cat_meteor4", {1441.565, -21871.851, -49540.215}, 3, {261.885, 28.325, 114.036}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_108", "cat_meteor4", {11136.895, -41561.937, -51826.928}, 3, {143.568, 1.27, 303.893}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_109", "cat_meteor4", {5482.124, 42229.747, -28309.503}, 3, {174.91, 349.57, 242.356}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_110", "cat_meteor4", {2059.707, -472.33, -33089.54}, 3, {148.573, 73.658, 356.601}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_111", "cat_meteor4", {11521.785, -17749.208, -49976.992}, 3, {154.971, 130.619, 103.264}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_112", "cat_meteor4", {10768.416, -10242.843, -45401.345}, 3, {130.142, 3.661, 193.543}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_113", "cat_meteor4", {4705.983, -29551.066, -53892.743}, 3, {227.777, 105.512, 216.544}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_114", "cat_meteor4", {1463.791, -35048.203, -48047.377}, 3, {220.724, 278.326, 14.628}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_115", "cat_meteor4", {6229.335, -51812.612, -55875.447}, 3, {42.941, 2.791, 323.166}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_116", "cat_meteor4", {8721.893, 35857.315, -27450.792}, 3, {170.479, 330.056, 85.984}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_117", "cat_meteor4", {5698.18, -31244.189, -50132.825}, 3, {121.825, 56.11, 111.484}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_118", "cat_meteor4", {1910.893, 7114.108, -34744.733}, 3, {64.9, 316.9, 16.499}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_119", "cat_meteor4", {13158.946, 2175.613, -41294.387}, 3, {149.544, 295.184, 331.821}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_120", "cat_meteor4", {3577.405, -7129.781, -43317.627}, 3, {131.491, 300.87, 272.218}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_121", "cat_meteor4", {4806.914, 43581.965, -20659.824}, 3, {355.758, 262.369, 3.538}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_122", "cat_meteor4", {1489.901, -13136.222, -39362.597}, 3, {114.067, 151.753, 274.683}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_123", "cat_meteor4", {1307.8, 18592.983, -35391.53}, 3, {134.217, 220.572, 123.118}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_124", "cat_meteor4", {5116.454, -16062.281, -41583.855}, 3, {272.223, 351.754, 189.155}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_125", "cat_meteor4", {6625.777, 10598.623, -29295.882}, 3, {177.493, 212.235, 151.046}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_126", "cat_meteor4", {6656.229, -24428.003, -39712.265}, 3, {287.821, 54.63, 141.879}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_127", "cat_meteor4", {5062.594, -35106.353, -51055.241}, 3, {270.652, 259.642, 4.169}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_128", "cat_meteor4", {10849.459, -25405.402, -47185.552}, 3, {300.559, 172.67, 69.193}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_129", "cat_meteor4", {8176.094, 6011.166, -40640.74}, 3, {245.4, 326.497, 199.367}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_130", "cat_meteor4", {7770.087, 17663.962, -25838.109}, 3, {302.486, 23.846, 303.138}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_131", "cat_meteor4", {827.229, -27351.954, -50190.898}, 3, {31.777, 212.684, 250.651}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_132", "cat_meteor4", {5823.148, 28354.605, -29483.038}, 3, {242.551, 126.261, 147.056}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_133", "cat_meteor4", {10951.339, 19120.74, -26951.213}, 3, {235.808, 207.07, 351.802}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_134", "cat_meteor4", {3116.657, 48013.316, -15050.894}, 3, {293.058, 324.857, 56.649}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_135", "cat_meteor4", {2561.976, 57566.79, -23999.762}, 3, {41.093, 38.987, 317.546}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_136", "cat_meteor4", {2101.693, 21674.274, -24574.438}, 3, {154.312, 257.889, 98.519}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_137", "cat_meteor4", {5875.811, 51119.374, -21083.758}, 3, {76.21, 262.253, 49.835}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_138", "cat_meteor4", {9199.96, -1082.023, -36582.862}, 3, {101.669, 249.001, 334.473}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors0_139", "cat_meteor4", {9638.742, 2765.534, -36760.835}, 3, {184.447, 18.847, 128.243}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_0", "cat_meteor4", {-39959.687, -16961.752, 3571.996}, 3, {251.551, 314.945, 176.305}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_1", "cat_meteor4", {-45317.525, -42646.612, 10819.614}, 3, {333.62, 299.949, 298.114}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_2", "cat_meteor4", {-37321.526, -9428.466, 1181.87}, 3, {212.515, 212.937, 255.795}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_3", "cat_meteor4", {-42256.725, -29032.957, 3540.649}, 3, {306.225, 146.754, 277.975}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_4", "cat_meteor4", {-28898.386, 27304.466, -2868.635}, 3, {162.123, 170.506, 211.33}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_5", "cat_meteor4", {-46995.704, -39723.212, 13312.724}, 3, {299.211, 216.708, 171.385}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_6", "cat_meteor4", {-43401.302, -10186.995, 10647.211}, 3, {180.089, 31.827, 251.046}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_7", "cat_meteor4", {-42732.074, -20739.253, 3274.206}, 3, {304.574, 308.272, 167.768}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_8", "cat_meteor4", {-32381.679, 21563.422, 1434.082}, 3, {250.464, 317.98, 312.443}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_9", "cat_meteor4", {-42784.331, -34801.974, 9074.852}, 3, {288.803, 201.288, 15.699}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_10", "cat_meteor4", {-34869.365, -10161.86, 4555.39}, 3, {122.885, 293.441, 163.564}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_11", "cat_meteor4", {-25641.75, 19927.975, 769.42}, 3, {304.183, 359.622, 107.276}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_12", "cat_meteor4", {-52083.454, -22724.473, 6024.836}, 3, {226.099, 151.928, 214.516}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_13", "cat_meteor4", {-26045.06, 32852.901, 2776.103}, 3, {130.658, 268.635, 164.307}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_14", "cat_meteor4", {-24994.458, 53737.561, 1209.837}, 3, {219.924, 245.48, 337.342}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_15", "cat_meteor4", {-55033.784, -39441.999, 14698.01}, 3, {25.746, 248.215, 274.662}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_16", "cat_meteor4", {-28221.603, 34370.543, -2281.316}, 3, {20.764, 164.391, 199.962}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_17", "cat_meteor4", {-52261.836, -24960.652, 3511.858}, 3, {296.162, 337.375, 228.641}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_18", "cat_meteor4", {-41389.382, 16579.062, -1259.012}, 3, {103.037, 352.76, 277.898}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_19", "cat_meteor4", {-46639.131, -32370.657, 2150.599}, 3, {16.659, 303.562, 137.971}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_20", "cat_meteor4", {-33917.535, 28115.98, 6166.234}, 3, {263.063, 160.832, 98.547}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_21", "cat_meteor4", {-46851.024, -9757.182, 214.107}, 3, {63.449, 207.594, 254.358}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_22", "cat_meteor4", {-42922.25, -33751.278, 10377.468}, 3, {18.158, 181.438, 259.685}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_23", "cat_meteor4", {-46194.246, -24035.609, 6607.738}, 3, {153.613, 311.567, 35.357}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_24", "cat_meteor4", {-52538.794, -50868.949, 9047.513}, 3, {312.536, 202.821, 51.269}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_25", "cat_meteor4", {-23039.955, 44021.775, -9930.736}, 3, {52.131, 241.183, 123.995}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_26", "cat_meteor4", {-53083.206, -27790.786, 7909.698}, 3, {109.267, 115.905, 209.018}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_27", "cat_meteor4", {-35066.626, 11274.33, 7960.655}, 3, {183.566, 338.044, 345.305}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_28", "cat_meteor4", {-31557.499, 33331.121, 3528.683}, 3, {25.666, 205.87, 258.642}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_29", "cat_meteor4", {-39258.737, -763.292, 1869.443}, 3, {219.741, 44.665, 161.458}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_30", "cat_meteor4", {-23069.271, 46812.771, -2670.731}, 3, {319.594, 332.72, 103.567}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_31", "cat_meteor4", {-55374.813, -42087.988, 8304.212}, 3, {144.229, 90.13, 203.287}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_32", "cat_meteor4", {-21354.523, 33243.418, -1129.496}, 3, {86.741, 188.614, 245.152}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_33", "cat_meteor4", {-28574.317, 29801.083, -4278.222}, 3, {74.634, 93.475, 312.685}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_34", "cat_meteor4", {-37679.968, 20317.904, 414.781}, 3, {72.041, 130.46, 87.06}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_35", "cat_meteor4", {-29391.794, 30690.524, 632.022}, 3, {242.529, 98.06, 104.655}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_36", "cat_meteor4", {-48332.835, -46313.818, 4859.366}, 3, {86.874, 269.83, 319.657}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_37", "cat_meteor4", {-43770.789, -36421.187, 9916.29}, 3, {132.393, 52.514, 199.992}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_38", "cat_meteor4", {-32683.789, 13384.674, -852.618}, 3, {208.274, 82.37, 119.043}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_39", "cat_meteor4", {-41439.819, -14235.979, 3066.145}, 3, {352.601, 76.928, 268.931}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_40", "cat_meteor4", {-50238.173, -40891.935, 5464.867}, 3, {304.216, 128.03, 8.767}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_41", "cat_meteor4", {-24843.945, 31479.809, -8632.247}, 3, {60.366, 35.556, 133.41}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_42", "cat_meteor4", {-35689.193, 24572.119, -4176.144}, 3, {236.4, 188.824, 101.814}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_43", "cat_meteor4", {-38925.237, -1970.696, 5872.161}, 3, {94.66, 54.956, 262.486}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_44", "cat_meteor4", {-32790.07, 26854.847, -4874.691}, 3, {167.414, 134.665, 159.094}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_45", "cat_meteor4", {-39142.52, 14710.88, 480.076}, 3, {112.583, 83.617, 216.497}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_46", "cat_meteor4", {-34797.705, 1642.258, 8357.501}, 3, {111.665, 19.04, 102.369}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_47", "cat_meteor4", {-29793.361, 34976.13, 2773.665}, 3, {244.556, 180.061, 8.416}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_48", "cat_meteor4", {-32571.606, 23002.427, 7026.348}, 3, {191.96, 50.592, 351.842}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_49", "cat_meteor4", {-42644.812, -18437.787, 9638.904}, 3, {130.822, 30.718, 105.873}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_50", "cat_meteor4", {-40934.634, 2333.905, 1461.804}, 3, {194.441, 353.265, 26.865}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_51", "cat_meteor4", {-28465.063, 10716.476, 3083.002}, 3, {116.789, 209.816, 46.272}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_52", "cat_meteor4", {-31880.666, 32705.515, -3556.64}, 3, {222.251, 222.094, 143.947}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_53", "cat_meteor4", {-42192.211, -3455.629, 745.352}, 3, {97.012, 155.098, 194.59}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_54", "cat_meteor4", {-39523.252, -15010.682, 1536.768}, 3, {97.797, 74.596, 168.908}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_55", "cat_meteor4", {-42083.55, -4955.245, -678.414}, 3, {232.373, 217.135, 210.872}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_56", "cat_meteor4", {-46703.978, -25285.904, 10873.429}, 3, {204.44, 251.983, 109.91}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_57", "cat_meteor4", {-50679.37, -45149.35, 2359.842}, 3, {66.465, 10.079, 223.332}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_58", "cat_meteor4", {-42985.96, -3536.28, 1472.81}, 3, {14.381, 334.771, 309.923}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_59", "cat_meteor4", {-31155.685, 34447.077, -4401.647}, 3, {182.638, 24.349, 315.839}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_60", "cat_meteor4", {-45845.016, -20009.378, -99.675}, 3, {21.399, 300.018, 258.57}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_61", "cat_meteor4", {-38034.301, -7614.963, -2237.675}, 3, {220.176, 115.017, 146.171}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_62", "cat_meteor4", {-30012.26, 12025.598, 4495.712}, 3, {296.864, 210.219, 23.849}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_63", "cat_meteor4", {-29485.56, 44681.336, -3592.412}, 3, {88.052, 115.002, 123.029}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_64", "cat_meteor4", {-36808.884, -4182.524, 5061.669}, 3, {15.218, 110.697, 2.543}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_65", "cat_meteor4", {-39437.135, -841.561, -2984.393}, 3, {268.84, 94.291, 128.515}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_66", "cat_meteor4", {-32817.25, 19262.048, 1265.23}, 3, {82.408, 64.591, 271.28}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_67", "cat_meteor4", {-27199.72, 25927.622, 4792.696}, 3, {186.585, 242.966, 89.191}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_68", "cat_meteor4", {-27676.86, 15558.194, 4317.339}, 3, {19.015, 66.167, 23.423}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_69", "cat_meteor4", {-49981.328, -24475.304, 10172.261}, 3, {341.939, 16.191, 41.909}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_70", "cat_meteor4", {-43247.162, -3080.185, 11376.421}, 3, {260.023, 189.305, 109.314}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_71", "cat_meteor4", {-27079.853, 41289.842, -6957.257}, 3, {120.487, 100.058, 170.971}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_72", "cat_meteor4", {-40407.015, 5891.682, -201.647}, 3, {213.827, 40.078, 64.653}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_73", "cat_meteor4", {-27972.911, 17963.399, -1797.794}, 3, {11.014, 230.508, 97.635}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_74", "cat_meteor4", {-35272.691, 26532.259, -4509.794}, 3, {73.85, 298.069, 130.718}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_75", "cat_meteor4", {-42682.031, -28236.645, 10887.15}, 3, {334.312, 338.466, 136.437}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_76", "cat_meteor4", {-25495.325, 38540.715, -1767.44}, 3, {267.341, 190.558, 14.711}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_77", "cat_meteor4", {-43750.265, -20609.033, 9997.395}, 3, {351.123, 34.019, 350.874}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_78", "cat_meteor4", {-17197.435, 50429.361, 273.3}, 3, {98.628, 250.345, 296.549}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_79", "cat_meteor4", {-39846.982, 10410.159, -562.836}, 3, {123.253, 179.955, 257.881}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_80", "cat_meteor4", {-25567.505, 27983.724, -5703.865}, 3, {12.649, 279.502, 264.479}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_81", "cat_meteor4", {-21511.305, 41979.639, -1442.207}, 3, {241.553, 81.168, 51.431}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_82", "cat_meteor4", {-24861.847, 49715.778, -4283.195}, 3, {139.5, 83.61, 340.695}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_83", "cat_meteor4", {-24832.794, 34791.87, -2967.286}, 3, {348.871, 285.602, 194.097}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_84", "cat_meteor4", {-43688.489, -3710.712, 4019.991}, 3, {101.501, 99.771, 211.308}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_85", "cat_meteor4", {-47217.332, -36633.898, 4160.871}, 3, {150.542, 356.036, 111.95}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_86", "cat_meteor4", {-21566.083, 50658.469, -531.732}, 3, {253.499, 229.556, 81.655}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_87", "cat_meteor4", {-35899.316, 23536.673, 3659.943}, 3, {340.411, 33.538, 71.644}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_88", "cat_meteor4", {-29317.826, 30849.932, -3559.754}, 3, {131.265, 117.24, 82.994}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_89", "cat_meteor4", {-32135.387, 14645.846, 5259.479}, 3, {43.254, 308.853, 63.403}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_90", "cat_meteor4", {-27158.462, 43962.44, -6168.299}, 3, {158.992, 176.456, 283.055}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_91", "cat_meteor4", {-37750.092, 15530.143, 2206.192}, 3, {210.361, 24.835, 207.507}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_92", "cat_meteor4", {-48730.278, -28462.366, 7546.435}, 3, {227.297, 90.493, 68.729}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_93", "cat_meteor4", {-28378.839, 34512.215, 1693.773}, 3, {261.894, 1.486, 296.92}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_94", "cat_meteor4", {-25437.663, 40088.292, -4303.775}, 3, {225.523, 8.749, 210.952}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_95", "cat_meteor4", {-22813.149, 53921.713, -6022.386}, 3, {197.477, 279.412, 305.977}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_96", "cat_meteor4", {-36618.105, 12289.639, 5851.217}, 3, {184.797, 165.963, 97.305}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_97", "cat_meteor4", {-32160.888, 22958.197, -2823.374}, 3, {135.856, 78.067, 81.443}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_98", "cat_meteor4", {-45480.848, -4462.162, 6107.797}, 3, {38.046, 153.233, 202.243}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_99", "cat_meteor4", {-50732.886, -41498.82, 10592.56}, 3, {144.796, 347.291, 191.191}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_100", "cat_meteor4", {-44870.915, -25723.666, 8863.386}, 3, {189.242, 329.376, 202.881}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_101", "cat_meteor4", {-47109.376, -21628.813, 9712.267}, 3, {356.396, 314.825, 159.97}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_102", "cat_meteor4", {-51832.632, -27231.833, 7526.959}, 3, {129.342, 214.74, 111.088}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_103", "cat_meteor4", {-38275.158, -6106.612, -2128.761}, 3, {125.791, 149.307, 159.033}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_104", "cat_meteor4", {-54278.72, -54487.507, 4418.314}, 3, {136.112, 155.933, 292.651}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_105", "cat_meteor4", {-29978.317, 12424.62, -2471.092}, 3, {359.434, 351.107, 267.46}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_106", "cat_meteor4", {-50838.635, -52164.768, 11270.286}, 3, {355.253, 106.553, 314.279}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_107", "cat_meteor4", {-49981.673, -29096.219, 3385.891}, 3, {103.464, 6.784, 313.854}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_108", "cat_meteor4", {-20293.175, 49818.139, 2256.067}, 3, {214.788, 40.155, 26.545}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_109", "cat_meteor4", {-23967.535, 29621.631, 1871.86}, 3, {25.377, 49.006, 64.248}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_110", "cat_meteor4", {-19973.543, 36245.482, 550.234}, 3, {129.215, 352.988, 175.176}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_111", "cat_meteor4", {-36645.916, 13860.549, 6636.082}, 3, {223.292, 96.949, 328.639}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_112", "cat_meteor4", {-43702.782, -7728.115, 8134.231}, 3, {187.619, 271.209, 247.734}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_113", "cat_meteor4", {-50173.115, -46419.872, 4582.126}, 3, {287.427, 71.952, 44.819}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_114", "cat_meteor4", {-31739.962, 30945.158, -1656.139}, 3, {266.635, 257.414, 205.032}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_115", "cat_meteor4", {-30712.013, 13127.471, 6484.837}, 3, {39.996, 49.974, 184.207}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_116", "cat_meteor4", {-55627.554, -30056.414, 4030.126}, 3, {329.514, 322.879, 151.009}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_117", "cat_meteor4", {-38459.864, 21936.393, 809.724}, 3, {253.633, 68.659, 204.75}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_118", "cat_meteor4", {-51868.518, -41702.024, 3033.638}, 3, {250.9, 83.807, 48.584}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_119", "cat_meteor4", {-38050.526, -1895.773, -3262.535}, 3, {215.496, 90.851, 136.116}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_120", "cat_meteor4", {-52525.779, -34300.999, 6440.677}, 3, {10.872, 139.618, 46.658}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_121", "cat_meteor4", {-45984.207, -36614.856, 8809.115}, 3, {220.274, 246.409, 265.435}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_122", "cat_meteor4", {-48765.488, -46186.356, 9002.656}, 3, {17.41, 62.86, 179.574}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_123", "cat_meteor4", {-28161.95, 13116.618, 5610.921}, 3, {291.33, 146.981, 60.75}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_124", "cat_meteor4", {-34101.058, 27089.412, -82.25}, 3, {302.841, 195.474, 92.033}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_125", "cat_meteor4", {-54878.534, -44561.889, 15481.958}, 3, {240.918, 10.076, 13.521}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_126", "cat_meteor4", {-51865.801, -34002.889, 10646.869}, 3, {286.24, 76.343, 122.118}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_127", "cat_meteor4", {-32334.425, 22517.46, -3254.797}, 3, {287.319, 153.907, 197.76}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_128", "cat_meteor4", {-24107.273, 38064.793, -2031.74}, 3, {45.095, 165.681, 163.079}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_129", "cat_meteor4", {-54612.863, -42367.903, 13746.369}, 3, {183.95, 272.672, 285.751}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_130", "cat_meteor4", {-25166.939, 21201.22, 1035.976}, 3, {290.571, 22.055, 357.81}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_131", "cat_meteor4", {-41173.15, -2244.888, 10061.895}, 3, {183.103, 210.637, 225.596}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_132", "cat_meteor4", {-26869.586, 23884.185, -5654.153}, 3, {107.331, 51.744, 327.553}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_133", "cat_meteor4", {-39678.729, -17395.488, 5620.334}, 3, {109.446, 193.562, 40.718}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_134", "cat_meteor4", {-39435.148, -12813.562, -1694.715}, 3, {226.507, 129.59, 229.472}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_135", "cat_meteor4", {-45212.235, -12363.755, 828.066}, 3, {151.183, 273.83, 260.234}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_136", "cat_meteor4", {-32595.866, 30941.16, 277.582}, 3, {204.225, 31.95, 296.291}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_137", "cat_meteor4", {-49027.754, -29374.865, 8900.043}, 3, {332.694, 152.261, 182.35}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_138", "cat_meteor4", {-39568.175, -4973.783, 559.663}, 3, {140.278, 170.488, 75.144}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors1_139", "cat_meteor4", {-50831.328, -40208.666, 9843.181}, 3, {18.697, 328.171, 11.01}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_0", "cat_meteor4", {18643.752, -57083.095, 37876.985}, 3, {94.6, 112.153, 205.842}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_1", "cat_meteor4", {40507.569, 50121.121, 52485.736}, 3, {298.107, 263.078, 140.233}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_2", "cat_meteor4", {39729.997, 27620.658, 53384.153}, 3, {15.311, 48.245, 28.818}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_3", "cat_meteor4", {22691.292, -40343.538, 33888.713}, 3, {205.2, 245.068, 62.527}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_4", "cat_meteor4", {14240.618, -45630.767, 30566.793}, 3, {211.566, 31.746, 142.798}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_5", "cat_meteor4", {14354.104, -39721.369, 38180.424}, 3, {28.184, 69.617, 19.371}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_6", "cat_meteor4", {37920.354, 38929.464, 52925.656}, 3, {317.213, 35.057, 206.042}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_7", "cat_meteor4", {17860.73, -43704.222, 39759.439}, 3, {60.881, 294.493, 85.983}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_8", "cat_meteor4", {13946.292, -58147.345, 29173.462}, 3, {219.631, 122.447, 278.627}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_9", "cat_meteor4", {18723.468, -26990.63, 38009.042}, 3, {295.118, 68.2, 98.924}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_10", "cat_meteor4", {16870.74, -53447.398, 38158.305}, 3, {233.053, 182.896, 37.495}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_11", "cat_meteor4", {29053.931, 38698.911, 56994.348}, 3, {105.674, 113.708, 179.187}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_12", "cat_meteor4", {35930.29, 28482.516, 60349.867}, 3, {214.513, 87.908, 75.164}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_13", "cat_meteor4", {42820.088, 32726.218, 56021.156}, 3, {232.799, 162.323, 88.931}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_14", "cat_meteor4", {29023.908, 22420.747, 54445.68}, 3, {281.337, 321.915, 150.316}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_15", "cat_meteor4", {26457.336, 3061.734, 40178.565}, 3, {238.067, 65.254, 329.214}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_16", "cat_meteor4", {25752.552, -30154.517, 42605.799}, 3, {259.938, 74.806, 286.217}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_17", "cat_meteor4", {45710.264, 54325.637, 62802.218}, 3, {268.158, 313.382, 161.542}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_18", "cat_meteor4", {23050.207, -39759.714, 42498.965}, 3, {46.028, 113.997, 81.45}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_19", "cat_meteor4", {26844.262, -37631.215, 33489.829}, 3, {37.128, 45.365, 211.319}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_20", "cat_meteor4", {29520.258, 1439.479, 50530.927}, 3, {82.054, 160.258, 191.069}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_21", "cat_meteor4", {29522.612, -16597.252, 46299.051}, 3, {340.543, 200.874, 51.621}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_22", "cat_meteor4", {20477.2, -37339.957, 43001.513}, 3, {68.667, 290.131, 111.424}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_23", "cat_meteor4", {12790.791, -56140.315, 32046.434}, 3, {298.976, 344.55, 108.236}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_24", "cat_meteor4", {12582.98, -47775.76, 28572.732}, 3, {246.256, 115.218, 334.611}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_25", "cat_meteor4", {17808.334, -19763.45, 37322.382}, 3, {294.762, 227.593, 159.412}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_26", "cat_meteor4", {32575.269, 21093.768, 55541.3}, 3, {263.253, 91.202, 56.265}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_27", "cat_meteor4", {23550.157, -40803.849, 37876.055}, 3, {295.579, 68.127, 309.623}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_28", "cat_meteor4", {45302.006, 47051.652, 62380.099}, 3, {132.345, 288.777, 173.513}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_29", "cat_meteor4", {19273.119, -23144.698, 37183.36}, 3, {79.6, 310.3, 225.651}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_30", "cat_meteor4", {25930.117, 23351.848, 51014.972}, 3, {249.46, 321.709, 187.877}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_31", "cat_meteor4", {20196.222, -50785.935, 35677.798}, 3, {44.719, 258.534, 189.356}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_32", "cat_meteor4", {38920.471, 22503.87, 48633.511}, 3, {115.557, 257.085, 143.121}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_33", "cat_meteor4", {12998.968, -41057.801, 34293.782}, 3, {7.911, 116.913, 303.591}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_34", "cat_meteor4", {20354.14, -37557.112, 41069.441}, 3, {61.844, 134.098, 261.973}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_35", "cat_meteor4", {41144.032, 47621, 60146.916}, 3, {139.027, 52.296, 156.71}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_36", "cat_meteor4", {29061.142, -3488.682, 38927.329}, 3, {83.412, 134.929, 198.953}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_37", "cat_meteor4", {30880.023, 21868.921, 49016.785}, 3, {21.481, 322.842, 247.917}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_38", "cat_meteor4", {22660.652, 8132.409, 47925.644}, 3, {326.199, 222.732, 106.559}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_39", "cat_meteor4", {33546.743, 9302.689, 54252.191}, 3, {334.627, 109.646, 204.787}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_40", "cat_meteor4", {30195.863, -24391.364, 37741.151}, 3, {195.236, 260.705, 0.936}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_41", "cat_meteor4", {22765.361, -40683.172, 38757.633}, 3, {109.593, 103.86, 270.596}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_42", "cat_meteor4", {27817.756, -134.215, 46313.726}, 3, {298.978, 283.91, 132.066}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_43", "cat_meteor4", {22133, -35924.758, 27949.777}, 3, {151.421, 135.069, 183.077}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_44", "cat_meteor4", {17615.461, -57298.718, 33880.282}, 3, {321.519, 356.911, 235.439}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_45", "cat_meteor4", {24060.012, -35593.702, 37994.349}, 3, {56.887, 10.662, 200.253}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_46", "cat_meteor4", {34737.921, 6535.931, 43182.388}, 3, {7.05, 132.5, 176.089}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_47", "cat_meteor4", {39832.509, 29324.124, 49377.636}, 3, {308.892, 124.206, 93.567}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_48", "cat_meteor4", {15119.642, -47413.303, 34030.187}, 3, {275.435, 101.846, 211.974}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_49", "cat_meteor4", {20569.801, -1043.165, 44063.15}, 3, {328.96, 314.588, 258.343}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_50", "cat_meteor4", {32510.976, -2019.656, 47672.154}, 3, {176.146, 354.376, 299.823}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_51", "cat_meteor4", {23263.743, -30923.085, 45408.627}, 3, {323.27, 170.333, 134.279}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_52", "cat_meteor4", {26339.893, -7196.47, 49432.292}, 3, {64.539, 7.669, 73.496}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_53", "cat_meteor4", {36660.615, 41570.775, 62915.367}, 3, {289.999, 42.377, 296.849}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_54", "cat_meteor4", {15642.117, -44213.705, 39915.892}, 3, {111.542, 197.94, 197.839}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_55", "cat_meteor4", {31141.363, 18039.793, 49719.427}, 3, {126.655, 39.317, 77.858}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_56", "cat_meteor4", {36629.376, 25312.278, 49332.468}, 3, {145.619, 223.274, 124.466}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_57", "cat_meteor4", {27901.742, 5268.263, 48059.181}, 3, {293.259, 9.538, 303.829}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_58", "cat_meteor4", {24824.133, 2641.99, 49620.719}, 3, {245.133, 167.381, 340.152}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_59", "cat_meteor4", {33603.92, 12753.952, 55113.449}, 3, {80.02, 184.512, 52.917}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_60", "cat_meteor4", {35787.265, 17984.004, 48156.79}, 3, {57.128, 272.599, 44.345}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_61", "cat_meteor4", {32054.568, 14124.237, 52735.32}, 3, {319.536, 280.881, 311.466}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_62", "cat_meteor4", {34545.64, -15355.928, 44112.508}, 3, {7.748, 149.449, 268.334}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_63", "cat_meteor4", {22765.918, -40322.792, 29064.628}, 3, {193.506, 18.147, 84.798}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_64", "cat_meteor4", {27505.42, -42145.689, 37118.618}, 3, {230.745, 137.61, 51.057}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_65", "cat_meteor4", {27571.015, -19263.366, 35388.181}, 3, {63.919, 34.515, 165.369}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_66", "cat_meteor4", {23962.961, -43482.214, 34566.399}, 3, {160.618, 232.01, 116.895}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_67", "cat_meteor4", {18452.134, -43820.016, 42648.061}, 3, {222.908, 252.789, 239.201}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_68", "cat_meteor4", {33639.255, 32341.212, 53349.988}, 3, {176.062, 188.742, 134.152}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_69", "cat_meteor4", {29832.427, -614.98, 44938.097}, 3, {106.477, 172.461, 246.034}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_70", "cat_meteor4", {18733.209, -9111.987, 43401.775}, 3, {317.599, 334.331, 136.421}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_71", "cat_meteor4", {33733.073, 17994.557, 56488.563}, 3, {294.341, 54.762, 270.15}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_72", "cat_meteor4", {26084.812, -26851.418, 39585.721}, 3, {73.831, 38.483, 337.497}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_73", "cat_meteor4", {23225.881, -22087.665, 44015.491}, 3, {271.011, 272.723, 273.702}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_74", "cat_meteor4", {30439.509, -854.29, 48991.729}, 3, {81.263, 1.259, 327.706}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_75", "cat_meteor4", {23238.709, -5597.615, 48175.434}, 3, {42.383, 278.575, 85.115}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_76", "cat_meteor4", {24600.238, -58838.904, 29748.651}, 3, {8.893, 133.309, 186.952}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_77", "cat_meteor4", {33783.196, 23606.504, 45200.991}, 3, {257.331, 193.253, 74.854}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_78", "cat_meteor4", {37589.407, 48974.011, 51253.322}, 3, {7.851, 151.428, 356.347}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_79", "cat_meteor4", {27552.135, -23556.566, 45437.146}, 3, {50.975, 109.47, 111.89}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_80", "cat_meteor4", {17331.781, -59968.572, 31048.443}, 3, {271.889, 153.822, 298.012}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_81", "cat_meteor4", {23496.738, -42765.348, 35825.416}, 3, {232.554, 105.977, 19.574}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_82", "cat_meteor4", {27052.915, -9632.946, 45504.281}, 3, {260.464, 194.549, 275.712}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_83", "cat_meteor4", {36305.394, 26891.178, 61071.445}, 3, {317.88, 220.902, 62.92}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_84", "cat_meteor4", {10338.921, -53993.416, 29288.368}, 3, {216.923, 191.943, 14.684}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_85", "cat_meteor4", {43061.78, 61433.29, 53398.897}, 3, {282.437, 37.564, 113.942}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_86", "cat_meteor4", {34234.45, 19457.95, 44861.704}, 3, {109.733, 309.708, 258.662}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_87", "cat_meteor4", {39536.278, 40457.212, 57627.543}, 3, {267.675, 6.439, 104.276}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_88", "cat_meteor4", {25729.593, -22391.57, 44162.983}, 3, {238.914, 172.221, 60.65}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_89", "cat_meteor4", {40649.184, 56468.12, 57117.121}, 3, {358.739, 246.542, 68.665}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_90", "cat_meteor4", {36652.673, 38139.612, 55827.251}, 3, {108.134, 15.268, 165.141}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_91", "cat_meteor4", {20784.721, -23005.44, 40186.843}, 3, {323.363, 2.462, 205.529}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_92", "cat_meteor4", {22276.264, -25132.935, 39054.131}, 3, {70.408, 208.72, 16.018}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_93", "cat_meteor4", {26927.095, -37206.141, 40481.756}, 3, {43.187, 313.646, 129.589}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_94", "cat_meteor4", {30709.378, 12206.663, 45039.723}, 3, {257.242, 355.197, 268.014}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_95", "cat_meteor4", {21673.68, -36070.932, 38707.051}, 3, {164.782, 106.386, 272.65}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_96", "cat_meteor4", {17819.663, -51910.839, 26752.371}, 3, {311.472, 103.185, 333.198}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_97", "cat_meteor4", {31237.303, 616.316, 50109.862}, 3, {36.378, 65.768, 311.862}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_98", "cat_meteor4", {37542.327, 50390.135, 62916.144}, 3, {306.482, 265.661, 82.291}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_99", "cat_meteor4", {18949.912, -55885.92, 28446.216}, 3, {220.086, 149.452, 352.147}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_100", "cat_meteor4", {21956.058, -43434.007, 34356.097}, 3, {177.392, 263.894, 255.749}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_101", "cat_meteor4", {42449.419, 41672.158, 55828.806}, 3, {175.555, 143.577, 37.475}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_102", "cat_meteor4", {27923.436, 5160.498, 45895.916}, 3, {262.762, 26.647, 106.612}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_103", "cat_meteor4", {15297.259, -51844.455, 32451.729}, 3, {157.476, 257.143, 310.358}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_104", "cat_meteor4", {27162.66, 16470.763, 52478.4}, 3, {5.68, 14.973, 115.583}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_105", "cat_meteor4", {27788.575, 14457.492, 46741.045}, 3, {8.165, 124.379, 155.179}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_106", "cat_meteor4", {35105.681, 11083.557, 54355.153}, 3, {115.764, 203.859, 0.206}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_107", "cat_meteor4", {20374.628, -23765.779, 44662.406}, 3, {180.238, 298.951, 272.272}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_108", "cat_meteor4", {18656.229, -40254.279, 42189.323}, 3, {119.403, 287.689, 196.872}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_109", "cat_meteor4", {23563.192, -15039.291, 37087.646}, 3, {126.129, 329.175, 247.448}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_110", "cat_meteor4", {35592.882, -13770.445, 43860.242}, 3, {292.255, 97.621, 163.826}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_111", "cat_meteor4", {18859.572, -56244.736, 36488.73}, 3, {82.19, 297.833, 66.825}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_112", "cat_meteor4", {23458.555, 3710.513, 46808.895}, 3, {43.404, 54.672, 66.44}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_113", "cat_meteor4", {8979.541, -56299.41, 29838.821}, 3, {70.145, 310.568, 82.642}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_114", "cat_meteor4", {30572.988, 17791.169, 51673.558}, 3, {7.149, 14.401, 268.456}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_115", "cat_meteor4", {16573.076, -25561.735, 36103.847}, 3, {170.115, 167.443, 310.294}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_116", "cat_meteor4", {38344.398, 17025.438, 51606.649}, 3, {66.29, 156.065, 81.81}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_117", "cat_meteor4", {30709.736, 49839.326, 57732.547}, 3, {308.482, 8.719, 126.661}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_118", "cat_meteor4", {41706.028, 55330.73, 68305.009}, 3, {166.693, 142.49, 56.155}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_119", "cat_meteor4", {20221.805, -56605.458, 32090.934}, 3, {53.132, 230.744, 16.755}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_120", "cat_meteor4", {31498.047, 29317.666, 55978.993}, 3, {99.982, 336.884, 348.014}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_121", "cat_meteor4", {35408.134, 36725.296, 60590.112}, 3, {147.928, 30.636, 80.07}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_122", "cat_meteor4", {20521.242, -35285.836, 34310.595}, 3, {37.328, 83.505, 57.022}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_123", "cat_meteor4", {27238.977, 6465.733, 46961.504}, 3, {42.327, 271.609, 73.829}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_124", "cat_meteor4", {27042.607, -19921.832, 32419.132}, 3, {6.887, 8.845, 70.945}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_125", "cat_meteor4", {40146.202, 35770.061, 51661.825}, 3, {178.473, 285.301, 91.412}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_126", "cat_meteor4", {16436.45, -33465.881, 39994.16}, 3, {136.776, 292.628, 215.277}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_127", "cat_meteor4", {23208.692, -12342.381, 43168.713}, 3, {99.88, 127.691, 127.835}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_128", "cat_meteor4", {23879.837, -40652.699, 37479.638}, 3, {354.833, 352.644, 79.112}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_129", "cat_meteor4", {26315.097, -1519.077, 44209.408}, 3, {0.458, 241.299, 274.575}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_130", "cat_meteor4", {37432.249, 51464.615, 55714.653}, 3, {168.109, 85.878, 288.718}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_131", "cat_meteor4", {19177.134, -10235.393, 44303.272}, 3, {325.673, 175.859, 1.772}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_132", "cat_meteor4", {18412.675, -25047.826, 38304.319}, 3, {200.741, 16.176, 203.078}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_133", "cat_meteor4", {44866.024, 37827.607, 56348.404}, 3, {216.516, 167.886, 279.509}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_134", "cat_meteor4", {38416.483, 42283.99, 50858.178}, 3, {106.254, 137.085, 74.038}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_135", "cat_meteor4", {26131.339, -17975.568, 44995.799}, 3, {43.444, 258.615, 3.635}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_136", "cat_meteor4", {27607.015, 15357.077, 51469.759}, 3, {268.748, 182.818, 80.418}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_137", "cat_meteor4", {25539.632, -17615.573, 35041.639}, 3, {241.443, 182.335, 326.979}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_138", "cat_meteor4", {31886.461, 3479.617, 39356.959}, 3, {321.826, 138.464, 163.73}, 0, 0) -- MeteorStorm Asteroid4
+    addSquadron("KAS_Meteors2_139", "cat_meteor4", {20336.868, -46381.585, 31705.983}, 3, {263.651, 276.364, 207.929}, 0, 0) -- MeteorStorm Asteroid4
 
     createSOBGroup("Objectives")
     createSOBGroup("FleetIntel")
@@ -144,6 +564,1269 @@ function DetermChunk()
     addToSOBGroup("kDestroyer0", "kDestroyer")
     createSOBGroup("dMessagePod")
     addToSOBGroup("dMessagePod0", "dMessagePod")
+    createSOBGroup("KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_0", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_1", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_2", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_3", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_4", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_5", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_6", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_7", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_8", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_9", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_10", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_11", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_12", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_13", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_14", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_15", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_16", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_17", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_18", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_19", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_20", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_21", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_22", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_23", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_24", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_25", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_26", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_27", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_28", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_29", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_30", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_31", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_32", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_33", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_34", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_35", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_36", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_37", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_38", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_39", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_40", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_41", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_42", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_43", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_44", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_45", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_46", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_47", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_48", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_49", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_50", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_51", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_52", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_53", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_54", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_55", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_56", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_57", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_58", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_59", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_60", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_61", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_62", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_63", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_64", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_65", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_66", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_67", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_68", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_69", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_70", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_71", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_72", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_73", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_74", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_75", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_76", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_77", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_78", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_79", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_80", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_81", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_82", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_83", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_84", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_85", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_86", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_87", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_88", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_89", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_90", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_91", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_92", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_93", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_94", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_95", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_96", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_97", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_98", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_99", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_100", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_101", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_102", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_103", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_104", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_105", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_106", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_107", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_108", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_109", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_110", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_111", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_112", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_113", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_114", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_115", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_116", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_117", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_118", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_119", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_120", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_121", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_122", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_123", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_124", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_125", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_126", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_127", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_128", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_129", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_130", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_131", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_132", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_133", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_134", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_135", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_136", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_137", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_138", "KAS_Meteors0")
+    addToSOBGroup("KAS_Meteors0_139", "KAS_Meteors0")
+    createSOBGroup("KAS_Meteors0_0g")
+    addToSOBGroup("KAS_Meteors0_0", "KAS_Meteors0_0g")
+    createSOBGroup("KAS_Meteors0_1g")
+    addToSOBGroup("KAS_Meteors0_1", "KAS_Meteors0_1g")
+    createSOBGroup("KAS_Meteors0_2g")
+    addToSOBGroup("KAS_Meteors0_2", "KAS_Meteors0_2g")
+    createSOBGroup("KAS_Meteors0_3g")
+    addToSOBGroup("KAS_Meteors0_3", "KAS_Meteors0_3g")
+    createSOBGroup("KAS_Meteors0_4g")
+    addToSOBGroup("KAS_Meteors0_4", "KAS_Meteors0_4g")
+    createSOBGroup("KAS_Meteors0_5g")
+    addToSOBGroup("KAS_Meteors0_5", "KAS_Meteors0_5g")
+    createSOBGroup("KAS_Meteors0_6g")
+    addToSOBGroup("KAS_Meteors0_6", "KAS_Meteors0_6g")
+    createSOBGroup("KAS_Meteors0_7g")
+    addToSOBGroup("KAS_Meteors0_7", "KAS_Meteors0_7g")
+    createSOBGroup("KAS_Meteors0_8g")
+    addToSOBGroup("KAS_Meteors0_8", "KAS_Meteors0_8g")
+    createSOBGroup("KAS_Meteors0_9g")
+    addToSOBGroup("KAS_Meteors0_9", "KAS_Meteors0_9g")
+    createSOBGroup("KAS_Meteors0_10g")
+    addToSOBGroup("KAS_Meteors0_10", "KAS_Meteors0_10g")
+    createSOBGroup("KAS_Meteors0_11g")
+    addToSOBGroup("KAS_Meteors0_11", "KAS_Meteors0_11g")
+    createSOBGroup("KAS_Meteors0_12g")
+    addToSOBGroup("KAS_Meteors0_12", "KAS_Meteors0_12g")
+    createSOBGroup("KAS_Meteors0_13g")
+    addToSOBGroup("KAS_Meteors0_13", "KAS_Meteors0_13g")
+    createSOBGroup("KAS_Meteors0_14g")
+    addToSOBGroup("KAS_Meteors0_14", "KAS_Meteors0_14g")
+    createSOBGroup("KAS_Meteors0_15g")
+    addToSOBGroup("KAS_Meteors0_15", "KAS_Meteors0_15g")
+    createSOBGroup("KAS_Meteors0_16g")
+    addToSOBGroup("KAS_Meteors0_16", "KAS_Meteors0_16g")
+    createSOBGroup("KAS_Meteors0_17g")
+    addToSOBGroup("KAS_Meteors0_17", "KAS_Meteors0_17g")
+    createSOBGroup("KAS_Meteors0_18g")
+    addToSOBGroup("KAS_Meteors0_18", "KAS_Meteors0_18g")
+    createSOBGroup("KAS_Meteors0_19g")
+    addToSOBGroup("KAS_Meteors0_19", "KAS_Meteors0_19g")
+    createSOBGroup("KAS_Meteors0_20g")
+    addToSOBGroup("KAS_Meteors0_20", "KAS_Meteors0_20g")
+    createSOBGroup("KAS_Meteors0_21g")
+    addToSOBGroup("KAS_Meteors0_21", "KAS_Meteors0_21g")
+    createSOBGroup("KAS_Meteors0_22g")
+    addToSOBGroup("KAS_Meteors0_22", "KAS_Meteors0_22g")
+    createSOBGroup("KAS_Meteors0_23g")
+    addToSOBGroup("KAS_Meteors0_23", "KAS_Meteors0_23g")
+    createSOBGroup("KAS_Meteors0_24g")
+    addToSOBGroup("KAS_Meteors0_24", "KAS_Meteors0_24g")
+    createSOBGroup("KAS_Meteors0_25g")
+    addToSOBGroup("KAS_Meteors0_25", "KAS_Meteors0_25g")
+    createSOBGroup("KAS_Meteors0_26g")
+    addToSOBGroup("KAS_Meteors0_26", "KAS_Meteors0_26g")
+    createSOBGroup("KAS_Meteors0_27g")
+    addToSOBGroup("KAS_Meteors0_27", "KAS_Meteors0_27g")
+    createSOBGroup("KAS_Meteors0_28g")
+    addToSOBGroup("KAS_Meteors0_28", "KAS_Meteors0_28g")
+    createSOBGroup("KAS_Meteors0_29g")
+    addToSOBGroup("KAS_Meteors0_29", "KAS_Meteors0_29g")
+    createSOBGroup("KAS_Meteors0_30g")
+    addToSOBGroup("KAS_Meteors0_30", "KAS_Meteors0_30g")
+    createSOBGroup("KAS_Meteors0_31g")
+    addToSOBGroup("KAS_Meteors0_31", "KAS_Meteors0_31g")
+    createSOBGroup("KAS_Meteors0_32g")
+    addToSOBGroup("KAS_Meteors0_32", "KAS_Meteors0_32g")
+    createSOBGroup("KAS_Meteors0_33g")
+    addToSOBGroup("KAS_Meteors0_33", "KAS_Meteors0_33g")
+    createSOBGroup("KAS_Meteors0_34g")
+    addToSOBGroup("KAS_Meteors0_34", "KAS_Meteors0_34g")
+    createSOBGroup("KAS_Meteors0_35g")
+    addToSOBGroup("KAS_Meteors0_35", "KAS_Meteors0_35g")
+    createSOBGroup("KAS_Meteors0_36g")
+    addToSOBGroup("KAS_Meteors0_36", "KAS_Meteors0_36g")
+    createSOBGroup("KAS_Meteors0_37g")
+    addToSOBGroup("KAS_Meteors0_37", "KAS_Meteors0_37g")
+    createSOBGroup("KAS_Meteors0_38g")
+    addToSOBGroup("KAS_Meteors0_38", "KAS_Meteors0_38g")
+    createSOBGroup("KAS_Meteors0_39g")
+    addToSOBGroup("KAS_Meteors0_39", "KAS_Meteors0_39g")
+    createSOBGroup("KAS_Meteors0_40g")
+    addToSOBGroup("KAS_Meteors0_40", "KAS_Meteors0_40g")
+    createSOBGroup("KAS_Meteors0_41g")
+    addToSOBGroup("KAS_Meteors0_41", "KAS_Meteors0_41g")
+    createSOBGroup("KAS_Meteors0_42g")
+    addToSOBGroup("KAS_Meteors0_42", "KAS_Meteors0_42g")
+    createSOBGroup("KAS_Meteors0_43g")
+    addToSOBGroup("KAS_Meteors0_43", "KAS_Meteors0_43g")
+    createSOBGroup("KAS_Meteors0_44g")
+    addToSOBGroup("KAS_Meteors0_44", "KAS_Meteors0_44g")
+    createSOBGroup("KAS_Meteors0_45g")
+    addToSOBGroup("KAS_Meteors0_45", "KAS_Meteors0_45g")
+    createSOBGroup("KAS_Meteors0_46g")
+    addToSOBGroup("KAS_Meteors0_46", "KAS_Meteors0_46g")
+    createSOBGroup("KAS_Meteors0_47g")
+    addToSOBGroup("KAS_Meteors0_47", "KAS_Meteors0_47g")
+    createSOBGroup("KAS_Meteors0_48g")
+    addToSOBGroup("KAS_Meteors0_48", "KAS_Meteors0_48g")
+    createSOBGroup("KAS_Meteors0_49g")
+    addToSOBGroup("KAS_Meteors0_49", "KAS_Meteors0_49g")
+    createSOBGroup("KAS_Meteors0_50g")
+    addToSOBGroup("KAS_Meteors0_50", "KAS_Meteors0_50g")
+    createSOBGroup("KAS_Meteors0_51g")
+    addToSOBGroup("KAS_Meteors0_51", "KAS_Meteors0_51g")
+    createSOBGroup("KAS_Meteors0_52g")
+    addToSOBGroup("KAS_Meteors0_52", "KAS_Meteors0_52g")
+    createSOBGroup("KAS_Meteors0_53g")
+    addToSOBGroup("KAS_Meteors0_53", "KAS_Meteors0_53g")
+    createSOBGroup("KAS_Meteors0_54g")
+    addToSOBGroup("KAS_Meteors0_54", "KAS_Meteors0_54g")
+    createSOBGroup("KAS_Meteors0_55g")
+    addToSOBGroup("KAS_Meteors0_55", "KAS_Meteors0_55g")
+    createSOBGroup("KAS_Meteors0_56g")
+    addToSOBGroup("KAS_Meteors0_56", "KAS_Meteors0_56g")
+    createSOBGroup("KAS_Meteors0_57g")
+    addToSOBGroup("KAS_Meteors0_57", "KAS_Meteors0_57g")
+    createSOBGroup("KAS_Meteors0_58g")
+    addToSOBGroup("KAS_Meteors0_58", "KAS_Meteors0_58g")
+    createSOBGroup("KAS_Meteors0_59g")
+    addToSOBGroup("KAS_Meteors0_59", "KAS_Meteors0_59g")
+    createSOBGroup("KAS_Meteors0_60g")
+    addToSOBGroup("KAS_Meteors0_60", "KAS_Meteors0_60g")
+    createSOBGroup("KAS_Meteors0_61g")
+    addToSOBGroup("KAS_Meteors0_61", "KAS_Meteors0_61g")
+    createSOBGroup("KAS_Meteors0_62g")
+    addToSOBGroup("KAS_Meteors0_62", "KAS_Meteors0_62g")
+    createSOBGroup("KAS_Meteors0_63g")
+    addToSOBGroup("KAS_Meteors0_63", "KAS_Meteors0_63g")
+    createSOBGroup("KAS_Meteors0_64g")
+    addToSOBGroup("KAS_Meteors0_64", "KAS_Meteors0_64g")
+    createSOBGroup("KAS_Meteors0_65g")
+    addToSOBGroup("KAS_Meteors0_65", "KAS_Meteors0_65g")
+    createSOBGroup("KAS_Meteors0_66g")
+    addToSOBGroup("KAS_Meteors0_66", "KAS_Meteors0_66g")
+    createSOBGroup("KAS_Meteors0_67g")
+    addToSOBGroup("KAS_Meteors0_67", "KAS_Meteors0_67g")
+    createSOBGroup("KAS_Meteors0_68g")
+    addToSOBGroup("KAS_Meteors0_68", "KAS_Meteors0_68g")
+    createSOBGroup("KAS_Meteors0_69g")
+    addToSOBGroup("KAS_Meteors0_69", "KAS_Meteors0_69g")
+    createSOBGroup("KAS_Meteors0_70g")
+    addToSOBGroup("KAS_Meteors0_70", "KAS_Meteors0_70g")
+    createSOBGroup("KAS_Meteors0_71g")
+    addToSOBGroup("KAS_Meteors0_71", "KAS_Meteors0_71g")
+    createSOBGroup("KAS_Meteors0_72g")
+    addToSOBGroup("KAS_Meteors0_72", "KAS_Meteors0_72g")
+    createSOBGroup("KAS_Meteors0_73g")
+    addToSOBGroup("KAS_Meteors0_73", "KAS_Meteors0_73g")
+    createSOBGroup("KAS_Meteors0_74g")
+    addToSOBGroup("KAS_Meteors0_74", "KAS_Meteors0_74g")
+    createSOBGroup("KAS_Meteors0_75g")
+    addToSOBGroup("KAS_Meteors0_75", "KAS_Meteors0_75g")
+    createSOBGroup("KAS_Meteors0_76g")
+    addToSOBGroup("KAS_Meteors0_76", "KAS_Meteors0_76g")
+    createSOBGroup("KAS_Meteors0_77g")
+    addToSOBGroup("KAS_Meteors0_77", "KAS_Meteors0_77g")
+    createSOBGroup("KAS_Meteors0_78g")
+    addToSOBGroup("KAS_Meteors0_78", "KAS_Meteors0_78g")
+    createSOBGroup("KAS_Meteors0_79g")
+    addToSOBGroup("KAS_Meteors0_79", "KAS_Meteors0_79g")
+    createSOBGroup("KAS_Meteors0_80g")
+    addToSOBGroup("KAS_Meteors0_80", "KAS_Meteors0_80g")
+    createSOBGroup("KAS_Meteors0_81g")
+    addToSOBGroup("KAS_Meteors0_81", "KAS_Meteors0_81g")
+    createSOBGroup("KAS_Meteors0_82g")
+    addToSOBGroup("KAS_Meteors0_82", "KAS_Meteors0_82g")
+    createSOBGroup("KAS_Meteors0_83g")
+    addToSOBGroup("KAS_Meteors0_83", "KAS_Meteors0_83g")
+    createSOBGroup("KAS_Meteors0_84g")
+    addToSOBGroup("KAS_Meteors0_84", "KAS_Meteors0_84g")
+    createSOBGroup("KAS_Meteors0_85g")
+    addToSOBGroup("KAS_Meteors0_85", "KAS_Meteors0_85g")
+    createSOBGroup("KAS_Meteors0_86g")
+    addToSOBGroup("KAS_Meteors0_86", "KAS_Meteors0_86g")
+    createSOBGroup("KAS_Meteors0_87g")
+    addToSOBGroup("KAS_Meteors0_87", "KAS_Meteors0_87g")
+    createSOBGroup("KAS_Meteors0_88g")
+    addToSOBGroup("KAS_Meteors0_88", "KAS_Meteors0_88g")
+    createSOBGroup("KAS_Meteors0_89g")
+    addToSOBGroup("KAS_Meteors0_89", "KAS_Meteors0_89g")
+    createSOBGroup("KAS_Meteors0_90g")
+    addToSOBGroup("KAS_Meteors0_90", "KAS_Meteors0_90g")
+    createSOBGroup("KAS_Meteors0_91g")
+    addToSOBGroup("KAS_Meteors0_91", "KAS_Meteors0_91g")
+    createSOBGroup("KAS_Meteors0_92g")
+    addToSOBGroup("KAS_Meteors0_92", "KAS_Meteors0_92g")
+    createSOBGroup("KAS_Meteors0_93g")
+    addToSOBGroup("KAS_Meteors0_93", "KAS_Meteors0_93g")
+    createSOBGroup("KAS_Meteors0_94g")
+    addToSOBGroup("KAS_Meteors0_94", "KAS_Meteors0_94g")
+    createSOBGroup("KAS_Meteors0_95g")
+    addToSOBGroup("KAS_Meteors0_95", "KAS_Meteors0_95g")
+    createSOBGroup("KAS_Meteors0_96g")
+    addToSOBGroup("KAS_Meteors0_96", "KAS_Meteors0_96g")
+    createSOBGroup("KAS_Meteors0_97g")
+    addToSOBGroup("KAS_Meteors0_97", "KAS_Meteors0_97g")
+    createSOBGroup("KAS_Meteors0_98g")
+    addToSOBGroup("KAS_Meteors0_98", "KAS_Meteors0_98g")
+    createSOBGroup("KAS_Meteors0_99g")
+    addToSOBGroup("KAS_Meteors0_99", "KAS_Meteors0_99g")
+    createSOBGroup("KAS_Meteors0_100g")
+    addToSOBGroup("KAS_Meteors0_100", "KAS_Meteors0_100g")
+    createSOBGroup("KAS_Meteors0_101g")
+    addToSOBGroup("KAS_Meteors0_101", "KAS_Meteors0_101g")
+    createSOBGroup("KAS_Meteors0_102g")
+    addToSOBGroup("KAS_Meteors0_102", "KAS_Meteors0_102g")
+    createSOBGroup("KAS_Meteors0_103g")
+    addToSOBGroup("KAS_Meteors0_103", "KAS_Meteors0_103g")
+    createSOBGroup("KAS_Meteors0_104g")
+    addToSOBGroup("KAS_Meteors0_104", "KAS_Meteors0_104g")
+    createSOBGroup("KAS_Meteors0_105g")
+    addToSOBGroup("KAS_Meteors0_105", "KAS_Meteors0_105g")
+    createSOBGroup("KAS_Meteors0_106g")
+    addToSOBGroup("KAS_Meteors0_106", "KAS_Meteors0_106g")
+    createSOBGroup("KAS_Meteors0_107g")
+    addToSOBGroup("KAS_Meteors0_107", "KAS_Meteors0_107g")
+    createSOBGroup("KAS_Meteors0_108g")
+    addToSOBGroup("KAS_Meteors0_108", "KAS_Meteors0_108g")
+    createSOBGroup("KAS_Meteors0_109g")
+    addToSOBGroup("KAS_Meteors0_109", "KAS_Meteors0_109g")
+    createSOBGroup("KAS_Meteors0_110g")
+    addToSOBGroup("KAS_Meteors0_110", "KAS_Meteors0_110g")
+    createSOBGroup("KAS_Meteors0_111g")
+    addToSOBGroup("KAS_Meteors0_111", "KAS_Meteors0_111g")
+    createSOBGroup("KAS_Meteors0_112g")
+    addToSOBGroup("KAS_Meteors0_112", "KAS_Meteors0_112g")
+    createSOBGroup("KAS_Meteors0_113g")
+    addToSOBGroup("KAS_Meteors0_113", "KAS_Meteors0_113g")
+    createSOBGroup("KAS_Meteors0_114g")
+    addToSOBGroup("KAS_Meteors0_114", "KAS_Meteors0_114g")
+    createSOBGroup("KAS_Meteors0_115g")
+    addToSOBGroup("KAS_Meteors0_115", "KAS_Meteors0_115g")
+    createSOBGroup("KAS_Meteors0_116g")
+    addToSOBGroup("KAS_Meteors0_116", "KAS_Meteors0_116g")
+    createSOBGroup("KAS_Meteors0_117g")
+    addToSOBGroup("KAS_Meteors0_117", "KAS_Meteors0_117g")
+    createSOBGroup("KAS_Meteors0_118g")
+    addToSOBGroup("KAS_Meteors0_118", "KAS_Meteors0_118g")
+    createSOBGroup("KAS_Meteors0_119g")
+    addToSOBGroup("KAS_Meteors0_119", "KAS_Meteors0_119g")
+    createSOBGroup("KAS_Meteors0_120g")
+    addToSOBGroup("KAS_Meteors0_120", "KAS_Meteors0_120g")
+    createSOBGroup("KAS_Meteors0_121g")
+    addToSOBGroup("KAS_Meteors0_121", "KAS_Meteors0_121g")
+    createSOBGroup("KAS_Meteors0_122g")
+    addToSOBGroup("KAS_Meteors0_122", "KAS_Meteors0_122g")
+    createSOBGroup("KAS_Meteors0_123g")
+    addToSOBGroup("KAS_Meteors0_123", "KAS_Meteors0_123g")
+    createSOBGroup("KAS_Meteors0_124g")
+    addToSOBGroup("KAS_Meteors0_124", "KAS_Meteors0_124g")
+    createSOBGroup("KAS_Meteors0_125g")
+    addToSOBGroup("KAS_Meteors0_125", "KAS_Meteors0_125g")
+    createSOBGroup("KAS_Meteors0_126g")
+    addToSOBGroup("KAS_Meteors0_126", "KAS_Meteors0_126g")
+    createSOBGroup("KAS_Meteors0_127g")
+    addToSOBGroup("KAS_Meteors0_127", "KAS_Meteors0_127g")
+    createSOBGroup("KAS_Meteors0_128g")
+    addToSOBGroup("KAS_Meteors0_128", "KAS_Meteors0_128g")
+    createSOBGroup("KAS_Meteors0_129g")
+    addToSOBGroup("KAS_Meteors0_129", "KAS_Meteors0_129g")
+    createSOBGroup("KAS_Meteors0_130g")
+    addToSOBGroup("KAS_Meteors0_130", "KAS_Meteors0_130g")
+    createSOBGroup("KAS_Meteors0_131g")
+    addToSOBGroup("KAS_Meteors0_131", "KAS_Meteors0_131g")
+    createSOBGroup("KAS_Meteors0_132g")
+    addToSOBGroup("KAS_Meteors0_132", "KAS_Meteors0_132g")
+    createSOBGroup("KAS_Meteors0_133g")
+    addToSOBGroup("KAS_Meteors0_133", "KAS_Meteors0_133g")
+    createSOBGroup("KAS_Meteors0_134g")
+    addToSOBGroup("KAS_Meteors0_134", "KAS_Meteors0_134g")
+    createSOBGroup("KAS_Meteors0_135g")
+    addToSOBGroup("KAS_Meteors0_135", "KAS_Meteors0_135g")
+    createSOBGroup("KAS_Meteors0_136g")
+    addToSOBGroup("KAS_Meteors0_136", "KAS_Meteors0_136g")
+    createSOBGroup("KAS_Meteors0_137g")
+    addToSOBGroup("KAS_Meteors0_137", "KAS_Meteors0_137g")
+    createSOBGroup("KAS_Meteors0_138g")
+    addToSOBGroup("KAS_Meteors0_138", "KAS_Meteors0_138g")
+    createSOBGroup("KAS_Meteors0_139g")
+    addToSOBGroup("KAS_Meteors0_139", "KAS_Meteors0_139g")
+    createSOBGroup("KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_0", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_1", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_2", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_3", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_4", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_5", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_6", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_7", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_8", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_9", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_10", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_11", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_12", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_13", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_14", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_15", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_16", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_17", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_18", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_19", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_20", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_21", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_22", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_23", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_24", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_25", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_26", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_27", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_28", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_29", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_30", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_31", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_32", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_33", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_34", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_35", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_36", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_37", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_38", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_39", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_40", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_41", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_42", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_43", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_44", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_45", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_46", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_47", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_48", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_49", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_50", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_51", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_52", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_53", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_54", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_55", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_56", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_57", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_58", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_59", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_60", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_61", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_62", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_63", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_64", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_65", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_66", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_67", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_68", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_69", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_70", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_71", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_72", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_73", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_74", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_75", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_76", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_77", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_78", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_79", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_80", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_81", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_82", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_83", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_84", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_85", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_86", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_87", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_88", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_89", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_90", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_91", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_92", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_93", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_94", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_95", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_96", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_97", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_98", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_99", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_100", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_101", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_102", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_103", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_104", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_105", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_106", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_107", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_108", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_109", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_110", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_111", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_112", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_113", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_114", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_115", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_116", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_117", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_118", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_119", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_120", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_121", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_122", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_123", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_124", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_125", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_126", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_127", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_128", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_129", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_130", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_131", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_132", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_133", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_134", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_135", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_136", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_137", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_138", "KAS_Meteors1")
+    addToSOBGroup("KAS_Meteors1_139", "KAS_Meteors1")
+    createSOBGroup("KAS_Meteors1_0g")
+    addToSOBGroup("KAS_Meteors1_0", "KAS_Meteors1_0g")
+    createSOBGroup("KAS_Meteors1_1g")
+    addToSOBGroup("KAS_Meteors1_1", "KAS_Meteors1_1g")
+    createSOBGroup("KAS_Meteors1_2g")
+    addToSOBGroup("KAS_Meteors1_2", "KAS_Meteors1_2g")
+    createSOBGroup("KAS_Meteors1_3g")
+    addToSOBGroup("KAS_Meteors1_3", "KAS_Meteors1_3g")
+    createSOBGroup("KAS_Meteors1_4g")
+    addToSOBGroup("KAS_Meteors1_4", "KAS_Meteors1_4g")
+    createSOBGroup("KAS_Meteors1_5g")
+    addToSOBGroup("KAS_Meteors1_5", "KAS_Meteors1_5g")
+    createSOBGroup("KAS_Meteors1_6g")
+    addToSOBGroup("KAS_Meteors1_6", "KAS_Meteors1_6g")
+    createSOBGroup("KAS_Meteors1_7g")
+    addToSOBGroup("KAS_Meteors1_7", "KAS_Meteors1_7g")
+    createSOBGroup("KAS_Meteors1_8g")
+    addToSOBGroup("KAS_Meteors1_8", "KAS_Meteors1_8g")
+    createSOBGroup("KAS_Meteors1_9g")
+    addToSOBGroup("KAS_Meteors1_9", "KAS_Meteors1_9g")
+    createSOBGroup("KAS_Meteors1_10g")
+    addToSOBGroup("KAS_Meteors1_10", "KAS_Meteors1_10g")
+    createSOBGroup("KAS_Meteors1_11g")
+    addToSOBGroup("KAS_Meteors1_11", "KAS_Meteors1_11g")
+    createSOBGroup("KAS_Meteors1_12g")
+    addToSOBGroup("KAS_Meteors1_12", "KAS_Meteors1_12g")
+    createSOBGroup("KAS_Meteors1_13g")
+    addToSOBGroup("KAS_Meteors1_13", "KAS_Meteors1_13g")
+    createSOBGroup("KAS_Meteors1_14g")
+    addToSOBGroup("KAS_Meteors1_14", "KAS_Meteors1_14g")
+    createSOBGroup("KAS_Meteors1_15g")
+    addToSOBGroup("KAS_Meteors1_15", "KAS_Meteors1_15g")
+    createSOBGroup("KAS_Meteors1_16g")
+    addToSOBGroup("KAS_Meteors1_16", "KAS_Meteors1_16g")
+    createSOBGroup("KAS_Meteors1_17g")
+    addToSOBGroup("KAS_Meteors1_17", "KAS_Meteors1_17g")
+    createSOBGroup("KAS_Meteors1_18g")
+    addToSOBGroup("KAS_Meteors1_18", "KAS_Meteors1_18g")
+    createSOBGroup("KAS_Meteors1_19g")
+    addToSOBGroup("KAS_Meteors1_19", "KAS_Meteors1_19g")
+    createSOBGroup("KAS_Meteors1_20g")
+    addToSOBGroup("KAS_Meteors1_20", "KAS_Meteors1_20g")
+    createSOBGroup("KAS_Meteors1_21g")
+    addToSOBGroup("KAS_Meteors1_21", "KAS_Meteors1_21g")
+    createSOBGroup("KAS_Meteors1_22g")
+    addToSOBGroup("KAS_Meteors1_22", "KAS_Meteors1_22g")
+    createSOBGroup("KAS_Meteors1_23g")
+    addToSOBGroup("KAS_Meteors1_23", "KAS_Meteors1_23g")
+    createSOBGroup("KAS_Meteors1_24g")
+    addToSOBGroup("KAS_Meteors1_24", "KAS_Meteors1_24g")
+    createSOBGroup("KAS_Meteors1_25g")
+    addToSOBGroup("KAS_Meteors1_25", "KAS_Meteors1_25g")
+    createSOBGroup("KAS_Meteors1_26g")
+    addToSOBGroup("KAS_Meteors1_26", "KAS_Meteors1_26g")
+    createSOBGroup("KAS_Meteors1_27g")
+    addToSOBGroup("KAS_Meteors1_27", "KAS_Meteors1_27g")
+    createSOBGroup("KAS_Meteors1_28g")
+    addToSOBGroup("KAS_Meteors1_28", "KAS_Meteors1_28g")
+    createSOBGroup("KAS_Meteors1_29g")
+    addToSOBGroup("KAS_Meteors1_29", "KAS_Meteors1_29g")
+    createSOBGroup("KAS_Meteors1_30g")
+    addToSOBGroup("KAS_Meteors1_30", "KAS_Meteors1_30g")
+    createSOBGroup("KAS_Meteors1_31g")
+    addToSOBGroup("KAS_Meteors1_31", "KAS_Meteors1_31g")
+    createSOBGroup("KAS_Meteors1_32g")
+    addToSOBGroup("KAS_Meteors1_32", "KAS_Meteors1_32g")
+    createSOBGroup("KAS_Meteors1_33g")
+    addToSOBGroup("KAS_Meteors1_33", "KAS_Meteors1_33g")
+    createSOBGroup("KAS_Meteors1_34g")
+    addToSOBGroup("KAS_Meteors1_34", "KAS_Meteors1_34g")
+    createSOBGroup("KAS_Meteors1_35g")
+    addToSOBGroup("KAS_Meteors1_35", "KAS_Meteors1_35g")
+    createSOBGroup("KAS_Meteors1_36g")
+    addToSOBGroup("KAS_Meteors1_36", "KAS_Meteors1_36g")
+    createSOBGroup("KAS_Meteors1_37g")
+    addToSOBGroup("KAS_Meteors1_37", "KAS_Meteors1_37g")
+    createSOBGroup("KAS_Meteors1_38g")
+    addToSOBGroup("KAS_Meteors1_38", "KAS_Meteors1_38g")
+    createSOBGroup("KAS_Meteors1_39g")
+    addToSOBGroup("KAS_Meteors1_39", "KAS_Meteors1_39g")
+    createSOBGroup("KAS_Meteors1_40g")
+    addToSOBGroup("KAS_Meteors1_40", "KAS_Meteors1_40g")
+    createSOBGroup("KAS_Meteors1_41g")
+    addToSOBGroup("KAS_Meteors1_41", "KAS_Meteors1_41g")
+    createSOBGroup("KAS_Meteors1_42g")
+    addToSOBGroup("KAS_Meteors1_42", "KAS_Meteors1_42g")
+    createSOBGroup("KAS_Meteors1_43g")
+    addToSOBGroup("KAS_Meteors1_43", "KAS_Meteors1_43g")
+    createSOBGroup("KAS_Meteors1_44g")
+    addToSOBGroup("KAS_Meteors1_44", "KAS_Meteors1_44g")
+    createSOBGroup("KAS_Meteors1_45g")
+    addToSOBGroup("KAS_Meteors1_45", "KAS_Meteors1_45g")
+    createSOBGroup("KAS_Meteors1_46g")
+    addToSOBGroup("KAS_Meteors1_46", "KAS_Meteors1_46g")
+    createSOBGroup("KAS_Meteors1_47g")
+    addToSOBGroup("KAS_Meteors1_47", "KAS_Meteors1_47g")
+    createSOBGroup("KAS_Meteors1_48g")
+    addToSOBGroup("KAS_Meteors1_48", "KAS_Meteors1_48g")
+    createSOBGroup("KAS_Meteors1_49g")
+    addToSOBGroup("KAS_Meteors1_49", "KAS_Meteors1_49g")
+    createSOBGroup("KAS_Meteors1_50g")
+    addToSOBGroup("KAS_Meteors1_50", "KAS_Meteors1_50g")
+    createSOBGroup("KAS_Meteors1_51g")
+    addToSOBGroup("KAS_Meteors1_51", "KAS_Meteors1_51g")
+    createSOBGroup("KAS_Meteors1_52g")
+    addToSOBGroup("KAS_Meteors1_52", "KAS_Meteors1_52g")
+    createSOBGroup("KAS_Meteors1_53g")
+    addToSOBGroup("KAS_Meteors1_53", "KAS_Meteors1_53g")
+    createSOBGroup("KAS_Meteors1_54g")
+    addToSOBGroup("KAS_Meteors1_54", "KAS_Meteors1_54g")
+    createSOBGroup("KAS_Meteors1_55g")
+    addToSOBGroup("KAS_Meteors1_55", "KAS_Meteors1_55g")
+    createSOBGroup("KAS_Meteors1_56g")
+    addToSOBGroup("KAS_Meteors1_56", "KAS_Meteors1_56g")
+    createSOBGroup("KAS_Meteors1_57g")
+    addToSOBGroup("KAS_Meteors1_57", "KAS_Meteors1_57g")
+    createSOBGroup("KAS_Meteors1_58g")
+    addToSOBGroup("KAS_Meteors1_58", "KAS_Meteors1_58g")
+    createSOBGroup("KAS_Meteors1_59g")
+    addToSOBGroup("KAS_Meteors1_59", "KAS_Meteors1_59g")
+    createSOBGroup("KAS_Meteors1_60g")
+    addToSOBGroup("KAS_Meteors1_60", "KAS_Meteors1_60g")
+    createSOBGroup("KAS_Meteors1_61g")
+    addToSOBGroup("KAS_Meteors1_61", "KAS_Meteors1_61g")
+    createSOBGroup("KAS_Meteors1_62g")
+    addToSOBGroup("KAS_Meteors1_62", "KAS_Meteors1_62g")
+    createSOBGroup("KAS_Meteors1_63g")
+    addToSOBGroup("KAS_Meteors1_63", "KAS_Meteors1_63g")
+    createSOBGroup("KAS_Meteors1_64g")
+    addToSOBGroup("KAS_Meteors1_64", "KAS_Meteors1_64g")
+    createSOBGroup("KAS_Meteors1_65g")
+    addToSOBGroup("KAS_Meteors1_65", "KAS_Meteors1_65g")
+    createSOBGroup("KAS_Meteors1_66g")
+    addToSOBGroup("KAS_Meteors1_66", "KAS_Meteors1_66g")
+    createSOBGroup("KAS_Meteors1_67g")
+    addToSOBGroup("KAS_Meteors1_67", "KAS_Meteors1_67g")
+    createSOBGroup("KAS_Meteors1_68g")
+    addToSOBGroup("KAS_Meteors1_68", "KAS_Meteors1_68g")
+    createSOBGroup("KAS_Meteors1_69g")
+    addToSOBGroup("KAS_Meteors1_69", "KAS_Meteors1_69g")
+    createSOBGroup("KAS_Meteors1_70g")
+    addToSOBGroup("KAS_Meteors1_70", "KAS_Meteors1_70g")
+    createSOBGroup("KAS_Meteors1_71g")
+    addToSOBGroup("KAS_Meteors1_71", "KAS_Meteors1_71g")
+    createSOBGroup("KAS_Meteors1_72g")
+    addToSOBGroup("KAS_Meteors1_72", "KAS_Meteors1_72g")
+    createSOBGroup("KAS_Meteors1_73g")
+    addToSOBGroup("KAS_Meteors1_73", "KAS_Meteors1_73g")
+    createSOBGroup("KAS_Meteors1_74g")
+    addToSOBGroup("KAS_Meteors1_74", "KAS_Meteors1_74g")
+    createSOBGroup("KAS_Meteors1_75g")
+    addToSOBGroup("KAS_Meteors1_75", "KAS_Meteors1_75g")
+    createSOBGroup("KAS_Meteors1_76g")
+    addToSOBGroup("KAS_Meteors1_76", "KAS_Meteors1_76g")
+    createSOBGroup("KAS_Meteors1_77g")
+    addToSOBGroup("KAS_Meteors1_77", "KAS_Meteors1_77g")
+    createSOBGroup("KAS_Meteors1_78g")
+    addToSOBGroup("KAS_Meteors1_78", "KAS_Meteors1_78g")
+    createSOBGroup("KAS_Meteors1_79g")
+    addToSOBGroup("KAS_Meteors1_79", "KAS_Meteors1_79g")
+    createSOBGroup("KAS_Meteors1_80g")
+    addToSOBGroup("KAS_Meteors1_80", "KAS_Meteors1_80g")
+    createSOBGroup("KAS_Meteors1_81g")
+    addToSOBGroup("KAS_Meteors1_81", "KAS_Meteors1_81g")
+    createSOBGroup("KAS_Meteors1_82g")
+    addToSOBGroup("KAS_Meteors1_82", "KAS_Meteors1_82g")
+    createSOBGroup("KAS_Meteors1_83g")
+    addToSOBGroup("KAS_Meteors1_83", "KAS_Meteors1_83g")
+    createSOBGroup("KAS_Meteors1_84g")
+    addToSOBGroup("KAS_Meteors1_84", "KAS_Meteors1_84g")
+    createSOBGroup("KAS_Meteors1_85g")
+    addToSOBGroup("KAS_Meteors1_85", "KAS_Meteors1_85g")
+    createSOBGroup("KAS_Meteors1_86g")
+    addToSOBGroup("KAS_Meteors1_86", "KAS_Meteors1_86g")
+    createSOBGroup("KAS_Meteors1_87g")
+    addToSOBGroup("KAS_Meteors1_87", "KAS_Meteors1_87g")
+    createSOBGroup("KAS_Meteors1_88g")
+    addToSOBGroup("KAS_Meteors1_88", "KAS_Meteors1_88g")
+    createSOBGroup("KAS_Meteors1_89g")
+    addToSOBGroup("KAS_Meteors1_89", "KAS_Meteors1_89g")
+    createSOBGroup("KAS_Meteors1_90g")
+    addToSOBGroup("KAS_Meteors1_90", "KAS_Meteors1_90g")
+    createSOBGroup("KAS_Meteors1_91g")
+    addToSOBGroup("KAS_Meteors1_91", "KAS_Meteors1_91g")
+    createSOBGroup("KAS_Meteors1_92g")
+    addToSOBGroup("KAS_Meteors1_92", "KAS_Meteors1_92g")
+    createSOBGroup("KAS_Meteors1_93g")
+    addToSOBGroup("KAS_Meteors1_93", "KAS_Meteors1_93g")
+    createSOBGroup("KAS_Meteors1_94g")
+    addToSOBGroup("KAS_Meteors1_94", "KAS_Meteors1_94g")
+    createSOBGroup("KAS_Meteors1_95g")
+    addToSOBGroup("KAS_Meteors1_95", "KAS_Meteors1_95g")
+    createSOBGroup("KAS_Meteors1_96g")
+    addToSOBGroup("KAS_Meteors1_96", "KAS_Meteors1_96g")
+    createSOBGroup("KAS_Meteors1_97g")
+    addToSOBGroup("KAS_Meteors1_97", "KAS_Meteors1_97g")
+    createSOBGroup("KAS_Meteors1_98g")
+    addToSOBGroup("KAS_Meteors1_98", "KAS_Meteors1_98g")
+    createSOBGroup("KAS_Meteors1_99g")
+    addToSOBGroup("KAS_Meteors1_99", "KAS_Meteors1_99g")
+    createSOBGroup("KAS_Meteors1_100g")
+    addToSOBGroup("KAS_Meteors1_100", "KAS_Meteors1_100g")
+    createSOBGroup("KAS_Meteors1_101g")
+    addToSOBGroup("KAS_Meteors1_101", "KAS_Meteors1_101g")
+    createSOBGroup("KAS_Meteors1_102g")
+    addToSOBGroup("KAS_Meteors1_102", "KAS_Meteors1_102g")
+    createSOBGroup("KAS_Meteors1_103g")
+    addToSOBGroup("KAS_Meteors1_103", "KAS_Meteors1_103g")
+    createSOBGroup("KAS_Meteors1_104g")
+    addToSOBGroup("KAS_Meteors1_104", "KAS_Meteors1_104g")
+    createSOBGroup("KAS_Meteors1_105g")
+    addToSOBGroup("KAS_Meteors1_105", "KAS_Meteors1_105g")
+    createSOBGroup("KAS_Meteors1_106g")
+    addToSOBGroup("KAS_Meteors1_106", "KAS_Meteors1_106g")
+    createSOBGroup("KAS_Meteors1_107g")
+    addToSOBGroup("KAS_Meteors1_107", "KAS_Meteors1_107g")
+    createSOBGroup("KAS_Meteors1_108g")
+    addToSOBGroup("KAS_Meteors1_108", "KAS_Meteors1_108g")
+    createSOBGroup("KAS_Meteors1_109g")
+    addToSOBGroup("KAS_Meteors1_109", "KAS_Meteors1_109g")
+    createSOBGroup("KAS_Meteors1_110g")
+    addToSOBGroup("KAS_Meteors1_110", "KAS_Meteors1_110g")
+    createSOBGroup("KAS_Meteors1_111g")
+    addToSOBGroup("KAS_Meteors1_111", "KAS_Meteors1_111g")
+    createSOBGroup("KAS_Meteors1_112g")
+    addToSOBGroup("KAS_Meteors1_112", "KAS_Meteors1_112g")
+    createSOBGroup("KAS_Meteors1_113g")
+    addToSOBGroup("KAS_Meteors1_113", "KAS_Meteors1_113g")
+    createSOBGroup("KAS_Meteors1_114g")
+    addToSOBGroup("KAS_Meteors1_114", "KAS_Meteors1_114g")
+    createSOBGroup("KAS_Meteors1_115g")
+    addToSOBGroup("KAS_Meteors1_115", "KAS_Meteors1_115g")
+    createSOBGroup("KAS_Meteors1_116g")
+    addToSOBGroup("KAS_Meteors1_116", "KAS_Meteors1_116g")
+    createSOBGroup("KAS_Meteors1_117g")
+    addToSOBGroup("KAS_Meteors1_117", "KAS_Meteors1_117g")
+    createSOBGroup("KAS_Meteors1_118g")
+    addToSOBGroup("KAS_Meteors1_118", "KAS_Meteors1_118g")
+    createSOBGroup("KAS_Meteors1_119g")
+    addToSOBGroup("KAS_Meteors1_119", "KAS_Meteors1_119g")
+    createSOBGroup("KAS_Meteors1_120g")
+    addToSOBGroup("KAS_Meteors1_120", "KAS_Meteors1_120g")
+    createSOBGroup("KAS_Meteors1_121g")
+    addToSOBGroup("KAS_Meteors1_121", "KAS_Meteors1_121g")
+    createSOBGroup("KAS_Meteors1_122g")
+    addToSOBGroup("KAS_Meteors1_122", "KAS_Meteors1_122g")
+    createSOBGroup("KAS_Meteors1_123g")
+    addToSOBGroup("KAS_Meteors1_123", "KAS_Meteors1_123g")
+    createSOBGroup("KAS_Meteors1_124g")
+    addToSOBGroup("KAS_Meteors1_124", "KAS_Meteors1_124g")
+    createSOBGroup("KAS_Meteors1_125g")
+    addToSOBGroup("KAS_Meteors1_125", "KAS_Meteors1_125g")
+    createSOBGroup("KAS_Meteors1_126g")
+    addToSOBGroup("KAS_Meteors1_126", "KAS_Meteors1_126g")
+    createSOBGroup("KAS_Meteors1_127g")
+    addToSOBGroup("KAS_Meteors1_127", "KAS_Meteors1_127g")
+    createSOBGroup("KAS_Meteors1_128g")
+    addToSOBGroup("KAS_Meteors1_128", "KAS_Meteors1_128g")
+    createSOBGroup("KAS_Meteors1_129g")
+    addToSOBGroup("KAS_Meteors1_129", "KAS_Meteors1_129g")
+    createSOBGroup("KAS_Meteors1_130g")
+    addToSOBGroup("KAS_Meteors1_130", "KAS_Meteors1_130g")
+    createSOBGroup("KAS_Meteors1_131g")
+    addToSOBGroup("KAS_Meteors1_131", "KAS_Meteors1_131g")
+    createSOBGroup("KAS_Meteors1_132g")
+    addToSOBGroup("KAS_Meteors1_132", "KAS_Meteors1_132g")
+    createSOBGroup("KAS_Meteors1_133g")
+    addToSOBGroup("KAS_Meteors1_133", "KAS_Meteors1_133g")
+    createSOBGroup("KAS_Meteors1_134g")
+    addToSOBGroup("KAS_Meteors1_134", "KAS_Meteors1_134g")
+    createSOBGroup("KAS_Meteors1_135g")
+    addToSOBGroup("KAS_Meteors1_135", "KAS_Meteors1_135g")
+    createSOBGroup("KAS_Meteors1_136g")
+    addToSOBGroup("KAS_Meteors1_136", "KAS_Meteors1_136g")
+    createSOBGroup("KAS_Meteors1_137g")
+    addToSOBGroup("KAS_Meteors1_137", "KAS_Meteors1_137g")
+    createSOBGroup("KAS_Meteors1_138g")
+    addToSOBGroup("KAS_Meteors1_138", "KAS_Meteors1_138g")
+    createSOBGroup("KAS_Meteors1_139g")
+    addToSOBGroup("KAS_Meteors1_139", "KAS_Meteors1_139g")
+    createSOBGroup("KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_0", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_1", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_2", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_3", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_4", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_5", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_6", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_7", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_8", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_9", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_10", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_11", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_12", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_13", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_14", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_15", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_16", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_17", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_18", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_19", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_20", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_21", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_22", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_23", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_24", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_25", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_26", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_27", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_28", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_29", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_30", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_31", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_32", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_33", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_34", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_35", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_36", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_37", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_38", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_39", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_40", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_41", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_42", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_43", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_44", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_45", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_46", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_47", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_48", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_49", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_50", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_51", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_52", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_53", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_54", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_55", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_56", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_57", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_58", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_59", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_60", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_61", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_62", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_63", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_64", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_65", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_66", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_67", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_68", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_69", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_70", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_71", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_72", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_73", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_74", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_75", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_76", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_77", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_78", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_79", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_80", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_81", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_82", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_83", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_84", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_85", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_86", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_87", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_88", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_89", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_90", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_91", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_92", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_93", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_94", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_95", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_96", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_97", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_98", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_99", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_100", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_101", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_102", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_103", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_104", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_105", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_106", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_107", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_108", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_109", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_110", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_111", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_112", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_113", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_114", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_115", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_116", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_117", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_118", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_119", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_120", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_121", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_122", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_123", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_124", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_125", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_126", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_127", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_128", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_129", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_130", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_131", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_132", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_133", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_134", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_135", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_136", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_137", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_138", "KAS_Meteors2")
+    addToSOBGroup("KAS_Meteors2_139", "KAS_Meteors2")
+    createSOBGroup("KAS_Meteors2_0g")
+    addToSOBGroup("KAS_Meteors2_0", "KAS_Meteors2_0g")
+    createSOBGroup("KAS_Meteors2_1g")
+    addToSOBGroup("KAS_Meteors2_1", "KAS_Meteors2_1g")
+    createSOBGroup("KAS_Meteors2_2g")
+    addToSOBGroup("KAS_Meteors2_2", "KAS_Meteors2_2g")
+    createSOBGroup("KAS_Meteors2_3g")
+    addToSOBGroup("KAS_Meteors2_3", "KAS_Meteors2_3g")
+    createSOBGroup("KAS_Meteors2_4g")
+    addToSOBGroup("KAS_Meteors2_4", "KAS_Meteors2_4g")
+    createSOBGroup("KAS_Meteors2_5g")
+    addToSOBGroup("KAS_Meteors2_5", "KAS_Meteors2_5g")
+    createSOBGroup("KAS_Meteors2_6g")
+    addToSOBGroup("KAS_Meteors2_6", "KAS_Meteors2_6g")
+    createSOBGroup("KAS_Meteors2_7g")
+    addToSOBGroup("KAS_Meteors2_7", "KAS_Meteors2_7g")
+    createSOBGroup("KAS_Meteors2_8g")
+    addToSOBGroup("KAS_Meteors2_8", "KAS_Meteors2_8g")
+    createSOBGroup("KAS_Meteors2_9g")
+    addToSOBGroup("KAS_Meteors2_9", "KAS_Meteors2_9g")
+    createSOBGroup("KAS_Meteors2_10g")
+    addToSOBGroup("KAS_Meteors2_10", "KAS_Meteors2_10g")
+    createSOBGroup("KAS_Meteors2_11g")
+    addToSOBGroup("KAS_Meteors2_11", "KAS_Meteors2_11g")
+    createSOBGroup("KAS_Meteors2_12g")
+    addToSOBGroup("KAS_Meteors2_12", "KAS_Meteors2_12g")
+    createSOBGroup("KAS_Meteors2_13g")
+    addToSOBGroup("KAS_Meteors2_13", "KAS_Meteors2_13g")
+    createSOBGroup("KAS_Meteors2_14g")
+    addToSOBGroup("KAS_Meteors2_14", "KAS_Meteors2_14g")
+    createSOBGroup("KAS_Meteors2_15g")
+    addToSOBGroup("KAS_Meteors2_15", "KAS_Meteors2_15g")
+    createSOBGroup("KAS_Meteors2_16g")
+    addToSOBGroup("KAS_Meteors2_16", "KAS_Meteors2_16g")
+    createSOBGroup("KAS_Meteors2_17g")
+    addToSOBGroup("KAS_Meteors2_17", "KAS_Meteors2_17g")
+    createSOBGroup("KAS_Meteors2_18g")
+    addToSOBGroup("KAS_Meteors2_18", "KAS_Meteors2_18g")
+    createSOBGroup("KAS_Meteors2_19g")
+    addToSOBGroup("KAS_Meteors2_19", "KAS_Meteors2_19g")
+    createSOBGroup("KAS_Meteors2_20g")
+    addToSOBGroup("KAS_Meteors2_20", "KAS_Meteors2_20g")
+    createSOBGroup("KAS_Meteors2_21g")
+    addToSOBGroup("KAS_Meteors2_21", "KAS_Meteors2_21g")
+    createSOBGroup("KAS_Meteors2_22g")
+    addToSOBGroup("KAS_Meteors2_22", "KAS_Meteors2_22g")
+    createSOBGroup("KAS_Meteors2_23g")
+    addToSOBGroup("KAS_Meteors2_23", "KAS_Meteors2_23g")
+    createSOBGroup("KAS_Meteors2_24g")
+    addToSOBGroup("KAS_Meteors2_24", "KAS_Meteors2_24g")
+    createSOBGroup("KAS_Meteors2_25g")
+    addToSOBGroup("KAS_Meteors2_25", "KAS_Meteors2_25g")
+    createSOBGroup("KAS_Meteors2_26g")
+    addToSOBGroup("KAS_Meteors2_26", "KAS_Meteors2_26g")
+    createSOBGroup("KAS_Meteors2_27g")
+    addToSOBGroup("KAS_Meteors2_27", "KAS_Meteors2_27g")
+    createSOBGroup("KAS_Meteors2_28g")
+    addToSOBGroup("KAS_Meteors2_28", "KAS_Meteors2_28g")
+    createSOBGroup("KAS_Meteors2_29g")
+    addToSOBGroup("KAS_Meteors2_29", "KAS_Meteors2_29g")
+    createSOBGroup("KAS_Meteors2_30g")
+    addToSOBGroup("KAS_Meteors2_30", "KAS_Meteors2_30g")
+    createSOBGroup("KAS_Meteors2_31g")
+    addToSOBGroup("KAS_Meteors2_31", "KAS_Meteors2_31g")
+    createSOBGroup("KAS_Meteors2_32g")
+    addToSOBGroup("KAS_Meteors2_32", "KAS_Meteors2_32g")
+    createSOBGroup("KAS_Meteors2_33g")
+    addToSOBGroup("KAS_Meteors2_33", "KAS_Meteors2_33g")
+    createSOBGroup("KAS_Meteors2_34g")
+    addToSOBGroup("KAS_Meteors2_34", "KAS_Meteors2_34g")
+    createSOBGroup("KAS_Meteors2_35g")
+    addToSOBGroup("KAS_Meteors2_35", "KAS_Meteors2_35g")
+    createSOBGroup("KAS_Meteors2_36g")
+    addToSOBGroup("KAS_Meteors2_36", "KAS_Meteors2_36g")
+    createSOBGroup("KAS_Meteors2_37g")
+    addToSOBGroup("KAS_Meteors2_37", "KAS_Meteors2_37g")
+    createSOBGroup("KAS_Meteors2_38g")
+    addToSOBGroup("KAS_Meteors2_38", "KAS_Meteors2_38g")
+    createSOBGroup("KAS_Meteors2_39g")
+    addToSOBGroup("KAS_Meteors2_39", "KAS_Meteors2_39g")
+    createSOBGroup("KAS_Meteors2_40g")
+    addToSOBGroup("KAS_Meteors2_40", "KAS_Meteors2_40g")
+    createSOBGroup("KAS_Meteors2_41g")
+    addToSOBGroup("KAS_Meteors2_41", "KAS_Meteors2_41g")
+    createSOBGroup("KAS_Meteors2_42g")
+    addToSOBGroup("KAS_Meteors2_42", "KAS_Meteors2_42g")
+    createSOBGroup("KAS_Meteors2_43g")
+    addToSOBGroup("KAS_Meteors2_43", "KAS_Meteors2_43g")
+    createSOBGroup("KAS_Meteors2_44g")
+    addToSOBGroup("KAS_Meteors2_44", "KAS_Meteors2_44g")
+    createSOBGroup("KAS_Meteors2_45g")
+    addToSOBGroup("KAS_Meteors2_45", "KAS_Meteors2_45g")
+    createSOBGroup("KAS_Meteors2_46g")
+    addToSOBGroup("KAS_Meteors2_46", "KAS_Meteors2_46g")
+    createSOBGroup("KAS_Meteors2_47g")
+    addToSOBGroup("KAS_Meteors2_47", "KAS_Meteors2_47g")
+    createSOBGroup("KAS_Meteors2_48g")
+    addToSOBGroup("KAS_Meteors2_48", "KAS_Meteors2_48g")
+    createSOBGroup("KAS_Meteors2_49g")
+    addToSOBGroup("KAS_Meteors2_49", "KAS_Meteors2_49g")
+    createSOBGroup("KAS_Meteors2_50g")
+    addToSOBGroup("KAS_Meteors2_50", "KAS_Meteors2_50g")
+    createSOBGroup("KAS_Meteors2_51g")
+    addToSOBGroup("KAS_Meteors2_51", "KAS_Meteors2_51g")
+    createSOBGroup("KAS_Meteors2_52g")
+    addToSOBGroup("KAS_Meteors2_52", "KAS_Meteors2_52g")
+    createSOBGroup("KAS_Meteors2_53g")
+    addToSOBGroup("KAS_Meteors2_53", "KAS_Meteors2_53g")
+    createSOBGroup("KAS_Meteors2_54g")
+    addToSOBGroup("KAS_Meteors2_54", "KAS_Meteors2_54g")
+    createSOBGroup("KAS_Meteors2_55g")
+    addToSOBGroup("KAS_Meteors2_55", "KAS_Meteors2_55g")
+    createSOBGroup("KAS_Meteors2_56g")
+    addToSOBGroup("KAS_Meteors2_56", "KAS_Meteors2_56g")
+    createSOBGroup("KAS_Meteors2_57g")
+    addToSOBGroup("KAS_Meteors2_57", "KAS_Meteors2_57g")
+    createSOBGroup("KAS_Meteors2_58g")
+    addToSOBGroup("KAS_Meteors2_58", "KAS_Meteors2_58g")
+    createSOBGroup("KAS_Meteors2_59g")
+    addToSOBGroup("KAS_Meteors2_59", "KAS_Meteors2_59g")
+    createSOBGroup("KAS_Meteors2_60g")
+    addToSOBGroup("KAS_Meteors2_60", "KAS_Meteors2_60g")
+    createSOBGroup("KAS_Meteors2_61g")
+    addToSOBGroup("KAS_Meteors2_61", "KAS_Meteors2_61g")
+    createSOBGroup("KAS_Meteors2_62g")
+    addToSOBGroup("KAS_Meteors2_62", "KAS_Meteors2_62g")
+    createSOBGroup("KAS_Meteors2_63g")
+    addToSOBGroup("KAS_Meteors2_63", "KAS_Meteors2_63g")
+    createSOBGroup("KAS_Meteors2_64g")
+    addToSOBGroup("KAS_Meteors2_64", "KAS_Meteors2_64g")
+    createSOBGroup("KAS_Meteors2_65g")
+    addToSOBGroup("KAS_Meteors2_65", "KAS_Meteors2_65g")
+    createSOBGroup("KAS_Meteors2_66g")
+    addToSOBGroup("KAS_Meteors2_66", "KAS_Meteors2_66g")
+    createSOBGroup("KAS_Meteors2_67g")
+    addToSOBGroup("KAS_Meteors2_67", "KAS_Meteors2_67g")
+    createSOBGroup("KAS_Meteors2_68g")
+    addToSOBGroup("KAS_Meteors2_68", "KAS_Meteors2_68g")
+    createSOBGroup("KAS_Meteors2_69g")
+    addToSOBGroup("KAS_Meteors2_69", "KAS_Meteors2_69g")
+    createSOBGroup("KAS_Meteors2_70g")
+    addToSOBGroup("KAS_Meteors2_70", "KAS_Meteors2_70g")
+    createSOBGroup("KAS_Meteors2_71g")
+    addToSOBGroup("KAS_Meteors2_71", "KAS_Meteors2_71g")
+    createSOBGroup("KAS_Meteors2_72g")
+    addToSOBGroup("KAS_Meteors2_72", "KAS_Meteors2_72g")
+    createSOBGroup("KAS_Meteors2_73g")
+    addToSOBGroup("KAS_Meteors2_73", "KAS_Meteors2_73g")
+    createSOBGroup("KAS_Meteors2_74g")
+    addToSOBGroup("KAS_Meteors2_74", "KAS_Meteors2_74g")
+    createSOBGroup("KAS_Meteors2_75g")
+    addToSOBGroup("KAS_Meteors2_75", "KAS_Meteors2_75g")
+    createSOBGroup("KAS_Meteors2_76g")
+    addToSOBGroup("KAS_Meteors2_76", "KAS_Meteors2_76g")
+    createSOBGroup("KAS_Meteors2_77g")
+    addToSOBGroup("KAS_Meteors2_77", "KAS_Meteors2_77g")
+    createSOBGroup("KAS_Meteors2_78g")
+    addToSOBGroup("KAS_Meteors2_78", "KAS_Meteors2_78g")
+    createSOBGroup("KAS_Meteors2_79g")
+    addToSOBGroup("KAS_Meteors2_79", "KAS_Meteors2_79g")
+    createSOBGroup("KAS_Meteors2_80g")
+    addToSOBGroup("KAS_Meteors2_80", "KAS_Meteors2_80g")
+    createSOBGroup("KAS_Meteors2_81g")
+    addToSOBGroup("KAS_Meteors2_81", "KAS_Meteors2_81g")
+    createSOBGroup("KAS_Meteors2_82g")
+    addToSOBGroup("KAS_Meteors2_82", "KAS_Meteors2_82g")
+    createSOBGroup("KAS_Meteors2_83g")
+    addToSOBGroup("KAS_Meteors2_83", "KAS_Meteors2_83g")
+    createSOBGroup("KAS_Meteors2_84g")
+    addToSOBGroup("KAS_Meteors2_84", "KAS_Meteors2_84g")
+    createSOBGroup("KAS_Meteors2_85g")
+    addToSOBGroup("KAS_Meteors2_85", "KAS_Meteors2_85g")
+    createSOBGroup("KAS_Meteors2_86g")
+    addToSOBGroup("KAS_Meteors2_86", "KAS_Meteors2_86g")
+    createSOBGroup("KAS_Meteors2_87g")
+    addToSOBGroup("KAS_Meteors2_87", "KAS_Meteors2_87g")
+    createSOBGroup("KAS_Meteors2_88g")
+    addToSOBGroup("KAS_Meteors2_88", "KAS_Meteors2_88g")
+    createSOBGroup("KAS_Meteors2_89g")
+    addToSOBGroup("KAS_Meteors2_89", "KAS_Meteors2_89g")
+    createSOBGroup("KAS_Meteors2_90g")
+    addToSOBGroup("KAS_Meteors2_90", "KAS_Meteors2_90g")
+    createSOBGroup("KAS_Meteors2_91g")
+    addToSOBGroup("KAS_Meteors2_91", "KAS_Meteors2_91g")
+    createSOBGroup("KAS_Meteors2_92g")
+    addToSOBGroup("KAS_Meteors2_92", "KAS_Meteors2_92g")
+    createSOBGroup("KAS_Meteors2_93g")
+    addToSOBGroup("KAS_Meteors2_93", "KAS_Meteors2_93g")
+    createSOBGroup("KAS_Meteors2_94g")
+    addToSOBGroup("KAS_Meteors2_94", "KAS_Meteors2_94g")
+    createSOBGroup("KAS_Meteors2_95g")
+    addToSOBGroup("KAS_Meteors2_95", "KAS_Meteors2_95g")
+    createSOBGroup("KAS_Meteors2_96g")
+    addToSOBGroup("KAS_Meteors2_96", "KAS_Meteors2_96g")
+    createSOBGroup("KAS_Meteors2_97g")
+    addToSOBGroup("KAS_Meteors2_97", "KAS_Meteors2_97g")
+    createSOBGroup("KAS_Meteors2_98g")
+    addToSOBGroup("KAS_Meteors2_98", "KAS_Meteors2_98g")
+    createSOBGroup("KAS_Meteors2_99g")
+    addToSOBGroup("KAS_Meteors2_99", "KAS_Meteors2_99g")
+    createSOBGroup("KAS_Meteors2_100g")
+    addToSOBGroup("KAS_Meteors2_100", "KAS_Meteors2_100g")
+    createSOBGroup("KAS_Meteors2_101g")
+    addToSOBGroup("KAS_Meteors2_101", "KAS_Meteors2_101g")
+    createSOBGroup("KAS_Meteors2_102g")
+    addToSOBGroup("KAS_Meteors2_102", "KAS_Meteors2_102g")
+    createSOBGroup("KAS_Meteors2_103g")
+    addToSOBGroup("KAS_Meteors2_103", "KAS_Meteors2_103g")
+    createSOBGroup("KAS_Meteors2_104g")
+    addToSOBGroup("KAS_Meteors2_104", "KAS_Meteors2_104g")
+    createSOBGroup("KAS_Meteors2_105g")
+    addToSOBGroup("KAS_Meteors2_105", "KAS_Meteors2_105g")
+    createSOBGroup("KAS_Meteors2_106g")
+    addToSOBGroup("KAS_Meteors2_106", "KAS_Meteors2_106g")
+    createSOBGroup("KAS_Meteors2_107g")
+    addToSOBGroup("KAS_Meteors2_107", "KAS_Meteors2_107g")
+    createSOBGroup("KAS_Meteors2_108g")
+    addToSOBGroup("KAS_Meteors2_108", "KAS_Meteors2_108g")
+    createSOBGroup("KAS_Meteors2_109g")
+    addToSOBGroup("KAS_Meteors2_109", "KAS_Meteors2_109g")
+    createSOBGroup("KAS_Meteors2_110g")
+    addToSOBGroup("KAS_Meteors2_110", "KAS_Meteors2_110g")
+    createSOBGroup("KAS_Meteors2_111g")
+    addToSOBGroup("KAS_Meteors2_111", "KAS_Meteors2_111g")
+    createSOBGroup("KAS_Meteors2_112g")
+    addToSOBGroup("KAS_Meteors2_112", "KAS_Meteors2_112g")
+    createSOBGroup("KAS_Meteors2_113g")
+    addToSOBGroup("KAS_Meteors2_113", "KAS_Meteors2_113g")
+    createSOBGroup("KAS_Meteors2_114g")
+    addToSOBGroup("KAS_Meteors2_114", "KAS_Meteors2_114g")
+    createSOBGroup("KAS_Meteors2_115g")
+    addToSOBGroup("KAS_Meteors2_115", "KAS_Meteors2_115g")
+    createSOBGroup("KAS_Meteors2_116g")
+    addToSOBGroup("KAS_Meteors2_116", "KAS_Meteors2_116g")
+    createSOBGroup("KAS_Meteors2_117g")
+    addToSOBGroup("KAS_Meteors2_117", "KAS_Meteors2_117g")
+    createSOBGroup("KAS_Meteors2_118g")
+    addToSOBGroup("KAS_Meteors2_118", "KAS_Meteors2_118g")
+    createSOBGroup("KAS_Meteors2_119g")
+    addToSOBGroup("KAS_Meteors2_119", "KAS_Meteors2_119g")
+    createSOBGroup("KAS_Meteors2_120g")
+    addToSOBGroup("KAS_Meteors2_120", "KAS_Meteors2_120g")
+    createSOBGroup("KAS_Meteors2_121g")
+    addToSOBGroup("KAS_Meteors2_121", "KAS_Meteors2_121g")
+    createSOBGroup("KAS_Meteors2_122g")
+    addToSOBGroup("KAS_Meteors2_122", "KAS_Meteors2_122g")
+    createSOBGroup("KAS_Meteors2_123g")
+    addToSOBGroup("KAS_Meteors2_123", "KAS_Meteors2_123g")
+    createSOBGroup("KAS_Meteors2_124g")
+    addToSOBGroup("KAS_Meteors2_124", "KAS_Meteors2_124g")
+    createSOBGroup("KAS_Meteors2_125g")
+    addToSOBGroup("KAS_Meteors2_125", "KAS_Meteors2_125g")
+    createSOBGroup("KAS_Meteors2_126g")
+    addToSOBGroup("KAS_Meteors2_126", "KAS_Meteors2_126g")
+    createSOBGroup("KAS_Meteors2_127g")
+    addToSOBGroup("KAS_Meteors2_127", "KAS_Meteors2_127g")
+    createSOBGroup("KAS_Meteors2_128g")
+    addToSOBGroup("KAS_Meteors2_128", "KAS_Meteors2_128g")
+    createSOBGroup("KAS_Meteors2_129g")
+    addToSOBGroup("KAS_Meteors2_129", "KAS_Meteors2_129g")
+    createSOBGroup("KAS_Meteors2_130g")
+    addToSOBGroup("KAS_Meteors2_130", "KAS_Meteors2_130g")
+    createSOBGroup("KAS_Meteors2_131g")
+    addToSOBGroup("KAS_Meteors2_131", "KAS_Meteors2_131g")
+    createSOBGroup("KAS_Meteors2_132g")
+    addToSOBGroup("KAS_Meteors2_132", "KAS_Meteors2_132g")
+    createSOBGroup("KAS_Meteors2_133g")
+    addToSOBGroup("KAS_Meteors2_133", "KAS_Meteors2_133g")
+    createSOBGroup("KAS_Meteors2_134g")
+    addToSOBGroup("KAS_Meteors2_134", "KAS_Meteors2_134g")
+    createSOBGroup("KAS_Meteors2_135g")
+    addToSOBGroup("KAS_Meteors2_135", "KAS_Meteors2_135g")
+    createSOBGroup("KAS_Meteors2_136g")
+    addToSOBGroup("KAS_Meteors2_136", "KAS_Meteors2_136g")
+    createSOBGroup("KAS_Meteors2_137g")
+    addToSOBGroup("KAS_Meteors2_137", "KAS_Meteors2_137g")
+    createSOBGroup("KAS_Meteors2_138g")
+    addToSOBGroup("KAS_Meteors2_138", "KAS_Meteors2_138g")
+    createSOBGroup("KAS_Meteors2_139g")
+    addToSOBGroup("KAS_Meteors2_139", "KAS_Meteors2_139g")
 
     addAsteroid("Asteroid0", {27664.94, -37354.226, -16243.341}, 100, 134.377, 125.24, 230.552, 0)
     addAsteroid("Asteroid0", {36119.36, -33273.845, -13882.061}, 100, 266.326, 89.308, 118.245, 0)
@@ -664,12 +2347,13 @@ function NonDetermChunk()
     setSensorsManagerCameraDistances(10500, 87500)
 end
 
-maxPlayers = 3
+maxPlayers = 4
 
 player = {}
 player[0] = { id = 0, name = "Somtaaw", resources = 0, raceName = "Somtaaw", startPos = 0 }
 player[1] = { id = 1, name = "Taiidan", resources = 0, raceName = "Taiidan", startPos = 0 }
 player[2] = { id = 2, name = "Kushan", resources = 0, raceName = "Kushan", startPos = 0 }
+player[3] = { id = 3, name = "Meteors", resources = 0, raceName = "Kushan", startPos = 0 }
 
--- unconverted MissionMan lines: MeteorStorm x3, Slipgate x2
+-- unconverted MissionMan lines: Slipgate x2
 -- unmapped ship types (placeholder used): RACE_DERELICT:dMessagePod x1

@@ -331,13 +331,23 @@ end
 KAS_DiscoverRadius = 5600
 
 -- 0x499570 (kasfHasShipBeenDiscovered?): 1 if any ship of the selection is visible to the player. The exe checks
--- each ship's position against the fog-of-war map; here: any player ship within sensor range of it.
+-- each ship's position against the fog-of-war map; here: any of them within sensor range of any player ship, ship
+-- by ship (measured against the whole selection, Mission02's meteors spread over the map counted as found at once:
+-- user, the meteor warning came before the Engineering Module's)
 function K_499570(sel)
     if SobGroup_Count(sel) == 0 then return 0 end
     SobGroup_CreateIfNotExist("KAS_Discover")
-    SobGroup_Clear("KAS_Discover")
-    Player_FillProximitySobGroup("KAS_Discover", 0, sel, KAS_DiscoverRadius)
-    return KAS_B(SobGroup_Count("KAS_Discover") > 0)
+    SobGroup_CreateIfNotExist("KAS_DiscoverBy")
+    for i = 0, SobGroup_Count("Player_Ships0") - 1 do
+        SobGroup_Clear("KAS_DiscoverBy")
+        SobGroup_FillShipsByIndexRange("KAS_DiscoverBy", "Player_Ships0", i, 1)
+        SobGroup_Clear("KAS_Discover")
+        if SobGroup_Count("KAS_DiscoverBy") > 0 then
+            SobGroup_FillProximitySobGroup("KAS_Discover", sel, "KAS_DiscoverBy", KAS_DiscoverRadius)
+            if SobGroup_Count("KAS_Discover") > 0 then return 1 end
+        end
+    end
+    return 0
 end
 
 -- kasfFindShipsInside(volume, ships): every live ship of every player inside the volume
@@ -780,6 +790,15 @@ function KAS_ApplyAlliances()
         SetAlliance(0, 2)
         SetAlliance(2, 0)
     end
+    -- the meteors' player (tools/mission2level.py add_storm): nobody's enemy (Cataclysm's meteors are asteroids)
+    if KAS_MeteorPlayer and KAS_MeteorPlayer >= 0 and n > KAS_MeteorPlayer then
+        for i = 0, n - 1 do
+            if i ~= KAS_MeteorPlayer then
+                SetAlliance(i, KAS_MeteorPlayer)
+                SetAlliance(KAS_MeteorPlayer, i)
+            end
+        end
+    end
 end
 
 -- Cataclysm research is offered by the mission (kasfAllowPlayerToResearch / Purchase): lock every tech first.
@@ -1141,6 +1160,7 @@ function KAS_StartEngine()
     singlePlayerHyperspaceButtonDisable()     -- (Gearbox's singlePlayerStartGame): shown by K_497290
     Rule_AddInterval("KAS_EngineTick", 0.5)
     Rule_AddInterval("KAS_MoveFireTick", 1)
+    KAS_MeteorInit()
     Rule_AddInterval("KAS_JettisonWatch", 0.25)
     Rule_AddInterval("KAS_RURegen", KAS_RU_REGEN_SECONDS)
 end
@@ -2240,12 +2260,158 @@ function K_492b90()
     if SobGroup_Count(KAS_Team) == 0 then return 0 end
     return SobGroup_MinimumHealth(KAS_Team) * 100
 end
--- 0x492d60(out): the asteroids flagged ATTRIBUTES_HeadShotVelToMothership (0x200), Mission02's "meteors" (its
--- MeteorStorm volumes, not converted yet: none)
+-- 0x492d60(out): the asteroids flagged ATTRIBUTES_HeadShotVelToMothership (0x200), Mission02's "meteors": our
+-- meteor ships (KAS_MeteorInit)
 function K_492d60(gs)
     SobGroup_Clear(gs)
-    KAS_NoOp("492d60", "select meteors (MeteorStorm not converted)")
-    return 0
+    if KAS_MeteorStorms then
+        for s = 1, getn(KAS_MeteorStorms) do SobGroup_SobGroupAdd(gs, KAS_MeteorStorms[s].group) end
+    end
+    return SobGroup_Count(gs)
+end
+
+-- ------------------------------------------------------------------ meteor storms (Cataclysm MeteorStorm)
+-- Each meteor (a cat_meteor<n> ship, tools/make_meteor.py; placed and its storm's velocity / wrap box written by
+-- tools/mission2level.py add_storm) flies its storm's velocity for good: cataclysm.exe FUN_005432d0 moves every
+-- meteor at its velocity and, per axis, puts one that passes +ext at -ext (and -ext at +ext). Here each is ordered
+-- to where it leaves the box at its storm's speed, and moved across when it gets there.
+-- A meteor touching a ship (FUN_0043bac0: closer than the two collision radii; no bump, FUN_00545540) costs both
+-- the lower of their two healths: a fighter dies, a ship that outweighs the meteor loses its health and destroys it.
+dofilepath("data:scripts/cataclysm/hullinfo_gen.lua")   -- CatHull: ship sizes (tools/make_hullinfo.py)
+KAS_MeteorRadius = { cat_meteor0 = 10, cat_meteor1 = 25, cat_meteor2 = 52.8, cat_meteor3 = 118.1, cat_meteor4 = 214.1 }
+KAS_MeteorShipSpeed = 400      -- the meteor ships' top speed (tools/make_meteor.py MAX_SPEED)
+KAS_MeteorReach = 900          -- a first sweep: meteors this close to a ship are measured (largest meteor + hull)
+KAS_MeteorHitFX, KAS_MeteorHitScale = "dmg_cloud_explosion_large_nodebris", 2
+KAS_MeteorHitSound = "data:sound/sfx/etg/explosion/small/etg_explode_small_firey"
+KAS_Meteors = {}               -- per meteor: { g = its group, st = its storm, due = when it reaches the box }
+-- a meteor turned nose-first along its storm's velocity (coordsys rows: right, up, bow). A meteor can't turn
+-- (tools/make_meteor.py, the headshot asteroid's: main engine only within 30 degrees of its heading): placed at
+-- random headings, only the ~7 % already facing the way moved, 10-12 in each storm of 140 (user / log)
+function KAS_MeteorFace(m)
+    local st = m.st
+    if st.facing == nil then
+        local f = { st.v[1] / st.speed, st.v[2] / st.speed, st.v[3] / st.speed }
+        local up = { 0, 1, 0 }
+        if abs(f[2]) > 0.99 then up = { 1, 0, 0 } end
+        local r = { up[2] * f[3] - up[3] * f[2], up[3] * f[1] - up[1] * f[3], up[1] * f[2] - up[2] * f[1] }
+        local l = sqrt(r[1] * r[1] + r[2] * r[2] + r[3] * r[3])
+        r = { r[1] / l, r[2] / l, r[3] / l }
+        local u = { f[2] * r[3] - f[3] * r[2], f[3] * r[1] - f[1] * r[3], f[1] * r[2] - f[2] * r[1] }
+        st.facing = { r[1], r[2], r[3], u[1], u[2], u[3], f[1], f[2], f[3] }
+    end
+    SobGroup_SetTransform(m.g, st.facing)
+end
+function KAS_MeteorInit()
+    if KAS_MeteorStorms == nil or getn(KAS_MeteorStorms) == 0 then return end
+    for s = 1, getn(KAS_MeteorStorms) do
+        local st = KAS_MeteorStorms[s]
+        st.speed = sqrt(st.v[1] * st.v[1] + st.v[2] * st.v[2] + st.v[3] * st.v[3])
+        -- each meteor's own group from the level (tools/mission2level.py add_storm)
+        for i = 0, st.n - 1 do
+            local g = st.group .. "_" .. i .. "g"
+            SobGroup_SetSpeed(g, st.speed / KAS_MeteorShipSpeed)
+            local m = { g = g, st = st, r = KAS_MeteorRadius[strlower(SobGroup_GetShipType(g))] or 50 }
+            tinsert(KAS_Meteors, m)
+            KAS_MeteorFace(m)
+            KAS_MeteorAim(m)
+        end
+    end
+    SobGroup_CreateIfNotExist("KAS_MeteorAll")
+    SobGroup_Clear("KAS_MeteorAll")
+    K_492d60("KAS_MeteorAll")
+    Rule_AddInterval("KAS_MeteorTick", 0.25)
+    print("CKAS: " .. getn(KAS_Meteors) .. " meteors in " .. getn(KAS_MeteorStorms) .. " storms")
+end
+-- ordered on in legs: KAS_MeteorLeg seconds ahead, again every KAS_MeteorStep (ordered straight to the far edge of
+-- the box, up to 200000 away, nine meteors in ten stood still, the same ones every run: user / log), and the last
+-- leg to where it leaves its box, KAS_MeteorEdge short of it (the box is the world bounds), then moved across
+KAS_MeteorEdge, KAS_MeteorLeg, KAS_MeteorStep = 100, 10, 5
+function KAS_MeteorAim(m)
+    local p, v = SobGroup_GetPosition(m.g), m.st.v
+    local e = { m.st.ext[1] - KAS_MeteorEdge, m.st.ext[2] - KAS_MeteorEdge, m.st.ext[3] - KAS_MeteorEdge }
+    local t = 1000000
+    for k = 1, 3 do
+        local tk = nil
+        if v[k] > 0 then tk = (e[k] - p[k]) / v[k] elseif v[k] < 0 then tk = (-e[k] - p[k]) / v[k] end
+        if tk and tk < t then t, m.axis = tk, k end
+    end
+    if t < 0 then t = 0 end
+    m.wrap = t <= KAS_MeteorStep
+    if m.wrap then m.due = Universe_GameTime() + t else m.due = Universe_GameTime() + KAS_MeteorStep end
+    if t > KAS_MeteorLeg then t = KAS_MeteorLeg end
+    SobGroup_MoveToPoint(KAS_MeteorPlayer, m.g, { p[1] + v[1] * t, p[2] + v[2] * t, p[3] + v[3] * t })
+end
+function KAS_MeteorTick()
+    local now = Universe_GameTime()
+    for i = 1, getn(KAS_Meteors) do
+        local m = KAS_Meteors[i]
+        if m.dead == nil and now >= m.due then
+            if SobGroup_Count(m.g) == 0 then
+                m.dead = 1
+            else
+                if m.wrap then
+                    local p, e = SobGroup_GetPosition(m.g), m.st.ext[m.axis] - KAS_MeteorEdge
+                    if m.st.v[m.axis] > 0 then p[m.axis] = -e else p[m.axis] = e end
+                    SobGroup_SetPosition(m.g, p)
+                    KAS_MeteorFace(m)
+                end
+                KAS_MeteorAim(m)
+            end
+        end
+    end
+    KAS_MeteorHits()
+end
+-- collisions: per ship of the other players, the meteors near it, then the measured ones
+function KAS_MeteorHits()
+    SobGroup_CreateIfNotExist("KAS_MeteorTargets")
+    SobGroup_Clear("KAS_MeteorTargets")
+    for pl = 0, Universe_PlayerCount() - 1 do
+        if pl ~= KAS_MeteorPlayer then SobGroup_SobGroupAdd("KAS_MeteorTargets", "Player_Ships" .. pl) end
+    end
+    SobGroup_CreateIfNotExist("KAS_MeteorShip")
+    SobGroup_CreateIfNotExist("KAS_MeteorNear")
+    SobGroup_CreateIfNotExist("KAS_MeteorOne")
+    for i = 0, SobGroup_Count("KAS_MeteorTargets") - 1 do
+        SobGroup_Clear("KAS_MeteorShip")
+        SobGroup_FillShipsByIndexRange("KAS_MeteorShip", "KAS_MeteorTargets", i, 1)
+        SobGroup_Clear("KAS_MeteorNear")
+        if SobGroup_Count("KAS_MeteorShip") > 0 then
+            SobGroup_FillProximitySobGroup("KAS_MeteorNear", "KAS_MeteorAll", "KAS_MeteorShip", KAS_MeteorReach)
+            if SobGroup_Count("KAS_MeteorNear") > 0 then KAS_MeteorHitShip() end
+        end
+    end
+end
+function KAS_MeteorHitShip()
+    local hull = CatHull[strlower(SobGroup_GetShipType("KAS_MeteorShip"))]
+    local rs = 20
+    if hull then
+        rs = 0
+        for k = 1, 6 do if abs(hull.box[k]) > rs then rs = abs(hull.box[k]) end end
+    end
+    local ps = SobGroup_GetPosition("KAS_MeteorShip")
+    for j = 0, SobGroup_Count("KAS_MeteorNear") - 1 do
+        SobGroup_Clear("KAS_MeteorOne")
+        SobGroup_FillShipsByIndexRange("KAS_MeteorOne", "KAS_MeteorNear", j, 1)
+        local pm = SobGroup_GetPosition("KAS_MeteorOne")
+        local d = { pm[1] - ps[1], pm[2] - ps[2], pm[3] - ps[3] }
+        local rm = KAS_MeteorRadius[strlower(SobGroup_GetShipType("KAS_MeteorOne"))] or 50
+        if d[1] * d[1] + d[2] * d[2] + d[3] * d[3] < (rs + rm) * (rs + rm) then
+            -- the lower health from both (FUN_00545540: damage = min of the two current healths, to each)
+            local hs = SobGroup_HealthPercentage("KAS_MeteorShip") * SobGroup_MaxHealthTotal("KAS_MeteorShip")
+            local hm = SobGroup_HealthPercentage("KAS_MeteorOne") * SobGroup_MaxHealthTotal("KAS_MeteorOne")
+            local dmg = hs
+            if hm < dmg then dmg = hm end
+            SobGroup_SetHealth("KAS_MeteorShip", (hs - dmg) / SobGroup_MaxHealthTotal("KAS_MeteorShip"))
+            SobGroup_SetHealth("KAS_MeteorOne", (hm - dmg) / SobGroup_MaxHealthTotal("KAS_MeteorOne"))
+            KAS_MeteorHitN = (KAS_MeteorHitN or 0) + 1
+            local vol = "KAS_MeteorHit" .. KAS_MeteorHitN
+            Volume_AddSphere(vol, pm, 1)
+            FX_PlayEffect(KAS_MeteorHitFX, vol, KAS_MeteorHitScale)
+            Sound_SFXPlay3D(KAS_MeteorHitSound, vol)
+            print("CKAS: meteor hit " .. SobGroup_GetShipType("KAS_MeteorShip") .. " for " .. floor(dmg))
+            if hs <= dmg then return end
+        end
+    end
 end
 -- 0x493400(ships): bit 3 of the first ship's flags at +0x1cc (kasfDockStay won't dock with such a ship: taken as "not
 -- built yet"). HWRM modules are built when they exist

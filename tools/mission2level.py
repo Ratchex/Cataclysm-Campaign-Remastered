@@ -40,6 +40,12 @@ import make_colours  # noqa: E402
 MAP_SPREAD = 1.5
 SCALE = 0.35 * MAP_SPREAD
 RADIUS_SCALE, OUTER = SCALE / 2, 1.2
+# Meteors (MeteorStorm): owned by a player of their own, allied with everyone (cataclysmkas.lua KAS_ApplyAlliances;
+# owner -1, as stock HWRM's derelicts, took no move orders: they stood still). The map is MAP_SPREAD wider each way,
+# so (user: adjust for the scaling, add more) their speed is at the map's scale (they cross it in Cataclysm's time)
+# and their number Cataclysm's (x MAP_SPREAD^3, 1416 ships, ruined the frame rate; x MAP_SPREAD, 630, still
+# stuttered: user)
+METEOR_PLAYER, SPEED_SCALE, METEOR_COUNT_SCALE = 3, SCALE, 1
 
 
 # Camera on the player's hyperspace arrival (cataclysmkas.lua K_498230, Camera_UseCameraPoint), offsets from
@@ -112,6 +118,7 @@ class Level:
         self.settings, self.unconverted, self.unmapped = {}, Counter(), Counter()
         self.label_counts = Counter()
         self.schemes, self.team_players = {}, {}   # labelled team -> its colorScheme(n) / owning player
+        self.storms = []                           # MeteorStorm: {group, v, ext} for the runtime
 
     def ship_type(self, race, shiptype, owner):
         if race in ("R1", "R2"):  # HW1 generic races follow the owning player's race
@@ -167,6 +174,8 @@ class Level:
             self.add_asteroids(f)
         elif kind == "Resources" and len(f) >= 11 and f[0].lower() == "asteroid" and f[4].lower() == "cylinder":
             self.add_asteroids(f, self.cylinder_point(f))
+        elif kind == "MeteorStorm" and len(f) >= 14 and f[3].lower() == "cylinder":
+            self.add_storm(f)
         else:
             self.unconverted[kind] += 1
 
@@ -183,6 +192,56 @@ class Level:
             x, y = math.cos(rz) * x - math.sin(rz) * y, math.sin(rz) * x + math.cos(rz) * y
             return x, y, z
         return point
+
+    def asteroid_weights(self, dist_name):
+        weights = []
+        dist = next((x for x in os.listdir(self.folder) if x.lower() == dist_name.lower()), None)
+        if dist:
+            for l in open(os.path.join(self.folder, dist), encoding="latin-1"):
+                m = re.match(r"\s*(Asteroid\d)\s+(\d+)", l)
+                if m and int(m.group(2)) > 0:
+                    weights.append((m.group(1), int(m.group(2))))
+        return weights or [("Asteroid2", 1)]
+
+    def add_storm(self, f):
+        """Cataclysm MeteorStorm (cataclysm.exe FUN_004a0d10, format "%f %f %f %s %s %d %f %f %f %f %d %f %f %f"):
+        x, y, z, layout, .dist, number, radius, length, roty, rotz (degrees), flags, speed, vy, vx. Meteors placed as
+        the cylinder's asteroids (K_4a03e0: the same box as AddResourceToCylinder), each a cat_meteor<type> ship
+        (tools/make_meteor.py); velocity (K_49fcf0) = speed x the cylinder's axis (Rz Ry (1, 0, 0)) + (vx, vy, 0);
+        wrapped per axis at +-max(universe size, the storm's extent |Rz Ry (length / 2, radius, radius)|) about the
+        world origin (FUN_005432d0, smUniverseSize*)."""
+        g = ["Asteroid"] + f[0:3] + ["Cylinder", f[4], f[5], f[6], f[7], f[8], f[9]]
+        point = self.cylinder_point(g)
+        weights = self.asteroid_weights(f[4])
+        rng = random.Random(",".join(f))
+        centre = tuple(map(float, f[0:3]))
+        group = f"KAS_Meteors{len(self.storms)}"
+        self.groups[group] = []
+        for i in range(round(int(f[5]) * METEOR_COUNT_SCALE)):
+            d = point(rng)
+            pick = rng.uniform(0, sum(w for _, w in weights))
+            for t, w in weights:
+                pick -= w
+                if pick <= 0:
+                    break
+            name = f"{group}_{i}"
+            self.squadrons.append((name, "cat_meteor" + t[-1], pos(*(centre[k] + d[k] for k in range(3))),
+                                   METEOR_PLAYER, (rng.uniform(0, 360), rng.uniform(0, 360), rng.uniform(0, 360)),
+                                   "MeteorStorm " + t))
+            self.groups[group].append(name)
+            self.groups[name + "g"] = [name]       # its own group (cataclysmkas.lua KAS_MeteorInit)
+        radius, length = float(f[6]), float(f[7])
+        ry, rz = math.radians(float(f[8])), math.radians(float(f[9]))
+
+        def turn(x, y, z):
+            x, z = math.cos(ry) * x + math.sin(ry) * z, -math.sin(ry) * x + math.cos(ry) * z
+            return math.cos(rz) * x - math.sin(rz) * y, math.sin(rz) * x + math.cos(rz) * y, z
+        speed, vy, vx = float(f[11]), float(f[12]), float(f[13])
+        ax = turn(1, 0, 0)
+        v = (speed * ax[0] + vx, speed * ax[1] + vy, speed * ax[2])
+        ext = tuple(abs(c) for c in turn(length / 2, radius, radius))
+        self.storms.append({"group": group, "n": len(self.groups[group]), "v": (-SPEED_SCALE * v[0], SPEED_SCALE * v[2], SPEED_SCALE * v[1]),
+                            "ext": ext})
 
     def add_asteroids(self, f, offset=None):
         """HW1 LevelLoad.c scriptSetResourcesCB, Sphere layout: <number> asteroids at random within <radius> of the
@@ -252,11 +311,14 @@ class Level:
         if "Background" in s:
             L.append(f'    loadBackground("{s["Background"]}")')
         L.append("    setSensorsManagerCameraDistances(10500, 87500)")
-        players = (0, 1, 2) if any(sq[3] == 2 for sq in self.squadrons) else (0, 1)
+        players = (0, 1, 2) if any(sq[3] >= 2 for sq in self.squadrons) else (0, 1)
+        if self.storms:
+            players += (METEOR_PLAYER,)
         L += ["end", "", f"maxPlayers = {len(players)}", "", "player = {}"]
         for i in players:
-            L.append(f'player[{i}] = {{ id = {i}, name = "{self.races[i]}", resources = 0, '
-                     f'raceName = "{self.races[i]}", startPos = 0 }}')
+            race = self.races[i] if i in self.races else self.races[2]
+            L.append(f'player[{i}] = {{ id = {i}, name = "{"Meteors" if i == METEOR_PLAYER else race}", '
+                     f'resources = 0, raceName = "{race}", startPos = 0 }}')
         if self.unconverted or self.unmapped:
             L += ["", "-- unconverted MissionMan lines: " + ", ".join(f"{k} x{v}" for k, v in sorted(self.unconverted.items())),
                   "-- unmapped ship types (placeholder used): " +
@@ -367,12 +429,24 @@ if __name__ == "__main__":
             # HW1 clamps KAS vectors to +-the universe size per axis (cataclysm.exe 0x4991d0); HWRM axes
             f.write(f"KAS_Universe = {{ {fmt(SCALE * s['smUniverseSizeX'])}, {fmt(SCALE * s['smUniverseSizeZ'])}, "
                     f"{fmt(SCALE * s['smUniverseSizeY'])} }}\n")
+        if all(k in s for k in ("smUniverseSizeX", "smUniverseSizeY", "smUniverseSizeZ")):
+            # meteor storms (Level.add_storm): velocity (HWRM, per second) and wrap box (HWRM axes)
+            uni = (s["smUniverseSizeX"], s["smUniverseSizeY"], s["smUniverseSizeZ"])
+            f.write(f"KAS_MeteorPlayer = {METEOR_PLAYER}\nKAS_MeteorStorms = {{\n")
+            for st in lv.storms:
+                e = [max(uni[k], st["ext"][k]) for k in range(3)]
+                f.write(f'\t{{ group = "{st["group"]}", n = {st["n"]}, v = {vec(st["v"])}, '
+                        f'ext = {vec((SCALE * e[0], SCALE * e[2], SCALE * e[1]))} }},\n')
+            f.write("}\n")
         f.write("KAS_TeamSchemes = {\n")
         for team, n in sorted(lv.schemes.items()):
             f.write(f'\t["{team}"] = {n},\n')
         f.write("}\n")
+    colour_players = {0: a.player_race, 1: a.enemy_race, 2: a.ally_race}
+    if lv.storms:
+        colour_players[METEOR_PLAYER] = a.ally_race
     make_colours.teamcolour(os.path.join(os.path.dirname(a.out), "teamcolour.lua"),
-                            {0: a.player_race, 1: a.enemy_race, 2: a.ally_race}, lv.schemes, lv.team_players)
+                            colour_players, lv.schemes, lv.team_players)
     print(f"{a.out}: {len(lv.squadrons)} squadrons, {len(lv.groups)} groups, {len(lv.points)} points, "
           f"{len(lv.spheres)} spheres, {len(lv.paths)} paths; unmapped types {sum(lv.unmapped.values())}; "
           f"unconverted {dict(lv.unconverted)}")
