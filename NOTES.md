@@ -521,3 +521,23 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
   15 LocationCard, 16 HW1_FleetCommand (mothership icon), 17 HW1_FleetIntel, 18 HW1_BentusiTraders, 19 HW1_Kadesh,
   20 HW1_AllShipsEnemy (Taiidan pilots), 21 HW1_Ambassador, 22 HW1_Defector, 23 HW1_Emperor, 24 HW1_KharSelim,
   26-32 Generic1-7. nis2hwrm.py picks them from tools/speech_speakers.tsv ("Taiidan pilot" / "Hiigaran pilot").
+
+## Fleet carry-over, dock paths, cargo clouds (2026-10-13, confirmed in game unless marked)
+- Persistence (HWRM FUN_005d423b): winning Mission[n] writes Profiles/<p>/Campaign/CATACLYSM/persist<n+1>.lua. The next
+  mission's OnInit must call `SobGroup_LoadPersistantData("smt_ms_sp")` (as HW1's Mission02 with "Kus_Mothership";
+  without it no fleet came) and the level needs a point named exactly `PlayerStartPoint`; with no persist file the
+  mission folder's StartingPlayerFleet.lua is used (build_mission.py writes both; Mission02's default fleet confirmed,
+  a real persist2 not yet).
+- Kuun-Lan hangar dock paths: Cataclysm has only dock points + normals; paths on them (geo2dae.py dock_nodes) dock once
+  waypoints inside the one collision box carry Clip, exit waypoints carry Close (else the path stays taken after a
+  launch) and the way in uses Cataclysm Remastered's flag pattern: Queue, Player (same far point), Unfocus, then
+  Unfocus+Close+Clip into the bay (tol 50, speed 0). Player Queue / Player / Clip ClearRes left ships queued outside.
+- Cargo clouds: harvesting needs the model's Latch1 joints (DustCloud0_hw1.hod has them, DustCloud_0.hod not); the HW1
+  type's SMRepresentation SoftDot / meshRenderLimit 7000 made it invisible. cat_cargocloud = HW1 model and resource
+  fields with DustCloud_0's drawing and .dustcloud (install_cr.py make_cargo_cloud).
+- Animatic speech queues: a line waits for the previous one to end (make_animatics.py).
+- KAS: kasVectorPtr names are vectors (KAS_Vec, HWRM coordinates) or level points (KAS_Pos); unnamed exe calls can take
+  string pointers (kas2lua resolves 4-aligned data addresses of identifiers) and stack arguments Ghidra misses
+  (a dropped kasAITeamShipsPtr before a no-argument call is its argument). out/m02_stubs.c has the decompiles.
+- Open: autosave "invalid key for `next'" in Campaign_QuickSaveNb (both missions); Mission01's crippled heavy cruiser
+  stops firing (diagnostic print in K_493aa0); CR's smt_swarmer.lua has a syntax error (lines 2-3).

@@ -8,10 +8,10 @@ AddLocalizedText( "locale:leveldata/campaign/cataclysm/speech.dat" );
 -- 11.5s: Ship's Engineer's Report 1.2- With the CLEE-SAN and their science team lost, my engineers 
 AddSubtitleEvent( 1.00, Actor_LocationCard, "$2206970", 11.5 );
 -- 7.2s: The Beast seems to infect vessels with a kind of particle beam that layers the target with
-AddSubtitleEvent( 10.00, Actor_LocationCard, "$2206971", 7.2 );
+AddSubtitleEvent( 12.15, Actor_LocationCard, "$2206971", 7.2 );
 -- 19.6s: Once these entities make contact with a compatible surface they begin to absorb material a
-AddSubtitleEvent( 19.00, Actor_LocationCard, "$2206972", 19.6 );
+AddSubtitleEvent( 19.22, Actor_LocationCard, "$2206972", 19.6 );
 -- 20.3s: Each beast cell functions like a bio-mechanical virus. It's capable of using and subvertin
-AddSubtitleEvent( 36.00, Actor_LocationCard, "$2206973", 20.3 );
+AddSubtitleEvent( 39.10, Actor_LocationCard, "$2206973", 20.3 );
 -- 21.4s: Analysis of the infection attack indicates that the Beast particles ride the charged plasm
-AddSubtitleEvent( 53.00, Actor_LocationCard, "$2206974", 21.4 );
+AddSubtitleEvent( 59.20, Actor_LocationCard, "$2206974", 21.4 );

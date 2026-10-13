@@ -12,4 +12,4 @@ AddSubtitleEvent( 17.00, Actor_LocationCard, "$2206939", 10.8 );
 -- 12.5s: The data transmission is in the form of a short repeating tone, threaded with a strange da
 AddSubtitleEvent( 28.00, Actor_LocationCard, "$2206940", 12.5 );
 -- 22.0s: In the meantime, we continue with our surface studies. Samples taken from the beacon's hul
-AddSubtitleEvent( 38.00, Actor_LocationCard, "$2206941", 22.0 );
+AddSubtitleEvent( 40.16, Actor_LocationCard, "$2206941", 22.0 );

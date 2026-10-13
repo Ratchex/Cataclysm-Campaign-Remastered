@@ -492,6 +492,8 @@ class Translator:
         t = e[0]
         if t == "num":
             return self.num_lit(e[1]), "num"
+        if t == "lua":                                    # already translated (simple(): a dropped lookup)
+            return e[1], "str"
         if t == "str":
             return '"' + e[1].replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n") + '"', "str"
         if t == "cast":
@@ -646,6 +648,14 @@ class Translator:
                 if s:
                     out.append(s)
                     continue
+            if a0[0] == "num" and isinstance(a0[1], int) and ptype == "" and self.d.base <= a0[1] < 0x900000 \
+                    and a0[1] % 4 == 0:
+                # unnamed function: a pointer into the exe's data at a name (Mission02 passes ship types as
+                # 8960500 = "sRecon"); hashes are not 4-aligned addresses of identifiers
+                raw = self.d.read_cstr(a0[1])
+                if raw and re.match(r"[A-Za-z][A-Za-z0-9_ ]{2,}$", raw):
+                    out.append(self.string_at(a0[1]))
+                    continue
             s, k = self.ex(a)
             if a0[0] == "num" and isinstance(a0[1], int) and ("udword" in ptype or ptype == ""):
                 c = self.d.hash_comment(a0[1]) if a0[1] > 0xFFFF else None
@@ -677,6 +687,9 @@ class Translator:
         if name == "kasThisTeamsVectorPtr":
             return "KAS_TeamVector(TeamName)", "str"
         if name == "kasShipsVectorPtr":
+            a0 = self.strip(args[0])
+            if a0[0] == "num":       # a selection by hash (Mission02: kasShipsVectorPtr(0xcff5860) = "Smothership")
+                return f"KAS_ShipsVector(KAS_GS({self.label_str(a0[1], 'gs')}))", "str"
             return f"KAS_ShipsVector({self.arg_values(args)[0]})", "str"
         if name in ("kasJump", "kasFSMCreate"):
             raise Unsupported(f"{name} used as a value")
@@ -704,10 +717,18 @@ class Translator:
         if s[0] == "decl":
             return []
         e = s[1]
+        pending, self.pending_arg = getattr(self, "pending_arg", None), None
         if e[0] == "call":
             addr, name = self.callee_addr(e[1])
             if name in ("kasJump", "kasFSMCreate"):
                 return self.fsm_call(name, e[2])
+            if name in self.HELPER_KIND and not e[2][1:]:
+                # a lookup whose value is dropped: the argument of the next call, which Ghidra shows with none
+                # (Mission02: kasAITeamShipsPtr(0x712bfb4); K_499330(); = K_499330("dMessagePod"))
+                self.pending_arg = self.ex(e)[0]
+                return []
+            if pending and not e[2] and addr is not None and KAS_LO <= addr < KAS_HI:
+                e = ("call", e[1], [("lua", pending)])
             # Ghidra shows the result of a call made as a statement as "extraout_EAX" when it is used later.
             if "extraout_EAX" in getattr(self, "cur_locals", ()):
                 return [f"extraout_EAX = {self.ex(e)[0]}"]
@@ -1115,7 +1136,10 @@ def main():
         return re.sub(r"\s*--\[\[.*?\]\]", "", line) + "  -- " + "; ".join(notes)
     lines = [trailing(l) for l in lines]
     # label -> kasLabelHash, so the runtime can give a team's hash (variable scope) without bit arithmetic in Lua 4
-    labels = sorted(set(d.labels.values()) | {mission})
+    # (and every vector name: kasfVectorSet & co. get the hash, KAS_Vector the name)
+    vec_names = {n for n in re.findall(r'KAS_Vector\("([A-Za-z]\w*)"\)', "\n".join(lines))
+                 if not n.startswith("vec_")}        # unresolved: the runtime keys those "vec_%08x" too
+    labels = sorted(set(d.labels.values()) | {mission} | vec_names)
     lines += ["KAS_LabelHash = KAS_LabelHash or {}"]
     lines += [f'KAS_LabelHash["{n}"] = {kashash(n)}' for n in labels]
     with open(out, "w", encoding="latin-1", newline="\n") as f:

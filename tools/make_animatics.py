@@ -111,9 +111,11 @@ def build(nn, events, video=True):
     for t, track, vol in music:
         inputs += ["-i", os.path.join(DECOMP, "extracted", "audio", "music", f"music_{track:02d}.wav")]
         chains.append((t, vol))
-    subs = []
+    subs, free = [], 0.0
     for t, ev, vol in speech:
         sid, secs, text, _ = events[ev]
+        # Cataclysm queues speech: a line waits for the one before it to end (user, Animatic02's "You got that right")
+        t, free = max(t, free), max(t, free) + secs
         inputs += ["-i", os.path.join(MOD, "data", "sound", "speech", "missions", "cataclysm", f"{sid}.wav")]
         chains.append((t, vol))
         subs.append((t, sid, secs, text))

@@ -83,12 +83,12 @@ RACE_KUSHAN	kstandarddestroyer	kus_destroyer	Gearbox substitute
 RACE_KUSHAN	mine		no HWRM equivalent
 RACE_KUSHAN	missile		no HWRM equivalent
 RACE_P1	missile		needs a new HWRM ship (Phase 1)
-RACE_P1	p1fighter		needs a new HWRM ship (Phase 1)
-RACE_P1	p1ionarrayfrigate		needs a new HWRM ship (Phase 1)
-RACE_P1	p1missilecorvette		needs a new HWRM ship (Phase 1)
-RACE_P1	p1mothership		needs a new HWRM ship (Phase 1)
+RACE_P1	p1fighter	tur_fighter	stock HWRM (HW1 Turanic Raiders)
+RACE_P1	p1ionarrayfrigate	tur_ionarrayfrigate	stock HWRM (HW1 Turanic Raiders)
+RACE_P1	p1missilecorvette	tur_missilecorvette	stock HWRM (HW1 Turanic Raiders)
+RACE_P1	p1mothership	tur_p1mothership	stock HWRM (HW1 Turanic Raiders)
 RACE_P1	p1outpost		needs a new HWRM ship (Phase 1)
-RACE_P1	p1standardcorvette		needs a new HWRM ship (Phase 1)
+RACE_P1	p1standardcorvette	tur_standardcorvette	stock HWRM (HW1 Turanic Raiders)
 RACE_SECT	generic_ship		needs a new HWRM ship (Phase 1)
 RACE_SECT	mine		needs a new HWRM ship (Phase 1)
 RACE_SECT	missile		needs a new HWRM ship (Phase 1)

@@ -12,12 +12,12 @@ AddSubtitleEvent( 9.00, Actor_LocationCard, "$2206930", 13.2 );
 -- 11.5s: We have brought it aboard now and are securing it in the main Hangar bay. What should we d
 AddSubtitleEvent( 27.00, Actor_LocationCard, "$2206931", 11.5 );
 -- 7.7s: We are transmitting design specs so that your manufacturing unit can construct a science m
-AddSubtitleEvent( 35.00, Actor_LocationCard, "$2206932", 7.7 );
+AddSubtitleEvent( 38.16, Actor_LocationCard, "$2206932", 7.7 );
 -- 11.0s: Excuse me Kiith-Sa, but would it not be easier to seek help from another Kiith? We are sti
-AddSubtitleEvent( 43.00, Actor_LocationCard, "$2206933", 11.0 );
+AddSubtitleEvent( 46.06, Actor_LocationCard, "$2206933", 11.0 );
 -- 12.0s: NO! A find like this could lead to alien technology that surpasses anything used by the ot
-AddSubtitleEvent( 50.00, Actor_LocationCard, "$2206934", 12.0 );
+AddSubtitleEvent( 57.04, Actor_LocationCard, "$2206934", 12.0 );
 -- 23.3s: We have a science vessel, the CLEE-SAN, studying stellar phenomena in the Coruc-tel system
 AddSubtitleEvent( 71.15, Actor_LocationCard, "$2206935", 23.3 );
 -- 5.0s: Yes, Kiith-Sa. Very Clear. KUUN-LAN out.
-AddSubtitleEvent( 85.15, Actor_LocationCard, "$2206936", 5.0 );
+AddSubtitleEvent( 94.25, Actor_LocationCard, "$2206936", 5.0 );

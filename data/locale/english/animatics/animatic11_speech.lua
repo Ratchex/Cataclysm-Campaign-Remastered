@@ -8,6 +8,6 @@ AddLocalizedText( "locale:leveldata/campaign/cataclysm/speech.dat" );
 -- 24.5s: Situation Report 10.5- The Siege Cannon failed to harm the Beast. Analysis of combat recor
 AddSubtitleEvent( 1.00, Actor_LocationCard, "$2207172", 24.5 );
 -- 26.0s: It is the opinion of the Ship's Engineer that the Beast's cells have mutated and adapted s
-AddSubtitleEvent( 15.00, Actor_LocationCard, "$2207173", 26.0 );
+AddSubtitleEvent( 25.16, Actor_LocationCard, "$2207173", 26.0 );
 -- 15.1s: According to our records, our Somtaaw sistership, the FAAL-CORUM, is in the sector on a su
-AddSubtitleEvent( 30.00, Actor_LocationCard, "$2207174", 15.1 );
+AddSubtitleEvent( 51.14, Actor_LocationCard, "$2207174", 15.1 );

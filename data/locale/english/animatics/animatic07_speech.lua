@@ -8,7 +8,7 @@ AddLocalizedText( "locale:leveldata/campaign/cataclysm/speech.dat" );
 -- 25.8s: We have finally been able to translate the data we downloaded from the alien pod. It was l
 AddSubtitleEvent( 1.00, Actor_LocationCard, "$2207006", 25.8 );
 -- 12.0s: We are not clear on this next section, but the visual data seems to be showing that the al
-AddSubtitleEvent( 22.00, Actor_LocationCard, "$2207007", 12.0 );
+AddSubtitleEvent( 26.24, Actor_LocationCard, "$2207007", 12.0 );
 -- 19.1s: The alien explorers realized almost immediately the nature of the creature and its potenti
 AddSubtitleEvent( 42.00, Actor_LocationCard, "$2207008", 19.1 );
 -- 18.7s: Unfortunately for us, the sacrifice of the alien explorers was undermined by their own ski

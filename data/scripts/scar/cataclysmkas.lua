@@ -1220,7 +1220,7 @@ function K_4907e0(h) return KAS_HashLabel(h) or "" end                          
 function K_490a60(h) return KAS_HashLabel(h) or "" end                                             -- kasPathPtrNoErrorChecking
 function K_490aa0(h) return KAS_HashLabel(h) or "" end                                             -- kasPathPtr
 function K_490af0(h) return KAS_HashLabel(h) or "" end                                             -- kasVolumePtr
-function K_490b30(h) return KAS_Vector(KAS_HashLabel(h) or "") end                                 -- kasVectorPtr
+function K_490b30(h) return KAS_Vector(KAS_VecKey(h)) end                                           -- kasVectorPtr
 function K_490b70(h) return KAS_GS(KAS_HashLabel(h) or format("gs_%08x", h)) end                   -- kasGetGrowSelectionPtrIfExists
 function K_490bb0(h) return KAS_GS(KAS_HashLabel(h) or format("gs_%08x", h)) end                   -- kasGrowSelectionPtr
 function K_4908c0(h) return KAS_TeamVector(KAS_HashLabel(h) or "") end                             -- kasTeamsVectorPtr
@@ -1506,7 +1506,12 @@ function KAS_PatrolTick()
     end
 end
 function K_492b20() return floor(KAS_TeamHealth(KAS_Team)) end                                      -- kasfTeamHealthAverage
-function K_493aa0(pct) SobGroup_SetHealth(KAS_Team, pct / 100) end                                  -- kasfTeamSetPercentDamaged
+function K_493aa0(pct)                                                                              -- kasfTeamSetPercentDamaged
+    SobGroup_SetHealth(KAS_Team, pct / 100)
+    -- (diagnostic: Mission01's crippled heavy cruiser stops firing, user; its guns are hardpoint subsystems)
+    print("CKAS: " .. KAS_Team .. " health " .. pct .. "%, Weapon_Gun0 " .. SobGroup_GetHardPointHealth(KAS_Team, "Weapon_Gun0")
+          .. ", Weapon_Ion1 " .. SobGroup_GetHardPointHealth(KAS_Team, "Weapon_Ion1"))
+end
 function K_493cf0(team, sel) SobGroup_SobGroupAdd(team, sel) end                                    -- kasfReinforceTeamWithShips
 
 -- kasfTeamCountOriginal: the team's ship count at its creation (Gearbox registers it then). Recorded for every team
@@ -1534,7 +1539,7 @@ end
 -- ------------------------------------------------------------------ orders
 function K_4941a0(vec)                                                                              -- kasfMoveTo
     KAS_EndPatrol()
-    if SobGroup_Count(KAS_Team) > 0 then SobGroup_MoveToPoint(KAS_Owner(KAS_Team), KAS_Team, vec) end
+    if SobGroup_Count(KAS_Team) > 0 then SobGroup_MoveToPoint(KAS_Owner(KAS_Team), KAS_Team, KAS_Pos(vec)) end
 end
 function K_494750(host) SobGroup_DockSobGroupInstant(KAS_Team, host) end                            -- kasfDockInstant
 -- kasfTeamFinishedLaunching: KASUtil's flag (set by the launch order, cleared as each ship leaves its hangar) never
@@ -1662,7 +1667,7 @@ end
 function K_495a50(n, o, vec, dist)                                                                  -- kasfShipsSelectNearby
     local src = KAS_SelSrc(n, o)
     SobGroup_Clear(n)
-    SobGroup_FillProximityPoint(n, src, vec, KAS_Dist(dist))
+    SobGroup_FillProximityPoint(n, src, KAS_Pos(vec), KAS_Dist(dist))
     return SobGroup_Count(n)
 end
 
@@ -1975,4 +1980,257 @@ function KAS_KuunLan(sobGroupName, playerIndex)
         end
         i = i + 1
     end
+end
+
+-- ================================================================== Mission02 API (decompiled: Cataclysm-decomp/out/m02_stubs.c)
+-- Vectors. kasVectorPtr gives a name (the translator's label, else "vec_<hash>": KAS_VecKey); the vectors a mission
+-- sets live in KAS_Vec (HWRM coordinates, mission2level.py pos()), any other name is a level point. Engine calls take
+-- KAS_Pos(name), a position. HW1 keeps computed vectors inside the universe (+-smUniverseSize per axis: KAS_Universe
+-- from the mission's _paths.lua).
+KAS_Vec = {}
+function KAS_VecKey(h) return KAS_HashLabel(h) or format("vec_%08x", h) end
+function KAS_Pos(v)
+    if type(v) == "table" then return v end
+    local p = KAS_Vec[v]
+    if p then return { p[1], p[2], p[3] } end
+    return Volume_GetPosition(v)
+end
+function KAS_SetVec(name, p)
+    if KAS_Universe then
+        local i = 1
+        while i <= 3 do
+            if p[i] > KAS_Universe[i] then p[i] = KAS_Universe[i] elseif p[i] < -KAS_Universe[i] then p[i] = -KAS_Universe[i] end
+            i = i + 1
+        end
+    end
+    KAS_Vec[name] = p
+end
+-- a random direction: three uniform components normalised (cataclysm.exe FUN_00419ed0)
+function KAS_RandomDir()
+    local x, y, z, l = 0, 0, 0, 0
+    while l < 0.0001 do
+        x, y, z = RandomRange(-1, 1), RandomRange(-1, 1), RandomRange(-1, 1)
+        l = sqrt(x * x + y * y + z * z)
+    end
+    return { x / l, y / l, z / l }
+end
+-- kasfVectorSet(name, x, y, z) (0x498dd0), HW1 coordinates
+function K_498dd0(h, x, y, z)
+    KAS_Vec[KAS_VecKey(h)] = { -KAS_WorldScale * x, KAS_WorldScale * z, KAS_WorldScale * y }
+end
+-- 0x4991d0(dst, src, dist): dst = src + a random direction x dist (Mission02's patrols pick waypoints so)
+function K_4991d0(dst, src, dist)
+    local p, d, r = KAS_Pos(src), KAS_RandomDir(), KAS_Dist(dist)
+    KAS_SetVec(dst, { p[1] + d[1] * r, p[2] + d[2] * r, p[3] + d[3] * r })
+end
+-- 0x498f30(dst, a, b, n, total): dst = a + (b - a) x n / total
+function K_498f30(dst, a, b, n, total)
+    local p, q, f = KAS_Pos(a), KAS_Pos(b), n / total
+    KAS_SetVec(dst, { p[1] + (q[1] - p[1]) * f, p[2] + (q[2] - p[2]) * f, p[3] + (q[3] - p[3]) * f })
+end
+
+-- formations (0x4927b0 / 4927e0 / 492840 / 492870 set the team's formation 1 / 2 / 4 / 5); Gearbox's KAS_SetFormation
+-- names them (Delta3D -> "x", its approximation)
+function K_4927b0() KAS_Form("Broad") end                                                            -- kasfFormationBroad
+function K_4927e0() KAS_Form("Delta3D") end                                                          -- kasfFormationDelta3D
+function K_492840() KAS_Form("Wall") end                                                             -- kasfFormationWall
+function K_492870() KAS_Form("Sphere") end                                                           -- kasfFormationSphere
+
+-- kasfIntercept(targets): the team flies to the first target (0x4924e0: a move order on it, not an attack; Mission02's
+-- decoy intercepts the allied destroyer)
+function K_4924e0(sel)
+    KAS_EndPatrol()
+    if SobGroup_Count(KAS_Team) > 0 and SobGroup_Count(sel) > 0 then
+        SobGroup_MoveToPoint(KAS_Owner(KAS_Team), KAS_Team, SobGroup_GetPosition(sel))
+    end
+end
+-- kasfShipsOrderAttributes(ships): the first ship's order attributes (HW1 COMMAND_MASK_*: 1 formation, 2 protecting).
+-- Protecting = a guard order (K_492960) whose guarded ships are still alive (HW1 drops the order when they die)
+function K_492ae0(sel)
+    local a = 0
+    local g = KAS_Guards[sel]
+    if g and SobGroup_Count(g.sel) > 0 then a = a + 2 end
+    if KAS_TeamFormation[sel] then a = a + 1 end
+    return a
+end
+-- kasfTeamHealthLowest: the team's weakest ship, percent (Gearbox's KAS_TeamHealthLowest)
+function K_492b90()
+    if SobGroup_Count(KAS_Team) == 0 then return 0 end
+    return SobGroup_MinimumHealth(KAS_Team) * 100
+end
+-- 0x492d60(out): the asteroids flagged ATTRIBUTES_HeadShotVelToMothership (0x200), Mission02's "meteors" (its
+-- MeteorStorm volumes, not converted yet: none)
+function K_492d60(gs)
+    SobGroup_Clear(gs)
+    KAS_NoOp("492d60", "select meteors (MeteorStorm not converted)")
+    return 0
+end
+-- 0x493400(ships): bit 3 of the first ship's flags at +0x1cc (kasfDockStay won't dock with such a ship: taken as "not
+-- built yet"). HWRM modules are built when they exist
+function K_493400(sel) return 0 end
+-- 0x493490(bits): ORs ship attributes into the team's ships (it is no "BitClear"). Mission02 sets
+-- ATTRIBUTES_StartInHS (0x80) right before kasfTeamHyperspaceOut, which then despawns them (Gearbox's handling)
+KAS_TeamAttr = {}
+function K_493490(bits)
+    KAS_TeamAttr[KAS_Team] = bits
+    if bits ~= 128 then KAS_NoOp("493490", "team attributes " .. bits) end
+end
+-- kasfTeamHyperspaceIn(vec) / kasfTeamHyperspaceInNear(vec, dist) / kasfTeamHyperspaceOut (Gearbox's KAS_Team*)
+function K_493600(vec)
+    print("CKAS: " .. KAS_Team .. " hyperspaces in")
+    SobGroup_HyperspaceToVector(KAS_Team, KAS_Pos(vec))
+    SobGroup_SetHidden(KAS_Team, 0)
+end
+function K_493630(vec, dist)
+    local p, d, r = KAS_Pos(vec), KAS_RandomDir(), KAS_Dist(dist)
+    print("CKAS: " .. KAS_Team .. " hyperspaces in near")
+    SobGroup_HyperspaceToVector(KAS_Team, { p[1] + d[1] * r, p[2] + d[2] * r, p[3] + d[3] * r })
+    SobGroup_SetHidden(KAS_Team, 0)
+end
+function K_493800() KAS_TeamHyperspaceOut(KAS_Team) end
+-- kasfShipsSetMaxVelocity / ClearMaxVelocity (0x4938f0 / 493940): Mission02 holds the crippled destroyer at 1
+function K_4938f0(sel, v)
+    if v <= 10 then SobGroup_SetSpeed(sel, 0) else KAS_NoOp("4938f0", "max velocity " .. v) end
+end
+function K_493940(sel) SobGroup_SetSpeed(sel, 1) end
+function K_493f40() end                                                -- kasfDisableAllAIFeatures (CPU_Enable(p, 0))
+-- kasfUnderAttack(out) (0x494510: ships whose attack order targets the team) and 0x498630(ships, out): the same for
+-- any selection
+function KAS_Attackers(sel, out)
+    SobGroup_Clear(out)
+    if SobGroup_Count(sel) == 0 then return 0 end
+    SobGroup_GetAttackers(sel, out)
+    return SobGroup_Count(out)
+end
+function K_494510(out) return KAS_Attackers(KAS_Team, out) end                                     -- kasfUnderAttack
+function K_494450(team, out) return KAS_Attackers(team, out) end                            -- kasfUnderAttackElsewhere
+function K_498630(sel, out) return KAS_Attackers(sel, out) end
+-- kasfDockStay(ships): dock with the first and stay (0x494630)
+function K_494630(sel)
+    KAS_EndPatrol()
+    if SobGroup_Count(sel) > 0 then SobGroup_DockSobGroupAndStayDocked(KAS_Team, sel) end
+end
+-- selection filters through the generic one (0x494f90)
+function KAS_Intersect(n, o, keep)
+    local src = KAS_SelSrc(n, o)
+    SobGroup_CreateIfNotExist("KAS_IsectTmp")
+    SobGroup_Clear("KAS_IsectTmp")
+    SobGroup_FillSubtract("KAS_IsectTmp", src, keep)           -- the ones not kept
+    SobGroup_Clear(n)
+    SobGroup_FillSubtract(n, src, "KAS_IsectTmp")
+    return SobGroup_Count(n)
+end
+-- 0x495410(new, orig, ships): orig's ships that are in ships
+function K_495410(n, o, sel) return KAS_Intersect(n, o, sel) end
+-- 0x495180(new, orig, ships): orig's ships in the first of ships' attacker list (Mission02's pod guards: the enemies
+-- attacking the message pod)
+function K_495180(n, o, sel)
+    SobGroup_CreateIfNotExist("KAS_PodAttackers")
+    if KAS_Attackers(sel, "KAS_PodAttackers") == 0 then
+        SobGroup_Clear(n)
+        return 0
+    end
+    return KAS_Intersect(n, o, "KAS_PodAttackers")
+end
+-- 0x4954d0(new, orig): strike craft (statics +0x24 == 0: not capital; not class 9)
+function K_4954d0(n, o)
+    local src = KAS_SelSrc(n, o)
+    SobGroup_Clear(n)
+    local fam = { "Fighter", "Corvette", "Utility" }
+    SobGroup_CreateIfNotExist("KAS_FamTmp")
+    local i = 1
+    while i <= getn(fam) do
+        SobGroup_Clear("KAS_FamTmp")
+        SobGroup_FilterInclude("KAS_FamTmp", src, "DisplayFamily", fam[i])
+        SobGroup_SobGroupAdd(n, "KAS_FamTmp")
+        i = i + 1
+    end
+    return SobGroup_Count(n)
+end
+-- 0x495640(new, orig, "CLASS_x"): select by HW1 ship class (not "damaged"); HWRM display families
+KAS_ClassFamily = { CLASS_Fighter = "Fighter", CLASS_Corvette = "Corvette", CLASS_Frigate = "Frigate",
+                    CLASS_Destroyer = "Capital", CLASS_HeavyCruiser = "Capital", CLASS_Carrier = "Capital",
+                    CLASS_Mothership = "Flagship", CLASS_NonCombat = "Utility", CLASS_Resource = "Utility" }
+function K_495640(n, o, class)
+    local src = KAS_SelSrc(n, o)
+    SobGroup_Clear(n)
+    local fam = KAS_ClassFamily[class]
+    if fam == nil then
+        KAS_WarnOnce("cls" .. class, "0x495640: no family for " .. class)
+        return 0
+    end
+    SobGroup_FilterInclude(n, src, "DisplayFamily", fam)
+    return SobGroup_Count(n)
+end
+function K_496150() end                                                -- kasfBuilderRestrictNone
+-- 0x4967b0(type): a build job of that type running for the player (Mission02's Micro module hints)
+function K_4967b0(t)
+    KAS_NoOp("4967b0", "player building " .. t .. " (not tracked)")
+    return 0
+end
+-- camera: 0x496930 sets the distance, 0x496950 focuses ships (the tutorial camera; Fleet Intel's briefing views)
+function K_496930(d) KAS_NoOp("496930", "camera distance") end
+function K_496950(sel) KAS_NoOp("496950", "camera focus") end
+function K_496d40(tech) return Player_HasResearch(0, tech) end                                    -- kasfCanPlayerResearch
+-- 0x496e00(player): the player's RUs (Mission02: under 500, Fleet Intel says to harvest)
+function K_496e00(p) return Player_GetRU(p) end
+-- 0x497420(n) / 0x498250(on): game UI modes not identified (Mission02's Fleet Intel briefings)
+function K_497420(n) KAS_NoOp("497420", "UI mode " .. n) end
+function K_498250(on) KAS_NoOp("498250", "UI mode end") end
+-- 0x497850(team): removes the ships from the game outright
+function K_497850(sel) SobGroup_Despawn(sel) end
+-- 0x497f10(index, type) / 0x497f70(index, n): per-player numbered ship-type lists for a UI menu ("%d. %s",
+-- FUN_004eac30; index 2 = asteroids). Not ported.
+function K_497f10(i, t) end
+function K_497f70(i, n) end
+-- 0x497fd0(ships, type, flag) / 0x498080(ships) / 0x498270(ships): Cataclysm's disguise state (+0x760): Mission02's
+-- decoy poses as a Kushan support frigate until the ambush. Not ported yet.
+function K_497fd0(sel, t, f) KAS_NoOp("497fd0", "disguise as " .. t) end
+function K_498080(sel) KAS_NoOp("498080", "drop disguise") end
+function K_498270(sel) KAS_NoOp("498270", "disguise state reset") end
+-- 0x498cb0(type, player): how many of that type the player has
+function K_498cb0(t, p)
+    SobGroup_CreateIfNotExist("KAS_CountTmp")
+    SobGroup_Clear("KAS_CountTmp")
+    Player_FillShipsByType("KAS_CountTmp", p, KAS_HWRMType(t))
+    return SobGroup_Count("KAS_CountTmp")
+end
+-- 0x499330(targets): the team kamikazes them (Gearbox's KAS_Kamikaze)
+function K_499330(targets) if SobGroup_Count(KAS_Team) > 0 then SobGroup_Kamikaze(KAS_Team, targets) end end
+-- 0x4995e0(volume, out): derelicts in the volume (none converted yet: slipgates)
+function K_4995e0(vol, out)
+    SobGroup_Clear(out)
+    KAS_NoOp("4995e0", "derelicts in volume")
+    return 0
+end
+-- 0x4998c0: the team has no AI move left (FUN_00417260)
+function K_4998c0()
+    if SobGroup_Count(KAS_Team) == 0 then return 1 end
+    if SobGroup_GetCurrentOrder(KAS_Team) == COMMAND_Idle then return 1 end
+    return 0
+end
+-- 0x49a2d0(ships, on): SOF_Disabled (Mission02's crippled destroyer): no move, no fire
+function K_49a2d0(sel, on)
+    local a = 1 - on
+    SobGroup_AbilityActivate(sel, AB_Move, a)
+    SobGroup_AbilityActivate(sel, AB_Attack, a)
+    SobGroup_AbilityActivate(sel, AB_Hyperspace, a)
+    print("CKAS: " .. sel .. ((on == 1 and " disabled") or " enabled"))
+end
+-- 0x49a460(ships): remembers the first ship in a UI global (DAT_00a57798)
+function K_49a460(sel) end
+-- 0x49a790(ships, out): the ships those ships guard (their protect orders, K_492960)
+function K_49a790(sel, out)
+    SobGroup_Clear(out)
+    SobGroup_CreateIfNotExist("KAS_GuardTmp")
+    for team, g in KAS_Guards do
+        if KAS_Intersect("KAS_GuardTmp", team, sel) > 0 then SobGroup_SobGroupAdd(out, g.sel) end
+    end
+    return SobGroup_Count(out)
+end
+-- 0x49ad80(out, ships): the ships docked inside them
+function K_49ad80(out, sel)
+    SobGroup_Clear(out)
+    if SobGroup_Count(sel) > 0 then SobGroup_GetSobGroupDockedWithGroup(sel, out) end
+    return SobGroup_Count(out)
 end

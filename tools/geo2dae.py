@@ -240,14 +240,29 @@ DOCK_KINDS = [  # (dock point name prefix, HWRM dock family, path flags, approac
 # flew straight through the box to reach it, and launched ships turned back through it. Cataclysm Remastered's
 # fighter / corvette paths start ~1100 units out.
 OUTER_APPROACH = {"Fighter": 2400, "Corvette": 2800}
+# Cataclysm Remastered's hangar paths instead of Cataclysm's lines (they docked; off our model's hangar, user)
+HANGAR_FROM_CR = False
 EXIT_OF = {"DBSMALLIN": "DBSMALLOUT", "DBMEDIN": "DBMEDOUT"}
 LATCH_OFFSET = 45   # collector latch waypoint off the dock point along its normal (HW1 units; ~16 HWRM)
+LATCH_DROP = 10     # and that much lower (model units; user: line the Worker up with the nose's hangar)
+
+
+# The collision box (--col-box, in the model's frame) dock waypoints may lie in: they get Clip, or the docking ship
+# stops at the box's wall (user: Acolytes stopped in front of the Kuun-Lan's hangar, whose dock points are inside
+# its one box; only the last waypoint had Clip)
+CLIP_BOXES = []
+
+
+def in_clip_box(xyz):
+    return any(all(b[k] <= xyz[k] <= b[k + 3] for k in range(3)) for b in CLIP_BOXES)
 
 
 def dock_nodes(points, conv, extra="", skip=()):
     """HOLD_DOCK with DOCK[...] paths (HODOR naming: DOCK[name]_Fam[]_Link[]_Flags[]_MAD[];
     SEG[i]_Tol[]_Spd[]_Flags[])."""
     def seg(i, xyz, tol, spd, flags, rot=None):
+        if rot is None and in_clip_box(xyz) and "Clip" not in flags.split():
+            flags = (flags + " Clip").strip()
         if rot is None:
             return jnode(f"SEG[{i}]_Tol[{tol}]_Spd[{spd}]_Flags[{flags}]", xyz)
         name = f"SEG[{i}]_Tol[{tol}]_Spd[{spd}]_Flags[{('UseRot ' + flags).strip()}]"
@@ -311,12 +326,14 @@ def dock_nodes(points, conv, extra="", skip=()):
                 entry = (seg(0, along(pos, nrm, far), 50, 0, "Check Queue", rot) + seg(1, along(pos, nrm, near), 50, 0, "", rot)
                          + seg(2, along(pos, nrm, LATCH_OFFSET), 50, 0, "", rot))
             else:
-                outer = OUTER_APPROACH.get(fam)
-                pre = [(along(pos, nrm, outer), 60, 250)] if outer else []
-                way = pre + [(along(pos, nrm, far), 25, 200), (along(pos, nrm, near), 25, 120)]
-                entry = "".join(seg(i, p, tol, spd, "Player Queue" if i == 0 else "Player")
-                                for i, (p, tol, spd) in enumerate(way))
-                entry += seg(len(way), conv(*pos), 25, 50, "Clip ClearRes")
+                # Cataclysm's own line (its dock point and normal); the flags as Cataclysm Remastered's hangar paths,
+                # which dock in HWRM (ours, Player Queue / Player / Clip ClearRes, left ships queued outside, user):
+                # queue, then player control off at the same point, Unfocus inwards, Close + Clip into the bay
+                outer = OUTER_APPROACH.get(fam) or far
+                way = [(along(pos, nrm, outer), "Queue"), (along(pos, nrm, outer), "Player"),
+                       (along(pos, nrm, far), "Unfocus"), (along(pos, nrm, near), "Unfocus Close Clip"),
+                       (conv(*pos), "Unfocus Close Clip")]
+                entry = "".join(seg(i, p, 50, 0, f) for i, (p, f) in enumerate(way))
             # Stock HW1 Kushan paths (kus_mothership.hod): MAD 0 (an invalid -1 crashed the level load), empty links,
             # Exit on the way out, Latch on both ways for collectors.
             paths.append(jnode(f"DOCK[{name}]_Fam[{fam}]_Link[]_Flags[{flags}]_MAD[0]", (0, 0, 0), entry))
@@ -325,10 +342,12 @@ def dock_nodes(points, conv, extra="", skip=()):
                 exitp = (seg(0, along(epos, enrm, LATCH_OFFSET), 50, 0, "", rot) + seg(1, along(epos, enrm, near), 50, 0, "Close", rot)
                          + seg(2, along(epos, enrm, far), 50, 0, "", rot))
             else:
-                exitp = (seg(0, conv(*epos), 25, 50, "") + seg(1, along(epos, enrm, near), 25, 150, "")
-                         + seg(2, along(epos, enrm, far), 50, 200, ""))
+                # Close on the way out, as Cataclysm Remastered's exit paths (and our collectors'): without it the
+                # path stayed taken after a launch (user: ACVs docked once, then queued outside the hangar for good)
+                exitp = (seg(0, conv(*epos), 25, 50, "Close") + seg(1, along(epos, enrm, near), 25, 150, "Close")
+                         + seg(2, along(epos, enrm, far), 50, 200, "Close"))
                 if OUTER_APPROACH.get(fam):    # leave all the way out before turning (see OUTER_APPROACH)
-                    exitp += seg(3, along(epos, enrm, OUTER_APPROACH[fam]), 60, 250, "")
+                    exitp += seg(3, along(epos, enrm, OUTER_APPROACH[fam]), 60, 250, "Close")
             paths.append(jnode(f"DOCK[{ex_name}]_Fam[{fam}]_Link[]_Flags[{(flags + ' Exit').strip()}]_MAD[0]",
                                (0, 0, 0), exitp))
     if not paths and not extra:
@@ -369,12 +388,35 @@ def read_hod_docks(path):
     return out
 
 
-def borrowed_dock_nodes(path, scale, family, anchors=()):
+def enter_like_exit(d, docks):
+    """A way-in path rebuilt along the family's way out, reversed (user: CR's hangar approach came in through our
+    Kuun-Lan's docking-bay module, its exit looked right): queue and take control far out on the exit's line, then
+    its waypoints back in, all at the way-in end's height, onto the way-in end. The source's flags by position (Queue,
+    Player, Unfocus, Close+Clip into the bay); no waypoint rotations (the source's face its own approach)."""
+    name, ex, latch, fam, segs = d
+    out = next((x[4] for x in docks if x[1] and x[4]), None)
+    if not out or len(out) < 2 or not segs:
+        return d
+    end = segs[-1]
+    z = end[2]
+    pts = [tuple(p[0:2]) for p in out]
+    far = tuple(pts[-1][k] + (pts[-1][k] - pts[0][k]) for k in range(2))
+    route = [far, far] + pts[::-1][:-1]
+    new = []
+    for i, (x, y) in enumerate(route):
+        src = segs[min(i, len(segs) - 2)]
+        new.append((x, y, z, 0.0, 0.0, 0.0, 0) + tuple(src[7:]))
+    new.append(tuple(end[0:3]) + (0.0, 0.0, 0.0, 0) + tuple(end[7:]))
+    return (name, ex, latch, fam, new)
+
+
+def borrowed_dock_nodes(path, scale, family, anchors=(), exact=False, onto=()):
     """Dock paths copied from another model (positions scaled), those whose families include `family`:
     SEG[i]_Tol[]_Spd[]_Flags[] joints rotated as the source waypoints (Z*Y*X, as HODOR stores them).
     With anchors (latch points on this model), each latching path moves whole so its latch point lands on an
     anchor (in and out paths share the point, so a pair moves together; anchors assigned for the least travel)."""
-    docks = [d for d in read_hod_docks(path) if family.lower() in d[3].lower()]
+    docks = [d for d in read_hod_docks(path) if (family.lower() == d[3].strip().lower() if exact
+                                                 else family.lower() in d[3].lower())]
     shift = {}
     if anchors:
         keys = sorted({tuple(round(c * scale, 3) for c in (segs[-1] if not ex else segs[0])[0:3])
@@ -383,16 +425,26 @@ def borrowed_dock_nodes(path, scale, family, anchors=()):
         best = min(itertools.permutations(range(len(anchors)), len(keys)),
                    key=lambda perm: sum(dist(keys[i], anchors[j]) for i, j in enumerate(perm)))
         shift = {k: tuple(anchors[j][c] - k[c] for c in range(3)) for k, j in zip(keys, best)}
+    if onto:
+        docks = [enter_like_exit(d, docks) if not d[1] else d for d in docks]
+    move = (0, 0, 0)
+    if onto:        # every path of the family moved by one offset: the way-in end onto the nearest of these points
+        end = next((tuple(c * scale for c in segs[-1][0:3]) for _, ex, _, _, segs in docks if not ex and segs), None)
+        if end:
+            near = min(onto, key=lambda q: sum((q[k] - end[k]) ** 2 for k in range(3)))
+            move = tuple(near[k] - end[k] for k in range(3))
     nodes = []
     for name, ex, latch, fam, segs in docks:
         key = tuple(round(c * scale, 3) for c in (segs[-1] if not ex else segs[0])[0:3]) if segs else None
-        dx = shift.get(key, (0, 0, 0)) if latch else (0, 0, 0)
+        dx = shift.get(key, (0, 0, 0)) if latch else move
         kids = ""
         for i, v in enumerate(segs):
             pos, rot, use_rot, tol, unfocus, spd = v[0:3], v[3:6], v[6], v[7], v[8], v[9]
             pos = tuple(pos[c] + dx[c] / scale for c in range(3))
             flags = (["UseRot"] if use_rot else []) + (["Unfocus"] if unfocus else []) + \
                 [f for f, on in zip(SEG_FLAGS, v[10:]) if on]
+            if "Clip" not in flags and in_clip_box([pos[c] * scale for c in range(3)]):
+                flags.append("Clip")              # inside this model's collision box (CLIP_BOXES)
             sname = f"SEG[{i}]_Tol[{tol:g}]_Spd[{spd:g}]_Flags[{' '.join(flags)}]"
             kids += (f'<node name="{sname}" id="{name}_{sname}" sid="{name}_{i}E">'
                      f'<translate sid="translate">{fl([c * scale for c in pos])}</translate>'
@@ -804,8 +856,22 @@ def main():
     # collector paths borrowed from another model, moved onto our Cataclysm RES points (LATCH_OFFSET off the hull)
     anchors = [conv(*(pos[k] + nrm[k] * LATCH_OFFSET for k in range(3)))
                for typ, lbl, pos, nrm, _ in points if typ == "Dok" and re.match(r"RES\d+$", lbl)]
+    anchors = [(x, y - LATCH_DROP, z) for x, y, z in anchors]
+    CLIP_BOXES[:] = [[float(t) for t in spec.split(",")] for spec in (a.col_box or []) if spec]
     extra, nextra = borrowed_dock_nodes(a.dock_from, a.dock_scale, "Utility", anchors) if a.dock_from else ("", 0)
-    hold_dock, ndock = dock_nodes(points, conv, extra, ("RES",) if a.dock_from else ())
+    skip = ("RES",) if a.dock_from else ()
+    if a.dock_from and HANGAR_FROM_CR:
+        # the hangar paths too, as they are (user: our own, built on Cataclysm's DBSMALL / DBMED points, never let
+        # Acolytes in, nor ACVs a second time; Cataclysm Remastered's dock on this model as the collectors' did)
+        # each moved whole so its dock end lands on our nearest Cataclysm hangar point (user: CR's Kuun-Lan differs,
+        # the copied paths were slightly off)
+        hangar = {"Fighter": "DBSMALLIN", "Corvette": "DBMEDIN"}
+        for fam in ("Fighter", "Corvette"):
+            ours = [conv(*pos) for typ, lbl, pos, nrm, _ in points if typ == "Dok" and lbl.startswith(hangar[fam])]
+            x, n = borrowed_dock_nodes(a.dock_from, a.dock_scale, fam, exact=True, onto=ours)
+            extra, nextra = extra + x, nextra + n
+        skip = ("RES", "DBSMALLIN", "DBMEDIN")
+    hold_dock, ndock = dock_nodes(points, conv, extra, skip)
     ndock += nextra
     # Engine nozzles from the .mex Eng chunks: JNT[EngineNozzle<n>] (setEngineTrail index n-1 / setEngineBurn).
     # Each nozzle as in HODOR's engine layout (toolkit demo ship): BURN[EngineBurn<n>] with five flame divisions

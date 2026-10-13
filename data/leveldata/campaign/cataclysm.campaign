@@ -33,21 +33,22 @@ Mission[1] =
     description = "Cataclysm Mission01 running on translated mission code.",
 }
 
--- Cataclysm Mission02 (not ported yet; uncomment with its level). Loads persist2.lua, Mission 1's fleet.
--- Mission[2] =
--- {
---     postload    = function () playAnimatic("data:animatics/animatic02.lua", 0, 0) end,
---     directory   = "m02",
---     level       = "m02.level",
---     postlevel   = function ( bWin ) postLevelComplete() end,
---
---     displayName = "Mission 2 (translated)",
---     description = "Cataclysm Mission02 running on translated mission code.",
--- }
+-- Cataclysm Mission02, translated from cataclysm.exe. Loads persist2.lua, Mission 1's fleet (else m02's
+-- StartingPlayerFleet.lua).
+Mission[2] =
+{
+    postload    = function () playAnimatic("data:animatics/animatic02.lua", 0, 0) end,
+    directory   = "m02",
+    level       = "m02.level",
+    postlevel   = function ( bWin ) postLevelComplete() end,
+
+    displayName = "Mission 2 (translated)",
+    description = "Cataclysm Mission02 running on translated mission code.",
+}
 
 -- Unit test range: Somtaaw ships and systems away from the missions (range/range.lua has its switches).
 -- Keep it last (after the highest ported mission) so it never sits between two missions' carry-over.
-Mission[2] =
+Mission[3] =
 {
     directory   = "range",
     level       = "range.level",

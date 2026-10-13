@@ -16,10 +16,10 @@ AddSubtitleEvent( 20.00, Actor_LocationCard, "$2206893", 2.8 );
 -- 4.6s: Good work with that Kaalel frigate, workers 5 and 7. I'm sure they'll forget to thank us l
 AddSubtitleEvent( 27.00, Actor_LocationCard, "$2206894", 4.6 );
 -- 1.1s: You got that right.
-AddSubtitleEvent( 30.00, Actor_LocationCard, "$2206895", 1.1 );
+AddSubtitleEvent( 31.19, Actor_LocationCard, "$2206895", 1.1 );
 -- 4.3s: Worker 12. Did you track down those suit beacons we picked up in sector 43?
 AddSubtitleEvent( 34.00, Actor_LocationCard, "$2206896", 4.3 );
 -- 5.5s: Sorry Command. We found the suits, but the poor dogs didn't have a chance to get their hel
-AddSubtitleEvent( 38.00, Actor_LocationCard, "$2206897", 5.5 );
+AddSubtitleEvent( 38.09, Actor_LocationCard, "$2206897", 5.5 );
 -- 19.1s: Attention Hiigaran Ships! We have thrown back the Imperial attack fleet. Hiigara should be
 AddSubtitleEvent( 47.00, Actor_LocationCard, "$2206898", 19.1 );

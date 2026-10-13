@@ -10,6 +10,6 @@ AddSubtitleEvent( 1.00, Actor_LocationCard, "$2207270", 9.7 );
 -- 26.6s: The Imperialist had information on a large Republican Naval shipyard at the edge of this s
 AddSubtitleEvent( 12.00, Actor_LocationCard, "$2207271", 26.6 );
 -- 27.4s: After analyzing the sample of Beast material we obtained from the NAGGAROK, we have adapte
-AddSubtitleEvent( 29.00, Actor_LocationCard, "$2207272", 27.4 );
+AddSubtitleEvent( 38.18, Actor_LocationCard, "$2207272", 27.4 );
 -- 23.8s: Our engineers have found many systems in the gun are derived from basic Bentusi technology
-AddSubtitleEvent( 44.00, Actor_LocationCard, "$2207273", 23.8 );
+AddSubtitleEvent( 66.01, Actor_LocationCard, "$2207273", 23.8 );

@@ -12,4 +12,4 @@ AddSubtitleEvent( 9.00, Actor_LocationCard, "$2206989", 15.0 );
 -- 8.8s: And then what? What do we do about this plague we've set loose? Do we have any idea of the
 AddSubtitleEvent( 25.00, Actor_LocationCard, "$2206990", 8.8 );
 -- 19.4s: Unknown. The fact it sent a fleet to infect the most powerful ship in the sector means tha
-AddSubtitleEvent( 33.00, Actor_LocationCard, "$2206991", 19.4 );
+AddSubtitleEvent( 33.24, Actor_LocationCard, "$2206991", 19.4 );

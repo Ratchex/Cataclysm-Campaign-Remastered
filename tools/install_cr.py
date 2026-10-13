@@ -384,17 +384,40 @@ def cataclysm_costs():
 # SpawnDustCloudOnDeath's held RU weight), but with type DustCloud_0, selectionPriority 0 and no blobRadius: it
 # could not be clicked, so not harvested (user). HW1's dust cloud 0 (stock Homeworld2 DustCloud0_hw1: priority 35,
 # blob 100, HW1's soft dots) is the one Cataclysm drops.
-CARGO_CLOUD_TYPE = "DustCloud0_hw1"
+CARGO_CLOUD_TYPE = "cat_cargocloud"
+# DustCloud0_hw1 is harvestable (resourceValue) but a soft dot past 7000 (user: invisible); DustCloud_0 is drawn as a
+# mesh to 25000 but worth nothing. Ours: DustCloud0_hw1's model and resource fields, DustCloud_0's drawing.
+CLOUD_SRC = r"C:\Modding\Cataclysm-decomp\reference\hwrm\Homeworld2\resource\dustcloud"
+
+
+def make_cargo_cloud():
+    out = os.path.join(DATA, "resource", "dustcloud", CARGO_CLOUD_TYPE)
+    os.makedirs(out, exist_ok=True)
+    # DustCloud0_hw1's model: DustCloud_0's mesh plus the Latch1 joints a Worker harvests at (without them: not
+    # harvestable, user)
+    shutil.copyfile(os.path.join(CLOUD_SRC, "dustcloud0_hw1", "dustcloud0_hw1.hod"),
+                    os.path.join(out, CARGO_CLOUD_TYPE + ".hod"))
+    text = open(os.path.join(CLOUD_SRC, "dustcloud_0", "dustcloud_0.resource"), encoding="latin-1").read().rstrip()
+    extra = [l for l in open(os.path.join(CLOUD_SRC, "dustcloud0_hw1", "dustcloud0_hw1.resource"), encoding="latin-1")
+             if re.match(r"NewResourceType\.(resourceValue|blobRadius)\s*=", l)]
+    text += "\n-- Cataclysm-HWRM: resourcers' cargo (install_cr.py make_cargo_cloud): DustCloud0_hw1's resource fields\n"
+    open(os.path.join(out, CARGO_CLOUD_TYPE + ".resource"), "w", encoding="latin-1", newline="\n").write(
+        text + "".join(extra))
+    # and a .dustcloud like DustCloud_0's, which has one (user: HWRM's look, not the HW1 cloud's)
+    dc = open(os.path.join(CLOUD_SRC, "dustcloud_0", "dustcloud_0.dustcloud"), encoding="latin-1").read().rstrip()
+    open(os.path.join(out, CARGO_CLOUD_TYPE + ".dustcloud"), "w", encoding="latin-1", newline="\n").write(
+        dc + "\n-- Cataclysm-HWRM: resourcers' cargo (install_cr.py make_cargo_cloud)\n" + "".join(extra))
 
 
 def patch_cargo_clouds():
+    make_cargo_cloud()
     done = []
     for ship in sorted(os.listdir(os.path.join(DATA, "ship"))):
         path = os.path.join(DATA, "ship", ship, ship + ".ship")
         if not os.path.exists(path):
             continue
         text = open(path, encoding="latin-1").read()
-        new = re.sub(r'^([ \t]*SpawnDustCloudOnDeath\(NewShipType,\s*)"DustCloud_0"', rf'\1"{CARGO_CLOUD_TYPE}"', text,
+        new = re.sub(r'^([ \t]*SpawnDustCloudOnDeath\(NewShipType,\s*)"(?:DustCloud_0|DustCloud0_hw1)"', rf'\1"{CARGO_CLOUD_TYPE}"', text,
                      flags=re.M)
         if new != text:
             open(path, "w", encoding="latin-1", newline="").write(new)

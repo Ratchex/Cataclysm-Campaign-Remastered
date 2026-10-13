@@ -12,8 +12,8 @@ AddSubtitleEvent( 9.00, Actor_LocationCard, "$2207191", 2.9 );
 -- 13.8s: It's been a million years since the beacon was launched. Galactic drift has made it imposs
 AddSubtitleEvent( 12.00, Actor_LocationCard, "$2207192", 13.8 );
 -- 4.3s: There is a Turanic Raider base in this sector. They would have they necessary data.
-AddSubtitleEvent( 25.00, Actor_LocationCard, "$2207193", 4.3 );
+AddSubtitleEvent( 25.23, Actor_LocationCard, "$2207193", 4.3 );
 -- 2.6s: And do we simply ask them for the information?
-AddSubtitleEvent( 30.00, Actor_LocationCard, "$2207194", 2.6 );
+AddSubtitleEvent( 30.01, Actor_LocationCard, "$2207194", 2.6 );
 -- 1.8s: We may have no other choice.
 AddSubtitleEvent( 34.00, Actor_LocationCard, "$2207195", 1.8 );

@@ -70,6 +70,10 @@ CatClass = {
     ["tai_resourcecollector"] = 7,
     ["tai_salvagecorvette"] = 5,
     ["tai_supportfrigate"] = 4,
+    ["tur_fighter"] = 6,
+    ["tur_ionarrayfrigate"] = 4,
+    ["tur_missilecorvette"] = 5,
+    ["tur_standardcorvette"] = 5,
 }
 CatName = {
     ["bst_acolyte"] = "Acolyte",
@@ -135,6 +139,10 @@ CatName = {
     ["tai_resourcecollector"] = "Resource Collector",
     ["tai_salvagecorvette"] = "Salvage Corvette",
     ["tai_supportfrigate"] = "Support Frigate",
+    ["tur_fighter"] = "Fighter",
+    ["tur_ionarrayfrigate"] = "Ion Array Frigate",
+    ["tur_missilecorvette"] = "Missile Corvette",
+    ["tur_standardcorvette"] = "Standard Corvette",
 }
 
 function CatCmd_volley_Start(g, p, id) CatAbility_Run("volley", g, p, id) end
@@ -878,5 +886,45 @@ function CatUpdate_tai_supportfrigate(g, p, id)
 end
 function CatDestroy_tai_supportfrigate(g, p, id)
     if Destroy_Tai_SupportFrigate then Destroy_Tai_SupportFrigate(g, p, id) end
+    CatShip_Destroy(g, p, id)
+end
+
+function CatCreate_tur_fighter(g, p, id)
+    CatShip_Create(g, p, id, "tur_fighter")
+end
+function CatUpdate_tur_fighter(g, p, id)
+    CatShip_Update(g, p, id)
+end
+function CatDestroy_tur_fighter(g, p, id)
+    CatShip_Destroy(g, p, id)
+end
+
+function CatCreate_tur_ionarrayfrigate(g, p, id)
+    CatShip_Create(g, p, id, "tur_ionarrayfrigate")
+end
+function CatUpdate_tur_ionarrayfrigate(g, p, id)
+    CatShip_Update(g, p, id)
+end
+function CatDestroy_tur_ionarrayfrigate(g, p, id)
+    CatShip_Destroy(g, p, id)
+end
+
+function CatCreate_tur_missilecorvette(g, p, id)
+    CatShip_Create(g, p, id, "tur_missilecorvette")
+end
+function CatUpdate_tur_missilecorvette(g, p, id)
+    CatShip_Update(g, p, id)
+end
+function CatDestroy_tur_missilecorvette(g, p, id)
+    CatShip_Destroy(g, p, id)
+end
+
+function CatCreate_tur_standardcorvette(g, p, id)
+    CatShip_Create(g, p, id, "tur_standardcorvette")
+end
+function CatUpdate_tur_standardcorvette(g, p, id)
+    CatShip_Update(g, p, id)
+end
+function CatDestroy_tur_standardcorvette(g, p, id)
     CatShip_Destroy(g, p, id)
 end

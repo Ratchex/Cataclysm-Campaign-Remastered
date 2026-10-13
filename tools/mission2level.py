@@ -165,12 +165,29 @@ class Level:
             pass  # handled by the caller (it names a .missphere file)
         elif kind == "Resources" and len(f) >= 9 and f[0].lower() == "asteroid" and f[4].lower() == "sphere":
             self.add_asteroids(f)
+        elif kind == "Resources" and len(f) >= 11 and f[0].lower() == "asteroid" and f[4].lower() == "cylinder":
+            self.add_asteroids(f, self.cylinder_point(f))
         else:
             self.unconverted[kind] += 1
 
-    def add_asteroids(self, f):
+    @staticmethod
+    def cylinder_point(f):
+        """HW1 LevelLoad.c AddResourceToCylinder: a point in a length x diameter x diameter box along x, turned
+        roty degrees about Y, then rotz degrees about Z (HW1 matMakeRotAboutY/Z, matrix x vector)."""
+        radius, length = float(f[7]), float(f[8])
+        ry, rz = math.radians(float(f[9])), math.radians(float(f[10]))
+
+        def point(rng):
+            x, y, z = rng.uniform(-length / 2, length / 2), rng.uniform(-radius, radius), rng.uniform(-radius, radius)
+            x, z = math.cos(ry) * x + math.sin(ry) * z, -math.sin(ry) * x + math.cos(ry) * z
+            x, y = math.cos(rz) * x - math.sin(rz) * y, math.sin(rz) * x + math.cos(rz) * y
+            return x, y, z
+        return point
+
+    def add_asteroids(self, f, offset=None):
         """HW1 LevelLoad.c scriptSetResourcesCB, Sphere layout: <number> asteroids at random within <radius> of the
-        point, types weighted by the .dist file. Seeded per line, so every build places them identically."""
+        point, types weighted by the .dist file. Seeded per line, so every build places them identically.
+        offset(rng) -> (x, y, z) replaces the sphere's for other layouts (cylinder_point)."""
         centre = tuple(map(float, f[1:4]))
         n, radius = int(f[6]), float(f[7])
         weights = []
@@ -184,10 +201,13 @@ class Level:
             weights = [("Asteroid2", 1)]
         rng = random.Random(",".join(f))
         for _ in range(n):
-            while True:
-                d = [rng.uniform(-1, 1) for _ in range(3)]
-                if sum(c * c for c in d) <= 1:
-                    break
+            if offset:
+                d, radius = offset(rng), 1
+            else:
+                while True:
+                    d = [rng.uniform(-1, 1) for _ in range(3)]
+                    if sum(c * c for c in d) <= 1:
+                        break
             p = tuple(centre[i] + d[i] * radius for i in range(3))
             pick = rng.uniform(0, sum(w for _, w in weights))
             for t, w in weights:
@@ -261,7 +281,8 @@ def read_file(level, path, sphere_player, folder, seen):
             if target and target not in seen:
                 seen.add(target)
                 read_file(level, os.path.join(folder, target), int(f[0]), folder, seen)
-        elif kind in ("Ships", "AIPoint", "AISphere", "AIPath", "AIBox", "Resources", "Derelict", "Mine"):
+        elif kind in ("Ships", "AIPoint", "AISphere", "AIPath", "AIBox", "Resources", "Derelict", "Mine", "MeteorStorm",
+                      "Slipgate"):
             level.line(kind, args, sphere_player)
         elif kind.startswith("smUniverseSize"):
             level.settings[kind] = float(args)
@@ -295,6 +316,12 @@ def convert(folder, out, shipmap, placeholder, races, background=None, start_shi
         for i, t in enumerate(fleet):
             pos_i = (where[0] + 600 * i, where[1], where[2])
             level.squadrons.insert(i, (f"PlayerFleet{i}", t, pos_i, 0, rot, "stand-in player fleet"))
+    else:
+        # no fleet placed: the engine brings the previous mission's (persist<n>.lua, else the mission folder's
+        # StartingPlayerFleet.lua) to a point that must be called PlayerStartPoint (HWRM FUN_005d423b)
+        start = next((p for p in level.points if p[0].lower() == "startpointplayer"), None)
+        if start:
+            level.points.append(("PlayerStartPoint", start[1], start[2]))
     level.write(out, os.path.basename(folder))
     return level
 
@@ -335,6 +362,11 @@ if __name__ == "__main__":
             f.write(f'\t["{name}"] = {{ {coords}; closed = {closed} }},\n')
         f.write("}\n")
         # each team's Cataclysm colour scheme (cataclysmkas.lua KAS_ApplyColourSchemes; tools/make_colours.py)
+        s = lv.settings
+        if all(k in s for k in ("smUniverseSizeX", "smUniverseSizeY", "smUniverseSizeZ")):
+            # HW1 clamps KAS vectors to +-the universe size per axis (cataclysm.exe 0x4991d0); HWRM axes
+            f.write(f"KAS_Universe = {{ {fmt(SCALE * s['smUniverseSizeX'])}, {fmt(SCALE * s['smUniverseSizeZ'])}, "
+                    f"{fmt(SCALE * s['smUniverseSizeY'])} }}\n")
         f.write("KAS_TeamSchemes = {\n")
         for team, n in sorted(lv.schemes.items()):
             f.write(f'\t["{team}"] = {n},\n')

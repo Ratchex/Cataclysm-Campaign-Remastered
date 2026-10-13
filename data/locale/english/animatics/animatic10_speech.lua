@@ -10,6 +10,6 @@ AddSubtitleEvent( 1.00, Actor_LocationCard, "$2207138", 15.2 );
 -- 6.0s: While we regroup, my team has been studying the data tapes we stole from the Imperial rese
 AddSubtitleEvent( 18.00, Actor_LocationCard, "$2207139", 6.0 );
 -- 18.3s: The Imperial scientists were working on a way to take control of the Beast and turn it int
-AddSubtitleEvent( 24.00, Actor_LocationCard, "$2207140", 18.3 );
+AddSubtitleEvent( 24.01, Actor_LocationCard, "$2207140", 18.3 );
 -- 16.0s: While their twisted experiments are useless to us, some of their methods of sterilizing fa
-AddSubtitleEvent( 36.00, Actor_LocationCard, "$2207141", 16.0 );
+AddSubtitleEvent( 42.10, Actor_LocationCard, "$2207141", 16.0 );
