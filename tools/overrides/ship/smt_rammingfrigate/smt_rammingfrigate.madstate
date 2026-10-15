@@ -1,4 +1,4 @@
--- Somtaaw Ramming Frigate animation states (Cataclysm-HWRM; installed by tools/install_cr.py).
+-- Somtaaw Ramming Frigate animation states (Cataclysm-HWRM; installed by tools/install_base.py).
 -- shiprules.lua CatRam_Tick switches the state (NIS00-02: states the engine leaves alone on this ship, it has no dock
 -- paths), and this keeps the one before, so three states cover Cataclysm's sequence (srammingfrigate.mad clips, all
 -- on its nose but the collapse / recover, which move the body too):

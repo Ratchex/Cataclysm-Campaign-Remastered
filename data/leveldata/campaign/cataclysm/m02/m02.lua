@@ -16,10 +16,11 @@ dofilepath("data:leveldata/campaign/cataclysm/m02/m02_kas.lua")
 -- Kuun-Lan modules at the start (the mission's IncludeShips sMothership<Module>; tools/make_modules.py)
 KAS_StartModules = {  }
 -- research the player starts with, the Kuun-Lan's turn on arrival, the opening lock (build_mission.py START_RESEARCH,
--- ARRIVAL_YAW, OPENING_LOCK)
+-- ARRIVAL_YAW, OPENING_LOCK, ALLY_ON_SWITCH)
 KAS_StartResearch = {  }
 KAS_ArrivalYaw = 0
 KAS_OpeningLock = nil
+KAS_AllyOnSwitch = 1
 
 function OnStartOrLoad()
     print("CATACLYSM Mission02: OnStartOrLoad")

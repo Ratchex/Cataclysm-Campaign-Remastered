@@ -10,7 +10,7 @@ others). It dies to the same fire as a 40-health ship; its health bar is a perce
 Weapons: ours in data/weapon, plus the stock Homeworld 2 ones our ships use (copied in to carry the entry). A few
 the ships name are in neither (tai_ioncruiser...): against the Mimic they keep their default.
 
-install() for tools/install_cr.py (after tools/make_damage.py set the Mimic's Cataclysm health).
+install() for tools/install_base.py (after tools/make_damage.py set the Mimic's Cataclysm health).
 """
 import glob
 import os
@@ -23,8 +23,7 @@ MOD = os.path.dirname(HERE)
 DATA = os.path.join(MOD, "data")
 BIG = r"C:\Modding\Cataclysm-decomp\extracted\big"
 STOCK = r"C:\Modding\Cataclysm-decomp\reference\hwrm\Homeworld2\weapon"
-CR = r"C:\Modding\Cataclysm-decomp\reference\cr_beast"   # install_cr.py SRC
-PP = r"C:\Modding\Cataclysm-decomp\reference\players_patch"   # install_cr.py PP
+PP = r"C:\Modding\Cataclysm-decomp\reference\players_patch"   # install_base.py PP
 FAMILY = "MimicArmour"
 HWRM_PER_HEALTH = 7.5     # HWRM kamikaze damage per health point of the rammer (in game: 299, 306 from 40)
 
@@ -94,9 +93,9 @@ def patch_families(text):
 
 def install():
     health, k = factor()
-    # the stock weapons our ships use that neither Cataclysm Remastered, the Players Patch nor we provide: copied in every install (and
+    # the stock weapons our ships use that neither the Players Patch nor we provide: copied in every install (and
     # listed for data/.gitignore: game files, not ours to commit)
-    theirs = {os.path.basename(d).lower() for src in (CR, PP) for d in glob.glob(os.path.join(src, "weapon", "*"))}
+    theirs = {os.path.basename(d).lower() for src in (PP,) for d in glob.glob(os.path.join(src, "weapon", "*"))}
     tracked = set(subprocess.run(["git", "-C", MOD, "ls-files", "data/weapon"], capture_output=True, text=True)
                   .stdout.lower().split())
     ours = {p.split("/")[2] for p in tracked if p.count("/") >= 3}

@@ -1,4 +1,4 @@
--- Somtaaw Processor animation states (Cataclysm-HWRM; installed by tools/install_cr.py).
+-- Somtaaw Processor animation states (Cataclysm-HWRM; installed by tools/install_base.py).
 -- Its four repair beam cones (tools/make_procbeam.py), aimed here at what shiprules.lua CatProcessor_Tick repairs.
 -- That script can't reach this Lua state (no shared globals), only switch the state: it sends bits, each a switch
 -- to one of the two of NIS00-02 it is not in (NIS00-02: the only states the engine leaves alone on the Processor;

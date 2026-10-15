@@ -76,7 +76,7 @@ end
 -- Weapon upgrades: upgrade ability -> the engine ability that lets that ship's "Special Attack" weapons fire in
 -- normal attacks (granted to the type by research at mission start: tools/make_race.py RUNTIME_RESEARCH), switched
 -- on per ship once it has the upgrade. Cataclysm's Acolyte gets its two missile launchers (sacolyte.shp GUN2/GUN3,
--- StartUpgradeLevel WEAPON_MISSILE) with ORDINANCE (tools/install_cr.py patch_acolyte). (Tried and dropped: weapon
+-- StartUpgradeLevel WEAPON_MISSILE) with ORDINANCE (tools/install_base.py patch_acolyte). (Tried and dropped: weapon
 -- subsystems. Added by script they need a ship that can build, so every Acolyte had a build menu tab; innate ones
 -- held at 0 health still fired.)
 -- volley = 1 would let the weapons fire only for CAT_VOLLEY_WINDOW seconds after the ship's volley command (tried);
@@ -1169,7 +1169,7 @@ end
 -- RamPushTime 30 s with the cutting beam at 20 / 60 per second, let go, RamWaitAfterPushTime 10 s).
 -- Its grapple is HWRM's own salvage-capture latch (SalCapCommand; its LatchOrientation at the nose tip,
 -- tools/build_ship.sh) onto the target's salvage points (user: the points resourcers salvage from; HWRM lines up
--- far more loosely than a script could). It has no attack (no guns; install_cr.py patch_rammingfrigate): a
+-- far more loosely than a script could). It has no attack (no guns; install_base.py patch_rammingfrigate): a
 -- right-click on an enemy is the latch. Learned in game (2026-10-10): latched, its order is 22 and it sits against
 -- the target (no tow home, no capture; IsDocked / IsReturningSalvage / GetSobGroupSalvagingGroup say nothing);
 -- SobGroup_SalvageSobGroup from script did nothing; the target moved (by order or by script) carries the latched
@@ -1340,7 +1340,7 @@ function CatRam_Hurt(tg, amount)
     SobGroup_SetHealth(tg, h)
 end
 
--- Its engines are the Processor's (the Kuun-Lan's, install_cr.py kuunlan_engines); while it pushes, a scaled-up
+-- Its engines are the Processor's (the Kuun-Lan's, install_base.py kuunlan_engines); while it pushes, a scaled-up
 -- copy of the Worker's engine flames plays on its nozzles (tools/make_ramburn.py; smt_rammingfrigate.madstate NIS01 /
 -- NIS02). (SobGroup_ManualEngineGlow 0 / 1 instead: no glow in flight, no burn on the pinned frigate, user.)
 function CatRam_Tick(rec, g, id, now)
@@ -1479,7 +1479,7 @@ function CatGated_Tick(rec)
     end
 end
 
--- The ordered repair (the Worker's and Processor's RepairCommand: install_cr.py repair_order). HWRM heals only by
+-- The ordered repair (the Worker's and Processor's RepairCommand: install_base.py repair_order). HWRM heals only by
 -- latching onto the target's repair point (RepairByLatchingCommand), which flew the repairer onto the target and
 -- dragged it along (user: "jank"). Its non-latching form (4th argument 1) approaches the target, faces it (the
 -- Processor turns its side) and holds off (data/scripts/attack/*_catrepair.lua) but never heals, and keeps the
@@ -1497,7 +1497,7 @@ CAT_REPAIR_SIZE = { smt_ms_sp = 600, smt_processor = 116, smt_rammingfrigate = 5
 CAT_REPAIR_TRACE = 1        -- TEST: log the ordered repair each second
 
 function CatRepair_Tick(rec, g, id, now)
-    if rec.t ~= "smt_processor" then return end   -- the Worker: HWRM's own latching repair (install_cr.py, user)
+    if rec.t ~= "smt_processor" then return end   -- the Worker: HWRM's own latching repair (install_base.py, user)
     local dt = now - (rec.repLast or now)
     rec.repLast = now
     if not rec.up.REPAIR or SobGroup_IsDoingAbility(g, AB_Repair) ~= 1 then
@@ -1581,7 +1581,7 @@ end
 -- once it has the Repair upgrade, each of its four beams (dock points Repair0-3: two each side, straight out) holds
 -- one damaged friendly ship within the beam's range and cone and heals it at twRepairRate per second; a beam drops
 -- a ship that is healed or leaves it and looks for the nearest other. (An ordered repair: its RepairCommand,
--- install_cr.py patch_processor.)
+-- install_base.py patch_processor.)
 CAT_PROC_RANGE = 1400       -- twProcessorAutoRepairDistance 4000 (x 0.35: ship scale)
 CAT_PROC_CONE = 0.7071      -- cos(twProcessorAutoRepairConeAngle 90 / 2)
 CAT_PROC_RATE = 30          -- twRepairRate (35 for the capital classes: the Kuun-Lan here)

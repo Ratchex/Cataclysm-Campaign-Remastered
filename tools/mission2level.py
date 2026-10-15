@@ -45,6 +45,7 @@ RADIUS_SCALE, OUTER = SCALE / 2, 1.2
 # so (user: adjust for the scaling, add more) their speed is at the map's scale (they cross it in Cataclysm's time)
 # and their number Cataclysm's (x MAP_SPREAD^3, 1416 ships, ruined the frame rate; x MAP_SPREAD, 630, still
 # stuttered: user)
+DISGUISE_TEAMS, DISGUISE_TYPE = set(), "tur_standardcorvette_disguise"   # --disguise-teams
 METEOR_PLAYER, SPEED_SCALE, METEOR_COUNT_SCALE = 3, SCALE, 1
 
 
@@ -140,6 +141,8 @@ class Level:
         if shiptype.lower() == "cryotray":
             owner = 0
         htype = self.ship_type(race, shiptype, owner)
+        if label in DISGUISE_TEAMS and htype.lower() == "tur_standardcorvette":
+            htype = DISGUISE_TYPE          # (tools/make_disguise.py: the corvette with its disguises on its model)
         m = re.search(r"colorScheme\((\d+)\)", ",".join(fields[8:]))
         if m and label not in ("?", ""):
             self.schemes[label] = int(m.group(1))
@@ -408,7 +411,9 @@ if __name__ == "__main__":
     ap.add_argument("--player-start-ship")
     ap.add_argument("--player-fleet")
     ap.add_argument("--arrival-yaw", type=float, default=0.0, help="degrees the Kuun-Lan turns left on arrival")
+    ap.add_argument("--disguise-teams", default="", help="teams placed as the disguisable corvette (make_disguise.py)")
     a = ap.parse_args()
+    DISGUISE_TEAMS.update(t for t in a.disguise_teams.split(",") if t)
     ARRIVAL_YAW = a.arrival_yaw
     lv = convert(a.mission_dir, a.out, load_shipmap(a.shipmap), a.placeholder,
                  {0: a.player_race, 1: a.enemy_race, 2: a.ally_race},

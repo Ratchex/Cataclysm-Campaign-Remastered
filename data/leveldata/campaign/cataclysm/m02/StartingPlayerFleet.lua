@@ -4,7 +4,7 @@ PersistantData = {
     [1] = { name = "TECH_DRIVE_FIGHTER", progress = 1, },
   },
   TeamColours = {
-    { trailColour = { 1.000, 1.000, 1.000 }, badgeTexName = "DATA:Badges/kiith somtaaw.tga", baseColour = { 0.259, 0.424, 0.792 }, stripeColour = { 1.000, 1.000, 1.000 }, },
+    { trailColour = { 1.000, 1.000, 1.000 }, badgeTexName = "DATA:Badges/Kushan.tga", baseColour = { 0.259, 0.424, 0.792 }, stripeColour = { 1.000, 1.000, 1.000 }, },
   },
   Squadrons = {
     { tactic = 1, type = "smt_ms_sp", subsystems = { { index = 0, name = "SMT_KL_DOCKINGBAY", }, { index = 0, name = "SMT_KL_ENGINESLOWER", }, { index = 0, name = "SMT_KL_ENGINESUPPER", }, { index = 0, name = "SMT_KL_LOWERSPINE", }, { index = 0, name = "SMT_KL_ORECANARMOUR", }, }, stance = 2, name = "PlayerFleet0", teamColourHandle = 0, hotkey = 0, },

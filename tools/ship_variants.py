@@ -7,7 +7,7 @@ invisible in the hangar, the user's choice), and after the research the build li
 (new ships come upgraded). Everything else treats a variant as its base type (shiprules.lua CatVariantBase: class,
 name, abilities, upgrades, Link; cataclysmkas.lua: mission scripts selecting the base type get the variants too).
 
-install_cr.py builds each variant's data/ship folder from its base's (weapons replaced, .madstate functions
+install_base.py builds each variant's data/ship folder from its base's (weapons replaced, .madstate functions
 renamed); make_shipcode.py hooks it like any ship; make_race.py lists it to build; this writes
 data/scripts/cataclysm/variants_gen.lua for both Lua states (ship code and mission).
 """
@@ -61,7 +61,7 @@ def base_of(ship):
 
 def build(variant):
     """data/ship/<variant>/ from data/ship/<base>/ (files renamed, weapons replaced, .madstate functions renamed).
-    Returns the data/ paths written ('/' separated), for install_cr.py's manifest."""
+    Returns the data/ paths written ('/' separated), for install_base.py's manifest."""
     base, _, weapons, _ = VARIANTS[variant]
     src, dst = os.path.join(DATA, "ship", base), os.path.join(DATA, "ship", variant)
     if os.path.isdir(dst):

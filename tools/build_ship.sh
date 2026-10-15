@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Build one Cataclysm ship model into the mod: geo2dae.py (DAE + textures in build/ships/<name>/), HODOR (.hod),
-# kept in build/ships/<name>/ for tools/install_cr.py (OUR_MODELS). Run from Git Bash: HODOR spins forever when Python/PowerShell start it.
+# kept in build/ships/<name>/ for tools/install_base.py (OUR_MODELS). Run from Git Bash: HODOR spins forever when Python/PowerShell start it.
 # HARDPOINTS=Hardpoint_Research adds a subsystem hardpoint joint set at the origin; GEO2DAE_ARGS go to geo2dae.py.
 # Usage: tools/build_ship.sh <race_dir>/<cataclysm_ship> <hwrm_name> [<race_dir>/<module> ...]
 #   e.g. race_sect/smothership som_mothership race_sect/smothershipcommand ...  (modules are baked into the mesh)
@@ -13,7 +13,7 @@ GEO="$(geo "$SRC")"
 OUT="$MOD/build/ships/$NAME"
 HODOR="C:/Program Files (x86)/Steam/steamapps/common/Homeworld 347380/GBXTools/HODOR"
 # Animated ships: their Cataclysm .mad objects become joints (geo2dae --anim-joints) driven by a converted .mad
-# (tools/mad2hwrm.py -> build/ships/<name>/<name>.mad, installed by install_cr.py), plus effect marker joints.
+# (tools/mad2hwrm.py -> build/ships/<name>/<name>.mad, installed by install_base.py), plus effect marker joints.
 ANIM=""; TRIM=""; CLIPS=""; ANIM_SRC=""; PROCBEAM=""
 case "$NAME" in
   som_worker)
@@ -29,7 +29,7 @@ case "$NAME" in
     # at scale 1 (stock kus_resourcecollector's beam marker to its LatchOrientation plane), scaled 1.3 in
     # smt_worker.events. Cataclysm held 400 HW1 units (140) off, far beyond the stock cone.
     GEO2DAE_ARGS="$GEO2DAE_ARGS --latch 0,28.5,44.8"
-    # its repair beam as a heal weapon from the tip (install_cr.py repair_order: ranged, no latching)
+    # its repair beam as a heal weapon from the tip (install_base.py repair_order: ranged, no latching)
     GEO2DAE_ARGS="$GEO2DAE_ARGS --weapon Repair@$TIP@0,0,1"
     CLIPS="JackOut,JackSpin,JackClose,DockOpen,DockClose,BladesSpin"
     ;;
@@ -39,14 +39,8 @@ case "$NAME" in
     # (-90 faces -X, the REPAIR0/1 side; the cone mesh runs along +Z: make_procbeam.py write_dae)
     GEO2DAE_ARGS="$GEO2DAE_ARGS --turret Beam0@dok:REPAIR0@-90 --turret Beam1@dok:REPAIR1@-90"
     GEO2DAE_ARGS="$GEO2DAE_ARGS --turret Beam2@dok:REPAIR2@90 --turret Beam3@dok:REPAIR3@90"
-    # glow (its landing pads lit like the Kuun-Lan's: user) from Cataclysm Remastered's Processor, the old-format
-    # copy (its .hod is the compressed kind hodtex can't read); engines the Kuun-Lan's (user: same engine glow): CR's
-    # Kuun-Lan engine shape, x0.909 (CR -> ours) x 0.30 (our Processor's length / our Kuun-Lan's, 340 / 1131)
-    GEO2DAE_ARGS="$GEO2DAE_ARGS --glow-from C:/Modding/Cataclysm-decomp/reference/cr_main/ship/smt_processor/smt_processor.hod.bak"
-    GEO2DAE_ARGS="$GEO2DAE_ARGS --engines-from C:/Modding/Cataclysm-decomp/reference/cr_main/ship/smt_ms_sp/smt_ms_sp.hod --engines-scale 0.273"
-    # its landing pads (0pro20, which CR leaves unlit) are the Kuun-Lan engineering module's pad art (smo_eng_face_upr,
-    # luminance correlation 0.99): its glow
-    GEO2DAE_ARGS="$GEO2DAE_ARGS --glow-copy 0pro20=C:/Modding/Cataclysm-decomp/reference/cr_main/ship/smt_ms_sp/smt_ms_sp.hod:smo_eng_face_upr"
+    # its landing pads glow over their cyan areas (user: lit like the Kuun-Lan's); engines geo2dae's own glow quad
+    GEO2DAE_ARGS="$GEO2DAE_ARGS --glow-cyan 0pro20"
     PROCBEAM=1
     ;;
   som_mothership)
@@ -79,9 +73,7 @@ case "$NAME" in
     # put one there and two 33 ahead of the nose, user: two copies in front of the ram)
     # 12 inside the rear face (z -87.6): its glow shows as a half circle out of it (user)
     GEO2DAE_ARGS="$GEO2DAE_ARGS --engines-at 0,6,-75.6"
-    # engines the Kuun-Lan's (user): CR's Kuun-Lan engine shape, x0.909 (CR -> ours) x 0.121 (our frigate's length /
-    # our Kuun-Lan's, 137 / 1131); its burn: install_cr.py kuunlan_engines
-    GEO2DAE_ARGS="$GEO2DAE_ARGS --engines-from C:/Modding/Cataclysm-decomp/reference/cr_main/ship/smt_ms_sp/smt_ms_sp.hod --engines-scale 0.19"
+    # its burn: install_base.py kuunlan_engines
     CLIPS="RamCollapse,RamRecover,AftBurnIgnite,AftBurnFiring,CancelAftBurn"
     ;;
   som_acolyte)

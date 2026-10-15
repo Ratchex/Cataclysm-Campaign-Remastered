@@ -522,6 +522,7 @@ function KAS_NisStart(name)
         end
     end
     KAS_FadeInAt = nil                    -- black between two NIS: the new one does its own fade in
+    Sensors_EnableToggle(0)               -- no sensors manager during a cutscene (user: opened during the intro)
     NISPlayFromCoordSys(path, position, nisMatrix)
     KAS_NisCuesStart(name)
     print("CKAS: playing " .. path .. " at {" .. position[1] .. ", " .. position[2] .. ", " .. position[3] .. "}")
@@ -627,6 +628,7 @@ function KAS_EngineTick()
         if p.key then KAS_Vars[p.key] = 1 end
         print("CKAS: cutscene complete")
         if p.after then p.after() end
+        if KAS_NisPending == nil and KAS_LockedOut ~= 1 then Sensors_EnableToggle(1) end
     end
     if KAS_FadeInAt and KAS_NisPending == nil and now >= KAS_FadeInAt then
         KAS_FadeInAt = nil
@@ -768,7 +770,7 @@ end
 -- (CommandLayer.c GroupShip), as HWRM's launches do on their own: Cataclysm's layout is the Kuun-Lan's paradeData
 -- (tools/make_parade.py). Cataclysm's line is its event 104 ("auto launch set"; out/speech_text_sect.tsv), not
 -- HW1's 169 (Cataclysm's: "Swarmer is locked on", user).
-KAS_AUTOLAUNCH_EVENT = 104 + 4096         -- (KAS_SpeechPlay: 0x1000 = Fleet Command)
+KAS_AUTOLAUNCH_CODE = 67113064           -- 0x4001068: event 104, Fleet Command, 5 s (FUN_0044a640)
 function KAS_Autolaunch()
     SobGroup_SetAutoLaunch("KAS_ArrivalMS", ShipHoldLaunch)
     -- and whatever the previous mission's fleet brought docked (persistence loads it inside: Mission02's Acolytes and
@@ -779,14 +781,16 @@ function KAS_Autolaunch()
     SobGroup_SobGroupAdd("KAS_ArrivalDocked", "KAS_ArrivalAboard")
     if SobGroup_Count("KAS_ArrivalDocked") == 0 then return end
     SobGroup_Launch("KAS_ArrivalDocked", "KAS_ArrivalMS")
-    KAS_SpeechPlay(KAS_AUTOLAUNCH_EVENT, 0)
+    CatVoice_Event(KAS_AUTOLAUNCH_CODE, 0, KAS_VOICE_WAIT)
 end
 
 -- Player 2 (when the level has one) is the allied Kushan fleet. Applied at start and again on the first tick.
 function KAS_ApplyAlliances()
     local n = Universe_PlayerCount()
-    print("CKAS: " .. n .. " players; allying 0 and 2")
-    if n > 2 then
+    if n > 2 and KAS_AllyOnSwitch then
+        print("CKAS: " .. n .. " players; 0 and 2 allied when 2's team switches sides (KAS_AllyOnSwitch)")
+    elseif n > 2 then
+        print("CKAS: " .. n .. " players; allying 0 and 2")
         SetAlliance(0, 2)
         SetAlliance(2, 0)
     end
@@ -1096,6 +1100,146 @@ function KAS_VariantBuildWatch()
     end
 end
 
+-- Cataclysm's Support Units (cataclysm.exe, decompiled in Cataclysm-decomp/out/su_funcs.c): each ship uses its type's
+-- supportUnits and adds its providesSU to the player's limit (FUN_00459a90 / 00459ae0: the player's +0x10 used,
+-- +0xc limit; the Kuun-Lan 70, its Hangar 30, each Support Module 10, a Carrier 40). A ship can be queued only while
+-- used < limit and its cost fits in what is left after everything already queued (FUN_004565a0 with FUN_00459c20);
+-- the computer players in a mission don't count Support Units. Unit caps on top (unitlimitcaps.script, the types it
+-- doesn't leave to Support Units): HWRM's own, data/scripts/races/somtaaw/singleplayer/unitcaps (install_base.py).
+-- Here the engine's unit cap does the limiting (KAS_SUTick, install_base.py set_support_units); the build menu's
+-- Support Units line (finalbuild.lua lblSUCount) shows used / limit as Cataclysm's build manager did.
+-- Costs: tools/make_supportunits.py.
+dofilepath("data:scripts/cataclysm/supportunits_gen.lua")
+KAS_SUShown = nil
+-- a type's ships of the player's, and (second) its damage copies' (tools/make_variants.py), which count as the type
+function KAS_SUCount(t)
+    SobGroup_CreateIfNotExist("KAS_SUType")
+    SobGroup_Clear("KAS_SUType")
+    Player_FillShipsByType("KAS_SUType", 0, t)
+    local n, c = SobGroup_Count("KAS_SUType"), 0
+    if KAS_SUCopies == nil then
+        KAS_SUCopies = {}
+        for copy, d in CatDamageVariants do
+            if KAS_SUCopies[d[1]] == nil then KAS_SUCopies[d[1]] = {} end
+            tinsert(KAS_SUCopies[d[1]], copy)
+        end
+    end
+    local copies = KAS_SUCopies[t]
+    if copies then
+        for i = 1, getn(copies) do
+            SobGroup_Clear("KAS_SUType")
+            Player_FillShipsByType("KAS_SUType", 0, copies[i])
+            c = c + SobGroup_Count("KAS_SUType")
+        end
+    end
+    return n, c
+end
+
+-- Used SU and the limit, every second. The engine enforces the limit: every type in the Somtaaw build list takes
+-- its SU from the "SupportUnits" unit cap (CatSU_Cap), so HWRM counts queues at the click as Cataclysm did, and
+-- filler ships hold the rest of the cap: CatSU_Cap - limit, plus the SU of the player's ships the engine doesn't
+-- count (CatSU_Native: types outside the build list, the Kushan / Taiidan ships a mission hands over, damage copies)
+dofilepath("data:scripts/cataclysm/sunative_gen.lua")
+KAS_SUUsed, KAS_SULimit = 0, 0
+function KAS_SUTick()
+    if KAS_SUOff then return end
+    local limit, used, extra = 0, 0, 0
+    for t, v in CatSU_Provides do
+        local n, c = KAS_SUCount(t)
+        limit = limit + v * (n + c)
+    end
+    SobGroup_CreateIfNotExist("KAS_SUMS")
+    KAS_KuunLan("KAS_SUMS", 0)
+    if SobGroup_Count("KAS_SUMS") > 0 then
+        for hp, v in CatSU_Hardpoints do
+            if SobGroup_GetHardPointHealth("KAS_SUMS", hp) > 0 then limit = limit + v end
+        end
+    end
+    for t, v in CatSU_Cost do
+        local n, c = KAS_SUCount(t)
+        used = used + v * (n + c)
+        if CatSU_Native[t] then extra = extra + v * c else extra = extra + v * (n + c) end
+    end
+    KAS_SUUsed, KAS_SULimit = used, limit
+    local fill = CatSU_Cap - limit + extra
+    if fill < 0 then fill = 0 end
+    KAS_SUFillTo(fill)
+    KAS_SUShow(used, KAS_SUQueued(), limit)
+end
+
+-- Filler ships (Complex EVO's unit cap fillers): one to a group, far below the map, hidden and invulnerable,
+-- CatSU_Fillers' sizes largest first. In game (2026-10-14): one in the world counts against the cap, a despawned one
+-- doesn't, so freeing SU despawns one
+KAS_SUFill, KAS_SUFillTotal, KAS_SUFillSerial = {}, -1, 0
+function KAS_SUFillTo(total)
+    if total == KAS_SUFillTotal then return end
+    KAS_SUFillTotal = total
+    local rest = total
+    for i = 1, getn(CatSU_Fillers) do
+        local f = CatSU_Fillers[i]
+        local want = floor(rest / f[2])
+        rest = rest - want * f[2]
+        local list = KAS_SUFill[f[1]] or {}
+        KAS_SUFill[f[1]] = list
+        while getn(list) < want do
+            KAS_SUFillSerial = KAS_SUFillSerial + 1
+            local g = "KAS_SUFill" .. KAS_SUFillSerial
+            SobGroup_CreateIfNotExist(g)
+            SobGroup_Clear(g)
+            Volume_AddSphere(g .. "V", { mod(KAS_SUFillSerial, 20) * 400, -90000, floor(KAS_SUFillSerial / 20) * 400 }, 1)
+            SobGroup_SpawnNewShipInSobGroup(0, f[1], g, g, g .. "V")
+            if SobGroup_Count(g) == 0 then   -- (never spawn every second without end)
+                print("CKAS SU: ERROR no " .. f[1] .. " spawned; fillers stopped")
+                KAS_SUOff = 1
+                return
+            end
+            tinsert(list, g)
+            SobGroup_SetHidden(g, 1)
+            SobGroup_SetInvulnerability(g, 1)
+        end
+        while getn(list) > want do
+            SobGroup_Despawn(list[getn(list)])
+            tremove(list)
+        end
+    end
+    print("CKAS SU: fillers hold " .. total .. " of the cap " .. CatSU_Cap)
+end
+
+-- every filler out of the world (the jump out of the mission: none may be carried over), and no more
+function KAS_SUFillersClear()
+    KAS_SUOff = 1
+    for t, list in KAS_SUFill do
+        for i = 1, getn(list) do SobGroup_Despawn(list[i]) end
+    end
+    KAS_SUFill = {}
+    print("CKAS SU: fillers cleared")
+end
+
+-- the build menu's SU line: Cataclysm takes a unit's SU when it's queued, so the line counts the queues too
+function KAS_SUShow(used, queued, limit)
+    local shown = (used + queued) .. " / " .. limit
+    if shown ~= KAS_SUShown then
+        KAS_SUShown = shown
+        UI_SetTextLabelText("NewBuildMenu", "lblSUCount", shown)
+        print("CKAS SU: " .. shown .. " (built " .. used .. ", queued " .. queued .. ")")
+    end
+end
+
+-- SU queued or being built, for the line only (the engine does the limiting): Player_HasQueuedBuild says only
+-- whether a type is queued (0/1), so several of one type show as one; at least one while a builder is building it
+function KAS_SUQueued()
+    local queued = 0
+    SobGroup_CreateIfNotExist("KAS_SUBuilders")
+    SobGroup_Clear("KAS_SUBuilders")
+    Player_GetShipsByFilterInclude(0, "KAS_SUBuilders", "Ability", "CanBuildShips")
+    for t, v in CatSU_Native do
+        local n = Player_HasQueuedBuild(0, t) or 0
+        if n < 1 and (SobGroup_IsBuilding("KAS_SUBuilders", t) or 0) ~= 0 then n = 1 end
+        queued = queued + CatSU_Cost[t] * n
+    end
+    return queued
+end
+
 -- Cataclysm's team colours (tools/make_colours.py): the 8 colour schemes into Gearbox's KAS_ColourSchemes, then each
 -- team in its mission's scheme (KAS_TeamSchemes, tools/mission2level.py: the Ships lines' colorScheme(n));
 -- kasfShipsSetColor (K_49aae0) uses the same table
@@ -1115,7 +1259,7 @@ end
 
 -- The Somtaaw announcer: the speech logic's raceHelper() picks the announcer by Race_ID[currentRace], read from
 -- player:racelist.lua, which Players Patch writes only from its skirmish rules (SpeechRaceHelper); write it here too,
--- so the campaign's list has the Somtaaw (install_cr.py patches raceHelper: Somtaaw -> "cat_fleet", Cataclysm's
+-- so the campaign's list has the Somtaaw (install_base.py patches raceHelper: Somtaaw -> "cat_fleet", Cataclysm's
 -- Fleet Command, data/soundscripts/cataclysm/catspeech.lua)
 dofilepath("data:scripts/playerspatch_speech_util.lua")
 
@@ -1152,6 +1296,7 @@ function KAS_StartEngine()
     Rule_AddInterval("CatAbilityTick", 0.25)
     Rule_AddInterval("CatSayTick", 0.5)
     Rule_AddInterval("KAS_VariantBuildWatch", 2)
+    Rule_AddInterval("KAS_SUTick", 1)
     KAS_GrantRuntimeResearch()
     KAS_DisableCPUPlayers()
     KAS_ApplyAlliances()
@@ -1160,6 +1305,8 @@ function KAS_StartEngine()
     singlePlayerHyperspaceButtonDisable()     -- (Gearbox's singlePlayerStartGame): shown by K_497290
     Rule_AddInterval("KAS_EngineTick", 0.5)
     Rule_AddInterval("KAS_MoveFireTick", 1)
+    Rule_AddInterval("KAS_DestroyerTrace", 5)   -- TEST
+    Rule_AddInterval("KAS_ResourcerTrace", 10)  -- TEST
     KAS_MeteorInit()
     Rule_AddInterval("KAS_JettisonWatch", 0.25)
     Rule_AddInterval("KAS_RURegen", KAS_RU_REGEN_SECONDS)
@@ -1247,6 +1394,14 @@ function K_494160(flag)                                                         
     end
     KAS_TeamSwitched[KAS_Team] = 1
     if to ~= owner then SobGroup_SwitchOwner(KAS_Team, to) end
+    if to == 2 and KAS_AllyOnSwitch and KAS_AlliedOnSwitch == nil then
+        KAS_AlliedOnSwitch = 1
+        KAS_HealthTrace(KAS_Team, "before the alliance")
+        SetAlliance(0, 2)
+        SetAlliance(2, 0)
+        KAS_HealthTrace(KAS_Team, "after the alliance")
+        print("CKAS: 0 and 2 allied (" .. KAS_Team .. " joined)")
+    end
     print("CKAS: team " .. KAS_Team .. " owner " .. owner .. " -> " .. to)
 end
 
@@ -1304,125 +1459,41 @@ function KAS_MsgSendRaw(from, to, msg)
     KAS_MsgSendRawUntraced(from, to, msg)
 end
 
--- ------------------------------------------------------------------ speech (Phase 0.4)
--- kasfSpeechEvent(event, variable): low 10 bits = event number (HW1 SPEECH_EVENT_MASK), higher bits pick the actor. The phrase is chosen as HW1 SEselectsentence does (cataclysmspeech.lua, generated) and played
--- with Subtitle_AddSkippable: data/sound/speech/missions/cataclysm/<id>.wav plus string <id> from speech.dat.
--- kasfIntelEventEnded (exe 0x497b00) reports 1 once the line has finished.
-KAS_SpeechEnd = 0
+-- ------------------------------------------------------------------ speech
+-- Every line goes through Cataclysm's speech queue (data/scripts/scar/cataclysmvoice.lua: CatVoice_Event with the
+-- exe's event code and wait); nothing here plays speech itself. Recordings: data/sound/speech/missions/cataclysm/
+-- <id>.wav plus string <id> from speech.dat (tools/build_speech.py, cataclysmspeech.lua).
+dofilepath("data:scripts/scar/cataclysmvoice.lua")
 KAS_SpeechPath = "speech:missions/cataclysm/"
 
-function KAS_SpeechPlay(event, variable)
+-- kasfSpeechEvent(event, variable) (0x496eb0): queued with no expiry (wait -1, 0xbf800000). A variable the event
+-- has no line for falls back to 0 (the exe drops it; the translator's variables don't always match).
+-- kasfIntelEventEnded (0x497b00) reports 1 once that line has played (or was dropped).
+KAS_IntelLine = nil
+function K_496eb0(event, variable)                                                                  -- kasfSpeechEvent
     if event < 0 then event = event + 4294967296 end
-    local ev = mod(event, 1024)
-    local e = KAS_SpeechEvents and KAS_SpeechEvents["sect" .. ev]
-    if e == nil then
-        KAS_WarnOnce("speech" .. ev, "no speech for event " .. ev .. " (" .. event .. ")")
-        KAS_SpeechEnd = Universe_GameTime() + 1
-        return
-    end
-    local maxvar = e[2]
-    if maxvar < 1 then maxvar = 1 end
-    if variable < 0 or variable >= maxvar then variable = 0 end
-    local id = KAS_SpeechBankBase.sect + e[3] + variable
-    -- Cataclysm actor bits (from Mission01's lines): 0x1000 Fleet Command, 0x2000 Tactical Officer, 0x8000 other
-    -- fleets (allies). HWRM has no Tactical Officer actor; Fleet Intel's voice slot is the nearest match.
-    local actor = Actor_HW1_FleetIntel
-    if mod(floor(event / 4096), 2) == 1 then actor = Actor_HW1_FleetCommand end
-    local secs = (KAS_SpeechDurations[id] or 3000) / 1000
-    -- Cataclysm's speech queue (HW1 SpeechEvent.c speechEventFleet: one line at a time per speaker, a line waits up to
-    -- 5 s, then is dropped; user: lines played over each other after Mission02's Engineering Module)
-    local now = Universe_GameTime()
-    local free = KAS_SpeechBusy[actor] or 0
-    if free > now then
-        if free - now > KAS_SpeechWait then
-            print("CKAS speech event " .. ev .. " dropped (speaker busy " .. (free - now) .. "s)")
-            return
-        end
-        tinsert(KAS_SpeechQueue, { at = free, actor = actor, id = id, secs = secs, ev = ev })
-        KAS_SpeechBusy[actor] = free + secs
-        if KAS_SpeechEnd == nil or KAS_SpeechEnd < free + secs then KAS_SpeechEnd = free + secs end
-        if Rule_Exists("KAS_SpeechQueueTick") == 0 then Rule_AddInterval("KAS_SpeechQueueTick", 0.1) end
-        print("CKAS speech event " .. ev .. " -> $" .. id .. " queued " .. (free - now) .. "s")
-        return
-    end
-    KAS_SpeechSay(actor, id, secs, ev)
+    local e = KAS_SpeechEvents and KAS_SpeechEvents["sect" .. mod(event, 2048)]
+    if e and (variable < 0 or variable >= e[2]) then variable = 0 end
+    KAS_IntelLine = CatVoice_Event(event, variable, -1)
 end
-KAS_SpeechWait = 5
-KAS_SpeechBusy = {}
-KAS_SpeechQueue = {}
-function KAS_SpeechSay(actor, id, secs, ev)
-    local t = Subtitle_AddSkippable(actor, "$" .. id, secs)
-    if t and t > secs then secs = t end
-    KAS_SpeechBusy[actor] = Universe_GameTime() + secs
-    if KAS_SpeechEnd == nil or KAS_SpeechEnd < Universe_GameTime() + secs then KAS_SpeechEnd = Universe_GameTime() + secs end
-    print("CKAS speech event " .. ev .. " -> $" .. id .. " (" .. secs .. "s)")
-end
-function KAS_SpeechQueueTick()
-    local now = Universe_GameTime()
-    local i = 1
-    while i <= getn(KAS_SpeechQueue) do
-        local q = KAS_SpeechQueue[i]
-        if q.at <= now then
-            tremove(KAS_SpeechQueue, i)
-            KAS_SpeechSay(q.actor, q.id, q.secs, q.ev)
-        else
-            i = i + 1
-        end
-    end
-    if getn(KAS_SpeechQueue) == 0 then Rule_Remove("KAS_SpeechQueueTick") end
+function K_497b00()                                                                               -- kasfIntelEventEnded
+    return KAS_B(KAS_IntelLine == nil or KAS_IntelLine.done == 1)
 end
 
-function K_496eb0(event, variable) KAS_SpeechPlay(event, variable) end                              -- kasfSpeechEvent
-
--- Barks the engine's speech logic can't trigger (data/soundscripts/cataclysm/catspeech.lua covers the rest): Link /
--- Unlink from the ship rules, "<technology> available" on research. Same phrase files as KAS_SpeechPlay, but they
--- don't hold up the mission's dialogue (KAS_SpeechEnd untouched). Variable = the speaking ship's Cataclysm ShipType /
--- the TechnologyType (catspeech_gen.lua CatSpeech_Var / CatSpeech_TechLine, tools/make_unitspeech.py).
+-- Lines the engine's speech logic can't trigger (data/soundscripts/cataclysm/catspeech.lua covers the rest), each
+-- with the exe's event code and wait (Cataclysm-decomp/out/speech_calls.tsv). Variable = the speaking ship's
+-- Cataclysm ShipType / the TechnologyType / the module (catspeech_gen.lua CatSpeech_Var / CatSpeech_TechLine,
+-- tools/make_unitspeech.py).
 dofilepath("data:soundscripts/cataclysm/catspeech_gen.lua")
-CatSayEvents = {156, 157, 165, 166, 167, 168, 5}   -- Link, Unlink, mimic, unmimic, kamikaze, disguise assumed, the Ram order (attack; shiprules.lua CatSay: cat_say_<event>)
-CatSayLast = 0
+-- the ship rules' barks (shiprules.lua CatSay: cat_say_<event>): Link, Unlink, mimic, unmimic, kamikaze, disguise
+-- assumed, the Ram order (attack): pilot chatter, 0 s wait (FUN_00467ae0, 00468580, 005b8f30; 167 / 168 by the same
+-- pattern; the Ram order's attack acknowledgement as the selection acks, FUN_00523040)
+CatSayEvents = { [156] = 71305372, [157] = 71305373, [165] = 71305381, [166] = 71305382, [167] = 71305383,
+                 [168] = 71305384, [5] = 67110917 }   -- 0x400089c, 0x400089d, 0x40008a5-a8, 0x4000805
 CatTechHad = nil
-
-function KAS_BarkId(ev, variable)
-    local e = KAS_SpeechEvents and KAS_SpeechEvents["sect" .. ev]
-    if e == nil or variable == nil or variable < 0 or variable >= e[2] then
-        return nil
-    end
-    local ids = {}
-    for v = 0, e[1] - 1 do
-        local i = KAS_SpeechBankBase.sect + e[3] + v * e[2] + variable
-        if KAS_SpeechDurations[i] then tinsert(ids, i) end
-    end
-    if getn(ids) > 0 then return ids[random(1, getn(ids))] end
-    return KAS_SpeechBankBase.sect + e[3] + variable
-end
-
--- A Fleet Command line outside the mission's script (a Kuun-Lan module coming online, event 48): Cataclysm queues it
--- on Fleet Command's channel (FUN_00522560: Fleet Command 0x1000 and the Tactical Officer 0x2000 share it) with a
--- 5 s wait (0x40a00000): it plays once the line speaking ends, if that is within 5 s, else it is dropped
-function KAS_SpeechFleetLine(ev, variable)
-    local id = KAS_BarkId(ev, variable)
-    if id == nil then return end
-    local secs = (KAS_SpeechDurations[id] or 2000) / 1000
-    local now = Universe_GameTime()
-    local fc, fi = Actor_HW1_FleetCommand, Actor_HW1_FleetIntel
-    local free = KAS_SpeechBusy[fc] or 0
-    if (KAS_SpeechBusy[fi] or 0) > free then free = KAS_SpeechBusy[fi] end
-    if free > now then
-        if free - now > KAS_SpeechWait then
-            print("CKAS fleet line " .. ev .. "/" .. variable .. " dropped (channel busy " .. (free - now) .. "s)")
-            return
-        end
-        tinsert(KAS_SpeechQueue, { at = free, actor = fc, id = id, secs = secs, ev = ev })
-        if Rule_Exists("KAS_SpeechQueueTick") == 0 then Rule_AddInterval("KAS_SpeechQueueTick", 0.1) end
-    else
-        free = now
-        KAS_SpeechSay(fc, id, secs, ev)
-    end
-    -- the channel is taken: the mission's next lines wait for it
-    KAS_SpeechBusy[fc], KAS_SpeechBusy[fi] = free + secs, free + secs
-    if KAS_SpeechEnd == nil or KAS_SpeechEnd < free + secs then KAS_SpeechEnd = free + secs end
-end
+KAS_CODE_MODULE_ONLINE = 33558576     -- 0x2001030: event 48, Fleet Command, 5 s (FUN_004f4530)
+KAS_CODE_TECHNOLOGY = 33558716        -- 0x20010bc: event 188, 5 s (FUN_004f2a20)
+KAS_VOICE_WAIT = 5                    -- the exe's 0x40a00000
 
 -- modules coming online (catspeech.lua leaves them to this): Cataclysm's module index, the event 48 variable
 -- (tools/make_unitspeech.py MODULES)
@@ -1437,41 +1508,21 @@ function CatModuleTick()
     if first then CatModuleHad = {} end
     for sub, v in CatModuleOnline do
         local has = SobGroup_HasSubsystem("CatModuleMS", sub)
-        if not first and has == 1 and CatModuleHad[sub] ~= 1 then KAS_SpeechFleetLine(48, v) end
+        if not first and has == 1 and CatModuleHad[sub] ~= 1 then CatVoice_Event(KAS_CODE_MODULE_ONLINE, v, KAS_VOICE_WAIT) end
         CatModuleHad[sub] = has
     end
-end
-
-function KAS_SpeechBark(ev, variable, actor)
-    local e = KAS_SpeechEvents and KAS_SpeechEvents["sect" .. ev]
-    if e == nil or variable == nil or variable < 0 or variable >= e[2] then
-        return
-    end
-    -- one of the event's recordings at random (Cataclysm's variations: e[1] of them, e[2] apart; user: the
-    -- kamikaze scream was always the first), of those this variable has (a duration: the recording exists)
-    local ids = {}
-    for v = 0, e[1] - 1 do
-        local i = KAS_SpeechBankBase.sect + e[3] + v * e[2] + variable
-        if KAS_SpeechDurations[i] then tinsert(ids, i) end
-    end
-    local id = KAS_SpeechBankBase.sect + e[3] + variable
-    if getn(ids) > 0 then id = ids[random(1, getn(ids))] end
-    Subtitle_AddSkippable(actor or Actor_HW1_FleetIntel, "$" .. id, (KAS_SpeechDurations[id] or 2000) / 1000)
-    print("CKAS bark " .. ev .. "/" .. variable .. " -> $" .. id)
 end
 
 function CatSayTick()
     local now = Universe_GameTime()
     CatModuleTick()
-    for i = 1, getn(CatSayEvents) do
-        local grp = "cat_say_" .. CatSayEvents[i]
+    for ev, code in CatSayEvents do
+        local grp = "cat_say_" .. ev
         if SobGroup_Exists(grp) == 1 and SobGroup_Count(grp) > 0 then
-            if now - CatSayLast > 1.5 then      -- one bark per press, however many ships
-                local t = strlower(SobGroup_GetShipType(grp))
-                if CatSpeech_Var[t] == nil and CatVariantBase and CatVariantBase[t] then t = CatVariantBase[t] end
-                KAS_SpeechBark(CatSayEvents[i], CatSpeech_Var[t])   -- a disguise speaks as its Mimic
-                CatSayLast = now
-            end
+            -- one bark per press, however many ships (the queue drops the same line again while it plays)
+            local t = strlower(SobGroup_GetShipType(grp))
+            if CatSpeech_Var[t] == nil and CatVariantBase and CatVariantBase[t] then t = CatVariantBase[t] end
+            if CatSpeech_Var[t] then CatVoice_Event(code, CatSpeech_Var[t], 0) end   -- a disguise speaks as its Mimic
             SobGroup_Clear(grp)
         end
     end
@@ -1489,7 +1540,8 @@ function CatSayTick()
     local k = 1
     while k <= getn(CatTechQueue) do
         if now >= CatTechQueue[k].at then
-            KAS_SpeechBark(188, CatTechQueue[k].v, Actor_HW1_FleetIntel)   -- Tactical Officer (as KAS_SpeechPlay)
+            -- the Tactical Officer's voice (Fleet Intel's slot) on channel 1 (user: it cut into her own meteor warning)
+            CatVoice_Event(KAS_CODE_TECHNOLOGY, CatTechQueue[k].v, KAS_VOICE_WAIT, { actor = Actor_HW1_FleetIntel })
             tremove(CatTechQueue, k)
         else
             k = k + 1
@@ -1505,10 +1557,6 @@ function CatResearchCompleteSecs()
     local e = KAS_SpeechEvents and KAS_SpeechEvents["sect51"]
     if e == nil then return 1.5 end
     return (KAS_SpeechDurations[KAS_SpeechBankBase.sect + e[3]] or 1500) / 1000
-end
-
-function K_497b00()                                                                               -- kasfIntelEventEnded
-    return KAS_B(Universe_GameTime() >= KAS_SpeechEnd)
 end
 
 function K_497b80() end                                                                           -- kasfSubtitleReset
@@ -1670,8 +1718,67 @@ function KAS_PatrolTick()
     end
 end
 function K_492b20() return floor(KAS_TeamHealth(KAS_Team)) end                                      -- kasfTeamHealthAverage
+-- (cataclysm.exe 0x493aa0: each ship's health = pct % of its maximum.) Set while a team is still hyperspacing in it
+-- doesn't hold (Mission02's destroyer arrived whole, so its repairs passed 39 % at once and the disguised corvettes
+-- came at the start: user): kept on the team until its ships are there and no healthier (never raised), 30 s at most
+-- TEST: a team's health, percent and absolute (user: Mission02's destroyer read 50 % once it changed sides)
+function KAS_HealthTrace(team, why)
+    if SobGroup_Count(team) == 0 then return end
+    print(format("CKAS: %s health %.1f %% (%.0f of %.0f) %s, owner %d", team, SobGroup_HealthPercentage(team) * 100,
+                 SobGroup_HealthPercentage(team) * SobGroup_MaxHealthTotal(team), SobGroup_MaxHealthTotal(team), why,
+                 SobGroup_GetPlayerOwner(team)))
+end
+function KAS_DestroyerTrace()
+    if SobGroup_Exists("kDestroyer") == 1 and SobGroup_Count("kDestroyer") > 0 then
+        local q = SobGroup_GetPosition("kDestroyer")
+        KAS_HealthTrace("kDestroyer", format("(every 5 s) at %.0f %.0f %.0f", q[1], q[2], q[3]))
+    end
+end
+-- TEST: Mission 1's resourcer objective never completed after the player killed them (every 10 s: who is left, where)
+function KAS_ResourcerTrace()
+    if KAS_Objectives["DestroyResourcers"] == nil or SobGroup_Exists("TaiidanResourcers") == 0 then return end
+    local n = SobGroup_Count("TaiidanResourcers")
+    print("CKAS TEST: TaiidanResourcers left " .. n)
+    SobGroup_CreateIfNotExist("KAS_TraceOne")
+    for i = 0, n - 1 do
+        SobGroup_Clear("KAS_TraceOne")
+        SobGroup_FillShipsByIndexRange("KAS_TraceOne", "TaiidanResourcers", i, 1)
+        if SobGroup_Count("KAS_TraceOne") > 0 then
+            local q = SobGroup_GetPosition("KAS_TraceOne")
+            print(format("CKAS TEST:   #%d at %.0f %.0f %.0f health %.2f docked %d", i, q[1], q[2], q[3],
+                SobGroup_HealthPercentage("KAS_TraceOne"), SobGroup_IsDocked("KAS_TraceOne")))
+        end
+    end
+end
+KAS_PendingHealth = {}
 function K_493aa0(pct)                                                                              -- kasfTeamSetPercentDamaged
     SobGroup_SetHealth(KAS_Team, pct / 100)
+    KAS_PendingHealth[KAS_Team] = { h = pct / 100, till = Universe_GameTime() + 30 }
+    if Rule_Exists("KAS_PendingHealthTick") == 0 then Rule_AddInterval("KAS_PendingHealthTick", 0.5) end
+end
+function KAS_PendingHealthTick()
+    local now, left, done = Universe_GameTime(), 0, {}
+    for team, p in KAS_PendingHealth do
+        if now > p.till then
+            tinsert(done, team)
+        elseif SobGroup_Count(team) > 0 then
+            if SobGroup_HealthPercentage(team) > p.h + 0.01 then
+                SobGroup_SetHealth(team, p.h)
+                left = left + 1
+            elseif p.seen then
+                tinsert(done, team)
+                print("CKAS: " .. team .. " health " .. floor(p.h * 100) .. " %")
+            else
+                p.seen = 1
+                left = left + 1
+            end
+        else
+            left = left + 1
+        end
+    end
+    -- (removed after the walk: Lua 4's next fails on a key cleared mid-walk)
+    for i = 1, getn(done) do KAS_PendingHealth[done[i]] = nil end
+    if left == 0 then Rule_Remove("KAS_PendingHealthTick") end
 end
 function K_493cf0(team, sel) SobGroup_SobGroupAdd(team, sel) end                                    -- kasfReinforceTeamWithShips
 
@@ -1761,7 +1868,44 @@ function K_493980(sel, pct)                                                     
     SobGroup_SobGroupAdd("cat_dmgf", sel)
     SobGroup_SobGroupAdd("cat_dmgf_" .. q, sel)
 end
-function K_493a10(sel, v) KAS_NoOp("493a10", "kasfShipsSetRepairFactor") end
+-- kasfShipsSetRepairFactor(ships, factor): 0 stops the ships repairing themselves (Mission02's crippled destroyer,
+-- until 90 %). HWRM's own regeneration (the .ship's regentime: the Kushan destroyer's took it from 20 % to 50 % before
+-- it was found, user) has no script switch, so every tick a rise in health up to the regeneration rate is taken back
+-- (a Worker's repair, on top of it, stays); any other factor lets it be
+KAS_NoRegen = {}
+function K_493a10(sel, v)
+    if v == 0 then
+        KAS_NoRegen[sel] = { last = Universe_GameTime(), h = {} }
+        if Rule_Exists("KAS_NoRegenTick") == 0 then Rule_AddInterval("KAS_NoRegenTick", 0.5) end
+    else
+        KAS_NoRegen[sel] = nil
+    end
+end
+function KAS_NoRegenTick()
+    local now, left = Universe_GameTime(), 0
+    SobGroup_CreateIfNotExist("KAS_RegenOne")
+    for sel, r in KAS_NoRegen do
+        left = left + 1
+        local dt = now - r.last
+        r.last = now
+        for i = 0, SobGroup_Count(sel) - 1 do
+            SobGroup_Clear("KAS_RegenOne")
+            SobGroup_FillShipsByIndexRange("KAS_RegenOne", sel, i, 1)
+            if SobGroup_Count("KAS_RegenOne") > 0 then
+                local h = SobGroup_HealthPercentage("KAS_RegenOne")
+                local hull = CatHull[strlower(SobGroup_GetShipType("KAS_RegenOne"))]
+                if r.h[i] and hull and hull.regen and h > r.h[i] then
+                    local regen = dt / hull.regen
+                    if h - r.h[i] < regen then regen = h - r.h[i] end
+                    h = h - regen
+                    SobGroup_SetHealth("KAS_RegenOne", h)
+                end
+                r.h[i] = h
+            end
+        end
+    end
+    if left == 0 then Rule_Remove("KAS_NoRegenTick") end
+end
 function K_4939d0(sel) KAS_NoOp("4939d0", "kasfShipsClearRepairFactor") end
 
 -- kasfShipsParalyze (the exe sets SOF_DontApplyPhysics): the ships cannot move.
@@ -1921,6 +2065,9 @@ function K_495e50(sel, name) KAS_PingRemove(name, name) KAS_PingAddShips(sel, na
 -- kasfPingAddPoint(point, name): Ping_AddPoint takes a volume name (Gearbox passes AI volume names), so ping a
 -- small sphere made at the point.
 function K_495e80(vec, name)                                                                        -- kasfPingAddPoint
+    local p = KAS_Pos(vec)
+    print(format("CKAS: ping %s at %.0f %.0f %.0f (%.0f from the origin)", name, p[1], p[2], p[3],
+                 sqrt(p[1] * p[1] + p[2] * p[2] + p[3] * p[3])))   -- TEST: user, the pings too close together
     KAS_PingRemove(name, name)
     Volume_AddSphere("KAS_Ping_" .. name, KAS_Pos(vec), 10)
     KAS_PingAddPoint("KAS_Ping_" .. name, name, name)
@@ -2005,6 +2152,7 @@ function KAS_Lockout(on)
     if on == 0 and KAS_OpeningLock == 1 then return end
     Universe_AllowPlayerOrders(1 - on)
     Sensors_EnableToggle(1 - on)
+    KAS_LockedOut = on
     if on == 1 then SobGroup_DeSelectAll() end
     print("CKAS: player control " .. ((on == 1 and "locked") or "unlocked"))
 end
@@ -2148,7 +2296,46 @@ function KAS_DevHyperspace()
     KAS_HyperspaceAllow()
 end
 
+-- The ships the jump waits for: every hyperspace capable ship of the player's, the Kuun-Lan only the real one.
+-- Gearbox's WatchHyperspacingShips waits for every ship with HyperSpaceCommand to be in hyperspace, the intro NIS's
+-- despawned Kuun-Lan too (KAS_KuunLan), which never jumps: the Emergency Hyperspace's Kuun-Lan left and the mission
+-- never ended (user, Mission01). Done when each is in hyperspace or docked (inside one that is).
+function KAS_HyperspaceJumpersGone()
+    SobGroup_CreateIfNotExist("KAS_HSWatch")
+    SobGroup_CreateIfNotExist("KAS_HSType")
+    SobGroup_CreateIfNotExist("KAS_HSOne")
+    Player_GetShipsByFilterInclude(0, "KAS_HSWatch", "Ability", "HyperSpaceCommand")
+    local i = 1
+    while i <= getn(KAS_MothershipTypes) do
+        SobGroup_Clear("KAS_HSType")
+        Player_FillShipsByType("KAS_HSType", 0, KAS_MothershipTypes[i])
+        SobGroup_FillSubtract("KAS_HSWatch", "KAS_HSWatch", "KAS_HSType")
+        i = i + 1
+    end
+    SobGroup_SobGroupAdd("KAS_HSWatch", "KAS_MothershipGroup0")
+    local n = SobGroup_Count("KAS_HSWatch")
+    for k = 0, n - 1 do
+        SobGroup_Clear("KAS_HSOne")
+        SobGroup_FillShipsByIndexRange("KAS_HSOne", "KAS_HSWatch", k, 1)
+        if SobGroup_Count("KAS_HSOne") > 0 and SobGroup_AreAllInHyperspace("KAS_HSOne") == 0
+           and SobGroup_IsDocked("KAS_HSOne") == 0 then
+            return 0
+        end
+    end
+    return 1
+end
+
 function KAS_HyperspaceTick()
+    -- the Support Units fillers out of the world before the fleet is saved for the next mission
+    if spGameInfo_hyperspaceState == HYPERSPACE_SHIPSLEAVING and KAS_SUOff == nil then KAS_SUFillersClear() end
+    if spGameInfo_hyperspaceState == HYPERSPACE_SHIPSLEAVING and spGameInfo_hyperspaceSubState == 2
+       and spGameInfo_hyperspaceFails == 0 and KAS_HyperspaceJumpersGone() ~= 0 then
+        -- (Gearbox's SHIPSLEAVING substate 2 on all ships gone)
+        print("CKAS: every jumping ship is in hyperspace")
+        spGameInfo_hyperspaceState = HYPERSPACE_WHITEOUT
+        spGameInfo_hyperspaceTimeStamp = Universe_GameTime() + HYPERSPACE_WHITEOUTTIME
+        Universe_Fade(1, 1)
+    end
     singlePlayerHyperspaceStateUpdate()
     if spGameInfo_hyperspaceState ~= KAS_HyperspaceLastState then
         KAS_HyperspaceLastState = spGameInfo_hyperspaceState
@@ -2256,9 +2443,23 @@ function K_492ae0(sel)
     return a
 end
 -- kasfTeamHealthLowest: the team's weakest ship, percent (Gearbox's KAS_TeamHealthLowest)
+-- kasfTeamHealthLowest (0x492b90): the lowest of the team's ships' health, whole percent of its maximum (rounded).
+-- (SobGroup_MinimumHealth x 100 read over 39 at 20 % health: Mission02's destroyer "repaired" at once and the
+-- disguised corvettes came straight after it was found, user)
 function K_492b90()
-    if SobGroup_Count(KAS_Team) == 0 then return 0 end
-    return SobGroup_MinimumHealth(KAS_Team) * 100
+    local n = SobGroup_Count(KAS_Team)
+    if n == 0 then return 0 end
+    local low = 110
+    SobGroup_CreateIfNotExist("KAS_HealthOne")
+    for i = 0, n - 1 do
+        SobGroup_Clear("KAS_HealthOne")
+        SobGroup_FillShipsByIndexRange("KAS_HealthOne", KAS_Team, i, 1)
+        if SobGroup_Count("KAS_HealthOne") > 0 then
+            local h = floor(SobGroup_HealthPercentage("KAS_HealthOne") * 100 + 0.5)
+            if h < low then low = h end
+        end
+    end
+    return low
 end
 -- 0x492d60(out): the asteroids flagged ATTRIBUTES_HeadShotVelToMothership (0x200), Mission02's "meteors": our
 -- meteor ships (KAS_MeteorInit)
@@ -2278,9 +2479,29 @@ end
 -- A meteor touching a ship (FUN_0043bac0: closer than the two collision radii; no bump, FUN_00545540) costs both
 -- the lower of their two healths: a fighter dies, a ship that outweighs the meteor loses its health and destroys it.
 dofilepath("data:scripts/cataclysm/hullinfo_gen.lua")   -- CatHull: ship sizes (tools/make_hullinfo.py)
-KAS_MeteorRadius = { cat_meteor0 = 10, cat_meteor1 = 25, cat_meteor2 = 52.8, cat_meteor3 = 118.1, cat_meteor4 = 214.1 }
+-- collision radii (Cataclysm's are spheres round the whole model): half the diagonal of the HOD box, CatHull
+KAS_HullRadii = {}
+function KAS_HullRadius(t, default)
+    t = strlower(t or "")
+    if KAS_HullRadii[t] == nil then
+        local hull, r = CatHull[t], default
+        if hull then
+            local b, q = hull.box, 0
+            for k = 1, 3 do
+                local a = abs(b[k])
+                if abs(b[k + 3]) > a then a = abs(b[k + 3]) end
+                q = q + a * a
+            end
+            r = sqrt(q)
+        end
+        KAS_HullRadii[t] = r
+    end
+    return KAS_HullRadii[t]
+end
+KAS_MeteorBlast, KAS_MeteorBlastScale = "dmg_cloud_main_explosion_combo", 7
+KAS_MeteorBlastSound = "data:sound/sfx/etg/explosion/medium/etg_explode_medium_firey"
 KAS_MeteorShipSpeed = 400      -- the meteor ships' top speed (tools/make_meteor.py MAX_SPEED)
-KAS_MeteorReach = 900          -- a first sweep: meteors this close to a ship are measured (largest meteor + hull)
+KAS_MeteorReach = 1500         -- a first sweep: meteors this close to a ship are measured (largest meteor + hull)
 KAS_MeteorHitFX, KAS_MeteorHitScale = "dmg_cloud_explosion_large_nodebris", 2
 KAS_MeteorHitSound = "data:sound/sfx/etg/explosion/small/etg_explode_small_firey"
 KAS_Meteors = {}               -- per meteor: { g = its group, st = its storm, due = when it reaches the box }
@@ -2310,7 +2531,7 @@ function KAS_MeteorInit()
         for i = 0, st.n - 1 do
             local g = st.group .. "_" .. i .. "g"
             SobGroup_SetSpeed(g, st.speed / KAS_MeteorShipSpeed)
-            local m = { g = g, st = st, r = KAS_MeteorRadius[strlower(SobGroup_GetShipType(g))] or 50 }
+            local m = { g = g, st = st }
             tinsert(KAS_Meteors, m)
             KAS_MeteorFace(m)
             KAS_MeteorAim(m)
@@ -2382,19 +2603,14 @@ function KAS_MeteorHits()
     end
 end
 function KAS_MeteorHitShip()
-    local hull = CatHull[strlower(SobGroup_GetShipType("KAS_MeteorShip"))]
-    local rs = 20
-    if hull then
-        rs = 0
-        for k = 1, 6 do if abs(hull.box[k]) > rs then rs = abs(hull.box[k]) end end
-    end
+    local rs = KAS_HullRadius(SobGroup_GetShipType("KAS_MeteorShip"), 20)
     local ps = SobGroup_GetPosition("KAS_MeteorShip")
     for j = 0, SobGroup_Count("KAS_MeteorNear") - 1 do
         SobGroup_Clear("KAS_MeteorOne")
         SobGroup_FillShipsByIndexRange("KAS_MeteorOne", "KAS_MeteorNear", j, 1)
         local pm = SobGroup_GetPosition("KAS_MeteorOne")
         local d = { pm[1] - ps[1], pm[2] - ps[2], pm[3] - ps[3] }
-        local rm = KAS_MeteorRadius[strlower(SobGroup_GetShipType("KAS_MeteorOne"))] or 50
+        local rm = KAS_HullRadius(SobGroup_GetShipType("KAS_MeteorOne"), 30)
         if d[1] * d[1] + d[2] * d[2] + d[3] * d[3] < (rs + rm) * (rs + rm) then
             -- the lower health from both (FUN_00545540: damage = min of the two current healths, to each)
             local hs = SobGroup_HealthPercentage("KAS_MeteorShip") * SobGroup_MaxHealthTotal("KAS_MeteorShip")
@@ -2406,8 +2622,14 @@ function KAS_MeteorHitShip()
             KAS_MeteorHitN = (KAS_MeteorHitN or 0) + 1
             local vol = "KAS_MeteorHit" .. KAS_MeteorHitN
             Volume_AddSphere(vol, pm, 1)
-            FX_PlayEffect(KAS_MeteorHitFX, vol, KAS_MeteorHitScale)
-            Sound_SFXPlay3D(KAS_MeteorHitSound, vol)
+            if hm <= dmg then
+                -- the meteor destroyed: a frigate-sized blast (no death of its own: the ship is only a model)
+                FX_PlayEffect(KAS_MeteorBlast, vol, KAS_MeteorBlastScale)
+                Sound_SFXPlay3D(KAS_MeteorBlastSound, vol)
+            else
+                FX_PlayEffect(KAS_MeteorHitFX, vol, KAS_MeteorHitScale)
+                Sound_SFXPlay3D(KAS_MeteorHitSound, vol)
+            end
             print("CKAS: meteor hit " .. SobGroup_GetShipType("KAS_MeteorShip") .. " for " .. floor(dmg))
             if hs <= dmg then return end
         end
@@ -2428,6 +2650,35 @@ function K_493600(vec)
     print("CKAS: " .. KAS_Team .. " hyperspaces in")
     SobGroup_HyperspaceToVector(KAS_Team, KAS_Pos(vec))
     SobGroup_SetHidden(KAS_Team, 0)
+    if Universe_GameTime() < 1 then
+        -- a team hyperspacing in as the mission starts (after its first-frame despawn, KAS_TeamHyperspaceOut): the jump
+        -- brings it back but may be undone in the same frame (the disabled state switching hyperspace off: Mission02's
+        -- destroyer stayed at its level spot past the map's edge, user), so it is also put there for the first seconds
+        -- (SobGroup_Spawn left it despawned: counted, but nowhere to be seen, user)
+        KAS_PlaceAt[KAS_Team] = { p = KAS_Pos(vec), till = Universe_GameTime() + 5 }
+        if Rule_Exists("KAS_PlaceAtTick") == 0 then Rule_AddInterval("KAS_PlaceAtTick", 0.25) end
+    end
+end
+KAS_PlaceAt = {}
+function KAS_PlaceAtTick()
+    local now, left, done = Universe_GameTime(), 0, {}
+    for team, a in KAS_PlaceAt do
+        if now > a.till then
+            tinsert(done, team)
+        else
+            left = left + 1
+            if SobGroup_Count(team) > 0 then
+                local q = SobGroup_GetPosition(team)
+                local d = (q[1] - a.p[1]) * (q[1] - a.p[1]) + (q[2] - a.p[2]) * (q[2] - a.p[2]) + (q[3] - a.p[3]) * (q[3] - a.p[3])
+                if d > 1000 * 1000 then
+                    SobGroup_SetPosition(team, a.p)
+                    print(format("CKAS: %s put at %.0f %.0f %.0f", team, a.p[1], a.p[2], a.p[3]))
+                end
+            end
+        end
+    end
+    for i = 1, getn(done) do KAS_PlaceAt[done[i]] = nil end
+    if left == 0 then Rule_Remove("KAS_PlaceAtTick") end
 end
 function K_493630(vec, dist)
     local p, d, r = KAS_Pos(vec), KAS_RandomDir(), KAS_Dist(dist)
@@ -2707,8 +2958,30 @@ function K_497f10(i, t) end
 function K_497f70(i, n) end
 -- 0x497fd0(ships, type, flag) / 0x498080(ships) / 0x498270(ships): Cataclysm's disguise state (+0x760): Mission02's
 -- decoy poses as a Kushan support frigate until the ambush. Not ported yet.
-function K_497fd0(sel, t, f) KAS_NoOp("497fd0", "disguise as " .. t) end
-function K_498080(sel) KAS_NoOp("498080", "drop disguise") end
+-- kasfShipsDisguise(ships, type, scheme) / kasfShipsUndisguise(ships) (0x497fd0 / 0x498080, FUN_005b8d70: the
+-- Mimic's routine, mode 1 a ship type / 2 "A<n>" an asteroid, drawn in the scheme's colours): the teams that do it are
+-- the disguisable corvette (tools/make_disguise.py), its model showing the disguise (KAS_Disguises: its mad state).
+-- Kept on the ships and set again every second (a team disguised then hyperspaced out came back undisguised)
+dofilepath("data:scripts/scar/cataclysmdisguise_gen.lua")
+KAS_Disguised = {}
+function K_497fd0(sel, t, f)
+    local state = KAS_Disguises and KAS_Disguises[strlower(t) .. "@" .. (f or 0)]
+    if state == nil then KAS_NoOp("497fd0", "disguise as " .. t .. " (" .. (f or 0) .. "): not on the model") return end
+    KAS_Disguised[sel] = state
+    SobGroup_SetMadState(sel, state)
+    print("CKAS: " .. sel .. " disguised as " .. t .. " (" .. state .. ")")
+    if Rule_Exists("KAS_DisguiseTick") == 0 then Rule_AddInterval("KAS_DisguiseTick", 1) end
+end
+function K_498080(sel)
+    KAS_Disguised[sel] = nil
+    SobGroup_SetMadState(sel, "NIS00")
+    print("CKAS: " .. sel .. " undisguised")
+end
+function KAS_DisguiseTick()
+    for sel, state in KAS_Disguised do
+        if SobGroup_Count(sel) > 0 then SobGroup_SetMadState(sel, state) end
+    end
+end
 function K_498270(sel) KAS_NoOp("498270", "disguise state reset") end
 -- 0x498cb0(type, player): how many of that type the player has
 function K_498cb0(t, p)
@@ -2732,12 +3005,88 @@ function K_4998c0()
     return 0
 end
 -- 0x49a2d0(ships, on): SOF_Disabled (Mission02's crippled destroyer): no move, no fire
+-- 0x49a2d0(ships, on): Cataclysm's disabled state (FUN_005b3bd0 / 005b3c80, SOF_Disabled, as EMP): no control and
+-- no guns, and (FUN_00545a80) a random spin added once, yaw / pitch / roll in tweak.script YAW/PITCH/ROLLCRAZYLO..HI
+-- (+-2, +-1, +-5) x the universe update (1/16 s), radians a second about its own axes, kept while it drifts (Mission02's
+-- destroyer listing slowly, user); off again: control back, the spin stopped
+KAS_CrazyYaw, KAS_CrazyPitch, KAS_CrazyRoll, KAS_UnivUpdate = 2, 1, 5, 1 / 16
+-- (halved: HWRM's latching repair can't get a Worker onto a ship spinning at Cataclysm's rate, user)
+KAS_CrazyScale = 0.5
+-- and held still while a ship with a repair order is this near (HWRM's latching repair can't get a Worker onto a ship
+-- that turns at all, even at half Cataclysm's rate: user; Cataclysm's beams repaired it spinning)
+KAS_DisabledRepairNear = 2000
+function KAS_BeingRepaired(sel)
+    SobGroup_CreateIfNotExist("KAS_RepairNear")
+    SobGroup_CreateIfNotExist("KAS_RepairOne")
+    for pl = 0, Universe_PlayerCount() - 1 do
+        SobGroup_Clear("KAS_RepairNear")
+        SobGroup_FillProximitySobGroup("KAS_RepairNear", "Player_Ships" .. pl, sel, KAS_DisabledRepairNear)
+        for i = 0, SobGroup_Count("KAS_RepairNear") - 1 do
+            SobGroup_Clear("KAS_RepairOne")
+            SobGroup_FillShipsByIndexRange("KAS_RepairOne", "KAS_RepairNear", i, 1)
+            if SobGroup_Count("KAS_RepairOne") > 0 and SobGroup_GetCurrentOrder("KAS_RepairOne") == (COMMAND_Repair or 15) then
+                return 1
+            end
+        end
+    end
+    return nil
+end
+KAS_Disabled = {}
 function K_49a2d0(sel, on)
     local a = 1 - on
     SobGroup_AbilityActivate(sel, AB_Move, a)
     SobGroup_AbilityActivate(sel, AB_Attack, a)
     SobGroup_AbilityActivate(sel, AB_Hyperspace, a)
+    if on == 1 then
+        SobGroup_SetROE(sel, PassiveROE)
+        local k = KAS_UnivUpdate * KAS_CrazyScale
+        KAS_Disabled[sel] = { RandomRange(-KAS_CrazyYaw, KAS_CrazyYaw) * k, RandomRange(-KAS_CrazyPitch, KAS_CrazyPitch) * k,
+                              RandomRange(-KAS_CrazyRoll, KAS_CrazyRoll) * k }
+        if Rule_Exists("KAS_DisabledTick") == 0 then Rule_AddInterval("KAS_DisabledTick", 0.05) end
+    else
+        SobGroup_SetROE(sel, DefensiveROE)
+        KAS_Disabled[sel] = nil
+    end
     print("CKAS: " .. sel .. ((on == 1 and " disabled") or " enabled"))
+end
+-- v turned by angle a (radians) about the unit axis k (Lua 4 sin / cos: degrees)
+function KAS_Turn(v, k, a)
+    local c, s = cos(a * 57.29578), sin(a * 57.29578)
+    local d = k[1] * v[1] + k[2] * v[2] + k[3] * v[3]
+    local x = { k[2] * v[3] - k[3] * v[2], k[3] * v[1] - k[1] * v[3], k[1] * v[2] - k[2] * v[1] }
+    return { v[1] * c + x[1] * s + k[1] * d * (1 - c), v[2] * c + x[2] * s + k[2] * d * (1 - c),
+             v[3] * c + x[3] * s + k[3] * d * (1 - c) }
+end
+function KAS_Unit(v)
+    local l = sqrt(v[1] * v[1] + v[2] * v[2] + v[3] * v[3])
+    return { v[1] / l, v[2] / l, v[3] / l }
+end
+function KAS_DisabledTick()
+    local now, left = Universe_GameTime(), 0
+    for sel, w in KAS_Disabled do
+        left = left + 1
+        local dt = now - (w.last or now)
+        w.last = now
+        if now >= (w.check or 0) and SobGroup_Count(sel) > 0 then
+            w.check = now + 0.5
+            local held = KAS_BeingRepaired(sel)
+            if held ~= w.held then print("CKAS: " .. sel .. ((held and " held still for repairs") or " drifting again")) end
+            w.held = held
+        end
+        if dt > 0 and SobGroup_Count(sel) > 0 and w.held == nil then
+            local m = SobGroup_GetCoordSys(sel)          -- rows: right, up, bow
+            local r, u, f = { m[1], m[2], m[3] }, { m[4], m[5], m[6] }, { m[7], m[8], m[9] }
+            -- yaw about up, pitch about right, roll about the bow (HW1 rotspeed x / y / z: up, right, heading)
+            r, f = KAS_Turn(r, u, w[1] * dt), KAS_Turn(f, u, w[1] * dt)
+            u, f = KAS_Turn(u, r, w[2] * dt), KAS_Turn(f, r, w[2] * dt)
+            r, u = KAS_Turn(r, f, w[3] * dt), KAS_Turn(u, f, w[3] * dt)
+            f = KAS_Unit(f)
+            r = KAS_Unit({ u[2] * f[3] - u[3] * f[2], u[3] * f[1] - u[1] * f[3], u[1] * f[2] - u[2] * f[1] })
+            u = { f[2] * r[3] - f[3] * r[2], f[3] * r[1] - f[1] * r[3], f[1] * r[2] - f[2] * r[1] }
+            SobGroup_SetTransform(sel, { r[1], r[2], r[3], u[1], u[2], u[3], f[1], f[2], f[3] })
+        end
+    end
+    if left == 0 then Rule_Remove("KAS_DisabledTick") end
 end
 -- 0x49a460(ships): remembers the first ship in a UI global (DAT_00a57798)
 function K_49a460(sel) end

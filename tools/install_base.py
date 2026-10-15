@@ -1,12 +1,15 @@
-"""Install the Players Patch (below, PP) and Cataclysm Remastered (workshop 2195601016, "Beast Update" v2.1) as the
-mod's base data layers.
+"""Install the mod's base data layer: the Players Patch (below, PP), then our Somtaaw and Beast races and ships
+generated from stock HWRM (Gearbox's HW1 ships as templates), then Cataclysm's data over them (costs, speeds,
+health and damage, abilities, ship rules, events, voices). No file from Cataclysm Remastered / HWU (REBUILD.md).
 
-Copies Cataclysm-decomp/reference/cr_beast (extracted with Cataclysm-decomp/tools/hw2big.py) into data/, except their
-campaign and junk, then applies PATCHES (small edits so their ships work for the Cataclysm campaign). The copied
-files are listed in data/cr_files.txt and git-ignored through data/.gitignore (their assets are not ours to commit;
-permission is needed before any public release).
+Ships: each smt_* / bst_* type is a copy of a stock HW1 ship (TEMPLATES: its .ship, model, .events, .mad), renamed;
+our converted models (tools/build_ship.sh, OUR_MODELS) replace the template's model, and every other ship keeps its
+template's model as a stand-in until converted (user, 2026-10-14). Races: stock Kushan (Somtaaw) and Taiidan (Beast)
+race folders under our names, with our build / research lists (tools/make_race.py).
+Installed files are listed in data/cr_files.txt and git-ignored through data/.gitignore (stock and PP files are not
+ours to commit); a file an earlier install put there and this one doesn't is removed.
 
-Usage: install_cr.py
+Usage: install_base.py
 """
 import os
 import re
@@ -22,31 +25,186 @@ import make_colours  # noqa: E402
 import make_background  # noqa: E402
 import ship_variants  # noqa: E402
 
-MOD =os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SRC = r"C:\Modding\Cataclysm-decomp\reference\cr_beast"
+MOD = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(MOD, "data")
+REF = r"C:\Modding\Cataclysm-decomp\reference"
+# stock HWRM, in load order (the HW1 campaign's files over the base game's)
+STOCK = [os.path.join(REF, "hwrm", "Homeworld2"), os.path.join(REF, "hwrm", "HW1Ships"),
+         os.path.join(REF, "hwrm", "HW1Campaign")]
 
-# The Homeworld Remastered 2.3 Players Patch (workshop 1190476337, extracted with hw2big.py) under theirs: the
-# community's fixes (formations / strike groups, cross-race docking, SCAR library fixes) and its HW1 ships, which
-# our Kushan and Taiidan use (tools/make_shipcode.py copies its .ship over stock's). Cataclysm Remastered's files
-# win where both have one. Not its campaign / multiplayer levels. Its HW1 rebalance comes along for now; the target
-# is Cataclysm's balance (user), when the Kushan / Taiidan stats are converted.
-PP = r"C:\Modding\Cataclysm-decomp\reference\players_patch"
+# The Homeworld Remastered 2.3 Players Patch (workshop 1190476337, extracted with hw2big.py; kept, user 2026-10-14):
+# the community's fixes (formations / strike groups, cross-race docking, SCAR library fixes) and its HW1 ships, which
+# our Kushan and Taiidan use (tools/make_shipcode.py copies its .ship over stock's). Not its campaign / multiplayer
+# levels. Its HW1 rebalance comes along for now; the target is Cataclysm's balance (user).
+PP = os.path.join(REF, "players_patch")
 PP_SKIP_PREFIX = ("leveldata/", "keeper.txt")
-
-# Only what their ships need (ship/subsystem/weapon/missile/art, ship sounds, race and ship-behaviour scripts):
-# not their menus/UI, their copies of the SCAR libraries (stock HWRM's are used; their scar_util.lua differed in
-# 244 lines), skirmish rules/AI/maps/badges/fleets, locale/speech logic, music or speech.
-SKIP_PREFIX = ("leveldata/", "config_old.txt", "keeper.txt", "ui/", "scripts/scar/", "scripts/rules/",
-               "scripts/startingfleets/", "ai/", "badges/", "locale/", "soundscripts/", "sound/music/",
-               "sound/speech/")
-# ...except these, which their ships do use (TOIcon "Flagship" etc.: a missing icon is a fatal exit)
-# (and the faction badges of Cataclysm's colour schemes: tools/make_colours.py)
-KEEP_PREFIX = ("ui/tacticalicons/",) + tuple("badges/" + b for b in make_colours.BADGES)
 CATSPEECH_LINE = 'dofilepath("data:soundscripts/cataclysm/catspeech.lua")   -- Cataclysm-HWRM: Somtaaw voices'
-SKIP_SUFFIX = (".swp", ".bak")
+MARK = "-- Cataclysm-HWRM base: "   # first line of a generated .ship (make_shipcode.py looks for it)
 
-RESEARCH_HP = ('StartShipHardPointConfig(NewShipType,"Research Module","Hardpoint_GravGenerator","System","Innate",'
+# Our ship types -> the stock HW1 ship each is made from: the Somtaaw from the Kushan, the Beast from the Taiidan (so
+# the two read differently while on stand-in models), by Cataclysm class and role
+TEMPLATES = {
+    # our models (OUR_MODELS)
+    "smt_ms_sp": "kus_mothership", "smt_ms": "kus_mothership", "smt_worker": "kus_resourcecollector",
+    "smt_scout": "kus_scout", "smt_acolyte": "kus_interceptor", "smt_acv": "kus_heavycorvette",
+    "smt_mimic": "kus_interceptor", "smt_processor": "kus_resourcecontroller", "smt_rammingfrigate": "kus_assaultfrigate",
+    # stand-ins (the template's model)
+    "smt_carrier": "kus_carrier", "smt_destroyer": "kus_destroyer", "smt_dreadnought": "kus_heavycruiser",
+    "smt_hivefrigate": "kus_supportfrigate", "smt_multibeamfrigate": "kus_ioncannonfrigate",
+    "smt_sentinel": "kus_defender", "smt_swarmer": "kus_interceptor",
+    "bst_acolyte": "tai_interceptor", "bst_acv": "tai_heavycorvette", "bst_attackbomber": "tai_attackbomber",
+    "bst_carrier": "tai_carrier", "bst_cloakedfighter": "kus_cloakedfighter", "bst_cruisemissile": "tai_lightcorvette",
+    "bst_heavycorvette": "tai_heavycorvette", "bst_heavycruiser": "tai_heavycruiser",
+    "bst_hivefrigate": "tai_supportfrigate", "bst_ionarrayfrigate": "tai_ioncannonfrigate",
+    "bst_missilecorvette": "tai_multiguncorvette", "bst_mothership": "tai_mothership",
+    "bst_multibeamfrigate": "tai_ioncannonfrigate", "bst_multiguncorvette": "tai_multiguncorvette",
+    "bst_rammingfrigate": "tai_assaultfrigate", "bst_swarmer": "tai_interceptor",
+}
+
+# Our races: (stock race it is made from, display name, ship prefix, strike group tags)
+RACES = {"somtaaw": ("kushan", "Somtaaw", "SMT_", "sgf_common,sgf_kus"),
+         "beast": ("taiidan", "The Beast", "BST_", "sgf_common,sgf_tai")}
+RACE_FILE = '''Path_Name = "{name}"
+Symbolic_Name = "{name}"
+Display_Name = "{display}"
+Prefix = "{prefix}"
+
+ExtFilter = "races_gbx,races_hw1,races_hwrm,races_dm,races_dm_hw1,races_gbx_hwrmc"
+Tags = "race_gbx,race_hw1,race_hwrm,race_dm,race_dm_hw1,race_gbx_hwrmc"
+
+SG_Pass_Tags = "{sg}"
+'''
+OURS = set()   # git-tracked data/ paths (lower case, below data/): never overwritten
+# Build families: the templates' <family>_Kus / _Tai become our races' (familylist.lua gets them: patch_families)
+BUILD_FAMILIES = ["Fighter", "Corvette", "Frigate", "SuperCap", "Battlecruiser", "Flagship", "Resource", "NonCombat",
+                  "SubSystem", "Mover", "Utility", "Probe", "Research", "Shipyard"]
+FAMILY_SUFFIX = {"smt_": "Smt", "bst_": "Bst"}
+
+
+def patch_families(text):
+    """The stock / Players Patch familylist plus our races' build families (BUILD_FAMILIES x FAMILY_SUFFIX)."""
+    text = text.replace("\r\n", "\n")
+    add = "".join('\t{\n\t\tname = "%s_%s",\n\t},\n' % (f, s) for s in FAMILY_SUFFIX.values() for f in BUILD_FAMILIES
+                  if '"%s_%s"' % (f, s) not in text)
+    new = text.replace("buildFamily =\n{\n", "buildFamily =\n{\n" + add, 1)
+    assert new != text or not add, "familylist.lua: no buildFamily section"
+    if '"SupportUnits"' not in new:   # Support Units as a native unit cap (set_support_units)
+        text = new
+        new = new.replace("unitcapsFamily =\n{\n", "unitcapsFamily =\n{\n" + SU_FAMILY, 1)
+        assert new != text, "familylist.lua: no unitcapsFamily section"
+    return new
+
+
+def stock_tree(rel):
+    """{path below rel: source file} of a stock folder, later layers over earlier ones."""
+    files = {}
+    for root in STOCK:
+        base = os.path.join(root, rel)
+        for d, _, fns in os.walk(base):
+            for fn in fns:
+                files[os.path.relpath(os.path.join(d, fn), base).replace("\\", "/")] = os.path.join(d, fn)
+    return files
+
+
+def gen_ship(ship, template):
+    """data/ship/<ship>/ from the stock template's folder, renamed: its .lua build script and the custom code that
+    loads it are left out (the Kushan research ships; our ship rules are make_shipcode.py's)."""
+    folder = os.path.join(DATA, "ship", ship)
+    out = []
+    pp = os.path.join(PP, "ship", template, template + ".ship")   # the Players Patch's fixes to the HW1 ships
+    for rel, src in sorted(stock_tree(os.path.join("ship", template)).items()):
+        if rel.lower().endswith(".lua") and "/" not in rel:
+            continue
+        dst_rel = re.sub(re.escape(template), ship, rel, flags=re.I)
+        out.append(f"ship/{ship}/{dst_rel}")
+        if out[-1].lower() in OURS:
+            continue
+        dst = os.path.join(folder, dst_rel)
+        os.makedirs(os.path.dirname(dst), exist_ok=True)
+        if rel.lower() == template + ".ship" and os.path.exists(pp):
+            src = pp
+        if rel.lower().endswith((".ship", ".madstate", ".events")):
+            text = open(src, encoding="latin-1").read()
+            # (the madstate's functions are <TYPE>_<state>_OnSet: the engine calls them by the ship type's name)
+            text = re.sub(r"\b%s(?=_|\b)" % re.escape(template), ship.upper(), text, flags=re.I) \
+                if rel.lower().endswith(".madstate") else re.sub(r"\b%s\b" % re.escape(template.upper()), ship.upper(), text)
+            text = re.sub(r"ship/%s/%s" % (re.escape(template), re.escape(template)), f"ship/{ship}/{ship}", text,
+                          flags=re.I)
+            if rel.lower().endswith(".ship"):
+                text = re.sub(r'^[ \t]*addCustomCode\(NewShipType,\s*"data:ship/%s/[^\n]*\n?' % re.escape(ship), "",
+                              text, flags=re.M | re.I)
+                # and its custom commands that run from that .lua (the HW1 Scout's / Interceptor's Speed Burst: not
+                # Cataclysm's, user)
+                text = re.sub(r'^([ \t]*addAbility\(NewShipType,\s*"CustomCommand"[^\n]*"data:ship/%s/)' % re.escape(ship),
+                              r"-- Cataclysm-HWRM (the template's ability): \1", text, flags=re.M | re.I)
+                # our race's own build families (FAMILY_SUFFIX): built by our builders, not the Kushan / Taiidan ones
+                text = re.sub(r"\b(%s)_(?:Kus|Tai)\b" % "|".join(BUILD_FAMILIES), r"\1_" + FAMILY_SUFFIX[ship[:4]],
+                              text)
+                text = f"{MARK}{template} (tools/install_base.py)\n" + text
+            open(dst, "w", encoding="latin-1", newline="").write(text)
+        else:
+            shutil.copyfile(src, dst)
+    return out
+
+
+ENGLISH = r"C:\Modding\Cataclysm-decomp\extracted\big\english.script"
+
+
+def set_names():
+    """Each generated ship's name and description: Cataclysm's (english.script str<ship> / str<ship>Info, the
+    Cataclysm type from tools/shipmap.tsv), in place of the stock template's ("$10002", Interceptor...). Names in title
+    case as our build lists show them (short ones, ACV, as they are); descriptions Cataclysm's build manager text."""
+    strings = {}
+    for line in open(ENGLISH, encoding="latin-1"):
+        m = re.match(r"str(\w+)\s+(.+?)\s*$", line)
+        if m:
+            strings.setdefault(m.group(1).lower(), m.group(2))
+    cat = {}
+    for line in list(open(os.path.join(MOD, "tools", "shipmap.tsv"), encoding="utf-8"))[1:]:
+        cols = line.rstrip("\n").split("\t")
+        if len(cols) >= 3 and cols[2]:
+            cat.setdefault(cols[2].lower(), cols[1].lower())
+    cat.setdefault("smt_ms", "smothership")   # (the other Kuun-Lan type: no shipmap row)
+    lua = lambda s: s.replace("\\", "\\\\").replace('"', '\\"').replace("\\\\n", "\\n")
+    n = 0
+    for ship in TEMPLATES:
+        c = cat.get(ship)
+        if not c or c not in strings:
+            continue
+        name = strings[c]
+        name = name if len(name) <= 4 else name.title()
+        info = strings.get(c + "info", "")
+        if info.startswith(("09###", "11###")) or "NEVER APPEARS" in info:
+            info = ""
+        path = os.path.join(DATA, "ship", ship, ship + ".ship")
+        text = open(path, encoding="latin-1").read()
+        text = re.sub(r'^(\s*NewShipType(?:\.displayedName|\["displayedName"\])\s*=\s*)"[^"]*"', lambda m: m.group(1)
+                      + f'"{lua(name)}"', text, count=1, flags=re.M)
+        text = re.sub(r'^(\s*NewShipType(?:\.sobDescription|\["sobDescription"\])\s*=\s*)"[^"]*"', lambda m: m.group(1)
+                      + f'"{lua(info or name)}"', text, count=1, flags=re.M)
+        open(path, "w", encoding="latin-1", newline="").write(text)
+        n += 1
+    print(f"  Cataclysm names on {n} ships")
+
+
+def gen_race(race, src, display, prefix, sg):
+    """scripts/races/<race>/ from the stock race's folder, and scripts/races/<race>.lua; our own files there (git
+    tracked: sp_build / sp_research) are kept."""
+    out = []
+    for rel, path in sorted(stock_tree(os.path.join("scripts", "races", src)).items()):
+        dst_rel = f"scripts/races/{race}/{rel}"
+        out.append(dst_rel)
+        if dst_rel.lower() in OURS:
+            continue
+        dst = os.path.join(DATA, dst_rel)
+        os.makedirs(os.path.dirname(dst), exist_ok=True)
+        shutil.copyfile(path, dst)
+    with open(os.path.join(DATA, "scripts", "races", race + ".lua"), "w", encoding="latin-1", newline="\n") as f:
+        f.write(RACE_FILE.format(name=race.capitalize(), display=display, prefix=prefix, sg=sg))
+    return out + [f"scripts/races/{race}.lua"]
+
+
+RESEARCH_HP = ('StartShipHardPointConfig(NewShipType,"Research Module","Hardpoint_Research","System","Innate",'
                '"Damageable","HW1_ResearchModule","","","","","","","","");')
 
 
@@ -55,70 +213,51 @@ TO_MOTHERSHIP = "\n".join(f"NewShipType.{k}={v}" for k, v in (
     ("TODistanceDisappear1", 5000), ("TODistanceFade2", 12000), ("TODistanceDisappear2", 35000)))
 
 
+def after_load_model(text, add):
+    """add after the .ship's LoadModel line (hardpoints and weapons must come after it)."""
+    new, n = re.subn(r"^([ \t]*LoadModel\(NewShipType,\s*1\);[^\n]*\n)", lambda m: m.group(1) + add.rstrip("\n") + "\n",
+                     text, count=1, flags=re.M)
+    assert n == 1, "no LoadModel line"
+    return new
+
+
 def patch_ms_sp(text):
-    """Cataclysm researches without building a research module: innate HW1 research module on the unused
-    Hardpoint_GravGenerator of their single-player Kuun-Lan (after LoadModel, as hardpoints must be; their
-    multiplayer model, see COPIES, has no Hardpoint_Generic5-7)."""
-    # its tactical overlay icon: theirs has no TODistance* (engine defaults: it vanished zooming out before the
-    # Workers' did, user); stock HW1 kus_mothership's
+    """Cataclysm researches without building a research module: innate HW1 research module on the Kuun-Lan's
+    Hardpoint_Research (our model's), its module slots
+    (tools/make_modules.py) and Cataclysm's guns (user): smothership.shp GUN1-6, six large hidden gimbals (GUN0 is the
+    siege cannon, its module's); data/weapon/cat_kuunlan_gun*. Its tactical overlay icon fades as stock HW1
+    kus_mothership's (engine defaults: it vanished zooming out before the Workers' did, user)."""
     if "TODistanceFade0" not in text:
-        assert 'NewShipType.TOIcon="Flagship"' in text
-        text = text.replace('NewShipType.TOIcon="Flagship"', 'NewShipType.TOIcon="Flagship"\n' + TO_MOTHERSHIP, 1)
-    # Cataclysm's guns, not theirs (user): smothership.shp GUN1-6, six large hidden gimbals (GUN0 is the siege
-    # cannon, its module's); data/weapon/cat_kuunlan_gun*
-    if "cat_kuunlan_gun" not in text:
-        text = re.sub(r'^(StartShipWeaponConfig\(NewShipType, "Bst_MSTurret1?",)', r"-- Cataclysm-HWRM: \1", text,
-                      flags=re.M)
-        guns = "\n".join(f'StartShipWeaponConfig(NewShipType,"cat_kuunlan_gun{"" if k <= 4 else "60"}",'
-                         f'"Weapon_GUN{k}","Weapon_GUN{k}");' for k in range(1, 7))
-        text = text.replace("LoadModel(NewShipType, 1);", "LoadModel(NewShipType, 1);\n"
-                            "-- Cataclysm-HWRM: Cataclysm's Kuun-Lan guns (GUN1-4 85 deg, GUN5-6 60 deg)\n" + guns, 1)
-    if "HW1_ResearchModule" in text:
+        text = text.rstrip("\n") + "\n" + TO_MOTHERSHIP + "\n"
+    # it builds its modules (subsystems, tools/make_modules.py: SubSystem_Smt) in a Modules tab
+    if "SubSystem_Smt" not in text:
+        text, n = re.subn(r'(addAbility\(NewShipType,\s*"CanBuildShips",\s*1,\s*"[^"]*)("\s*,\s*"[^"]*)"',
+                          r'\1, SubSystem_Smt\2, SubSystemModule"', text, count=1)
+        assert n == 1, "Kuun-Lan: no CanBuildShips"
+    # its parade: Cataclysm's layout (tools/make_parade.py), not the stock Kushan Mothership's (user: it reset)
+    text = re.sub(r'(NewShipType(?:\.paradeData|\["paradeData"\])\s*=\s*)"[^"]*"', r'\1"smt_mothership_parade"', text)
+    for key, v in KUUNLAN_MOVE.items():
+        text, n = re.subn(r'^([ \t]*NewShipType(?:\.%s|\["%s"\])\s*=\s*)[^;\n]*' % (key, key), r"\g<1>%g" % v, text,
+                          count=1, flags=re.M)
+        if not n:
+            text = text.rstrip("\n") + f"\nNewShipType.{key}={v:g}\n"
+    if "cat_kuunlan_gun" in text:
         return text
-    return text.replace("LoadModel(NewShipType, 1);",
-                        "LoadModel(NewShipType, 1);\n-- Cataclysm-HWRM: innate research module\n" + RESEARCH_HP +
-                        "\n-- Cataclysm-HWRM: Kuun-Lan module slots (tools/make_modules.py)\n" +
-                        "\n".join(make_modules.hardpoint_lines()), 1)
+    guns = "\n".join(f'StartShipWeaponConfig(NewShipType,"cat_kuunlan_gun{"" if k <= 4 else "60"}",'
+                     f'"Weapon_GUN{k}","Weapon_GUN{k}");' for k in range(1, 7))
+    return after_load_model(text, "-- Cataclysm-HWRM: Cataclysm's Kuun-Lan guns (GUN1-4 85 deg, GUN5-6 60 deg)\n" + guns +
+                            "\n-- Cataclysm-HWRM: innate research module\n" + RESEARCH_HP +
+                            "\n-- Cataclysm-HWRM: Kuun-Lan module slots (tools/make_modules.py)\n" +
+                            "\n".join(make_modules.hardpoint_lines()))
 
 
 def patch_sp_props(text):
-    """Single-player build/research lists: ours (tools/make_race.py: Cataclysm's tech tree on their ships)."""
-    if "path_build" in text:
-        return text
+    """Single-player build/research lists: ours (tools/make_race.py: Cataclysm's tech tree), in place of the stock
+    race's (the HW1 campaign's props point at the Kushan lists)."""
+    text = re.sub(r"^[ \t]*path_(?:build|research)\s*=[^\n]*\n", "", text, flags=re.M)
     return text.replace("String_Properties = {", "String_Properties = {\n"
                         "\tpath_build = [[data:scripts/races/somtaaw/scripts/sp_build.lua]],\n"
                         "\tpath_research = [[data:scripts/races/somtaaw/scripts/sp_research.lua]],", 1)
-
-
-MISSING_FAMILIES = ["Shipyard_Smt", "Utility_Smt", "Research_Smt", "SubSystemLarge_Smt", "Probe_Smt"]
-
-
-def family_sections(text):
-    """{section: [family names]} of a familylist.lua (buildFamily = { { name = "..." }, ... })."""
-    return {m.group(1): re.findall(r'name\s*=\s*"([^"]+)"', m.group(2))
-            for m in re.finditer(r"^(\w+)\s*=\s*\n\{(.*?)^\}", text, re.M | re.S)}
-
-
-def patch_families(text):
-    """Their familylist, plus: families their Kuun-Lan builds that the Beast Update's lacks, and the Players Patch's
-    families theirs lacks (its ships use them; a missing family is a log error)."""
-    text = text.replace("\r\n", "\n")
-    add = "".join('\t{\n\t\tname = "%s",\n\t},\n' % f for f in MISSING_FAMILIES if '"%s"' % f not in text)
-    text = text.replace("buildFamily =\n{\n", "buildFamily =\n{\n" + add, 1)
-    ours = family_sections(text)
-    pp = family_sections(open(os.path.join(PP, "scripts", "familylist.lua"), encoding="latin-1").read()
-                         .replace("\r\n", "\n"))
-    for section, names in pp.items():
-        missing = [n for n in names if n not in ours.get(section, [])]
-        if missing:
-            text = text.replace(section + " =\n{\n", section + " =\n{\n" +
-                                "".join('\t{\n\t\tname = "%s",\n\t},\n' % f for f in missing), 1)
-    return text
-
-
-def patch_race(text):
-    """Single-player rules only pass races tagged race_gbx_hwrmc ("Unknown Race [Somtaaw]" otherwise)."""
-    return re.sub(r'^(Tags = "(?:(?!race_gbx_hwrmc)[^"])*)"', r'\1,race_gbx_hwrmc"', text, count=1, flags=re.M)
 
 
 # The repair order (Worker, Processor): HWRM repairs only the attack families listed after EndRepairRates, each
@@ -158,9 +297,7 @@ def repair_order(text, kind):
     new, n = re.subn(r'^\s*addAbility\(NewShipType,\s*"RepairCommand".*?\);[^\n]*$', order, text,
                      count=1, flags=re.M | re.S)
     if not n:
-        assert 'addAbility(NewShipType, "RetireAbility", 1, 1);' in text
-        new = text.replace('addAbility(NewShipType, "RetireAbility", 1, 1);',
-                           'addAbility(NewShipType, "RetireAbility", 1, 1);\n' + order, 1)
+        new = text.rstrip("\n") + "\n" + order + "\n"
     return new
 
 
@@ -209,6 +346,16 @@ def patch_hw1_armour(text):
 
 # the Mimic's attack (install below): its own CanAttack numbers (the collector's 1, 5, 2 took attack orders away: a
 # click gave a move order, user) with stock kus_resourcecollector's kamikaze styles, on every family
+# an active CanAttack statement, all its lines (stock HW1 ships list one attack style per line)
+CAN_ATTACK = re.compile(r'^addAbility\(NewShipType,\s*"CanAttack".*?\);[^\n]*', re.M | re.S)
+
+
+def comment_out(stmt, why):
+    """every line of a statement commented out"""
+    lines = stmt.split("\n")
+    return "\n".join([f"-- Cataclysm-HWRM ({why}): " + lines[0]] + ["-- " + l for l in lines[1:]])
+
+
 MIMIC_ATTACK = ('addAbility(NewShipType, "CanAttack", 1, 5, 1, 0, 0.35, 1, "Fighter, Fighter_hw1, Corvette, '
                 'Corvette_hw1, Frigate, Utility, SmallCapitalShip, BigCapitalShip, Mothership", "kamikaze", '
                 '{Fighter="kamikaze"}, {Fighter_hw1="kamikaze"}, {SubSystem="kamikaze"}, {SmallCapitalShip="kamikaze"}, '
@@ -238,7 +385,7 @@ def patch_rammingfrigate(text):
     """Cataclysm's ram grapples onto a target's salvage points (user: the points resourcers dock to when salvaging;
     Cataclysm lines up far more loosely than HWRM could from script): HWRM's own salvage-capture latch (stock
     kus_salvagecorvette's SalCapCommand), which shiprules.lua CatRam_Tick turns into the hit, push and cutting beam.
-    No attack (no guns; Cataclysm Remastered's attack run only collided): a right-click on an enemy is the latch
+    No attack (no guns): a right-click on an enemy is the latch
     (SobGroup_SalvageSobGroup from script did nothing)."""
     # the Processor's engines (user), but the stock HW1 frigates' burn (kus_assaultfrigate & co.): the Kuun-Lan's
     # drew a white ball as big as the frigate over its rear (user: pics/engine-normal.jpg)...
@@ -252,78 +399,197 @@ def patch_rammingfrigate(text):
                             "setEngineGlow(NewShipType", 1)
     if '"SalCapCommand"' in text:
         return text
-    text = re.sub(r'^(addAbility\(NewShipType,\s*"CanAttack".*)$', r"-- Cataclysm-HWRM (the ram is its salvage latch): \1",
-                  text, count=1, flags=re.M)
+    text = re.sub(CAN_ATTACK, lambda m: comment_out(m.group(0), "the ram is its salvage latch"), text, count=1)
     return (text.rstrip("\n") +
             '\naddAbility(NewShipType,"SalCapCommand",1,500,0,0);   -- Cataclysm-HWRM: the ram\'s latch\n')
 
 
+SU_FRAME = """
+				-- Cataclysm-HWRM: Support Units, used / limit (Cataclysm's build manager "SU:"; set by cataclysmkas.lua
+				-- KAS_SUTick)
+				{
+					type = "Frame",
+					Layout = {
+						size_WH = {	w = 1, h = 1.0, wr = "par", hr = "px" },
+					},
+					autosize = 1,
+					;
+					{
+						type = "TextLabel",
+						name = "lblSUHeading",
+						autosize=1,
+						ignored = 1,
+						Layout = {
+							size_WH = {w = .70, h = STD_LABEL_HEIGHT, wr = "par", hr = "scr",},
+						},
+						dropShadow = 1,
+						Text = {
+							text = "Support Units",
+							textStyle = "IGHeading2",
+							minShrink = 0.25,
+						},
+					},
+					{
+						type = "TextLabel",
+						name = "lblSUCount",
+						ignored = 1,
+						Layout = {
+							size_WH = {w = .25, h = STD_LABEL_HEIGHT, wr = "par", hr = "scr",},
+							pos_XY = { x = 1.0, xr = "par" },
+							pivot_XY = { 1,  0 },
+						},
+						autosize = 1,
+						dropShadow = 1,
+						Text = {
+							textStyle = "IGHeading2",
+							hAlign = "Right",
+							minShrink = 0.25,
+						},
+					},
+				},
+"""
+
+
+def patch_build_menu(text):
+    """The build menu's subsystem lines (Production / Module / Sensors slots) get Cataclysm's Support Units line
+    (SU_FRAME, filled by the runtime's KAS_SUTick)."""
+    if "lblSUCount" in text:
+        return text
+    text, n = re.subn(r"(\n\t\t\t\},\n\t\t\t-+ END Subsystem stat labels)", lambda m: SU_FRAME.rstrip("\n") + m.group(1),
+                      text, count=1)
+    assert n == 1
+    return text
+
+
+def patch_sp_unitcaps(text):
+    """Cataclysm's unit caps (unitlimitcaps.script, cataclysm.exe FUN_0053ece0): only the types not left to Support
+    Units (cap -1): CapsCarrier 2 (the Kuun-Lan's modules are one per hardpoint, 12 Support Modules). Theirs called
+    UC_FamilyOverride, which HWRM lacks (the file failed at its first line). Support Units: set_support_units.
+    Cataclysm's ShipTotalCaps 297 is left out: Support Units stop a fleet well short of it."""
+    return ("-- Cataclysm-HWRM (install_base.py patch_sp_unitcaps): Cataclysm's unit caps, and Support Units as one\n"
+            "supplyLimit(\"Carrier\", 2)   -- unitlimitcaps.script CapsCarrier\n"
+            f"supplyLimit(\"SupportUnits\", {SU_CAP})   -- Support Units: filler ships hold what's above the limit "
+            "(set_support_units)\n"
+            "supplyShow(\"SupportUnits\", \"Never\")   -- (the fillers are in it: the build menu's own SU line shows "
+            "used / limit)\n")
+
+
+# Support Units as a native unit cap (Complex EVO's filler ships, workshop 398406822): every type the Somtaaw build
+# list has takes its SU from the "SupportUnits" cap (HWRM counts queues at the click, as Cataclysm did), capped at
+# SU_CAP; the runtime (cataclysmkas.lua KAS_SUTick) holds what's above the mission's SU limit with filler ships.
+# Learned in game (2026-10-14): a type counts only if the race's build list has it (make_race.py lists the fillers,
+# gated by a research that doesn't exist); a despawned ship doesn't count, one in the world does.
+SU_CAP = 400         # Cataclysm's most: the Kuun-Lan 70 + Hangar 30 + 12 Support Modules 120 + 2 Carriers 80
+SU_FILLERS = [("cat_sufiller25", 25), ("cat_sufiller5", 5), ("cat_sufiller1", 1)]   # largest first (make_race.py)
+SU_FAMILY = ('\t{\n\t\tname = "SupportUnits",\n\t\tnumParam = 95,\n\t\tstringParam = "Support Units",\n\t},\n')
+SU_FILLER_SHIP = """NewShipType = StartShipConfig()
+-- Generated by tools/install_base.py set_support_units: a Support Units filler (hidden, far below the map)
+NewShipType.displayedName = "Support Units"
+NewShipType.maxhealth = 1000000
+NewShipType.mass = 0
+NewShipType.AttackFamily = "UnAttackable"
+NewShipType.AvoidanceFamily = "None"
+NewShipType.CollisionFamily = "Unmoveable"
+NewShipType.DisplayFamily = "Utility"
+NewShipType.visualRange = 0
+NewShipType.prmSensorRange = 0
+NewShipType.secSensorRange = 0
+NewShipType.mouseOverMinFadeSize = 0
+NewShipType.mouseOverMaxFadeSize = 0
+NewShipType.meshRenderLimit = 0
+NewShipType.visibleInSecondary = 0
+NewShipType.selectionLimit = 0
+NewShipType.preciseSelectionLimit = 0
+NewShipType.preciseATILimit = 0
+NewShipType.selectionPriority = 0
+NewShipType.militaryUnit = 0
+setSupplyValue(NewShipType, "SupportUnits", {su})
+LoadSharedModel(NewShipType, "kus_probe")
+"""
+
+
+def set_support_units():
+    """Each Somtaaw build-list ship's SU (tools/make_supportunits.py's CatSU_Cost) as its "SupportUnits" supply
+    value, the filler ships, and data/scripts/cataclysm/sunative_gen.lua for the runtime (the cap, the fillers, the
+    types the engine counts: the script adds the others' SU to the fillers). Returns the files it made."""
+    gen = open(os.path.join(DATA, "scripts", "cataclysm", "supportunits_gen.lua"), encoding="latin-1").read()
+    costs = dict(re.findall(r'\["(\w+)"\]\s*=\s*(\d+)', gen.split("CatSU_Cost", 1)[1].split("}", 1)[0]))
+    listed = set(re.findall(r'ThingToBuild\s*=\s*"(\w+)"', open(
+        os.path.join(DATA, "scripts", "races", "somtaaw", "scripts", "sp_build.lua"), encoding="latin-1").read()))
+    native = []
+    for ship, su in sorted(costs.items()):
+        path = os.path.join(DATA, "ship", ship, ship + ".ship")
+        if not (ship in listed and os.path.exists(path)):
+            continue
+        text = open(path, encoding="latin-1").read()
+        text = re.sub(r'^setSupplyValue\(NewShipType, "SupportUnits"[^\n]*\n?', "", text, flags=re.M)
+        text = text.rstrip("\n") + f'\nsetSupplyValue(NewShipType, "SupportUnits", {su})   -- Cataclysm-HWRM: Support Units\n'
+        open(path, "w", encoding="latin-1", newline="").write(text)
+        native.append(ship)
+    made = []
+    for name, su in SU_FILLERS:
+        assert name in listed, f"{name} not in sp_build.lua (rerun tools/make_race.py): it wouldn't count"
+        os.makedirs(os.path.join(DATA, "ship", name), exist_ok=True)
+        open(os.path.join(DATA, "ship", name, name + ".ship"), "w", encoding="latin-1", newline="\n").write(
+            SU_FILLER_SHIP.replace("{su}", str(su)))
+        made.append(f"ship/{name}/{name}.ship")
+    lua = ["-- Generated by tools/install_base.py set_support_units: Support Units as the engine's unit cap",
+           f"CatSU_Cap = {SU_CAP}",
+           "CatSU_Fillers = { " + ", ".join(f'{{ "{n}", {s} }}' for n, s in SU_FILLERS) + " }",
+           "CatSU_Native = { " + ", ".join(f'["{s}"] = 1' for s in native) + " }", ""]
+    rel = "scripts/cataclysm/sunative_gen.lua"
+    open(os.path.join(DATA, rel), "w", encoding="latin-1", newline="\n").write("\n".join(lua))
+    print(f"  Support Units supply values on {len(native)} ships; fillers {', '.join(n for n, _ in SU_FILLERS)}")
+    return made + [rel]
+
+
 PATCHES = {
+    "scripts/races/somtaaw/singleplayer/unitcaps/singleplayer.lua": patch_sp_unitcaps,
+    "ui/newui/build/finalbuild.lua": patch_build_menu,
     "ship/smt_rammingfrigate/smt_rammingfrigate.ship": patch_rammingfrigate,
     "ship/smt_ms_sp/smt_ms_sp.ship": patch_ms_sp,
+    "ship/smt_ms/smt_ms.ship": patch_ms_sp,
     "ship/smt_worker/smt_worker.ship": patch_worker,
     "ship/smt_processor/smt_processor.ship": patch_processor,
     "ship/smt_acolyte/smt_acolyte.ship": patch_acolyte,
     "scripts/races/somtaaw/singleplayer/props/gbx.lua": patch_sp_props,
     "scripts/familylist.lua": patch_families,
-    "scripts/races/somtaaw.lua": patch_race,
 }
 
-# Their single-player Kuun-Lan model is an old 20 MB export that fails the HWRM mesh loader ("Unknown mesh
-# group type", BMSH version 0x578 with extra UV sets); their multiplayer Kuun-Lan is the same ship re-exported
-# (same .mad/.events and joints, minus the unused Hardpoint_Generic5-7).
-COPIES = {
-    "ship/smt_ms_sp/smt_ms_sp.hod": "ship/smt_ms/smt_ms.hod",
-}
-
-# Our models (tools/build_ship.sh: Cataclysm's geometry at Gearbox's scale, matching the converted NIS and
-# levels) under their ship setup. Their joint names map to ours; hardpoint/weapon configs on joints our model
-# lacks are commented out.
+# Our models (tools/build_ship.sh: Cataclysm's geometry at Gearbox's scale, matching the converted NIS and levels)
+# under the template's setup: (our model, template joint -> ours). The template's weapons give way to OUR_WEAPONS;
+# its hardpoint configs on joints our model lacks are commented out.
 BUILD = os.path.join(MOD, "build", "ships")
 OUR_MODELS = {
-    "smt_ms_sp": ("som_mothership", {
-        "Hardpoint_GravGenerator": "Hardpoint_Research",
-        "Weapon_TurretTopCenter": "Weapon_GUN0", "Weapon_TurretRearLeftTop": "Weapon_GUN1",
-        "Weapon_TurretRearRightTop": "Weapon_GUN2", "Weapon_TurretRearLeftBot": "Weapon_GUN3",
-        "Weapon_TurretRearRightBot": "Weapon_GUN4", "Weapon_TurretFrontCenter": "Weapon_GUN5"}),
+    "smt_ms_sp": ("som_mothership", {}),
+    "smt_ms": ("som_mothership", {}),
     "smt_worker": ("som_worker", {}),
-    "smt_scout": ("som_recon", {"Weapon_Autogun": "Weapon_GUN0"}),
-    "smt_acolyte": ("som_acolyte", {"Weapon_FrontGun": "Weapon_GUN0", "Weapon_FrontBotGun": "Weapon_GUN1",
-                                    "Weapon_Missile": "Weapon_GUN2"}),
-    # their four guns are Cataclysm's four, in order
-    "smt_acv": ("som_acv", {"Weapon_Gun": "Weapon_GUN0", "Weapon_Gun1": "Weapon_GUN1", "Weapon_Gun2": "Weapon_GUN2",
-                            "Weapon_Gun3": "Weapon_GUN3"}),
+    "smt_scout": ("som_recon", {}),
+    "smt_acolyte": ("som_acolyte", {}),
+    "smt_acv": ("som_acv", {}),
     # its body and its disguises as joints, one shown at a time (tools/overrides/ship/smt_mimic/smt_mimic.madstate)
     "smt_mimic": ("som_mimic", {}),
-    # their four hull guns on Cataclysm's four gun points (any pairing: their positions differ from ours)
-    "smt_processor": ("som_processor", {"Weapon_TopLeft": "Weapon_GUN0", "Weapon_TopRight": "Weapon_GUN2",
-                                        "Weapon_BotLeft": "Weapon_GUN3", "Weapon_BotRight": "Weapon_GUN1"}),
-    # (their ion beam's hardpoint isn't on ours: Cataclysm's has no gun)
+    "smt_processor": ("som_processor", {}),
     "smt_rammingfrigate": ("som_rammingfrigate", {}),
 }
-
-
-# Effects for ships whose own .events have none (their Acolyte's is empty: no muzzle flash): a stock HWRM ship's,
-# its joint/animation names mapped to ours
-HW1SHIPS = r"C:\Modding\Cataclysm-decomp\reference\hwrm\HW1Ships\ship"
-OUR_EVENTS = {
-    "smt_acolyte": (os.path.join(HW1SHIPS, "kus_interceptor", "kus_interceptor.events"),
-                    {"Weapon_Gun0": "Weapon_GUN0", "Weapon_Gun1": "Weapon_GUN1"}),
-    # theirs had no death events: no explosion (user)
-    "smt_mimic": (os.path.join(HW1SHIPS, "kus_interceptor", "kus_interceptor.events"), {}),
+# Weapons on our models' gun joints (Cataclysm's guns, GUN<n> in the .shp's order; tools/build_ship.sh): stock HWRM
+# weapons, their damage set to Cataclysm's by tools/make_damage.py. The Kuun-Lan's are patch_ms_sp's, the Acolyte's
+# missile launchers patch_acolyte's; the Worker, Mimic and Ramming Frigate have no guns in Cataclysm.
+OUR_WEAPONS = {
+    "smt_scout": [("HW1_Scout", "Weapon_GUN0"), ("Hgn_SmallEMP", "Weapon_GUN0")],
+    "smt_acolyte": [("HW1_Interceptor", "Weapon_GUN0"), ("HW1_Interceptor", "Weapon_GUN1")],
+    "smt_acv": [("HW1_Interceptor", f"Weapon_GUN{k}") for k in range(4)] + [("Hgn_SmallEMP", "Weapon_GUN0")],
+    "smt_processor": [("Hgn_MSHullDefenseGun", f"Weapon_GUN{k}") for k in range(4)],
 }
+# The Kuun-Lan moves as it did before the rebuild (user: more agile than HW1's Mothership)
+KUUNLAN_MOVE = {"mass": 2000, "thrusterMaxSpeed": 60, "mainEngineMaxSpeed": 60, "rotationMaxSpeed": 8,
+                "thrusterAccelTime": 6, "thrusterBrakeTime": 2, "mainEngineAccelTime": 6, "mainEngineBrakeTime": 2,
+                "rotationAccelTime": 0.5, "rotationBrakeTime": 0.3, "accelerationAngle": 30, "maxBankingAmount": 10,
+                "descendPitch": 10, "slideMoveRange": 350}
 
-
-# Files of theirs replaced by ours (tracked here; data/ copies are git-ignored as theirs): tools/overrides/<data path>
+# Our own versions of installed files (tracked here; the data/ copies are git-ignored): tools/overrides/<data path>.
+# Only for ships on our models: a stand-in keeps its template's files.
 OVERRIDES = os.path.join(MOD, "tools", "overrides")
-
-
-def use_our_events(ship, src, names):
-    text = open(src, encoding="latin-1").read()
-    for theirs, mine in names.items():
-        text = text.replace(theirs, mine)
-    with open(os.path.join(DATA, "ship", ship, ship + ".events"), "w", encoding="latin-1", newline="") as f:
-        f.write(text)
 
 
 # Speeds: Cataclysm's .shp maxvelocity converted the way Gearbox converted the matching HW1 class for HWRM (their
@@ -412,13 +678,13 @@ def make_cargo_cloud():
     text = open(os.path.join(CLOUD_SRC, "dustcloud_0", "dustcloud_0.resource"), encoding="latin-1").read().rstrip()
     extra = [l for l in open(os.path.join(CLOUD_SRC, "dustcloud0_hw1", "dustcloud0_hw1.resource"), encoding="latin-1")
              if re.match(r"NewResourceType\.(resourceValue|blobRadius)\s*=", l)]
-    text += "\n-- Cataclysm-HWRM: resourcers' cargo (install_cr.py make_cargo_cloud): DustCloud0_hw1's resource fields\n"
+    text += "\n-- Cataclysm-HWRM: resourcers' cargo (install_base.py make_cargo_cloud): DustCloud0_hw1's resource fields\n"
     open(os.path.join(out, CARGO_CLOUD_TYPE + ".resource"), "w", encoding="latin-1", newline="\n").write(
         text + "".join(extra))
     # and a .dustcloud like DustCloud_0's, which has one (user: HWRM's look, not the HW1 cloud's)
     dc = open(os.path.join(CLOUD_SRC, "dustcloud_0", "dustcloud_0.dustcloud"), encoding="latin-1").read().rstrip()
     open(os.path.join(out, CARGO_CLOUD_TYPE + ".dustcloud"), "w", encoding="latin-1", newline="\n").write(
-        dc + "\n-- Cataclysm-HWRM: resourcers' cargo (install_cr.py make_cargo_cloud)\n" + "".join(extra))
+        dc + "\n-- Cataclysm-HWRM: resourcers' cargo (install_base.py make_cargo_cloud)\n" + "".join(extra))
 
 
 # Turret turn speeds from Cataclysm's .shp (maxanglespeed / maxdeclinationspeed, degrees/s) for the weapons whose
@@ -509,28 +775,6 @@ def set_trails():
         print(f"  {ship}: {src}'s engine trail on {nozzles} nozzles")
 
 
-# CR's energy cannons, "Special Attack" weapons on their Acolyte / ACV: they never fire in normal combat (make_damage
-# counted them, so the guns that do fire got about half of Cataclysm's damage: ACV ~25 of 58 DPS, user: "doesn't do
-# enough damage"), and once UseSpecialWeaponsInNormalAttack is on (the Acolyte's missile upgrade) they fire as an
-# extra gun Cataclysm only gives with its Energy upgrade (shelved). Cataclysm's ships fire their projectile guns only.
-DROP_WEAPONS = {"smt_acolyte": ("Ksh_KineticAutoGun1",), "smt_acv": ("Smt_ACVAutoGun1",)}
-
-
-def drop_weapons():
-    for ship, weapons in DROP_WEAPONS.items():
-        path = os.path.join(DATA, "ship", ship, ship + ".ship")
-        if not os.path.exists(path):
-            continue
-        text = open(path, encoding="latin-1").read()
-        n = 0
-        for w in weapons:
-            text, k = re.subn(r'^(StartShipWeaponConfig\(NewShipType,\s*"%s")' % re.escape(w),
-                              r"-- Cataclysm-HWRM (drop_weapons): \1", text, flags=re.M | re.I)
-            n += k
-        open(path, "w", encoding="latin-1", newline="").write(text)
-        print(f"  {ship}: {n} special-attack weapon configs dropped")
-
-
 def set_speed(ship, cat, cls):
     shp = os.path.join(r"C:\Modding\Cataclysm-decomp\extracted\big\race_sect", cat + ".shp")
     v = next(float(l.split()[1]) for l in open(shp, encoding="latin-1") if l.lower().startswith("maxvelocity"))
@@ -551,6 +795,10 @@ def use_our_model(ship, ours, joints):
     folder = os.path.join(DATA, "ship", ship)
     shutil.copyfile(os.path.join(BUILD, ours, ours + ".hod"), os.path.join(folder, ship + ".hod"))
     mad = os.path.join(BUILD, ours, ours + ".mad")   # converted Cataclysm animation (tools/mad2hwrm.py)
+    # the template's .madstate drives the template's animations, which our model doesn't have (ours, where there
+    # is one: tools/overrides)
+    if os.path.exists(os.path.join(folder, ship + ".madstate")) and f"ship/{ship}/{ship}.madstate" not in OURS:
+        os.remove(os.path.join(folder, ship + ".madstate"))
     if os.path.exists(mad):
         shutil.copyfile(mad, os.path.join(folder, ship + ".mad"))
     else:
@@ -570,11 +818,23 @@ def use_our_model(ship, ours, joints):
     text = re.sub(r'^\s*NewShipType(\.|\[")(upLOD|downLOD)\b.*\n', "", text, flags=re.M)
     text = re.sub(r'^(\s*NewShipType(?:\.|\[")minLOD(?:"\])?\s*=\s*)[\d.]+', r"\g<1>1", text, flags=re.M)
 
+    # the template's guns give way to ours (its weapon joints and turrets aren't on our model)
+    text = re.sub(r'^(StartShipWeaponConfig\(|StartShipHardPointConfig\(NewShipType,\s*"[^"]*",\s*"[^"]*",\s*"Weapon")',
+                  r"-- Cataclysm-HWRM (the template's gun): \1", text, flags=re.M)
+    if OUR_WEAPONS.get(ship):
+        text = after_load_model(text, "-- Cataclysm-HWRM: Cataclysm's guns on our model (OUR_WEAPONS)\n" + "\n".join(
+            f'StartShipWeaponConfig(NewShipType,"{w}","{j}","{j}");' for w, j in OUR_WEAPONS[ship]))
+
     def drop(m):
         joint = m.group(2)
         return m.group(0) if joint.encode() in model else "-- Cataclysm-HWRM (no joint in our model): " + m.group(0)
     text = re.sub(r'^(Start(?:Ship)?(?:HardPoint|Weapon)Config\(NewShipType,\s*"[^"]*",\s*"([^"]*)").*$', drop,
                   text, flags=re.M)
+    # the template's effects on our joints (stock names its guns Weapon_Gun<n>, ours Weapon_GUN<n>)
+    ev = os.path.join(folder, ship + ".events")
+    if os.path.exists(ev):
+        etext = open(ev, encoding="latin-1").read()
+        open(ev, "w", encoding="latin-1", newline="").write(re.sub(r"\bWeapon_Gun(\d+)", r"Weapon_GUN\1", etext))
 
     # the weapon's 4th argument names its firing animation in the .events ("Fire", "Missile" on theirs, from their
     # .mad); stock names it after the weapon joint, as our OUR_EVENTS do
@@ -595,6 +855,12 @@ def use_our_model(ship, ours, joints):
         seen.add(idx)
         return m.group(1) + str(idx) + m.group(3)
     text = re.sub(r'^(setEngineTrail\(NewShipType,\s*)(\d+)(.*)$', trail, text, flags=re.M)
+    # ...and every nozzle of ours gets one: the template's (its HW1 Scout trails one nozzle, our Recon has two: user)
+    m = re.search(r'^setEngineTrail\(NewShipType,\s*\d+(.*)$', text, flags=re.M)
+    if m:
+        extra = [f"setEngineTrail(NewShipType,{k}{m.group(1)}" for k in range(nozzles) if k not in seen]
+        if extra:
+            text = text.rstrip("\n") + "\n-- Cataclysm-HWRM: the template's trail on our other nozzles\n" + "\n".join(extra) + "\n"
 
     # LOD switching: our models have LOD 0 only (their Worker vanished at distance, switching to a LOD 1)
     text = re.sub(r'^(NewShipType\.(?:up|down)LOD\s*=)', r'-- Cataclysm-HWRM (LOD 0 only): \1', text, flags=re.M)
@@ -636,8 +902,7 @@ def patch_speech_logic():
                 out += "\n\t" + SPEECH_EARLY_OUT[name].format(s=ship)
             return out
         text = re.sub(r"^function\s+(\w+)\s*\(([^)]*)\)", handler, text, flags=re.M)
-        # the race's own announcer, as theirs for the Vaygr / Taiidan (Cataclysm Remastered did the same for its
-        # Kuun-Lan / Beast): Somtaaw -> "cat_fleet" (player:racelist.lua written at mission start, cataclysmkas.lua)
+        # the race's own announcer, as theirs for the Vaygr / Taiidan: Somtaaw -> "cat_fleet" (player:racelist.lua written at mission start, cataclysmkas.lua)
         taiidan = 'elseif (Race_ID[currentRace] == "Taiidan" or Race_ID[currentRace] == "2x_Taiidan") then\n\t\treturn NameEmperor'
         if fn == "commands.lua":
             if taiidan not in text:
@@ -696,21 +961,17 @@ def main():
             os.makedirs(os.path.dirname(dst), exist_ok=True)
             shutil.copyfile(os.path.join(root, fn), dst)
             copied.append(rel)
-    for root, _, files in os.walk(SRC):
-        for fn in files:
-            rel = os.path.relpath(os.path.join(root, fn), SRC).replace("\\", "/")
-            low = rel.lower()
-            if (low.startswith(SKIP_PREFIX) and not low.startswith(KEEP_PREFIX)) or low.endswith(SKIP_SUFFIX) \
-                    or low in ours:
-                continue
-            dst = os.path.join(DATA, rel)
-            os.makedirs(os.path.dirname(dst), exist_ok=True)
-            shutil.copyfile(os.path.join(root, fn), dst)
-            copied.append(rel)
-    for rel, src in COPIES.items():
-        os.makedirs(os.path.dirname(os.path.join(DATA, rel)), exist_ok=True)
-        shutil.copyfile(os.path.join(SRC, src), os.path.join(DATA, rel))
-        copied.append(rel)
+    OURS.update(ours)
+    # our races (stock Kushan / Taiidan race folders) and ships (stock HW1 templates)
+    for race, args in RACES.items():
+        copied += gen_race(race, *args)
+    for ship, template in TEMPLATES.items():
+        copied += gen_ship(ship, template)
+    set_names()
+    for ship, (model, joints) in OUR_MODELS.items():
+        use_our_model(ship, model, joints)
+        copied += [f"ship/{ship}/{ship}{ext}" for ext in (".hod", ".mad")
+                   if os.path.exists(os.path.join(DATA, "ship", ship, ship + ext))]
     for rel, fn in PATCHES.items():
         p = os.path.join(DATA, rel)
         t = open(p, encoding="latin-1").read()
@@ -720,20 +981,21 @@ def main():
             p = os.path.join(DATA, rel)
             t = open(p, encoding="latin-1").read()
             open(p, "w", encoding="latin-1", newline="").write(patch_hw1_armour(t))
-    for ship, (ours, joints) in OUR_MODELS.items():
-        use_our_model(ship, ours, joints)
-    for ship, (src, names) in OUR_EVENTS.items():
-        use_our_events(ship, src, names)
     for ship, (cat, cls) in SPEEDS.items():
         set_speed(ship, cat, cls)
     set_costs()
+    copied += set_support_units()
     patch_cargo_clouds()
     set_trails()
-    drop_weapons()
-    for root, _, files in os.walk(OVERRIDES):   # our own versions of their files (.events / .madstate)
+    for root, _, files in os.walk(OVERRIDES):   # our own versions of installed files (.events / .madstate)
         for fn in files:
             rel = os.path.relpath(os.path.join(root, fn), OVERRIDES)
+            parts = rel.replace("\\", "/").split("/")
+            if parts[0] == "ship" and parts[1] not in OUR_MODELS:
+                continue   # (a stand-in keeps its template's)
             shutil.copyfile(os.path.join(root, fn), os.path.join(DATA, rel))
+            if "/".join(parts).lower() not in OURS:
+                copied.append("/".join(parts))
     for rel in copied:
         if rel.endswith(".events"):
             fix_event_markers(os.path.join(DATA, rel))
@@ -749,10 +1011,9 @@ def main():
                       r"-- Cataclysm-HWRM (our Mimic menu, shiprules.lua CatMimic_*): \1", text, flags=re.M)
         # it has no guns: its attack is a kamikaze (user), as stock HW1 resource collectors' (their CanAttack: the
         # kamikaze style on every family, the HW1 ones included: theirs left out Fighter_hw1, the Taiidan fighters)
-        n = len(re.findall(r'^addAbility\(NewShipType,\s*"CanAttack".*$', text, flags=re.M))
-        assert n == 1, f"smt_mimic: {n} CanAttack lines"
-        text = re.sub(r'^addAbility\(NewShipType,\s*"CanAttack".*$', MIMIC_ATTACK.replace("\\", "\\\\"), text,
-                      flags=re.M)
+        n = len(CAN_ATTACK.findall(text))
+        assert n == 1, f"smt_mimic: {n} CanAttack statements"
+        text = CAN_ATTACK.sub(lambda m: MIMIC_ATTACK, text)
         open(mimic, "w", encoding="latin-1", newline="").write(text)
     ship_variants.write_lua()
     # the Mimic's transformation effects as events on the Mimic and its disguises (tools/make_mimicfx.py)
@@ -776,6 +1037,8 @@ def main():
         stock = open(os.path.join(make_events.STOCK, src, src + ".ship"), encoding="latin-1").read()
         want = float(re.search(r"sobDieTime\s*=\s*([\d.]+)", stock).group(1))
         path = os.path.join(DATA, "ship", ship, ship + ".ship")
+        if not os.path.exists(path):
+            continue
         text = open(path, encoding="latin-1").read()
         m = re.search(r'(NewShipType(?:\["sobDieTime"\]|\.sobDieTime)\s*=\s*)([\d.]+)', text)
         if m and float(m.group(2)) < want:
@@ -855,13 +1118,13 @@ def main():
                 os.rmdir(d)
                 d = os.path.dirname(d)
     if removed:
-        print(f"  removed {removed} Cataclysm Remastered files no longer installed")
+        print(f"  removed {removed} files no longer installed")
     with open(manifest, "w", newline="\n") as f:
         f.write("\n".join(copied) + "\n")
     with open(os.path.join(DATA, ".gitignore"), "w", newline="\n") as f:
-        f.write("# Generated by tools/install_cr.py: Cataclysm Remastered files (not committed)\n")
+        f.write("# Generated by tools/install_base.py: installed stock, Players Patch and generated files (not committed)\n")
         f.write("\n".join("/" + re.sub(r"([\[\]*?])", r"\\\1", r) for r in copied) + "\n")
-    print(f"installed {len(copied)} Cataclysm Remastered files into data/ ({len(PATCHES)} patched, {len(COPIES)} replaced, {len(OUR_MODELS)} on our models)")
+    print(f"installed {len(copied)} files into data/ ({len(TEMPLATES)} ships from stock templates, {len(OUR_MODELS)} on our models)")
 
 
 if __name__ == "__main__":

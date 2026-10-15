@@ -1,4 +1,4 @@
--- Somtaaw Acolyte animation states (Cataclysm-HWRM; installed over Cataclysm Remastered's by tools/install_cr.py).
+-- Somtaaw Acolyte animation states (Cataclysm-HWRM; installed over Cataclysm Remastered's by tools/install_base.py).
 -- Clips from Cataclysm's sacolyte.mad (tools/mad2hwrm.py): CombatIn swings the wing pods out for battle, CombatOut
 -- back; Link slides the whole body 50 (HW1 units) along its up axis in to its partner and folds the thrusters, Unlink
 -- slides it out from the ACV's middle (its pose at the start of Unlink is the ACV half's). Link and Unlink are played

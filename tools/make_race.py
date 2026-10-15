@@ -1,12 +1,12 @@
-"""Single-player build and research lists for the Somtaaw race of Cataclysm Remastered (tools/install_cr.py).
+"""Single-player build and research lists for our Somtaaw race (tools/install_base.py: stock Kushan race folders).
 
-Their race and ships are used as they are; for the campaign the build list and research tree are Cataclysm's:
+The race and ships are install_base.py's; for the campaign the build list and research tree are Cataclysm's:
   races/somtaaw/scripts/sp_build.lua     every Somtaaw ship mapped in shipmap.tsv, gated by SPRSShipDepend
   races/somtaaw/scripts/sp_research.lua  every SPRSTECH_* tech: Time = Cataclysm's research seconds (HW1
                                          ResearchAPI.c TimeToComplete), prerequisites from SPRSTechDepend ("&"),
                                          TargetName = the Kuun-Lan (all: see main); Cost: see COST_PER_SECOND
   scripts/scar/cataclysmtech.lua         KAS_Techs, for kasfAllowPlayerToResearch/Purchase gating
-(their singleplayer/props/gbx.lua points path_build/path_research here: install_cr.py patch)
+(the race's singleplayer/props/gbx.lua points path_build/path_research here: install_base.py patch)
 
 Usage: make_race.py
 """
@@ -125,6 +125,13 @@ def main():
                   f'\t\tRequiredResearch =\t\t"{vreq}",', f'\t\tRequiredShipSubSystems =\t"{HANGAR}",',
                   f"\t\tDisplayPriority =\t\t{10 + prio},", f'\t\tDisplayedName =\t\t\t"{name}",',
                   f'\t\tDescription =\t\t\t"{name}",', "\t},"]
+    # the Support Units fillers (install_base.py SU_FILLERS): a type the race can't build counted for nothing against
+    # the cap (user test), so they're listed, gated by a research that doesn't exist (never shown or built), as
+    # Complex EVO lists theirs (RequiredResearch "invisible")
+    for filler in ("cat_sufiller25", "cat_sufiller5", "cat_sufiller1"):
+        b += ["\t{", "\t\tType =\t\t\t\t\tShip,", f'\t\tThingToBuild =\t\t\t"{filler}",',
+              '\t\tRequiredResearch =\t\t"CAT_NEVER",', '\t\tRequiredShipSubSystems =\t"",',
+              "\t\tDisplayPriority =\t\t0,", '\t\tDisplayedName =\t\t\t"",', '\t\tDescription =\t\t\t"",', "\t},"]
     structural = []
     for prio, (key, (_, disp, _, _, buildable, tech)) in enumerate(make_modules.MODULES.items()):
         # every Kuun-Lan module must be in the build list, or SobGroup_CreateSubSystem refuses it ("Race Specific

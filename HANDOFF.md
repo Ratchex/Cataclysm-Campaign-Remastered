@@ -98,7 +98,54 @@ findings).
 - Balance: Taiidan collectors at Cataclysm's 0.5 RU/s; Worker on the collector ratio (144); two extra Kushan
   main-guard ion frigates (tools/level_extras.py).
 
-## RESUME HERE (updated 2026-10-09, after the damage conversion; see git log for the last commit)
+## RESUME HERE (2026-10-14, session end: everything since 9ef456e is UNCOMMITTED on main; commit only when the user says)
+**Cataclysm Remastered / HWU removed (user, 2026-10-14):** no CR file in the mod; plan + status in `REBUILD.md`.
+`tools/install_cr.py` is now `tools/install_base.py` (Players Patch + Somtaaw/Beast ships from stock HW1 templates,
+TEMPLATES; our 9 models via OUR_MODELS/OUR_WEAPONS; stand-ins keep the template model). Rerun it after any model
+rebuild. Checks done: no data/ file identical to a CR-only file; every fx/sound/icon/weapon-fire name resolves to stock
+or ours. User-confirmed after the rebuild: Mission01 loads, intro n01 + nislet01 play, Workers launch/dock/unload,
+parade (Cataclysm's), Cataclysm ship names/descriptions (set_names, english.script).
+Model builds no longer take CR inputs (build_kuunlan.sh / build_ship.sh): no glow maps except --glow-cyan, engines =
+geo2dae's quad, Kuun-Lan collector paths from Cataclysm's own `smothership.shp` DockPoint table (geo2dae SHP_DOCKS:
+Res0/Res1 only; the queue point doesn't count toward a path's 2 points), medium bay paths also take Utility (Workers
+launch there).
+
+**Also this session (uncommitted, user-tested unless noted):**
+- Speech: one queue for every voice line, Cataclysm's exe rules (`data/scripts/scar/cataclysmvoice.lua` CatVoice_Event;
+  `tools/check_voice.py` enforces it from build_mission.py; memory voice-lines-through-queue). User: "much closer".
+- End of mission: own jump watch (KAS_HyperspaceJumpersGone; the intro's despawned Kuun-Lan blocked mission complete).
+  Untested.
+- Mission 2 disguised corvettes (tools/hodread.py, hod2dae.py, make_disguise.py, build_disguise.sh;
+  tur_standardcorvette_disguise). Untested in game.
+- Cutscenes switch the sensors manager off (KAS_NisStart / KAS_LockedOut). Recon: Speed Burst removed, trail per nozzle.
+- TEST traces still in cataclysmkas.lua: KAS_DestroyerTrace, KAS_ResourcerTrace, the K_495e80 ping print. Remove
+  before committing.
+
+**IN PROGRESS: Support Units on the engine's unit cap (2026-10-14, built, awaiting the user's test).**
+Costs / providers: `tools/make_supportunits.py` -> `data/scripts/cataclysm/supportunits_gen.lua`.
+- install_base.py set_support_units: a "SupportUnits" family (familylist.lua unitcapsFamily, numParam 95),
+  supplyLimit("SupportUnits", 400) (SU_CAP: Cataclysm's most is ~300) with supplyShow Never; every type in the
+  Somtaaw build list gets setSupplyValue(NewShipType, "SupportUnits", <SU>); fillers cat_sufiller25/5/1 (kus_probe's
+  model); writes data/scripts/cataclysm/sunative_gen.lua (CatSU_Cap, CatSU_Fillers, CatSU_Native).
+- make_race.py lists the fillers in sp_build.lua gated by the undefined research "CAT_NEVER".
+- cataclysmkas.lua KAS_SUTick (1 s): used / limit as before; fillers (KAS_SUFillTo) = cap - limit + SU of the
+  player's ships the engine doesn't count (non-build-list types: handed-over Kushan / Taiidan, damage copies). The
+  label (KAS_SUShow) = used + queued / limit, queued only for display (Player_HasQueuedBuild is 0/1). No more
+  build-option restricting for SU. KAS_HyperspaceTick clears the fillers (KAS_SUFillersClear) at SHIPSLEAVING.
+- Learned in game (filler tests): a type counts against a cap only if the race's build list has it; a filler in the
+  world (hidden) counts, a despawned one doesn't (Complex EVO, MP, relies on despawned ones: not so here).
+  SCAR can't read caps (supplyLimit / GetUnitCapForFamily nil); Stats_SquadronsQueued(0, 0) is always 0;
+  Player_HasQueuedBuild hides restricted types. Source idea: Complex EVO (workshop 398406822, extracted to
+  Cataclysm-decomp/reference/complex_evo: leveldata/multiplayer/lib/lib.lua UnitCap, ship/spc_unitcap*).
+- To check: building stops at the real limit (range: 100) with queues; module loss / Carrier raise it; fillers not
+  selectable / visible / in the sensors manager; roll call unaffected; Mission01's persist2.lua (Profiles/<p>/
+  Campaign/CATACLYSM) has no cat_sufiller; Mission 1's handed-over Kushan count (CatSU_Cost has kus_ types).
+
+**Other open items:** speech.dat "colliding name" in the log (subtitle file, pre-existing); Carrier Support Modules;
+stand-in capitals keep stock damage (turret subsystems shared with Kushan); model conversions for the 23 stand-ins
+(REBUILD.md Phase C); Mission 2 BUSHAN-RE visuals; autosave "invalid key for next".
+
+## Earlier resume notes (2026-10-09, after the damage conversion)
 **Console start:** run `claude` from `C:\Modding\Homeworld` (loads the project memory), then say "resume from
 Cataclysm-HWRM/HANDOFF.md". Shells: Git Bash for anything that runs HODOR (tools/build_ship.sh); `powershell -File
 launch.ps1` to launch. The user plays every test; Claude launches, reads `Bin\Release\HwRM.log` (strip NULs) and never

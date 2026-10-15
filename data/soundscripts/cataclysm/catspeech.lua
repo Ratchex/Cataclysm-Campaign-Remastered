@@ -7,7 +7,7 @@
 -- speech event variable = ShipType).
 --
 -- That environment does not allow redefining a global function ("Cannot overwrite function") and has no getn, so
--- tools/install_cr.py patch_speech_logic() edits the Players Patch files instead: this file is loaded at the top of
+-- tools/install_base.py patch_speech_logic() edits the Players Patch files instead: this file is loaded at the top of
 -- each, every handler first stores its ship in CatSpeech_Ship, the play calls go through CatSpeech_Play /
 -- CatSpeech_PlayLinked, and construction-complete / ship-destroyed first ask CatSpeech_Built / CatSpeech_Destroyed.
 -- For Somtaaw ships an announcer call plays from "cat_fleet" (flat, as stock "fleet"), a pilot call from the speaking
@@ -99,7 +99,7 @@ if CatSpeech_Loaded == nil then
         return nil
     end
 
-    -- raceHelper() returned the Somtaaw announcer (patched in by install_cr.py): always Cataclysm's Fleet Command
+    -- raceHelper() returned the Somtaaw announcer (patched in by install_base.py): always Cataclysm's Fleet Command
     function CatSpeech_IsCatFleet(actor)
         if actor ~= nil and strupper(actor) == "CAT_FLEET" then
             return 1
@@ -182,7 +182,7 @@ if CatSpeech_Loaded == nil then
     end
 
     -- a repair order given (chatter.lua CE_CMD_REPAIR, a speechFile entry the engine played in the stock support
-    -- pilot voice; install_cr.py makes it call this): routed like the handlers, so a Somtaaw ship says Cataclysm's
+    -- pilot voice; install_base.py makes it call this): routed like the handlers, so a Somtaaw ship says Cataclysm's
     -- "Repairs underway." and other races play the stock line as before
     function CatSpeech_CommandRepair(shipname, targetname)
         CatSpeech_Ship = shipname or ""

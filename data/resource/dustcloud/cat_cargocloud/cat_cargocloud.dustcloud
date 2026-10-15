@@ -45,6 +45,6 @@ NewResourceType.damageMultiplier=1
 NewResourceType.DockFamily="Resource"
 NewResourceType.AvoidanceFamily="None"
 NewResourceType.AttackFamily="Resource"
--- Cataclysm-HWRM: resourcers' cargo (install_cr.py make_cargo_cloud)
+-- Cataclysm-HWRM: resourcers' cargo (install_base.py make_cargo_cloud)
 NewResourceType.resourceValue=100
 NewResourceType.blobRadius=100

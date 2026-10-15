@@ -5,7 +5,7 @@ copies). A copy is its own ship type: the .ship (weapons renamed to cat_<copy>_<
 converted file), its .hod / .events / .madstate / .lua from the first layer that has them. The ship rules treat it as
 its base type (shiprules.lua CatShip_Base) and don't apply the mission's factor again.
 
-Usage: python tools/make_variants.py   (run by install_cr.py after make_damage; VARIANTS below)
+Usage: python tools/make_variants.py   (run by install_base.py after make_damage; VARIANTS below)
 """
 import os
 import re

@@ -34,10 +34,10 @@ function DetermChunk()
     addSquadron("pPatrol22", "tur_fighter", {30847.425, -19707.45, 30261.525}, 1, {0, -176, 0}, 0, 0) -- RACE_P1 p1Fighter
     addSquadron("pPatrol23", "tur_fighter", {30847.425, -19707.45, 30261.525}, 1, {0, -176, 0}, 0, 0) -- RACE_P1 p1Fighter
     addSquadron("pPatrol24", "tur_fighter", {30847.425, -19707.45, 30261.525}, 1, {0, -176, 0}, 0, 0) -- RACE_P1 p1Fighter
-    addSquadron("pTricky0", "tur_standardcorvette", {72.082, 0, 5144.79}, 1, {0, -90, 0}, 0, 0) -- RACE_P1 p1StandardCorvette
-    addSquadron("pTricky1", "tur_standardcorvette", {72.082, 0, 5144.79}, 1, {0, -90, 0}, 0, 0) -- RACE_P1 p1StandardCorvette
-    addSquadron("pTricky2", "tur_standardcorvette", {72.082, 0, 5144.79}, 1, {0, -90, 0}, 0, 0) -- RACE_P1 p1StandardCorvette
-    addSquadron("pTricky3", "tur_standardcorvette", {72.082, 0, 5144.79}, 1, {0, -90, 0}, 0, 0) -- RACE_P1 p1StandardCorvette
+    addSquadron("pTricky0", "tur_standardcorvette_disguise", {72.082, 0, 5144.79}, 1, {0, -90, 0}, 0, 0) -- RACE_P1 p1StandardCorvette
+    addSquadron("pTricky1", "tur_standardcorvette_disguise", {72.082, 0, 5144.79}, 1, {0, -90, 0}, 0, 0) -- RACE_P1 p1StandardCorvette
+    addSquadron("pTricky2", "tur_standardcorvette_disguise", {72.082, 0, 5144.79}, 1, {0, -90, 0}, 0, 0) -- RACE_P1 p1StandardCorvette
+    addSquadron("pTricky3", "tur_standardcorvette_disguise", {72.082, 0, 5144.79}, 1, {0, -90, 0}, 0, 0) -- RACE_P1 p1StandardCorvette
     addSquadron("pPatrol30", "tur_fighter", {41421.817, 54317.287, -42854.7}, 1, {0, -76, 0}, 0, 0) -- RACE_P1 p1Fighter
     addSquadron("pPatrol31", "tur_fighter", {41421.817, 54317.287, -42854.7}, 1, {0, -76, 0}, 0, 0) -- RACE_P1 p1Fighter
     addSquadron("pPatrol32", "tur_fighter", {41421.817, 54317.287, -42854.7}, 1, {0, -76, 0}, 0, 0) -- RACE_P1 p1Fighter

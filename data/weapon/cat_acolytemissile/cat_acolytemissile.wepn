@@ -1,9 +1,9 @@
 -- Cataclysm-HWRM: the Acolyte's missile launchers (sacolyte.shp GUN2/GUN3: MaxMissiles 1, FireTime 13, BulletRange
--- 5000), from the Missile upgrade. Their Ksh_Sec_AcolyteMissile (missile, damage, accuracy), once per 13 s. A "Special
+-- 5000), from the Missile upgrade. A stock Kushan missile (kus_missile), once per 13 s. A "Special
 -- Attack" weapon: it fires in normal attacks only while the ship's UseSpecialWeaponsInNormalAttack ability is on,
 -- which data/scripts/cataclysm/shiprules.lua switches on per Acolyte once it has the upgrade (as Cataclysm's
 -- launchers fire in normal attacks, FUN_005b3870). Damage: Cataclysm's (tools/make_damage.py), every armour family alike.
-StartWeaponConfig(NewWeaponType, "Fixed", "Missile", "ksh_smallmissile", "Special Attack", 400, 2000, 0, 0, 0, 0, 1, 0, 0, 13, 0, 0, 0, 0, 0, 0, 0.1, "Normal", 0, 0, 0)
+StartWeaponConfig(NewWeaponType, "Fixed", "Missile", "kus_missile", "Special Attack", 400, 2000, 0, 0, 0, 0, 1, 0, 0, 13, 0, 0, 0, 0, 0, 0, 0.1, "Normal", 0, 0, 0)
 AddWeaponResult(NewWeaponType, "Hit", "DamageHealth", "Target", 420, 420, "")   -- Cataclysm: missile row 60 x DamageMult 7
 setPenetration(NewWeaponType, 5, 1, { MimicArmour = 3.3333 })
 setAccuracy(NewWeaponType, 1, {Fighter = 0,}, {Corvette = 0,}, {munition = 0,}, {Frigate = 1,}, {SmallCapitalShip = 1,}, {BigCapitalShip = 1,}, {ResourceLarge = 1,})

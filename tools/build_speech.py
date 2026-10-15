@@ -11,6 +11,7 @@ Usage: build_speech.py [--rate 44100] [--banks sect,beast]
 import argparse
 import csv
 import os
+import struct
 import subprocess
 import wave
 
@@ -95,6 +96,16 @@ def main():
                     e["maxvar"] = (ph - e["base"] - v) // var
                     break
             f.write(f'KAS_SpeechEvents["{bank}{ev}"] = {{ {e["nvar"]}, {e["maxvar"]}, {e["base"]} }}\n')
+        # each event's queue priority (cataclysm.exe FUN_00522560: the sentence table's first column, actor 0's row;
+        # the speech queue plays the highest first: cataclysmvoice.lua)
+        f.write("KAS_SpeechPriority = {}\n")
+        for bank in a.banks.split(","):
+            lut = open(os.path.join(DECOMP, "extracted", "big", "soundfx", f"{bank}sentence.lut"), "rb").read()
+            cols, nevents = struct.unpack_from("<HH", lut, 8)
+            for ev in range(nevents):
+                pri = struct.unpack_from("<H", lut, 16 + ev * cols * 2)[0]
+                if (bank, ev) in events and pri:
+                    f.write(f'KAS_SpeechPriority["{bank}{ev}"] = {pri}\n')
         f.write("KAS_SpeechDurations = {}\n")
         for sid in sorted(subs):
             f.write(f"KAS_SpeechDurations[{sid}] = {subs[sid][1]}\n")

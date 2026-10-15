@@ -1,4 +1,4 @@
--- Cataclysm-HWRM: the Processor's repair approach (install_cr.py repair_order). Its repair beams point straight out
+-- Cataclysm-HWRM: the Processor's repair approach (install_base.py repair_order). Its repair beams point straight out
 -- of its sides (Repair0-3), so it turns its side to the target (stock broadside: facingAngle 90) and holds off near
 -- the beams' range instead of closing in; it only flies after a target once it is well out of range.
 

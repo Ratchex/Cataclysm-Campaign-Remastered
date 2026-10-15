@@ -15,7 +15,7 @@ decodes them and plays the beam's yaw / pitch clip toward the new angle, pausing
               is the madstate's clock
   --dae       the cone mesh (one mesh, one material, the fx shader) into build/ships/fx_procbeam/ for HODOR
   (none)      install: the cone .hod, the effect (data/art/fx/cat_procbeam.lua), its texture
-Events: patch_events() (install_cr.py) adds ProcBeam<i>_<band> to the Processor's .events: the cone on Beam<i>_Cone,
+Events: patch_events() (install_base.py) adds ProcBeam<i>_<band> to the Processor's .events: the cone on Beam<i>_Cone,
 scaled to the band's length.
 
 Run from tools/build_ship.sh (--mad), tools/build_procbeam.sh (--dae, HODOR, install).

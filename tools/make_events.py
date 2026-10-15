@@ -1,5 +1,5 @@
 """Effects (.events) for Somtaaw ships whose Cataclysm Remastered file is empty (no death explosion, user: the Recon),
-from the nearest stock HW1 ship's, written to tools/overrides/ship/<ship>/<ship>.events (tools/install_cr.py installs
+from the nearest stock HW1 ship's, written to tools/overrides/ship/<ship>/<ship>.events (tools/install_base.py installs
 them over theirs).
 
 The stock file's death / damage / power-off / radiation effects as they are, except:
@@ -12,7 +12,7 @@ The stock file's death / damage / power-off / radiation effects as they are, exc
 - SpeedBurst (an HW1 Scout ability none of these have) is dropped
 - entries already in our override whose names start with "Ram" (the Ramming Frigate's ram effects) are kept
 
-Usage: make_events.py   (then tools/install_cr.py)
+Usage: make_events.py   (then tools/install_base.py)
 """
 import os
 import re

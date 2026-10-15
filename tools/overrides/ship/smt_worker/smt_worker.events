@@ -1,4 +1,4 @@
--- Somtaaw Worker effects (Cataclysm-HWRM; installed over Cataclysm Remastered's empty one by tools/install_cr.py).
+-- Somtaaw Worker effects (Cataclysm-HWRM; installed over Cataclysm Remastered's empty one by tools/install_base.py).
 -- Started / ended from smt_worker.madstate; markers from tools/build_ship.sh (geo2dae --marker). Stock HWRM effects:
 -- the HW1 resource collector's harvest beam (kus_resourcecollector.events harvestingbeam1) and the HW1 repair
 -- corvette's repair beam (kus_repaircorvette.events repairing1).

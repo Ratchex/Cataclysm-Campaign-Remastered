@@ -185,23 +185,15 @@ function CatCmd_mimic_tai_interceptor_Start(g, p, id) CatAbility_Run("mimic_tai_
 function CatCmd_mimic_tai_interceptor_Do(g, p, id) end
 function CatCmd_mimic_tai_interceptor_Finish(g, p, id) end
 
-dofilepath("data:Ship/Bst_Carrier/Bst_Carrier.lua")
-dofilepath("data:Ship/Bst_CruiseMissile/Bst_CruiseMissile.lua")
-dofilepath("data:Ship/Bst_HeavyCruiser/Bst_HeavyCruiser.lua")
-dofilepath("data:Ship/Bst_HiveFrigate/Bst_HiveFrigate.lua")
-dofilepath("data:Ship/Bst_MotherShip/Bst_MotherShip.lua")
 dofilepath("data:Ship/Kus_Carrier/Kus_Carrier.lua")
 dofilepath("data:Ship/Kus_CloakGenerator/Kus_CloakGenerator.lua")
 dofilepath("data:Ship/Kus_GravWellGenerator/Kus_GravWellGenerator.lua")
 dofilepath("data:Ship/Kus_SupportFrigate/Kus_SupportFrigate.lua")
-dofilepath("data:Ship/Smt_HiveFrigate/Smt_HiveFrigate.lua")
 dofilepath("data:Ship/Tai_Carrier/Tai_Carrier.lua")
 dofilepath("data:Ship/Tai_CloakGenerator/Tai_CloakGenerator.lua")
 dofilepath("data:Ship/Tai_Destroyer/Tai_Destroyer.lua")
 dofilepath("data:Ship/Tai_GravWellGenerator/Tai_GravWellGenerator.lua")
 dofilepath("data:Ship/Tai_SupportFrigate/Tai_SupportFrigate.lua")
-dofilepath("data:Ship/smt_mimic/smt_mimic.lua")
-dofilepath("data:Ship/smt_swarmer/smt_swarmer.lua")
 dofilepath("data:ship/Kus_Destroyer/Kus_Destroyer.lua")
 dofilepath("data:ship/Kus_HeavyCruiser/Kus_HeavyCruiser.lua")
 dofilepath("data:ship/Kus_IonCannonFrigate/Kus_IonCannonFrigate.lua")
@@ -243,11 +235,9 @@ function CatDestroy_bst_attackbomber(g, p, id)
 end
 
 function CatCreate_bst_carrier(g, p, id)
-    if Create_Bst_Carrier then Create_Bst_Carrier(g, p, id) end
     CatShip_Create(g, p, id, "bst_carrier")
 end
 function CatUpdate_bst_carrier(g, p, id)
-    CatChainTick(g, p, id, Update_Bst_Carrier, 4)
     CatShip_Update(g, p, id)
 end
 function CatDestroy_bst_carrier(g, p, id)
@@ -265,11 +255,9 @@ function CatDestroy_bst_cloakedfighter(g, p, id)
 end
 
 function CatCreate_bst_cruisemissile(g, p, id)
-    if Create_Bst_CruiseMissile then Create_Bst_CruiseMissile(g, p, id) end
     CatShip_Create(g, p, id, "bst_cruisemissile")
 end
 function CatUpdate_bst_cruisemissile(g, p, id)
-    CatChainTick(g, p, id, Update_Bst_CruiseMissile, 4)
     CatShip_Update(g, p, id)
 end
 function CatDestroy_bst_cruisemissile(g, p, id)
@@ -287,11 +275,9 @@ function CatDestroy_bst_heavycorvette(g, p, id)
 end
 
 function CatCreate_bst_heavycruiser(g, p, id)
-    if Create_Bst_HeavyCruiser then Create_Bst_HeavyCruiser(g, p, id) end
     CatShip_Create(g, p, id, "bst_heavycruiser")
 end
 function CatUpdate_bst_heavycruiser(g, p, id)
-    CatChainTick(g, p, id, Update_Bst_HeavyCruiser, 4)
     CatShip_Update(g, p, id)
 end
 function CatDestroy_bst_heavycruiser(g, p, id)
@@ -299,15 +285,12 @@ function CatDestroy_bst_heavycruiser(g, p, id)
 end
 
 function CatCreate_bst_hivefrigate(g, p, id)
-    if Create_BstHiveFrigate then Create_BstHiveFrigate(g, p, id) end
     CatShip_Create(g, p, id, "bst_hivefrigate")
 end
 function CatUpdate_bst_hivefrigate(g, p, id)
-    CatChainTick(g, p, id, Update_BstHiveFrigate, 1.15)
     CatShip_Update(g, p, id)
 end
 function CatDestroy_bst_hivefrigate(g, p, id)
-    if Destroy_BstHiveFrigate then Destroy_BstHiveFrigate(g, p, id) end
     CatShip_Destroy(g, p, id)
 end
 
@@ -332,11 +315,9 @@ function CatDestroy_bst_missilecorvette(g, p, id)
 end
 
 function CatCreate_bst_mothership(g, p, id)
-    if Create_Bst_MotherShip then Create_Bst_MotherShip(g, p, id) end
     CatShip_Create(g, p, id, "bst_mothership")
 end
 function CatUpdate_bst_mothership(g, p, id)
-    CatChainTick(g, p, id, Update_Bst_MotherShip, 4)
     CatShip_Update(g, p, id)
 end
 function CatDestroy_bst_mothership(g, p, id)
@@ -586,28 +567,22 @@ function CatDestroy_smt_dreadnought(g, p, id)
 end
 
 function CatCreate_smt_hivefrigate(g, p, id)
-    if Create_SmtHiveFrigate then Create_SmtHiveFrigate(g, p, id) end
     CatShip_Create(g, p, id, "smt_hivefrigate")
 end
 function CatUpdate_smt_hivefrigate(g, p, id)
-    CatChainTick(g, p, id, Update_SmtHiveFrigate, 1.15)
     CatShip_Update(g, p, id)
 end
 function CatDestroy_smt_hivefrigate(g, p, id)
-    if Destroy_SmtHiveFrigate then Destroy_SmtHiveFrigate(g, p, id) end
     CatShip_Destroy(g, p, id)
 end
 
 function CatCreate_smt_mimic(g, p, id)
-    if Create_Mimic then Create_Mimic(g, p, id) end
     CatShip_Create(g, p, id, "smt_mimic")
 end
 function CatUpdate_smt_mimic(g, p, id)
-    CatChainTick(g, p, id, Update_Mimic, 1.15)
     CatShip_Update(g, p, id)
 end
 function CatDestroy_smt_mimic(g, p, id)
-    if Destroy_Mimic then Destroy_Mimic(g, p, id) end
     CatShip_Destroy(g, p, id)
 end
 
@@ -675,7 +650,6 @@ function CatCreate_smt_swarmer(g, p, id)
     CatShip_Create(g, p, id, "smt_swarmer")
 end
 function CatUpdate_smt_swarmer(g, p, id)
-    CatChainTick(g, p, id, Update_smt_swarmer, 60)
     CatShip_Update(g, p, id)
 end
 function CatDestroy_smt_swarmer(g, p, id)

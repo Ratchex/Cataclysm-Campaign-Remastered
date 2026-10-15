@@ -1,4 +1,4 @@
--- Somtaaw Worker animation states (Cataclysm-HWRM; installed over Cataclysm Remastered's by tools/install_cr.py).
+-- Somtaaw Worker animation states (Cataclysm-HWRM; installed over Cataclysm Remastered's by tools/install_base.py).
 -- Clips from Cataclysm's sworker.mad (tools/mad2hwrm.py): JackOut / JackClose swing the repair jack out and back,
 -- JackSpin holds it out, DockOpen / DockClose turn the four docking clamps, BladesSpin turns the three blades.
 -- Effects (.events): "Resourcing" = stock HW1 harvest beam at marker_beam, "Repairing" = stock repair beam at

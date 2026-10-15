@@ -1,8 +1,8 @@
 """Hook Cataclysm's ship rules (data/scripts/cataclysm/shiprules.lua: pilot experience, damage slowing ships, the
-Acolyte -> ACV link) into every ship the campaign uses. Called by install_cr.py after their files are copied.
+Acolyte -> ACV link) into every ship the campaign uses. Called by install_base.py after the ships are generated.
 
 For each HWRM ship in tools/shipmap.tsv:
-  - HW1 ships (kus_*/tai_*) get a copy of the Players Patch's .ship (else stock's) in data/ (returned, so install_cr git-ignores it);
+  - HW1 ships (kus_*/tai_*) get a copy of the Players Patch's .ship (else stock's) in data/ (returned, so install_base git-ignores it);
   - the .ship gets our addCustomCode; a ship's own custom code (only one is allowed) is chained: ours calls it at
     its own interval;
   - abilities (Link, Unlink, ...) are command buttons of ours, not CustomCommands: tools/make_abilities.py.
@@ -23,8 +23,8 @@ MOD = os.path.dirname(HERE)
 DATA = os.path.join(MOD, "data")
 BIG = r"C:\Modding\Cataclysm-decomp\extracted\big"
 HW1SHIPS = r"C:\Modding\Cataclysm-decomp\reference\hwrm\HW1Ships\ship"
-CR = r"C:\Modding\Cataclysm-decomp\reference\cr_beast"   # install_cr.py SRC
-PP = r"C:\Modding\Cataclysm-decomp\reference\players_patch"   # install_cr.py PP
+BASE_MARK = "-- Cataclysm-HWRM base: "   # first line of a ship install_base.py generated
+PP = r"C:\Modding\Cataclysm-decomp\reference\players_patch"   # install_base.py PP
 GEN = "data:scripts/cataclysm/shipcode_gen.lua"
 MARK = "-- Cataclysm-HWRM ship rules (tools/make_shipcode.py)"
 CHAINED = "-- (chained by Cataclysm-HWRM ship rules) "
@@ -107,17 +107,19 @@ def hook(ship):
 def install():
     """Hook every mapped ship; returns the data/ paths of stock ships copied in (rel, '/' separated)."""
     info = ship_info()
-    for variant in ship_variants.VARIANTS:   # built by install_cr.py
+    for variant in ship_variants.VARIANTS:   # built by install_base.py
         base = ship_variants.base_of(variant)
         if base in info and os.path.exists(os.path.join(DATA, "ship", variant, variant + ".ship")):
             info[variant] = info[base]
     copied, chains = [], {}
     for ship in sorted(info):
         folder = os.path.join(DATA, "ship", ship)
-        if ship not in ship_variants.VARIANTS and not os.path.exists(os.path.join(CR, "ship", ship, ship + ".ship")):
-            # not one of Cataclysm Remastered's: a fresh copy of the stock ship, reported every run so install_cr
+        mine = os.path.join(folder, ship + ".ship")
+        if ship not in ship_variants.VARIANTS and not (
+                os.path.exists(mine) and open(mine, encoding="latin-1").readline().startswith(BASE_MARK)):
+            # not one install_base.py generated: a fresh copy of the stock ship, reported every run so install_base
             # keeps it in its manifest
-            stock = os.path.join(PP, "ship", ship, ship + ".ship")   # the Players Patch's (install_cr.py PP)
+            stock = os.path.join(PP, "ship", ship, ship + ".ship")   # the Players Patch's (install_base.py PP)
             if not os.path.exists(stock):
                 stock = os.path.join(HW1SHIPS, ship, ship + ".ship")
             if not os.path.exists(stock):

@@ -179,7 +179,7 @@ def main():
 
     pilot_events = sorted({m for m in re.findall(r"[A-Z_ ]{4,}", " ".join(p for p, _ in PILOT))})
     # the event names the logic actually passes: listed in the speech logic files
-    # (Players Patch's pristine copies: the installed ones call CatSpeech_Play, install_cr.py patch_speech_logic)
+    # (Players Patch's pristine copies: the installed ones call CatSpeech_Play, install_base.py patch_speech_logic)
     logic = r"C:\Modding\Cataclysm-decomp\reference\players_patch\soundscripts\speechlogic"
     names = set()
     for fn in ("commands.lua", "status.lua", "chatter.lua"):

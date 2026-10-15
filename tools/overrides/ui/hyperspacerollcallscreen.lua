@@ -1,5 +1,5 @@
 -- Cataclysm-HWRM: stock HyperspaceRollCallScreen.lua (Gearbox's HW1 roll call), its Go Now button made Cataclysm's
--- Emergency Hyperspace (installed by tools/install_cr.py)
+-- Emergency Hyperspace (installed by tools/install_base.py)
 --
 -- Definition of the HW1-style roll call screen
 --

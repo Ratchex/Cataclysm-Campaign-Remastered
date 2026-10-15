@@ -11,7 +11,7 @@ KAS_ApplyColourSchemes) from
 and the teams' schemes from tools/mission2level.py (KAS_TeamSchemes in m<NN>_paths.lua). teamcolour(...) writes a
 mission's teamcolour.lua: each player in the scheme most of its teams use (the player: scheme 0).
 
-Badges: Cataclysm Remastered's faction badges (tools/install_cr.py KEEP_PREFIX). Trails: control point 1 of the
+Badges: stock HWRM's (FACTIONS; Cataclysm has none). Trails: control point 1 of the
 scheme's TrailColor (the bright one).
 
 Usage: make_colours.py   (build_mission.py runs it)
@@ -26,17 +26,17 @@ SCRIPT = r"C:\Modding\Cataclysm-decomp\extracted\big\teamcolors.script"
 
 # scheme -> (faction in teamcolors.script's comments, badge, HWRM trail texture)
 FACTIONS = {
-    0: ("Kiith Somtaaw", "DATA:Badges/kiith somtaaw.tga", "data:/effect/trails/kus_trail_clr.tga"),
-    1: ("Beast", "DATA:Badges/beast.tga", "data:/effect/trails/kus_trail_clr.tga"),
-    2: ("Taiidan Imperialists", "DATA:Badges/imperial taiidan.tga", "data:/effect/trails/tai_trail_clr.tga"),
-    3: ("Taiidan Loyalists", "DATA:Badges/republican taiidan.tga", "data:/effect/trails/tai_trail_clr.tga"),
-    4: ("Kiith Manaan", "DATA:Badges/cmanaan.tga", "data:/effect/trails/kus_trail_clr.tga"),
+    0: ("Kiith Somtaaw", "DATA:Badges/Kushan.tga", "data:/effect/trails/kus_trail_clr.tga"),
+    1: ("Beast", "DATA:Badges/hm3_black.tga", "data:/effect/trails/kus_trail_clr.tga"),
+    2: ("Taiidan Imperialists", "DATA:Badges/Taiidan.tga", "data:/effect/trails/tai_trail_clr.tga"),
+    3: ("Taiidan Loyalists", "DATA:Badges/taiidan2.tga", "data:/effect/trails/tai_trail_clr.tga"),
+    4: ("Kiith Manaan", "DATA:Badges/kiith manaan.tga", "data:/effect/trails/kus_trail_clr.tga"),
     5: ("Pirates", "DATA:Badges/Taiidan.tga", "data:/effect/trails/tai_trail_clr.tga"),
-    6: ("Kiith Naabal", "DATA:Badges/cnabaal.tga", "data:/effect/trails/kus_trail_clr.tga"),
-    7: ("Kiith S'jet", "DATA:Badges/Kushan.tga", "data:/effect/trails/kus_trail_clr.tga"),
+    6: ("Kiith Naabal", "DATA:Badges/kiith naabal.tga", "data:/effect/trails/kus_trail_clr.tga"),
+    7: ("Kiith S'jet", "DATA:Badges/kiith sjet.tga", "data:/effect/trails/kus_trail_clr.tga"),
 }
-BADGES = sorted({f[1].split("/", 1)[1].lower() for f in FACTIONS.values()
-                 if f[1] not in ("DATA:Badges/Taiidan.tga", "DATA:Badges/Kushan.tga")})
+# all stock HWRM badges (Cataclysm has none; no stock Somtaaw / Beast badge: Kushan's and a plain one for now)
+BADGES = []
 
 
 def read():

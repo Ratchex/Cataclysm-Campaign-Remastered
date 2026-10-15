@@ -46,6 +46,6 @@ NewResourceType.DockFamily="Resource"
 NewResourceType.AvoidanceFamily="None"
 NewResourceType.AttackFamily="Resource"
 NewResourceType.ArmourFamily="ResourceArmour"
--- Cataclysm-HWRM: resourcers' cargo (install_cr.py make_cargo_cloud): DustCloud0_hw1's resource fields
+-- Cataclysm-HWRM: resourcers' cargo (install_base.py make_cargo_cloud): DustCloud0_hw1's resource fields
 NewResourceType.resourceValue=100
 NewResourceType.blobRadius=100

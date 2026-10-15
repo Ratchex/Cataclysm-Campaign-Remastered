@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # The Ramming Frigate's impact bowl mesh (tools/make_ramimpact.py --dae, HODOR) and its effect files. Then
-# tools/install_cr.py. Run from Git Bash (HODOR).
+# tools/install_base.py. Run from Git Bash (HODOR).
 set -e
 cd "$(dirname "$0")/.."
 OUT=build/ships/fx_ramimpact

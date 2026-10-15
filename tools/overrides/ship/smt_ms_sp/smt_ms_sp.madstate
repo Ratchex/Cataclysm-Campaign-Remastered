@@ -1,4 +1,4 @@
--- Kuun-Lan animation states (Cataclysm-HWRM; installed over Cataclysm Remastered's by tools/install_cr.py).
+-- Kuun-Lan animation states (Cataclysm-HWRM; installed over Cataclysm Remastered's by tools/install_base.py).
 -- Cataclysm's smothershipcommand.mad GravRotate (tools/mad2hwrm.py, on our som_mothership's grav_generator joint):
 -- the command module's gravity generator turns once every 12 s, always (Cataclysm Remastered loops its own
 -- "rotate" the same way).

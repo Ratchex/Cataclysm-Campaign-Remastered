@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # The Mimic's model (som_mimic): Cataclysm's smimic as joint MimicBody plus each disguise target's Cataclysm model as
 # a hidden joint Disguise_<target> in its faction's colours (tools/make_mimic.py), then its .madstate and still .mad.
-# Then tools/install_cr.py. Run from Git Bash (HODOR).
+# Then tools/install_base.py. Run from Git Bash (HODOR).
 set -e
 cd "$(dirname "$0")/.."
 PARTS=""

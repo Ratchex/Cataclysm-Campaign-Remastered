@@ -7,7 +7,7 @@ keep their shading), alpha kept.
 
   cat_ico_upgrade.dds  Upgrade: the Dock icon turned 180 degrees (chevrons up), coloured like Move (user)
 
-Usage: python tools/make_icons.py  (then tools/make_abilities.py, tools/install_cr.py)
+Usage: python tools/make_icons.py  (then tools/make_abilities.py, tools/install_base.py)
 """
 import os
 import sys

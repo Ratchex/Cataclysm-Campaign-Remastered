@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Build a Cataclysm mission background's sky model (tools/make_background.py --sky: texture + sphere DAE, HODOR,
-# then --splice: the stock lights) into build/backgrounds/<name>/, for tools/install_cr.py. Git Bash only: HODOR
+# then --splice: the stock lights) into build/backgrounds/<name>/, for tools/install_base.py. Git Bash only: HODOR
 # spins forever when Python/PowerShell start it.
 # Usage: tools/build_background.sh <name>   (name, .btg and offsets from make_background.py BACKGROUNDS)
 set -e

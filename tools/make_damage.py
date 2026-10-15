@@ -1,5 +1,5 @@
-"""Cataclysm's health and weapon damage on our ships, 1:1 (user, 2026-10-09: all mapped ships, Cataclysm's scale; CR's
-per-class accuracy kept; armour upgrade levels later; NOTES.md "Damage model"). Run by install_cr.py.
+"""Cataclysm's health and weapon damage on our ships, 1:1 (user, 2026-10-09: all mapped ships, Cataclysm's scale; the stock
+per-class accuracy kept; armour upgrade levels later; NOTES.md "Damage model"). Run by install_base.py.
 
 Health: the .shp maxhealth. Damage: Cataclysm's per-hit damage (table 0x72b228 [bullet type][armour level 0] x the
 gun's DamageMult; beams hit 16 times a second for BulletLifeTime: per shot = per hit x 16 x lifetime) and its fire /
@@ -9,9 +9,9 @@ cadence and accuracy; their damage is scaled so the ship's total matches Catacly
 alike (Cataclysm's damage depends on armour level, not ship class). A weapon shared by ship types that need different
 scales gets a per-ship copy (cat_<ship>_<weapon>). Our own weapons (cat_*) carry Cataclysm's values themselves.
 Not yet: Beast ships (their infection weapons are their own mechanic), mines, armour levels, the Energy upgrade's
-damage; ships Cataclysm gives no guns keep CR's weapons (the Somtaaw ramming frigate).
+damage; ships Cataclysm gives no guns keep their template's weapons (the Somtaaw ramming frigate).
 
-Originals are read from the source layers (Players Patch, Cataclysm Remastered, HW1 campaign, stock), never from
+Originals are read from the source layers (Players Patch, HW1 campaign, stock), never from
 data/, so re-running doesn't scale twice.
 Usage: make_damage.py [--report]     (--report: print the per-ship factors, change nothing)
 """
@@ -27,7 +27,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 MOD = os.path.dirname(HERE)
 DATA = os.path.join(MOD, "data")
 REF = r"C:\Modding\Cataclysm-decomp\reference"
-SOURCES = [os.path.join(REF, "cr_beast"), os.path.join(REF, "players_patch"), os.path.join(REF, "hwrm", "HW1Campaign"),
+SOURCES = [os.path.join(REF, "players_patch"), os.path.join(REF, "hwrm", "HW1Campaign"),
            os.path.join(REF, "hwrm", "Homeworld2")]
 BEAM_TICKS = 16          # beam damage per original-rate universe update (HW1 Collision.c collCheckBeamColl)
 RACES = {"RACE_SECT": "sect", "RACE_BEAST": "beast", "RACE_KUSHAN": "kushan", "RACE_TAIDAN": "taidan"}
@@ -209,7 +209,7 @@ def write_weapon(name, text):
 
 
 def apply(rows):
-    """Write health and the scaled weapons into data/; returns the paths written (for install_cr's manifest)."""
+    """Write health and the scaled weapons into data/; returns the paths written (for install_base's manifest)."""
     written, wants = [], {}
     for ship, (health, _, _, f, pool) in rows.items():
         set_health(ship, health)

@@ -26,7 +26,7 @@ ez01's without the lens flare / sun following the planet rig's Flare_Key joint. 
 ship without them, e.g. Battlestar Galactica: Fleet Command's).
 
 Usage: make_background.py <btg> <name> [--theta DEG] [--phi DEG]   e.g. mission01.btg cat_m01 --theta 200
-       (tools/install_cr.py runs it for BACKGROUNDS: the light .hod is 22 MB of stock data, not kept in git)
+       (tools/install_base.py runs it for BACKGROUNDS: the light .hod is 22 MB of stock data, not kept in git)
 """
 import argparse
 import math
@@ -98,7 +98,7 @@ BACKGROUNDS = {}
 
 # Stock skies relit with a Cataclysm mission's lights (user: Mission 1 looked harshly lit and shadowed; Cataclysm's
 # mission01.hsf has a high pale-yellow ambient, a moderate orange key and a weak red fill, stock ez14 two key lights
-# above 1.0 and little ambient). Written to data/background/<sky>/<sky>_light.hod by tools/install_cr.py.
+# above 1.0 and little ambient). Written to data/background/<sky>/<sky>_light.hod by tools/install_base.py.
 RELIGHT = {"ez14": "mission01"}
 # ...and with a glow in their sky texture dimmed: sky -> (u, v centre, u, v radius (Gaussian sigma), r, g, b cut at the
 # centre). ez14: the bright glow behind its main nebula (user: the nebula is supposed to be a dark smear; reduce the

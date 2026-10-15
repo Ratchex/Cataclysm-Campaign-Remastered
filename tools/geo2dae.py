@@ -243,6 +243,9 @@ OUTER_APPROACH = {"Fighter": 2400, "Corvette": 2800}
 # Cataclysm Remastered's hangar paths instead of Cataclysm's lines (they docked; off our model's hangar, user)
 HANGAR_FROM_CR = False
 EXIT_OF = {"DBSMALLIN": "DBSMALLOUT", "DBMEDIN": "DBMEDOUT"}
+# The families a kind's paths take: Workers (Utility) launch and dock through the medium bay too (their RES paths
+# are latch paths, for unloading only: "Can't find a launch path!", built Workers stayed inside, user)
+PATH_FAMILIES = {"Corvette": "Corvette, Utility"}
 LATCH_OFFSET = 45   # collector latch waypoint off the dock point along its normal (HW1 units; ~16 HWRM)
 LATCH_DROP = 10     # and that much lower (model units; user: line the Worker up with the nose's hangar)
 
@@ -255,6 +258,49 @@ CLIP_BOXES = []
 
 def in_clip_box(xyz):
     return any(all(b[k] <= xyz[k] <= b[k + 3] for k in range(3)) for b in CLIP_BOXES)
+
+
+# The ship's own dock point table (its .shp: "DockPoint name,type,flyawaydist,mindist,maxdist,heading,up", directions
+# 0 up, 1 right, 2 forward, 4 down, 5 left, 6 back in HW1 model space): {name lower: (type, flyaway, min, max,
+# heading, up)}. Filled by main; the collector paths take their distances and the docked ship's heading / up from it
+# (user: the Kuun-Lan's paths from Cataclysm's own files).
+SHP_DOCKS = {}
+HW1_DIRS = {0: (1, 0, 0), 1: (0, 1, 0), 2: (0, 0, 1), 4: (-1, 0, 0), 5: (0, -1, 0), 6: (0, 0, -1)}
+CONVN = None   # HW1 direction -> ours (main's convn)
+
+
+def read_shp_docks(path):
+    out = {}
+    if not os.path.exists(path):
+        return out
+    for line in open(path, encoding="latin-1"):
+        m = re.match(r"\s*DockPoint\s+(.*)", line, re.I)
+        if not m:
+            continue
+        f = [x.strip() for x in m.group(1).split(";")[0].split(",")]
+        if len(f) >= 7:
+            out[f[0].lower()] = (f[1], float(f[2]), float(f[3]), float(f[4]), int(f[5]), int(f[6]))
+    return out
+
+
+def rotation_of(up, fwd):
+    """Euler degrees (Z*Y*X, as SEG rotations) of a frame whose y is up and z is fwd (our model space)."""
+    ln = math.sqrt(sum(c * c for c in up)) or 1.0
+    up = [c / ln for c in up]
+    dot = sum(fwd[k] * up[k] for k in range(3))
+    fwd = [fwd[k] - dot * up[k] for k in range(3)]
+    ln = math.sqrt(sum(c * c for c in fwd)) or 1.0
+    fwd = [c / ln for c in fwd]
+    side = [up[1] * fwd[2] - up[2] * fwd[1], up[2] * fwd[0] - up[0] * fwd[2], up[0] * fwd[1] - up[1] * fwd[0]]
+    m = [[side[r], up[r], fwd[r]] for r in range(3)]
+    ry = math.asin(max(-1.0, min(1.0, -m[2][0])))
+    if abs(m[2][0]) < 0.9999:
+        rx = math.atan2(m[2][1], m[2][2])
+        rz = math.atan2(m[1][0], m[0][0])
+    else:
+        rz = 0.0
+        rx = math.atan2(m[0][1] if ry > 0 else -m[0][1], m[1][1])
+    return tuple(math.degrees(v) for v in (rx, ry, rz))
 
 
 def dock_nodes(points, conv, extra="", skip=()):
@@ -305,6 +351,8 @@ def dock_nodes(points, conv, extra="", skip=()):
         for lbl in sorted(l for l in docks if l.startswith(prefix)):
             if prefix == "RES" and not re.match(r"RES\d+$", lbl):
                 continue                                   # RESLEECH*: Beast attachment points
+            if prefix == "RES" and SHP_DOCKS and SHP_DOCKS.get(lbl.lower(), ("",))[0] != "DPT_Worker_RU_Transfer":
+                continue    # only the Worker drop-offs the ship's .shp lists (the Kuun-Lan: Res0 / Res1; its .mex has 11)
             pos, nrm = docks[lbl]
             exit_lbl = None
             if prefix in EXIT_OF:   # DBSMALLINP0 leaves by DBSMALLOUTP0, else the first exit on that side
@@ -320,9 +368,18 @@ def dock_nodes(points, conv, extra="", skip=()):
             # Check+Queue on the approach, Close leaving, no Player/ClearRes, tolerance 50, oriented waypoints (UseRot,
             # latch_rotation): with the stock flags they never unloaded, without rotations they stopped short.
             rot = latch_rotation(pos, nrm) if fam == "Utility" else None
+            shp = SHP_DOCKS.get(lbl.lower())
+            if fam == "Utility" and shp and CONVN:
+                # Cataclysm's own: the docked Worker faces the point's heading with its top along its up (Res0: nose
+                # up, top forward; Res1: nose down), approached from its max / min distance along the normal
+                _, _, dmin, dmax, hd, ud = shp
+                rot = rotation_of(CONVN(*HW1_DIRS[ud]), CONVN(*HW1_DIRS[hd]))
+                far, near = dmax, dmin
             if fam == "Utility":
                 # the waypoint is the collector's centre: off the hull by about its half-height (Worker clamps 14.4
                 # below centre; CR's nose latch is ~28 off the hull), not on the Cataclysm dock point itself
+                # (the queue point doesn't count: a path needs two more, even where Cataclysm's min and max are the
+                # same, Res0 / Res1 600 / 600: "dockingpath with only one point", fatal)
                 entry = (seg(0, along(pos, nrm, far), 50, 0, "Check Queue", rot) + seg(1, along(pos, nrm, near), 50, 0, "", rot)
                          + seg(2, along(pos, nrm, LATCH_OFFSET), 50, 0, "", rot))
             else:
@@ -336,7 +393,7 @@ def dock_nodes(points, conv, extra="", skip=()):
                 entry = "".join(seg(i, p, 50, 0, f) for i, (p, f) in enumerate(way))
             # Stock HW1 Kushan paths (kus_mothership.hod): MAD 0 (an invalid -1 crashed the level load), empty links,
             # Exit on the way out, Latch on both ways for collectors.
-            paths.append(jnode(f"DOCK[{name}]_Fam[{fam}]_Link[]_Flags[{flags}]_MAD[0]", (0, 0, 0), entry))
+            paths.append(jnode(f"DOCK[{name}]_Fam[{PATH_FAMILIES.get(fam, fam)}]_Link[]_Flags[{flags}]_MAD[0]", (0, 0, 0), entry))
             epos, enrm = docks[exit_lbl] if exit_lbl else (pos, nrm)
             if fam == "Utility":
                 exitp = (seg(0, along(epos, enrm, LATCH_OFFSET), 50, 0, "", rot) + seg(1, along(epos, enrm, near), 50, 0, "Close", rot)
@@ -348,7 +405,7 @@ def dock_nodes(points, conv, extra="", skip=()):
                          + seg(2, along(epos, enrm, far), 50, 200, "Close"))
                 if OUTER_APPROACH.get(fam):    # leave all the way out before turning (see OUTER_APPROACH)
                     exitp += seg(3, along(epos, enrm, OUTER_APPROACH[fam]), 60, 250, "Close")
-            paths.append(jnode(f"DOCK[{ex_name}]_Fam[{fam}]_Link[]_Flags[{(flags + ' Exit').strip()}]_MAD[0]",
+            paths.append(jnode(f"DOCK[{ex_name}]_Fam[{PATH_FAMILIES.get(fam, fam)}]_Link[]_Flags[{(flags + ' Exit').strip()}]_MAD[0]",
                                (0, 0, 0), exitp))
     if not paths and not extra:
         return "", 0
@@ -670,6 +727,11 @@ def main():
     s = a.scale
     conv = lambda x, y, z: (-y * s, x * s, z * s)
     convn = lambda x, y, z: (-y, x, z)
+    global CONVN
+    CONVN = convn
+    parts_rel = rel.replace("\\", "/").split("/")
+    if len(parts_rel) >= 2:   # race_sect/smothership/rl0/lod0 -> race_sect/smothership.shp
+        SHP_DOCKS.update(read_shp_docks(os.path.join(DECOMP, "extracted", "big", parts_rel[0], parts_rel[1] + ".shp")))
 
     # Group triangles by texture (materials sharing a texture share one HWRM material).
     groups = {}   # key -> {"mat", "png_dir", "tris": [(positions[3], normals[3], uvs[3])]}
@@ -1034,7 +1096,7 @@ def main():
         # repair points (stock HW1 layout: RepairPointN with _Heading / _Left / _Up, 10 out): HWRM repairs a ship only
         # at its RepCap latch points ("marked as repairable ... but has no repair points!"; user: the repair order
         # targeted nothing), one repairer per point (user: several craft must repair one target). Four, just off
-        # the hull's top, bottom and sides (bounding box); install_cr.py declares them.
+        # the hull's top, bottom and sides (bounding box); install_base.py declares them.
         rp_vs = [v for g in groups.values() for t in g["tris"] for v in t[0]] or [(0.0, 0.0, 0.0)]
         rp_lo = [min(v[k] for v in rp_vs) for k in range(3)]
         rp_hi = [max(v[k] for v in rp_vs) for k in range(3)]

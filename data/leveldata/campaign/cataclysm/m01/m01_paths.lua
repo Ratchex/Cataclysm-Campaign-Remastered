@@ -4,6 +4,9 @@ KAS_Paths = {
 	["DestroyerPath"] = { {24532.987, 0, 33936.945}, {40680.045, 5827.867, 26524.68}, {47738.355, 0, -46004.647}; closed = 0 },
 }
 KAS_Universe = { 52500, 15750, 52500 }
+KAS_MeteorPlayer = 3
+KAS_MeteorStorms = {
+}
 KAS_TeamSchemes = {
 	["KushanCarriers"] = 6,
 	["KushanFlankFrigates"] = 6,

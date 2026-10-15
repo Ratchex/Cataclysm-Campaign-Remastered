@@ -10,7 +10,7 @@ Kuun-Lan's) is forward.
 Every Somtaaw ship type (data/ship/smt_*) takes its Cataclysm slot (SLOTS; a type's variants <type>_<x> too); the
 rest go to Cataclysm's SLOT_Misc ("all ships not covered above") as HWRM's required "misc" slot.
 
-Writes tools/overrides/scripts/formations/smt_mothership_parade.lua (tools/install_cr.py installs it).
+Writes tools/overrides/scripts/formations/smt_mothership_parade.lua (tools/install_base.py installs it).
 Usage: make_parade.py
 """
 import math

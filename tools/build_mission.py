@@ -35,6 +35,16 @@ START_RESEARCH = {"01": ["TECH_DRIVE_FIGHTER"]}
 # Missions that take the player's control from the warp-in to the end of their first Fleet Intel briefing
 # (cataclysmkas.lua KAS_Lockout; user: Mission01 opens restricted until the first sensors scene is over)
 OPENING_LOCK = {"01": 1}
+# Missions whose allied computer player (2) joins the player only when its team switches sides (kasfTeamSwitchPlayer-
+# Owner): Mission02's Kushan destroyer is found adrift, and before that its sensors are not the player's (user)
+ALLY_ON_SWITCH = {"02": 1}
+# The cutscene each mission opens with (--intro overrides; a regenerated Mission01 without it lost its Kuun-Lan intro)
+INTROS = {"01": "n01"}
+# Teams the mission disguises (kasfShipsDisguise, cataclysm.exe 0x497fd0: all p1StandardCorvette): placed as the
+# corvette with the disguises on its model (tools/make_disguise.py, tur_standardcorvette_disguise)
+DISGUISE_TEAMS = {"02": ["pTricky"],
+                  "10": [f"pSalCorvette{n}" for n in range(1, 7)] + ["pMSMimic1", "pMSMimic2"],
+                  "12": [f"pMimicAst{n}" for n in range(1, 5)] + ["pMimicPlayer1", "pMimicPlayer2", "pSalvage1"]}
 # Mission01's starting fleet (observed in the original); later missions bring the previous one's (persistence)
 DEFAULT_FLEET = "smt_ms_sp,smt_scout*3,smt_worker*2"
 # brings the previous mission's fleet (persist<n>.lua, else StartingPlayerFleet.lua) to PlayerStartPoint, as
@@ -60,10 +70,11 @@ dofilepath("data:leveldata/campaign/cataclysm/m{nn}/m{nn}_kas.lua")
 -- Kuun-Lan modules at the start (the mission's IncludeShips sMothership<Module>; tools/make_modules.py)
 KAS_StartModules = {{ {modules} }}
 -- research the player starts with, the Kuun-Lan's turn on arrival, the opening lock (build_mission.py START_RESEARCH,
--- ARRIVAL_YAW, OPENING_LOCK)
+-- ARRIVAL_YAW, OPENING_LOCK, ALLY_ON_SWITCH)
 KAS_StartResearch = {{ {research} }}
 KAS_ArrivalYaw = {yaw}
 KAS_OpeningLock = {lock}
+KAS_AllyOnSwitch = {ally}
 
 function OnStartOrLoad()
     print("CATACLYSM Mission{nn}: OnStartOrLoad")
@@ -150,9 +161,12 @@ def main():
     ap.add_argument("--fleet", default=None, help="player fleet placed by the level (default: Mission01's; the "
                     "other missions get the previous mission's fleet, persistence)")
     ap.add_argument("--background", help="default: BACKGROUNDS, else ez01")
-    ap.add_argument("--intro", default="", help="cutscene played before the mission starts (e.g. n01)")
+    ap.add_argument("--intro", default=None, help="cutscene played before the mission starts (default: INTROS)")
     a = ap.parse_args()
+    run(os.path.join(HERE, "check_voice.py"))      # every voice line through the speech queue
     nn = a.nn.zfill(2)
+    if a.intro is None:
+        a.intro = INTROS.get(nn, "")
     if a.fleet is None:
         a.fleet = DEFAULT_FLEET if nn == "01" else ""
     persist = not a.fleet
@@ -165,6 +179,8 @@ def main():
     if a.fleet:
         lvl += ["--player-fleet", a.fleet]
     lvl += ["--arrival-yaw", str(ARRIVAL_YAW.get(nn, 0))]
+    if DISGUISE_TEAMS.get(nn):
+        lvl += ["--disguise-teams", ",".join(DISGUISE_TEAMS[nn])]
     run(os.path.join(HERE, "mission2level.py"), src, os.path.join(out, f"m{nn}.level"), *lvl)
     run(os.path.join(HERE, "kas2lua.py"), DECOMP, f"Mission{nn}", src, os.path.join(out, f"m{nn}_kas.lua"))
     # the teams with a damage factor HWRM's multiplier can't give get weaker weapon copies (make_variants.py)
@@ -181,7 +197,7 @@ def main():
     with open(os.path.join(out, f"m{nn}.lua"), "w", newline="\n") as f:
         f.write(WRAPPER.format(nn=nn, intro=a.intro, modules=", ".join(f'"{m}"' for m in modules),
                                research=", ".join(f'"{t}"' for t in START_RESEARCH.get(nn, [])),
-                               yaw=ARRIVAL_YAW.get(nn, 0), lock=OPENING_LOCK.get(nn, "nil"),
+                               yaw=ARRIVAL_YAW.get(nn, 0), lock=OPENING_LOCK.get(nn, "nil"), ally=ALLY_ON_SWITCH.get(nn, "nil"),
                                persist=PERSIST_LOAD if persist else ""))
     run(os.path.join(HERE, "make_colours.py"))   # (teamcolour.lua: written by mission2level.py)
     with open(os.path.join(out, "datfiles.lua"), "w", newline="\n") as f:

@@ -1,4 +1,4 @@
--- Cataclysm-HWRM: the Worker's repair approach (install_cr.py repair_order). Stock frontal_supportfrigate, made to
+-- Cataclysm-HWRM: the Worker's repair approach (install_base.py repair_order). Stock frontal_supportfrigate, made to
 -- hold off near its beam's full range (Cataclysm's Worker repaired from repairDistance, not alongside) and not to
 -- chase a target that is still in range: it faces the target and only flies after it once it is well out of range.
 

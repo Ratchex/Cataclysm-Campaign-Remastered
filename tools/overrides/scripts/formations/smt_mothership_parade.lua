@@ -9,11 +9,6 @@ paradeSlot("smt_acv", {840, -315, 437.5}, {0, 0, 1}, {1, 0, 0}, 70);   -- SLOT_S
 paradeSlot("smt_sentinel", {840, -210, 175}, {0, 0, 1}, {1, 0, 0}, 70);   -- SLOT_SSENTINEL
 paradeSlot("smt_worker", {840, 0, -350}, {0, 0, 1}, {1, 0, 0}, 140);   -- SLOT_SWORKER
 paradeSlot("smt_mimic", {-840, -700, 787.5}, {0, 0, 1}, {-1, 0, 0}, 70);   -- SLOT_SMIMIC
-paradeSlot("smt_mimic_attackbomber", {-840, -700, 787.5}, {0, 0, 1}, {-1, 0, 0}, 70);   -- SLOT_SMIMIC
-paradeSlot("smt_mimic_interceptor", {-840, -700, 787.5}, {0, 0, 1}, {-1, 0, 0}, 70);   -- SLOT_SMIMIC
-paradeSlot("smt_mimic_multiguncorvette", {-840, -700, 787.5}, {0, 0, 1}, {-1, 0, 0}, 70);   -- SLOT_SMIMIC
-paradeSlot("smt_mcv_ioncannonfrigate", {-840, -525, 525}, {0, 0, 1}, {-1, 0, 0}, 70);   -- SLOT_SMCV
-paradeSlot("smt_mcv_supportfrigate", {-840, -525, 525}, {0, 0, 1}, {-1, 0, 0}, 70);   -- SLOT_SMCV
 paradeSlot("smt_rammingfrigate", {-840, -350, 262.5}, {0, 0, 1}, {-1, 0, 0}, 210);   -- SLOT_SRAMMINGFRIGATE
 paradeSlot("smt_multibeamfrigate", {-840, -175, 0}, {0, 0, 1}, {-1, 0, 0}, 210);   -- SLOT_SMULTIBEAMFRIGATE
 paradeSlot("smt_hivefrigate", {-840, 0, -262.5}, {0, 0, 1}, {-1, 0, 0}, 210);   -- SLOT_SHIVEFRIGATE
