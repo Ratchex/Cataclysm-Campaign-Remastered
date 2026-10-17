@@ -49,6 +49,14 @@ CATACLYSM_MODEL = {
     "kus_attackbomber": "race_kushan/kattackbomber", "bst_acolyte": "race_beast/bacolyte",
     "smt_acolyte": "race_sect/sacolyte",
 }
+# the mission scripts' disguises (kasfShipsDisguise, tools/make_disguise.py): Cataclysm type (as the runtime has it,
+# cataclysmkas.lua K_498080) -> (its Cataclysm model, the model it hides, the disguisable ship type). Only the way out
+# is shown (the disguise is put on out of sight); the shell reaches past the hidden ship's own radius (user,
+# 2026-10-17: Mission02's corvettes drop their disguise with our Mimic's visuals)
+SCRIPT_DISGUISES = {
+    "kadvancesupportfrigate": ("race_kushan/kadvancesupportfrigate", "race_p1/p1standardcorvette",
+                               "tur_standardcorvette_disguise"),
+}
 
 
 def radius(model):
@@ -122,17 +130,19 @@ EVENT = ("    {name}_fx = {{ {{ \"anim\", \"{name}\" }}, {{ \"animtime\", \"0\" 
          "{{ \"fx\", \"{fx}\" }}, {{ \"fx_scale\", \"1\" }}, }},\n")
 
 
-def patch_events(path):
+def patch_events(path, targets, kinds=("In", "Out", "Tail")):
     """Add MimicIn_ / MimicOut_ / MimicTail_<target> (each playing that effect on the Root marker) to a ship's .events:
-    started by shiprules.lua FX_StartEvent, they move with the ship (FX_PlayEffect stayed where it was started)."""
+    started by shiprules.lua / cataclysmkas.lua FX_StartEvent, they move with the ship (FX_PlayEffect stayed where it
+    was started)."""
     text = open(path, encoding="latin-1").read()
-    if "MimicIn_" in text:
+    if "Mimic" + kinds[0] + "_" in text:
         return
     anims, events = "", ""
-    for target in sorted(ship_variants.DISGUISES):
-        for name, fx, length in ((f"MimicIn_{target}", f"cat_mimic_in_{target}", PHASE_TIME),
-                                 (f"MimicOut_{target}", f"cat_mimic_out_{target}", PHASE_TIME),
-                                 (f"MimicTail_{target}", f"cat_mimic_tail_{target}", PHASE_TIME - SWAP)):
+    for target in sorted(targets):
+        for kind, length in (("In", PHASE_TIME), ("Out", PHASE_TIME), ("Tail", PHASE_TIME - SWAP)):
+            if kind not in kinds:
+                continue
+            name, fx = f"Mimic{kind}_{target}", f"cat_mimic_{kind.lower()}_{target}"
             anims += ANIM.format(name=name, length=length)
             events += EVENT.format(name=name, fx=fx)
     for table, add in (("animations", anims), ("events", events)):
@@ -144,12 +154,14 @@ def patch_events(path):
 
 
 def patch_all_events():
-    for ship in ["smt_mimic"]:
+    ships = [("smt_mimic", ship_variants.DISGUISES, ("In", "Out", "Tail"))]
+    ships += [(ship, [target], ("Out",)) for target, (_, _, ship) in SCRIPT_DISGUISES.items()]
+    for ship, targets, kinds in ships:
         path = os.path.join(MOD, "data", "ship", ship, ship + ".events")
         if not os.path.exists(path):
             with open(path, "w", newline="\n") as f:
                 f.write("effects = {\nanimations = {},\nevents = {}\n}\n")
-        patch_events(path)
+        patch_events(path, targets, kinds)
 
 
 def main():
@@ -164,10 +176,7 @@ def main():
         at_swap = s0 + (1 - s0) * k
         # the target's Cataclysm model as one plain mesh (tools/build_mimicfx.sh): HWRM drew nothing of a ship model
         # (many meshes and materials on joints) as an effect mesh; the Keeper's one-mesh effect model showed
-        mdir = os.path.join(MOD, "data", "art", "fx", "cat_mimic")
-        os.makedirs(mdir, exist_ok=True)
-        shutil.copyfile(os.path.join(MOD, "build", "ships", "fx_" + target, "fx_" + target + ".hod"),
-                        os.path.join(mdir, target + ".hod"))
+        copy_mesh(target)
         mesh = f"DATA:ART/FX/CAT_MIMIC/{target.upper()}.HOD"
         # phase 1 -> 0 linear: scale s0 -> 1, opacity 0 -> ALPHA
         write(f"cat_mimic_in_{target}", mesh, PHASE_TIME, [(0, s0), (1, 1)], [(0, 0), (1, ALPHA)])
@@ -176,11 +185,26 @@ def main():
         # phase 0 -> 1: the shell grows from the model to the sphere and fades out
         write(f"cat_mimic_out_{target}", mesh, PHASE_TIME, [(0, 1), (1, s0)], [(0, ALPHA), (1, 0)])
         print(f"{target}: radius {rt:.1f} (Mimic {rm:.1f}), shell from x{s0:.2f}")
+    for target, (model, hidden, _) in sorted(SCRIPT_DISGUISES.items()):
+        rt, rh = radius(model), radius(hidden)
+        s0 = SHELL * max(rt, rh) / rt
+        copy_mesh(target)
+        write(f"cat_mimic_out_{target}", f"DATA:ART/FX/CAT_MIMIC/{target.upper()}.HOD", PHASE_TIME,
+              [(0, 1), (1, s0)], [(0, ALPHA), (1, 0)])
+        print(f"{target} (mission disguise): radius {rt:.1f} (hiding {rh:.1f}), shell to x{s0:.2f}")
     patch_all_events()
+
+
+def copy_mesh(target):
+    mdir = os.path.join(MOD, "data", "art", "fx", "cat_mimic")
+    os.makedirs(mdir, exist_ok=True)
+    shutil.copyfile(os.path.join(MOD, "build", "ships", "fx_" + target, "fx_" + target + ".hod"),
+                    os.path.join(mdir, target + ".hod"))
 
 
 if __name__ == "__main__":
     if "--list-builds" in sys.argv:      # for tools/build_mimicfx.sh
-        print(" ".join(f"{t}={CATACLYSM_MODEL[t]}" for t in ship_variants.DISGUISES))
+        print(" ".join([f"{t}={CATACLYSM_MODEL[t]}" for t in ship_variants.DISGUISES] +
+                       [f"{t}={m}" for t, (m, _, _) in SCRIPT_DISGUISES.items()]))
     else:
         main()

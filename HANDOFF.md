@@ -1,6 +1,6 @@
 # Session handoff: Cataclysm → HWRM port
 
-Last updated 2026-10-09 (late). Read this first, then `C:\Modding\Cataclysm-decomp\PORT_PLAN.md` (plan and decisions),
+Last updated 2026-10-17. Read this first, then `C:\Modding\Cataclysm-decomp\PORT_PLAN.md` (plan and decisions),
 `NOTES.md` (HWRM engine rules learned in game) and `C:\Modding\Cataclysm-decomp\MODLOG.md` (reverse-engineering
 findings).
 
@@ -98,7 +98,7 @@ findings).
 - Balance: Taiidan collectors at Cataclysm's 0.5 RU/s; Worker on the collector ratio (144); two extra Kushan
   main-guard ion frigates (tools/level_extras.py).
 
-## RESUME HERE (2026-10-14, session end: everything since 9ef456e is UNCOMMITTED on main; commit only when the user says)
+## RESUME HERE (2026-10-17: all committed and pushed; commit only when the user says)
 **Cataclysm Remastered / HWU removed (user, 2026-10-14):** no CR file in the mod; plan + status in `REBUILD.md`.
 `tools/install_cr.py` is now `tools/install_base.py` (Players Patch + Somtaaw/Beast ships from stock HW1 templates,
 TEMPLATES; our 9 models via OUR_MODELS/OUR_WEAPONS; stand-ins keep the template model). Rerun it after any model
@@ -110,16 +110,17 @@ geo2dae's quad, Kuun-Lan collector paths from Cataclysm's own `smothership.shp` 
 Res0/Res1 only; the queue point doesn't count toward a path's 2 points), medium bay paths also take Utility (Workers
 launch there).
 
-**Also this session (uncommitted, user-tested unless noted):**
+**2026-10-14 session (committed in 9921bac, user-tested unless noted):**
 - Speech: one queue for every voice line, Cataclysm's exe rules (`data/scripts/scar/cataclysmvoice.lua` CatVoice_Event;
   `tools/check_voice.py` enforces it from build_mission.py; memory voice-lines-through-queue). User: "much closer".
 - End of mission: own jump watch (KAS_HyperspaceJumpersGone; the intro's despawned Kuun-Lan blocked mission complete).
   Untested.
 - Mission 2 disguised corvettes (tools/hodread.py, hod2dae.py, make_disguise.py, build_disguise.sh;
   tur_standardcorvette_disguise). Untested in game.
-- Cutscenes switch the sensors manager off (KAS_NisStart / KAS_LockedOut). Recon: Speed Burst removed, trail per nozzle.
-- TEST traces still in cataclysmkas.lua: KAS_DestroyerTrace, KAS_ResourcerTrace, the K_495e80 ping print. Remove
-  before committing.
+- Cutscenes switch the sensors manager off (KAS_NisStart / KAS_LockedOut). Recon: trail per nozzle (its Speed Burst:
+  see abilities below).
+- TEST traces still in cataclysmkas.lua: KAS_DestroyerTrace (5 s), KAS_ResourcerTrace, the K_495e80 ping print,
+  the kDestroyer "team empty" check; shiprules.lua CAT_REPAIR_TRACE. Remove once Mission 2 is signed off.
 
 **Support Units on the engine's unit cap (2026-10-17: limit works in the range, user-tested; HWRM's rule accepted).**
 Costs / providers: `tools/make_supportunits.py` -> `data/scripts/cataclysm/supportunits_gen.lua`.
@@ -148,6 +149,38 @@ Costs / providers: `tools/make_supportunits.py` -> `data/scripts/cataclysm/suppo
   selectable / visible / in the sensors manager; roll call unaffected; Mission01's persist2.lua (Profiles/<p>/
   Campaign/CATACLYSM) has no cat_sufiller; Mission 1's handed-over Kushan count (CatSU_Cost has kus_ types).
 
+**Mission 2, meteors, abilities (2026-10-17; engine rules in NOTES.md "Engine rules learned with Mission 2"):**
+- Meteors DONE (user-tested in the range): contact against the ship's hull box turned with the ship (KAS_BoxDistance,
+  CatHull box, coordsys rows) and the meteor's largest half-extent x KAS_MeteorContact 1.2; swept along the storm's
+  velocity since the last check (5 samples); meteors ghosted (SobGroup_SetGhost). The range has a 24-meteor belt
+  (range.level KAS_Meteors0, players 2 empty ally / 3 meteors, maxPlayers 4; range.lua RANGE_METEORS; RANGE_MUSIC
+  plays a track at the start).
+- Music DONE (user-tested): held through HWRM's carried-over fleet arrival and played once the mothership is out
+  (K_497000 / KAS_ArrivalWatch, as Gearbox's HW1 Mission02); the sensors manager's music duck lifted whenever it's
+  shut (K_496bc0 / KAS_SensorsDuckTick); tools/build_music.py levels every track to one median loudness (--loudness
+  2500: track 1 was 3-5x quieter than the rest). Mission 1's loud tracks are a little quieter than before.
+- Abilities DONE (user-tested: buttons hide correctly): Link / Unlink / Mimic buttons need a selected ship that has
+  the upgrade (shiprules.lua CatUpgrade_Apply keeps cat_has_<UPGRADE>; CatAbilityTick); the selection is read per ship
+  (SobGroup_Selected: MainUI_CurrentSelection's group only grows) and the buttons set every tick. Template leftovers:
+  ACV's burst attack and the Hive Frigate's repair commented out (install_base.py TEMPLATE_DROP, whole statement),
+  the Recon's Speed Burst kept with enable flag 0 (Cataclysm Remastered's way). Worker keeps its kamikaze (user).
+- 0x4984c0 is INVULNERABILITY (not paralyse): K_4984c0 = SobGroup_SetInvulnerability, re-applied every second
+  (KAS_InvulnerableTick: a despawn / respawn cleared it). Mission02: the BUSHAN-RE from arrival to Fleet Intel's
+  ambush briefing (fail state only after the ambush, user); the disguised corvettes / decoy while disguised. Mission01's
+  Kushan destroyer uses it too (untested since).
+- Ambush (technically working, user; polish built, UNTESTED): disguised team switched to the allied player while
+  disguised (shows friendly; left out of the pirates' "Enemy"), visible through the fog (KAS_DisguiseVisible), stops
+  at the BUSHAN-RE's sensor edge (K_4924e0 intercept, KAS_InterceptStop kDestroyer 9000; default Cataclysm's 4000),
+  drops the disguise with our Mimic's Unmimic shell (MimicOut_kadvancesupportfrigate: make_mimicfx.py
+  SCRIPT_DISGUISES; shell from Cataclysm's model, HWRM shows the Remastered one). Far camera focus reveals for 45 s.
+- Pirates' "Enemy" leaves out player 2 until it joins where the level starts it unallied (KAS_FillHumanSide).
+- Open: the intermittent access violation loading a mission (NOTES.md; launch with ProcDump attached to catch it);
+  0x498c10 ("kasfMusicStop") takes a technology name (hash 8979808 unmatched); "unable to unrestrict TECH_LINK /
+  TECH_DRIVE_FIGHTER" and "unable to grant CAT_ACOLYTE_MISSILES" at Mission02's start (Link's research may never
+  work); Mission 2 BUSHAN-RE visuals; autosave "invalid key for next".
+- Next: test the ambush polish (friendly display, the stop at the sensor edge, the transform), then the research
+  errors above, then the rest of Mission 2 against the original.
+
 **Engine work (later, with the Veterancy rank stars and the Upgrade UI displays; user, 2026-10-17):**
 - Support Units: Cataclysm's queue rule (a unit only if its whole cost fits; HWRM checks count < limit only), the
   build menu's SU line counting every queued unit (Player_HasQueuedBuild is 0/1 per type), and a limit above ~250.
@@ -156,7 +189,7 @@ Costs / providers: `tools/make_supportunits.py` -> `data/scripts/cataclysm/suppo
 
 **Other open items:** speech.dat "colliding name" in the log (subtitle file, pre-existing); Carrier Support Modules;
 stand-in capitals keep stock damage (turret subsystems shared with Kushan); model conversions for the 23 stand-ins
-(REBUILD.md Phase C); Mission 2 BUSHAN-RE visuals; autosave "invalid key for next".
+(REBUILD.md Phase C).
 
 ## Earlier resume notes (2026-10-09, after the damage conversion)
 **Console start:** run `claude` from `C:\Modding\Homeworld` (loads the project memory), then say "resume from

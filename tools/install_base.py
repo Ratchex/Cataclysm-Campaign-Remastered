@@ -133,10 +133,22 @@ def gen_ship(ship, template):
             if rel.lower().endswith(".ship"):
                 text = re.sub(r'^[ \t]*addCustomCode\(NewShipType,\s*"data:ship/%s/[^\n]*\n?' % re.escape(ship), "",
                               text, flags=re.M | re.I)
-                # and its custom commands that run from that .lua (the HW1 Scout's / Interceptor's Speed Burst: not
-                # Cataclysm's, user)
-                text = re.sub(r'^([ \t]*addAbility\(NewShipType,\s*"CustomCommand"[^\n]*"data:ship/%s/)' % re.escape(ship),
-                              r"-- Cataclysm-HWRM (the template's ability): \1", text, flags=re.M | re.I)
+                # and its custom commands that run from that .lua (the HW1 Scout's Speed Burst: not Cataclysm's, user)
+                # kept but off from the start (addAbility's enable flag 0, as Cataclysm Remastered's Recon has its
+                # SensorPing / EMP): commented out, HWRM's custom-code loader crashed loading any mission (access
+                # violation in CustomCodeManagerStatic::onLoad, bisected 2026-10-17)
+                text = re.sub(r'^([ \t]*addAbility\(NewShipType,\s*"CustomCommand",\s*)1(\s*,[^\n]*"data:ship/%s/)'
+                              % re.escape(ship), r"\g<1>0\2", text, flags=re.M | re.I)
+                # the template's abilities Cataclysm's ship lacks (upgrades_gen.lua CatUpgradeType, the .shp guns):
+                # the Heavy Corvette's burst attack on the ACV, the Support Frigate's repair on the Hive Frigate (user,
+                # 2026-10-17: only abilities that should be visible)
+                # (the whole statement, every line of it: the Support Frigate's repair runs over 20 lines, and only its
+                # first commented left the rest a parse error, a crash on loading Mission02)
+                for ability in TEMPLATE_DROP.get(ship, []):
+                    text = re.sub(r'^[ \t]*addAbility\((?:NewShipType,\s*)?"%s".*?\)[ \t]*;?[ \t]*$' % ability,
+                                  lambda m: "-- Cataclysm-HWRM (the template's ability):\n" +
+                                  "\n".join("-- " + line for line in m.group(0).split("\n")),
+                                  text, flags=re.M | re.S)
                 # our race's own build families (FAMILY_SUFFIX): built by our builders, not the Kushan / Taiidan ones
                 text = re.sub(r"\b(%s)_(?:Kus|Tai)\b" % "|".join(BUILD_FAMILIES), r"\1_" + FAMILY_SUFFIX[ship[:4]],
                               text)
@@ -145,6 +157,10 @@ def gen_ship(ship, template):
         else:
             shutil.copyfile(src, dst)
     return out
+
+
+# template abilities (addAbility names) a ship doesn't keep, not being Cataclysm's (gen_ship)
+TEMPLATE_DROP = {"smt_acv": ["SpecialAttack"], "smt_hivefrigate": ["RepairCommand"]}
 
 
 ENGLISH = r"C:\Modding\Cataclysm-decomp\extracted\big\english.script"

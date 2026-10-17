@@ -17,6 +17,13 @@ dofilepath("data:scripts/scar/cataclysmtech.lua")
 RANGE_GRANT_ALL = 0      -- 1: every Cataclysm tech researched at the start, the placed ships upgraded with it;
                          -- 0: every tech researchable, none done (to test researching and upgrading)
 
+RANGE_MUSIC = nil        -- a Cataclysm track (kasfMusicPlay number) to play at the start, nil none
+RANGE_METEORS = 1        -- 1: the level's meteor belt flies (Mission02's storms: contact = both lose the lower health)
+KAS_MeteorPlayer = 3
+if RANGE_METEORS == 1 then
+    KAS_MeteorStorms = { { group = "KAS_Meteors0", n = 24, v = { 250, 0, 0 }, ext = { 7000, 3000, 7000 } } }
+end
+
 -- every module the player can have (tools/make_modules.py), so all research and building is possible
 KAS_StartModules = { "smt_kl_dockingbay", "smt_kl_engineslower", "smt_kl_enginesupper", "smt_kl_lowerspine",
                      "smt_kl_orecanarmour", "smt_kl_weapons", "smt_kl_armour", "smt_kl_micro", "smt_kl_special" }
@@ -37,6 +44,7 @@ function OnInit()
         i = i + 1
     end
     Camera_Interpolate("here", "Camera_Startpos", 0)
+    if RANGE_MUSIC then K_497000(RANGE_MUSIC) end
     Rule_AddInterval("Range_CoordSys", 1)
     Rule_AddInterval("Range_Damage", 2)
     if RANGE_GRANT_ALL == 1 then Rule_AddInterval("Range_Upgrade", 2) end

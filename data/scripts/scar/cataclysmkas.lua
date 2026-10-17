@@ -755,6 +755,12 @@ function KAS_ArrivalWatch()
     KAS_Vars[KAS_Key_ShipsHaveArrived] = 1
     print("CKAS: fleet out of hyperspace after " .. t .. "s; launching " .. SobGroup_Count("KAS_ArrivalDocked")
           .. " ships; G_ShipsHaveArrived")
+    if KAS_MusicHeld then       -- the mission's track, held through the arrival (K_497000)
+        local path = KAS_MusicHeld
+        KAS_MusicHeld = nil
+        Sound_MusicPlayType(path, MUS_Ambient)
+        print("CKAS: music " .. path .. " (held through the arrival)")
+    end
 end
 
 KAS_ArrivalBowLogs = 0
@@ -933,7 +939,18 @@ CAT_ABILITY_HOLD = 1.0      -- over shiprules.lua CAT_TICK (0.5 s), so every sel
 function CatAbility_OwnSelection(grp)
     SobGroup_CreateIfNotExist(grp)
     SobGroup_Clear(grp)
-    SobGroup_FilterInclude(grp, MainUI_CurrentSelection(), "PlayerOwner", "0")
+    -- each of the human's ships that is selected (SobGroup_Selected): MainUI_CurrentSelection()'s group only ever
+    -- grew (logged 1, 4, 5 ... 17 ships, never less), so an upgraded Acolyte once selected kept Link on every later
+    -- selection (user, 2026-10-17)
+    SobGroup_CreateIfNotExist("cat_sel_one")
+    local n = SobGroup_Count("Player_Ships0")
+    for i = 0, n - 1 do
+        SobGroup_Clear("cat_sel_one")
+        SobGroup_FillShipsByIndexRange("cat_sel_one", "Player_Ships0", i, 1)
+        if SobGroup_Count("cat_sel_one") > 0 and SobGroup_Selected("cat_sel_one") == 1 then
+            SobGroup_SobGroupAdd(grp, "cat_sel_one")
+        end
+    end
     return grp
 end
 
@@ -994,13 +1011,14 @@ function CatAbilityTick()
             local show = 0
             if SobGroup_Count(sel) > 0 and SobGroup_AreAnyOfTheseTypes(sel, a.types) == 1 and
                (a.tech == "" or Player_HasResearch(0, a.tech) == 1) and (a.menu == "" or CatMenuOpen[a.menu]) and
-               (a.group == nil or a.group == "" or CatAbility_SelectionIn(sel, a.group) == 1) then
+               (a.group == nil or a.group == "" or CatAbility_SelectionIn(sel, a.group) == 1) and
+               (a.upgrade == "" or CatAbility_SelectionIn(sel, "cat_has_" .. a.upgrade) == 1) then
                 show = 1
             end
-            if CatAbilityShown[a.name] ~= show then
-                UI_SetElementVisible("NewTaskbar", "btnCat_" .. a.name, show)
-                CatAbilityShown[a.name] = show
-            end
+            -- every tick, not on a change only: the taskbar's rebuild for a new selection showed them again behind our
+            -- back (user, 2026-10-17: Link / Unlink on a Worker)
+            UI_SetElementVisible("NewTaskbar", "btnCat_" .. a.name, show)
+            CatAbilityShown[a.name] = show
         end
     end
 end
@@ -1360,7 +1378,22 @@ function KAS_FillByOwners(newShips, orig, owners)
     end
     return SobGroup_Count(newShips)
 end
-function KAS_FillHumanSide(newShips, orig) return KAS_FillByOwners(newShips, orig, { 0, 2 }) end
+-- player 2 only once it is the human's: where the level starts it unallied (KAS_AllyOnSwitch: Mission02's BUSHAN-RE,
+-- the computer's in Cataclysm until found), not before its team switches sides (the pirates went for it unfound)
+function KAS_FillHumanSide(newShips, orig)
+    if KAS_AllyOnSwitch and KAS_AlliedOnSwitch == nil then return KAS_FillByOwners(newShips, orig, { 0 }) end
+    KAS_FillByOwners(newShips, orig, { 0, 2 })
+    -- (a disguised team is the ally's only for show: K_497fd0)
+    for sel, _ in KAS_DisguiseInfo do
+        if SobGroup_Count(sel) > 0 then
+            SobGroup_CreateIfNotExist("KAS_OwnerTmp")
+            SobGroup_FillSubstract("KAS_OwnerTmp", newShips, sel)
+            SobGroup_Clear(newShips)
+            SobGroup_SobGroupAdd(newShips, "KAS_OwnerTmp")
+        end
+    end
+    return SobGroup_Count(newShips)
+end
 function KAS_FillComputerSide(newShips, orig) return KAS_FillByOwners(newShips, orig, { 1 }) end
 function K_495560(n, o) return KAS_SelectInto(n, o, KAS_FillHumanSide) end                         -- kasfShipsSelectEnemy
 function K_495620(n, o) return KAS_SelectInto(n, o, KAS_FillComputerSide) end                      -- kasfShipsSelectFriendly
@@ -1673,6 +1706,7 @@ KAS_Patrols = {}
 KAS_PatrolReach = 600          -- a team is at a waypoint when its centre is this close (or it has stopped)
 function KAS_EndPatrol()
     KAS_Patrols[KAS_Team] = nil
+    if KAS_Intercepts then KAS_Intercepts[KAS_Team] = nil end
     if KAS_Guards then KAS_Guards[KAS_Team] = nil end
     if KAS_Moves then KAS_Moves[KAS_Team] = nil end
 end
@@ -1729,10 +1763,25 @@ function KAS_HealthTrace(team, why)
                  SobGroup_GetPlayerOwner(team)))
 end
 function KAS_DestroyerTrace()
-    if SobGroup_Exists("kDestroyer") == 1 and SobGroup_Count("kDestroyer") > 0 then
+    if SobGroup_Exists("kDestroyer") == 0 then return end
+    local n = SobGroup_Count("kDestroyer")
+    if n > 0 then
         local q = SobGroup_GetPosition("kDestroyer")
-        KAS_HealthTrace("kDestroyer", format("(every 5 s) at %.0f %.0f %.0f", q[1], q[2], q[3]))
+        KAS_HealthTrace("kDestroyer", format("(every 1 s) at %.0f %.0f %.0f, order %d", q[1], q[2], q[3],
+                        SobGroup_GetCurrentOrder("kDestroyer")))
+    elseif KAS_DestroyerSeen then
+        -- TEST (2026-10-17): gone from its team: destroyed, or only out of the group (any kus_destroyer left?)
+        SobGroup_CreateIfNotExist("KAS_TraceKD")
+        local left = ""
+        for pl = 0, Universe_PlayerCount() - 1 do
+            SobGroup_Clear("KAS_TraceKD")
+            Player_FillShipsByType("KAS_TraceKD", pl, "kus_destroyer")
+            left = left .. " player " .. pl .. ": " .. SobGroup_Count("KAS_TraceKD")
+        end
+        print("CKAS TEST: kDestroyer team empty; kus_destroyer ships left:" .. left)
+        KAS_DestroyerSeen = nil
     end
+    if n > 0 then KAS_DestroyerSeen = 1 end
 end
 -- TEST: Mission 1's resourcer objective never completed after the player killed them (every 10 s: who is left, where)
 function KAS_ResourcerTrace()
@@ -1908,9 +1957,22 @@ function KAS_NoRegenTick()
 end
 function K_4939d0(sel) KAS_NoOp("4939d0", "kasfShipsClearRepairFactor") end
 
--- kasfShipsParalyze (the exe sets SOF_DontApplyPhysics): the ships cannot move.
+-- 0x4984c0(ships, on): invulnerable (taken for kasfShipsParalyze / HW1's SOF_DontApplyPhysics; but the bit is
+-- Cataclysm's +0x18 flags 0x4, and its damage function (FUN at blast.c:11725) takes no health from such a ship).
+-- Mission02: the BUSHAN-RE from its arrival until Fleet Intel's ambush briefing, the disguised corvettes and the decoy
+-- while disguised (frozen, they never flew in: user, 2026-10-17); Mission01: a Kushan destroyer until its patrol
+-- Kept on the ships and set again every second: HWRM's flag didn't survive the BUSHAN-RE's first-frame jump out and
+-- back (it took fire once found: user, 2026-10-17); Cataclysm's stays on the ship
+KAS_Invulnerable = {}
 function K_4984c0(sel, on)
-    if on ~= 0 then SobGroup_AbilityActivate(sel, AB_Move, 0) else SobGroup_AbilityActivate(sel, AB_Move, 1) end
+    if on ~= 0 then KAS_Invulnerable[sel] = 1 else KAS_Invulnerable[sel] = nil end
+    if SobGroup_Count(sel) > 0 then SobGroup_SetInvulnerability(sel, on ~= 0 and 1 or 0) end
+    if on ~= 0 and Rule_Exists("KAS_InvulnerableTick") == 0 then Rule_AddInterval("KAS_InvulnerableTick", 1) end
+end
+function KAS_InvulnerableTick()
+    for sel, _ in KAS_Invulnerable do
+        if SobGroup_Count(sel) > 0 then SobGroup_SetInvulnerability(sel, 1) end
+    end
 end
 
 -- kasfShipsSetColor(ships, scheme): Gearbox colour schemes when the index exists.
@@ -2107,8 +2169,38 @@ function KAS_JettisonCancelTick()
 end                                                        -- kasfTutCameraFocusCancel
 
 -- ------------------------------------------------------------------ sensors, camera, screen
-function K_496bc0(flags) KAS_SensorsToggle(1, flags) end                                        -- kasfOpenSensors
-function K_496c30() KAS_SensorsToggle(0, 1) end                                                  -- kasfCloseSensors
+-- kasfOpenSensors / kasfCloseSensors: Gearbox's KAS_SensorsToggle, which ducks the music (Sound_EnterIntelEvent) on
+-- opening and lifts it only on the script's close; the player can close the sensors manager here (KAS_Lockout gives
+-- the toggle back), and Mission02 left it ducked until its ambush (user, 2026-10-17: silent until then). So the duck
+-- is lifted once the manager is shut, by whoever, and never doubled
+function K_496bc0(flags)                                                                         -- kasfOpenSensors
+    if KAS_SensorsDuck then Sound_ExitIntelEvent() end
+    KAS_SensorsToggle(1, flags)
+    KAS_SensorsDuck = { seen = nil, at = Universe_GameTime() }
+    if Rule_Exists("KAS_SensorsDuckTick") == 0 then Rule_AddInterval("KAS_SensorsDuckTick", 0.5) end
+end
+function K_496c30()                                                                              -- kasfCloseSensors
+    if KAS_SensorsDuck then
+        KAS_SensorsDuck = nil
+        KAS_SensorsToggle(0, 1)
+    elseif Sensors_ManagerIsActive() ~= 0 then
+        Sensors_Toggle(0)
+        Sensors_EnableToggle(1)
+        smFleetIntelState = 0
+    end
+end
+function KAS_SensorsDuckTick()
+    local d = KAS_SensorsDuck
+    if d == nil then Rule_Remove("KAS_SensorsDuckTick") return end
+    if Sensors_ManagerIsActive() ~= 0 then
+        d.seen = 1
+    elseif d.seen or Universe_GameTime() - d.at > 2 then   -- shut (or it never opened)
+        Sound_ExitIntelEvent()
+        KAS_SensorsDuck = nil
+        Rule_Remove("KAS_SensorsDuckTick")
+        print("CKAS: sensors manager shut: music duck lifted")
+    end
+end
 function K_496c80(flags) return KAS_B(Sensors_ManagerIsActive() == 1) end                        -- kasfSensorsIsOpen
 function K_496190() return 0 end                                                                 -- kasfCameraGetAngleDeg
 function K_4961f0() return 0 end                                                                 -- kasfCameraGetDeclinationDeg
@@ -2201,6 +2293,14 @@ function K_497000(track)
     if track < 0 or track > 61 then return end
     local path = format("data:sound/music/cataclysm/music_%02d", track)
     KAS_MusicPrevious, KAS_MusicCurrent = KAS_MusicCurrent, path
+    -- held while HWRM's arrival of the carried-over fleet runs, and played once the mothership is out (KAS_ArrivalWatch),
+    -- as Gearbox's HW1 Mission02 starts its music only after singlePlayerPauseUntilHyperspaceComplete: Mission02's
+    -- track, started at time 0, was silenced by the arrival, and asking for it again did nothing (user, 2026-10-17)
+    if KAS_PersistFleet == 1 and KAS_Vars[KAS_Key_ShipsHaveArrived] ~= 1 then
+        KAS_MusicHeld = path
+        print("CKAS: music " .. path .. " held until the fleet is in")
+        return
+    end
     print("CKAS: music " .. path)
     Sound_MusicPlayType(path, MUS_Ambient)
 end
@@ -2407,10 +2507,18 @@ end
 function K_498dd0(h, x, y, z)
     KAS_Vec[KAS_VecKey(h)] = { -KAS_WorldScale * x, KAS_WorldScale * z, KAS_WorldScale * y }
 end
--- 0x4991d0(dst, src, dist): dst = src + a random direction x dist (Mission02's patrols pick waypoints so)
+-- 0x4991d0(dst, src, dist): dst = src + a random direction x dist (Mission02's patrols pick waypoints so), each
+-- axis clamped to the universe (the exe clamps to DAT_00892d20..28: Mission02's ambushers came in 23600 from the
+-- BUSHAN-RE, itself 46800 from the centre of a 65625 map)
 function K_4991d0(dst, src, dist)
     local p, d, r = KAS_Pos(src), KAS_RandomDir(), KAS_Dist(dist)
-    KAS_SetVec(dst, { p[1] + d[1] * r, p[2] + d[2] * r, p[3] + d[3] * r })
+    local q = { p[1] + d[1] * r, p[2] + d[2] * r, p[3] + d[3] * r }
+    if KAS_Universe then
+        for k = 1, 3 do
+            if q[k] > KAS_Universe[k] then q[k] = KAS_Universe[k] elseif q[k] < -KAS_Universe[k] then q[k] = -KAS_Universe[k] end
+        end
+    end
+    KAS_SetVec(dst, q)
 end
 -- 0x498f30(dst, a, b, n, total): dst = a + (b - a) x n / total
 function K_498f30(dst, a, b, n, total)
@@ -2426,12 +2534,45 @@ function K_492840() KAS_Form("Wall") end                                        
 function K_492870() KAS_Form("Sphere") end                                                           -- kasfFormationSphere
 
 -- kasfIntercept(targets): the team flies to the first target (0x4924e0: a move order on it, not an attack; Mission02's
--- decoy intercepts the allied destroyer)
+-- decoy intercepts the allied destroyer) and stops once near: HW1's aimProcessIntercept, done within
+-- AIM_INTERCEPT_FINISH_DISTSQ (Cataclysm's aiplayer.script: 16000000, 4000 away), the destination re-aimed every few
+-- seconds. KAS_InterceptStop: targets the interceptors stop further out from, at the edge of their sensors (Mission02:
+-- the disguised corvettes stop where the BUSHAN-RE's sensors (kstandarddestroyer.shp fowRadius 9000) pick them up and
+-- transform there, user 2026-10-17; they flew right up to it)
+KAS_InterceptFinish, KAS_InterceptRecalc = 4000, 3
+KAS_InterceptStop = { kDestroyer = 9000 }
+KAS_Intercepts = {}
 function K_4924e0(sel)
     KAS_EndPatrol()
     if SobGroup_Count(KAS_Team) > 0 and SobGroup_Count(sel) > 0 then
-        SobGroup_MoveToPoint(KAS_Owner(KAS_Team), KAS_Team, SobGroup_GetPosition(sel))
+        KAS_Intercepts[KAS_Team] = { target = sel, dist = KAS_Dist(KAS_InterceptStop[sel] or KAS_InterceptFinish), next = 0 }
+        if Rule_Exists("KAS_InterceptTick") == 0 then Rule_AddInterval("KAS_InterceptTick", 0.5) end
+        KAS_InterceptTick()
     end
+end
+function KAS_InterceptTick()
+    local now, left, done = Universe_GameTime(), 0, {}
+    for team, it in KAS_Intercepts do
+        if SobGroup_Count(team) == 0 or SobGroup_Count(it.target) == 0 then
+            tinsert(done, team)
+        else
+            local p, q = SobGroup_GetPosition(team), SobGroup_GetPosition(it.target)
+            local d = { q[1] - p[1], q[2] - p[2], q[3] - p[3] }
+            if d[1] * d[1] + d[2] * d[2] + d[3] * d[3] < it.dist * it.dist then
+                SobGroup_Stop(KAS_Owner(team), team)       -- arrived: idle, which the missions wait on (K_4998c0)
+                print("CKAS: " .. team .. " intercepted " .. it.target)
+                tinsert(done, team)
+            else
+                left = left + 1
+                if now >= it.next and SobGroup_AreAllInRealSpace(team) == 1 then
+                    it.next = now + KAS_InterceptRecalc
+                    SobGroup_MoveToPoint(KAS_Owner(team), team, q)
+                end
+            end
+        end
+    end
+    for i = 1, getn(done) do KAS_Intercepts[done[i]] = nil end
+    if left == 0 then Rule_Remove("KAS_InterceptTick") end
 end
 -- kasfShipsOrderAttributes(ships): the first ship's order attributes (HW1 COMMAND_MASK_*: 1 formation, 2 protecting).
 -- Protecting = a guard order (K_492960) whose guarded ships are still alive (HW1 drops the order when they die)
@@ -2502,6 +2643,9 @@ KAS_MeteorBlast, KAS_MeteorBlastScale = "dmg_cloud_main_explosion_combo", 7
 KAS_MeteorBlastSound = "data:sound/sfx/etg/explosion/medium/etg_explode_medium_firey"
 KAS_MeteorShipSpeed = 400      -- the meteor ships' top speed (tools/make_meteor.py MAX_SPEED)
 KAS_MeteorReach = 1500         -- a first sweep: meteors this close to a ship are measured (largest meteor + hull)
+-- contact slack on the meteor's radius: HWRM's physics stops the hulls where they touch and slides the ship along the
+-- meteor, so they never got closer (an asteroid slid round an Acolyte: user, 2026-10-17)
+KAS_MeteorContact = 1.2
 KAS_MeteorHitFX, KAS_MeteorHitScale = "dmg_cloud_explosion_large_nodebris", 2
 KAS_MeteorHitSound = "data:sound/sfx/etg/explosion/small/etg_explode_small_firey"
 KAS_Meteors = {}               -- per meteor: { g = its group, st = its storm, due = when it reaches the box }
@@ -2531,6 +2675,9 @@ function KAS_MeteorInit()
         for i = 0, st.n - 1 do
             local g = st.group .. "_" .. i .. "g"
             SobGroup_SetSpeed(g, st.speed / KAS_MeteorShipSpeed)
+            -- no collisions of HWRM's own: Cataclysm's meteors don't bump (FUN_00545540), only the scripted contact
+            -- (HWRM's nudged them up or down just before it: user, 2026-10-17); a ghost still flies its orders (the Ram)
+            SobGroup_SetGhost(g, 1)
             local m = { g = g, st = st }
             tinsert(KAS_Meteors, m)
             KAS_MeteorFace(m)
@@ -2582,8 +2729,15 @@ function KAS_MeteorTick()
     end
     KAS_MeteorHits()
 end
--- collisions: per ship of the other players, the meteors near it, then the measured ones
+-- collisions: per ship of the other players, the meteors of each storm near it, then the measured ones. Swept: a
+-- meteor flies 60-75 between two checks (storm speeds 245-300 a second, every 0.25 s), more than a small contact (an
+-- Acolyte's with a small meteor is ~35), so the path it flew since the last check counts (its storm's velocity; the
+-- ship's own movement left out); sampled only, passes went through ships unhurt (user, 2026-10-17: inconsistent)
 function KAS_MeteorHits()
+    local now = Universe_GameTime()
+    local dt = now - (KAS_MeteorHitsAt or now)
+    KAS_MeteorHitsAt = now
+    if dt > 1 then dt = 1 end
     SobGroup_CreateIfNotExist("KAS_MeteorTargets")
     SobGroup_Clear("KAS_MeteorTargets")
     for pl = 0, Universe_PlayerCount() - 1 do
@@ -2596,22 +2750,67 @@ function KAS_MeteorHits()
         SobGroup_Clear("KAS_MeteorShip")
         SobGroup_FillShipsByIndexRange("KAS_MeteorShip", "KAS_MeteorTargets", i, 1)
         SobGroup_Clear("KAS_MeteorNear")
-        if SobGroup_Count("KAS_MeteorShip") > 0 then
-            SobGroup_FillProximitySobGroup("KAS_MeteorNear", "KAS_MeteorAll", "KAS_MeteorShip", KAS_MeteorReach)
-            if SobGroup_Count("KAS_MeteorNear") > 0 then KAS_MeteorHitShip() end
+        for s = 1, getn(KAS_MeteorStorms) do
+            if SobGroup_Count("KAS_MeteorShip") == 0 then break end
+            SobGroup_Clear("KAS_MeteorNear")
+            SobGroup_FillProximitySobGroup("KAS_MeteorNear", KAS_MeteorStorms[s].group, "KAS_MeteorShip", KAS_MeteorReach)
+            if SobGroup_Count("KAS_MeteorNear") > 0 then KAS_MeteorHitShip(KAS_MeteorStorms[s].v, dt) end
         end
     end
 end
-function KAS_MeteorHitShip()
-    local rs = KAS_HullRadius(SobGroup_GetShipType("KAS_MeteorShip"), 20)
+-- a meteor's radius: its largest half-extent (a rock; the box's corners made small ships' contacts too wide)
+KAS_MeteorRadii = {}
+function KAS_MeteorRadius(t)
+    t = strlower(t or "")
+    if KAS_MeteorRadii[t] == nil then
+        local hull, r = CatHull[t], 30
+        if hull then
+            r = 0
+            for k = 1, 6 do if abs(hull.box[k]) > r then r = abs(hull.box[k]) end end
+        end
+        KAS_MeteorRadii[t] = r
+    end
+    return KAS_MeteorRadii[t]
+end
+-- the distance from a point (relative to the ship, world axes) to the ship's hull box, turned with the ship (coordsys
+-- rows: right, up, bow; CatHull box: min x y z, max x y z). The ship as a sphere round its box's corners was far too
+-- wide for long ships (user, 2026-10-17: the larger ships' collision far too large); Cataclysm checks the box after
+-- the sphere too (HW1 collision rectangles)
+function KAS_BoxDistance(d, m, box)
+    local q = { d[1] * m[1] + d[2] * m[2] + d[3] * m[3], d[1] * m[4] + d[2] * m[5] + d[3] * m[6],
+                d[1] * m[7] + d[2] * m[8] + d[3] * m[9] }
+    local s = 0
+    for k = 1, 3 do
+        local e = 0
+        if q[k] < box[k] then e = box[k] - q[k] elseif q[k] > box[k + 3] then e = q[k] - box[k + 3] end
+        s = s + e * e
+    end
+    return sqrt(s)
+end
+KAS_MeteorSamples = 4          -- points along a meteor's path since the last check (the closest counts)
+function KAS_MeteorHitShip(v, dt)
+    local st = strlower(SobGroup_GetShipType("KAS_MeteorShip"))
+    local hull = CatHull[st]
+    local rs = KAS_HullRadius(st, 20)
+    local m = nil
+    if hull then m = SobGroup_GetCoordSys("KAS_MeteorShip") end
     local ps = SobGroup_GetPosition("KAS_MeteorShip")
     for j = 0, SobGroup_Count("KAS_MeteorNear") - 1 do
         SobGroup_Clear("KAS_MeteorOne")
         SobGroup_FillShipsByIndexRange("KAS_MeteorOne", "KAS_MeteorNear", j, 1)
         local pm = SobGroup_GetPosition("KAS_MeteorOne")
-        local d = { pm[1] - ps[1], pm[2] - ps[2], pm[3] - ps[3] }
-        local rm = KAS_HullRadius(SobGroup_GetShipType("KAS_MeteorOne"), 30)
-        if d[1] * d[1] + d[2] * d[2] + d[3] * d[3] < (rs + rm) * (rs + rm) then
+        local rm = KAS_MeteorRadius(SobGroup_GetShipType("KAS_MeteorOne"))
+        -- the closest the meteor came to the hull on its path since the last check (from d - v dt to d)
+        local gap = nil
+        for k = 0, KAS_MeteorSamples do
+            local f = 1 - k / KAS_MeteorSamples
+            local d = { pm[1] - v[1] * dt * f - ps[1], pm[2] - v[2] * dt * f - ps[2], pm[3] - v[3] * dt * f - ps[3] }
+            local g
+            if m then g = KAS_BoxDistance(d, m, hull.box) else g = sqrt(d[1] * d[1] + d[2] * d[2] + d[3] * d[3]) - rs end
+            if gap == nil or g < gap then gap = g end
+        end
+        local reach = rm * KAS_MeteorContact
+        if gap < reach then
             -- the lower health from both (FUN_00545540: damage = min of the two current healths, to each)
             local hs = SobGroup_HealthPercentage("KAS_MeteorShip") * SobGroup_MaxHealthTotal("KAS_MeteorShip")
             local hm = SobGroup_HealthPercentage("KAS_MeteorOne") * SobGroup_MaxHealthTotal("KAS_MeteorOne")
@@ -2927,7 +3126,13 @@ function K_496950(sel)
     if sel == KAS_OreCanSel and SobGroup_Count("KAS_JettCan") > 0 then g = "KAS_JettCan" end
     KAS_JettFocus = nil
     if g == "KAS_JettCan" then KAS_JettFocus = 1 end
-    if SobGroup_Count(g) > 0 then Camera_FocusSobGroupWithBuffer(g, KAS_CamDist or KAS_JettisonCamera, 0, 0) end
+    if SobGroup_Count(g) > 0 then
+        Camera_FocusSobGroupWithBuffer(g, KAS_CamDist or KAS_JettisonCamera, 0, 0)
+        -- the focused ships seen for 45 s, as Gearbox's KAS_FocusShipsFar / KAS_FocusShips (K_496870) make them: HW1's
+        -- main view had no fog of war, so a scripted focus showed them (Mission01's hyperspace-signature patrol, by
+        -- kasfTutCameraFocus; this far one skipped it: Mission02's disguised corvettes, user 2026-10-17)
+        if g ~= "KAS_JettCan" then KAS_FocusShipsRemember(g, 0) end
+    end
 end
 -- the jettison at the start of an Armour / Weapons / Special / Engineering module's build (FUN_00466b00's types)
 KAS_JettisonModules = { "smt_kl_armour", "smt_kl_weapons", "smt_kl_special", "smt_kl_micro" }
@@ -2963,23 +3168,56 @@ function K_497f70(i, n) end
 -- the disguisable corvette (tools/make_disguise.py), its model showing the disguise (KAS_Disguises: its mad state).
 -- Kept on the ships and set again every second (a team disguised then hyperspaced out came back undisguised)
 dofilepath("data:scripts/scar/cataclysmdisguise_gen.lua")
-KAS_Disguised = {}
+-- While disguised the team is the allied player's (KAS_AllyPlayer): it shows as a friend, as the ship it poses as
+-- (user, 2026-10-17: Mission02's disguised corvettes showed as hostile), and back to its own player on dropping the
+-- disguise; the pirates' "Enemy" leaves it out (KAS_FillHumanSide). Dropping it plays our Mimic's transformation
+-- (MimicOut_<type>, tools/make_mimicfx.py SCRIPT_DISGUISES) with the model switched at once, as the Mimic's Unmimic.
+KAS_Disguised, KAS_DisguiseInfo = {}, {}
 function K_497fd0(sel, t, f)
     local state = KAS_Disguises and KAS_Disguises[strlower(t) .. "@" .. (f or 0)]
     if state == nil then KAS_NoOp("497fd0", "disguise as " .. t .. " (" .. (f or 0) .. "): not on the model") return end
     KAS_Disguised[sel] = state
+    if KAS_DisguiseInfo[sel] == nil and SobGroup_Count(sel) > 0 then
+        KAS_DisguiseInfo[sel] = { type = strlower(t), owner = SobGroup_GetPlayerOwner(sel) }
+        local ally = KAS_AllyPlayer()
+        if ally ~= KAS_DisguiseInfo[sel].owner then
+            SobGroup_SetSwitchOwnerFlag(sel, 0)
+            SobGroup_SwitchOwner(sel, ally)
+        end
+    end
     SobGroup_SetMadState(sel, state)
+    KAS_DisguiseVisible(sel, 1)
     print("CKAS: " .. sel .. " disguised as " .. t .. " (" .. state .. ")")
     if Rule_Exists("KAS_DisguiseTick") == 0 then Rule_AddInterval("KAS_DisguiseTick", 1) end
 end
 function K_498080(sel)
     KAS_Disguised[sel] = nil
+    local info = KAS_DisguiseInfo[sel]
+    KAS_DisguiseInfo[sel] = nil
+    if info and SobGroup_Count(sel) > 0 then
+        FX_StartEvent(sel, "MimicOut_" .. info.type)
+        if SobGroup_GetPlayerOwner(sel) ~= info.owner then
+            SobGroup_SetSwitchOwnerFlag(sel, 0)
+            SobGroup_SwitchOwner(sel, info.owner)
+        end
+    end
     SobGroup_SetMadState(sel, "NIS00")
+    KAS_DisguiseVisible(sel, 0)
     print("CKAS: " .. sel .. " undisguised")
+end
+-- a disguised ship transmits its position as the ship it poses as: the human sees it through the fog of war (user,
+-- 2026-10-17: Mission02's disguised corvettes, watched coming in), Gearbox's SobGroup_SetInherentVisibility
+-- (KAS_FocusShipsRemember)
+function KAS_DisguiseVisible(sel, on)
+    if SobGroup_Count(sel) == 0 then return end
+    if on == 1 then SobGroup_SetInherentVisibility(sel, 0, VisFull) else SobGroup_SetInherentVisibility(sel, 0, VisNone) end
 end
 function KAS_DisguiseTick()
     for sel, state in KAS_Disguised do
-        if SobGroup_Count(sel) > 0 then SobGroup_SetMadState(sel, state) end
+        if SobGroup_Count(sel) > 0 then
+            SobGroup_SetMadState(sel, state)
+            KAS_DisguiseVisible(sel, 1)   -- (again: a team disguised then hyperspaced out came back as it was)
+        end
     end
 end
 function K_498270(sel) KAS_NoOp("498270", "disguise state reset") end
@@ -3001,6 +3239,7 @@ end
 -- 0x4998c0: the team has no AI move left (FUN_00417260)
 function K_4998c0()
     if SobGroup_Count(KAS_Team) == 0 then return 1 end
+    if KAS_Intercepts and KAS_Intercepts[KAS_Team] then return 0 end   -- still intercepting (not yet ordered on)
     if SobGroup_GetCurrentOrder(KAS_Team) == COMMAND_Idle then return 1 end
     return 0
 end

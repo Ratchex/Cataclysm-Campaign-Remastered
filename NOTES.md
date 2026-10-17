@@ -301,9 +301,47 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
   solStartShipHardPointConfig reads the joint from the loaded HOD (null -> access violation at load).
 - Build families must be declared in scripts/familylist.lua ("could not find family ..."); dock path MAD must be a
   valid animation index (stock paths use 0).
+- **Intermittent access violation loading a mission, in CustomCodeManagerStatic::onLoad** (RVA 0xa8f38, hashing a
+  custom-code name; read of 0x3f800014 / 0x80003014: garbage where a std::string should be). FUN_004a855f walks every
+  player's ship types and loads each type's custom-code record (+0x94c); one record pointer is garbage. Not tied to
+  one file: it came and went with no .ship change (2026-10-17: three crashes, several clean loads of the same build),
+  so the bisect that blamed the Recon's Speed Burst was misleading. Likely a latent HWRM bug our ship set exposes,
+  depending on memory layout. Launch with ProcDump attached (`procdump -ma -e 1 -f C0000005 <pid> <dir>`) to get a
+  full dump of the next one; not caught yet. The Speed Burst stays in smt_scout.ship with addAbility's enable flag 0
+  (off from the start, as Cataclysm Remastered keeps its Recon's SensorPing / EMP until research; install_base.py
+  gen_ship). Commenting out a multi-line `addAbility` needs every line of it (install_base.py TEMPLATE_DROP): only
+  the first left a parse error that crashed the load.
+- After any install, syntax-check every .ship (`tools/luacheck.py`): a .ship parse error is a fatal crash at load.
 - Dock path waypoint (SEG) record, 64 bytes (HODOR flag test): pos f3, rot f3, UseRot u32, Tol f, Unfocus u32,
   Spd f, Check u32, Close, Player, Queue, Clip, ClearRes (u32 each). Stock collector In: Player+Queue, Player,
   ClearRes; fighter In: Player+Queue, Player, Clip+ClearRes; Out paths: no flags. HOLD_DOCK must be under ROOT_LOD[0].
+
+## Engine rules learned with Mission 2 (2026-10-17; confirmed in game unless marked untested)
+- **Music:** Sound_MusicPlayType during HWRM's arrival of a carried-over fleet (SobGroup_LoadPersistantData) is
+  silenced, and asking again for the same track does nothing (a different track does play). Gearbox's HW1 Mission02
+  starts its music after singlePlayerPauseUntilHyperspaceComplete; ours holds the request until the mothership is out
+  (K_497000 / KAS_ArrivalWatch, KAS_MusicHeld). Gearbox's KAS_SensorsToggle ducks music (Sound_EnterIntelEvent) on
+  opening the sensors manager and lifts it only on the script's close; the player can close it here, so the duck is
+  lifted whenever the manager is shut (KAS_SensorsDuckTick). Cataclysm's tracks differ a lot in loudness: one gain for
+  all buried the quiet ones (track 1, 3-5x quieter); tools/build_music.py levels each to a median RMS (--loudness).
+- **MainUI_CurrentSelection()'s group only grows** (never loses deselected ships): read the selection per ship with
+  SobGroup_Selected (cataclysmkas.lua CatAbility_OwnSelection). Taskbar buttons: set their visibility every tick.
+- **SobGroup_SetInvulnerability doesn't survive a despawn / respawn** (a team's first-frame jump out and back): keep
+  it set (KAS_InvulnerableTick, untested). Cataclysm's 0x4984c0 is invulnerability (flags +0x18 bit 4, its damage function
+  takes no health), not SOF_DontApplyPhysics: our "paralysed" disguised corvettes never moved.
+- **SobGroup_SetInherentVisibility(g, 0, VisFull / VisNone)** shows ships through the fog of war. Gearbox's camera
+  focus helpers (KAS_FocusShips / KAS_FocusShipsFar) make the focused ships visible for 45 s: HW1's main view had no
+  fog of war, so a scripted focus showed them. Disguised ships are visible while disguised (KAS_DisguiseVisible).
+- **Ownership for show:** SobGroup_SetSwitchOwnerFlag(g, 0) then SobGroup_SwitchOwner keeps the team group; a
+  disguised team is the allied player's while disguised (K_497fd0), left out of the pirates' "Enemy" (untested).
+- **Intercept** (HW1 aimProcessIntercept): done within AIM_INTERCEPT_FINISH_DISTSQ (Cataclysm's aiplayer.script:
+  4000 away), re-aimed every few seconds; the mission waits on the team going idle (K_4998c0). (Untested.)
+- **Rule_AddOneShot doesn't exist** in HWRM (a mission start crash): Rule_AddInterval and Rule_Remove in the rule.
+- **Meteors:** HWRM's physics stops hulls at contact and slides the smaller ship along, so a sphere test at the two
+  radii never fired; contact is against the ship's hull box turned with it (CatHull box, coordsys rows), swept along
+  the storm's velocity (60-75 a check), meteors ghosted (SobGroup_SetGhost: HWRM's collision nudged them).
+- **Unit caps:** HWRM allows a queue while the count is below the limit, whatever the unit costs; a limit of 400
+  held at ~250. The unit cap popup (UnitCapInfoPopup) shows a family only with supplyShow "Always".
 
 ## The Mimic (2026-10-10, confirmed in game)
 - Cataclysm (FUN_005b8d70 mode 0 unmimic / 1 ship / 2 asteroid; state machine at ship +0x760, FUN_005b8f30): a phase

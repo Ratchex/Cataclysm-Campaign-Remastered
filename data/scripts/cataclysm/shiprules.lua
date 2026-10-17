@@ -253,6 +253,11 @@ function CatShip_Update(g, p, id)
     SobGroup_CreateIfNotExist(rec.g)
     if SobGroup_Empty(rec.g) == 1 then
         SobGroup_SobGroupAdd(rec.g, g)
+        -- the upgrades it was created with (CatUpgrade_Apply ran while rec.g was still empty)
+        for name, _ in rec.up do
+            SobGroup_CreateIfNotExist("cat_has_" .. name)
+            SobGroup_SobGroupAdd("cat_has_" .. name, g)
+        end
         if not rec.filled then
             rec.filled = 1
             CatTrace("ship " .. id .. " own group " .. rec.g .. ": " .. SobGroup_Count(rec.g) .. " ship(s)")
@@ -467,9 +472,15 @@ function CatUpgrade_Time(rec, list, armour)
     return t * CatUpgradeType[rec.t].time
 end
 
+-- cat_has_<upgrade>: the ships that have it, for the mission script's ability buttons (another Lua state: they
+-- showed for ships without it, e.g. Unlink / Mimic on every ACV / Mimic, Link once researched: user, 2026-10-17)
 function CatUpgrade_Apply(rec)
     local list, armour = CatUpgrade_Pending(rec)
-    for i = 1, getn(list) do rec.up[list[i]] = 1 end
+    for i = 1, getn(list) do
+        rec.up[list[i]] = 1
+        SobGroup_CreateIfNotExist("cat_has_" .. list[i])
+        SobGroup_SobGroupAdd("cat_has_" .. list[i], rec.g)
+    end
     rec.armour = armour
     rec.spd = -1                      -- re-apply the speed multiplier
     return getn(list)

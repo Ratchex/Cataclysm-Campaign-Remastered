@@ -2,6 +2,9 @@ effects =
 {
     animations =
     {
+    -- Cataclysm-HWRM: the Mimic's transformation (tools/make_mimicfx.py)
+    MimicOut_kadvancesupportfrigate = { name = "MimicOut_kadvancesupportfrigate", length = 1.2500, loop = 0, parent = "", minimum = 0, maximum = 0, markers = { "" } },
+
         animation1 =
         {
             name = "Death",
@@ -84,7 +87,10 @@ effects =
         },
     },
     events =
-    {				
+    {
+    -- Cataclysm-HWRM: the Mimic's transformation (tools/make_mimicfx.py)
+    MimicOut_kadvancesupportfrigate_fx = { { "anim", "MimicOut_kadvancesupportfrigate" }, { "animtime", "0" }, { "marker", "Root" }, { "fx", "cat_mimic_out_kadvancesupportfrigate" }, { "fx_scale", "1" }, },
+				
         death1 =
         {
             { "anim", "Death" },
