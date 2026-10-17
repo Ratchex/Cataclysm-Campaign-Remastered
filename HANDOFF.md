@@ -121,10 +121,10 @@ launch there).
 - TEST traces still in cataclysmkas.lua: KAS_DestroyerTrace, KAS_ResourcerTrace, the K_495e80 ping print. Remove
   before committing.
 
-**IN PROGRESS: Support Units on the engine's unit cap (2026-10-14, built, awaiting the user's test).**
+**Support Units on the engine's unit cap (2026-10-17: limit works in the range, user-tested; HWRM's rule accepted).**
 Costs / providers: `tools/make_supportunits.py` -> `data/scripts/cataclysm/supportunits_gen.lua`.
 - install_base.py set_support_units: a "SupportUnits" family (familylist.lua unitcapsFamily, numParam 95),
-  supplyLimit("SupportUnits", 400) (SU_CAP: Cataclysm's most is ~300) with supplyShow Never; every type in the
+  supplyLimit("SupportUnits", 250) (SU_CAP) with supplyShow Never; every type in the
   Somtaaw build list gets setSupplyValue(NewShipType, "SupportUnits", <SU>); fillers cat_sufiller25/5/1 (kus_probe's
   model); writes data/scripts/cataclysm/sunative_gen.lua (CatSU_Cap, CatSU_Fillers, CatSU_Native).
 - make_race.py lists the fillers in sp_build.lua gated by the undefined research "CAT_NEVER".
@@ -135,11 +135,24 @@ Costs / providers: `tools/make_supportunits.py` -> `data/scripts/cataclysm/suppo
 - Learned in game (filler tests): a type counts against a cap only if the race's build list has it; a filler in the
   world (hidden) counts, a despawned one doesn't (Complex EVO, MP, relies on despawned ones: not so here).
   SCAR can't read caps (supplyLimit / GetUnitCapForFamily nil); Stats_SquadronsQueued(0, 0) is always 0;
-  Player_HasQueuedBuild hides restricted types. Source idea: Complex EVO (workshop 398406822, extracted to
+  Player_HasQueuedBuild hides restricted types.
+  2026-10-17 (user-tested in the range): HWRM allows a queue while the cap's count is below the limit, whatever
+  the unit costs, so the last unit overshoots by up to its cost - 1 (at 245 / 250 a Processor, 13, went in). User:
+  accept HWRM's rule for now (engine work below). A limit of 400 was also blocked from ~250 used (fixed filler
+  totals 150 / 175 / 275 / 300), so the engine seems to hold a cap near 250 at most: SU_CAP is 250. Cataclysm's
+  most (300: Kuun-Lan 70, Hangar 30, 12 Support Modules, 2 Carriers) doesn't fit: open item. The engine's count
+  (unit cap popup "UnitCapInfoPopup" with supplyShow "Always"; the build menu never lists the family) read
+  213 / 250 at the start (57 counted + 156 fillers) and matched our count + fillers throughout. Source idea: Complex EVO (workshop 398406822, extracted to
   Cataclysm-decomp/reference/complex_evo: leveldata/multiplayer/lib/lib.lua UnitCap, ship/spc_unitcap*).
-- To check: building stops at the real limit (range: 100) with queues; module loss / Carrier raise it; fillers not
+- To check: module loss / Carrier raise it; fillers not
   selectable / visible / in the sensors manager; roll call unaffected; Mission01's persist2.lua (Profiles/<p>/
   Campaign/CATACLYSM) has no cat_sufiller; Mission 1's handed-over Kushan count (CatSU_Cost has kus_ types).
+
+**Engine work (later, with the Veterancy rank stars and the Upgrade UI displays; user, 2026-10-17):**
+- Support Units: Cataclysm's queue rule (a unit only if its whole cost fits; HWRM checks count < limit only), the
+  build menu's SU line counting every queued unit (Player_HasQueuedBuild is 0/1 per type), and a limit above ~250.
+- Veterancy: rank stars as real UI beside the stance icon (script can only message).
+- Upgrade UI displays.
 
 **Other open items:** speech.dat "colliding name" in the log (subtitle file, pre-existing); Carrier Support Modules;
 stand-in capitals keep stock damage (turret subsystems shared with Kushan); model conversions for the 23 stand-ins
@@ -226,9 +239,9 @@ Missiles disabled before the upgrade (no energy spent); missiles in normal comba
    detection; ACV EMP (TECH_EMP). (Unmimic shows only for disguised Mimics: the ship rules' cat_disguised group.) Also done: Kuun-Lan module health bars (modules recentred on their hardpoints),
    its tactical overlay distances (stock kus_mothership).
 4. Then Mission 1 against the original, the hyperspace exit (K_497290 stub), Missions 02-17.
-Open, lower priority: rank stars as UI; Fire Missiles burst (HWRM can't fire weapons from script; user: keep as-is);
+Open, lower priority: Fire Missiles burst (HWRM can't fire weapons from script; user: keep as-is);
 icons for our ability buttons (stock placeholders); sensor freeze / blanket defensive ROE (maybe unneeded since the AI
-is off); Support units; Siege Cannon; engine loss slowing the Kuun-Lan; Kuun-Lan arrival heading.
+is off); Siege Cannon; engine loss slowing the Kuun-Lan; Kuun-Lan arrival heading.
 
 ## Repositories
 | Path | What |

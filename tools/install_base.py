@@ -479,7 +479,7 @@ def patch_sp_unitcaps(text):
 # SU_CAP; the runtime (cataclysmkas.lua KAS_SUTick) holds what's above the mission's SU limit with filler ships.
 # Learned in game (2026-10-14): a type counts only if the race's build list has it (make_race.py lists the fillers,
 # gated by a research that doesn't exist); a despawned ship doesn't count, one in the world does.
-SU_CAP = 400         # Cataclysm's most: the Kuun-Lan 70 + Hangar 30 + 12 Support Modules 120 + 2 Carriers 80
+SU_CAP = 250         # the engine held a limit of 400 at ~250 (in game 2026-10-17); Cataclysm's most is 300 (Kuun-Lan 70 + Hangar 30 + 12 Support Modules 120 + 2 Carriers 80)
 SU_FILLERS = [("cat_sufiller25", 25), ("cat_sufiller5", 5), ("cat_sufiller1", 1)]   # largest first (make_race.py)
 SU_FAMILY = ('\t{\n\t\tname = "SupportUnits",\n\t\tnumParam = 95,\n\t\tstringParam = "Support Units",\n\t},\n')
 SU_FILLER_SHIP = """NewShipType = StartShipConfig()
