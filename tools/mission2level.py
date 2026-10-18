@@ -46,6 +46,8 @@ RADIUS_SCALE, OUTER = SCALE / 2, 1.2
 # and their number Cataclysm's (x MAP_SPREAD^3, 1416 ships, ruined the frame rate; x MAP_SPREAD, 630, still
 # stuttered: user)
 DISGUISE_TEAMS, DISGUISE_TYPE = set(), "tur_standardcorvette_disguise"   # --disguise-teams
+# HWRM types that are salvage objects, not ships (install_base.py SALVAGE): placed with addSalvage
+SALVAGE_TYPES = set()   # (none now: Mission02's pod is a ship, captured as in HW1)
 METEOR_PLAYER, SPEED_SCALE, METEOR_COUNT_SCALE = 3, SCALE, 1
 
 
@@ -65,6 +67,11 @@ ARRIVAL_DIRECTION = (900.0, -200.0, 1380.0)     # eye - target, confirmed angle
 ARRIVAL_DISTANCE_SCALE = 0.8
 ARRIVAL_EYE = tuple(ARRIVAL_TARGET[k] + ARRIVAL_DISTANCE_SCALE * ARRIVAL_DIRECTION[k] for k in range(3))
 ARRIVAL_YAW = 0.0
+# nebula wisps along the asteroid fields (--wisps, build_mission.py WISPS, wisp_strands): cylinders chained while their
+# centres are within WISP_CHAIN lengths, points every WISP_SPACING (HWRM units) along the smoothed chain, each point's
+# size (addNebulaWithResources' 85.75 in the stock Kadesh levels: x2, user: a larger radius; 5 a cylinder dropped the
+# frame rate a little)
+WISPS, WISP_CHAIN, WISP_SPACING, WISP_SIZE = False, 1.3, 3500, 171.5
 
 
 def arrival_camera(p, rot):
@@ -120,6 +127,8 @@ class Level:
         self.label_counts = Counter()
         self.schemes, self.team_players = {}, {}   # labelled team -> its colorScheme(n) / owning player
         self.storms = []                           # MeteorStorm: {group, v, ext} for the runtime
+        self.salvage, self.salvage_group = [], {}  # salvage objects (SALVAGE_TYPES): (name, type, pos), name -> team
+        self.wisps = []                            # --wisps: nebula strands along the asteroid cylinders (add_wisps)
 
     def ship_type(self, race, shiptype, owner):
         if race in ("R1", "R2"):  # HW1 generic races follow the owning player's race
@@ -177,10 +186,78 @@ class Level:
             self.add_asteroids(f)
         elif kind == "Resources" and len(f) >= 11 and f[0].lower() == "asteroid" and f[4].lower() == "cylinder":
             self.add_asteroids(f, self.cylinder_point(f))
+            if WISPS:
+                self.add_wisps(f)
         elif kind == "MeteorStorm" and len(f) >= 14 and f[3].lower() == "cylinder":
             self.add_storm(f)
         else:
             self.unconverted[kind] += 1
+
+    def add_wisps(self, f):
+        """An asteroid cylinder for the nebula wisps (tools/make_wisps.py): its centre and axis ends, the axis turned as
+        AddResourceToCylinder turns the box (cylinder_point). Cataclysm's fields are chains of these cylinders that read
+        as tendrils in its sensors view, lost at our scale (user, 2026-10-18); wisp_strands joins them."""
+        centre = tuple(map(float, f[1:4]))
+        half = float(f[8]) / 2
+        ry, rz = math.radians(float(f[9])), math.radians(float(f[10]))
+        x, z = math.cos(ry) * half, -math.sin(ry) * half
+        x, y = math.cos(rz) * x, math.sin(rz) * x
+        self.wisps.append((centre, (x, y, z), 2 * half))
+
+    def wisp_strands(self):
+        """The cylinders, in the order the mission lists them, chained while each centre is within WISP_CHAIN lengths of
+        the last; each chain a smooth curve (centripetal Catmull-Rom) through its first cylinder's far end, the centres
+        and its last cylinder's far end, sampled every WISP_SPACING along it (HWRM units). Per cylinder straight strands
+        met at angles (user: far too jagged); the stock Kadesh tendrils run 7-14 points, 800-2100 apart."""
+        chains = []
+        for c in self.wisps:
+            if chains and math.dist(chains[-1][-1][0], c[0]) <= WISP_CHAIN * c[2]:
+                chains[-1].append(c)
+            else:
+                chains.append([c])
+        strands = []
+        for chain in chains:
+            def end(cyl, away):     # the end of a cylinder's axis farther from the point "away"
+                a = tuple(cyl[0][k] + cyl[1][k] for k in range(3))
+                b = tuple(cyl[0][k] - cyl[1][k] for k in range(3))
+                return a if math.dist(a, away) > math.dist(b, away) else b
+            if len(chain) == 1:
+                ctrl = [end(chain[0], end(chain[0], chain[0][0])), end(chain[0], chain[0][0])]
+                ctrl = [ctrl[0], chain[0][0], ctrl[1]]
+            else:
+                ctrl = [end(chain[0], chain[1][0])] + [c[0] for c in chain] + [end(chain[-1], chain[-2][0])]
+            ctrl = [pos(*p) for p in ctrl]
+            dense = []
+            pts = [ctrl[0]] + ctrl + [ctrl[-1]]
+            for i in range(1, len(pts) - 2):
+                p0, p1, p2, p3 = pts[i - 1], pts[i], pts[i + 1], pts[i + 2]
+                t0 = 0.0
+                t1 = t0 + max(math.dist(p0, p1), 1e-3) ** 0.5
+                t2 = t1 + max(math.dist(p1, p2), 1e-3) ** 0.5
+                t3 = t2 + max(math.dist(p2, p3), 1e-3) ** 0.5
+                for s in range(20):
+                    tt = t1 + (t2 - t1) * s / 20
+
+                    def lerp(a, b, ta, tb):
+                        w = (tt - ta) / (tb - ta) if tb != ta else 0
+                        return tuple(a[k] + (b[k] - a[k]) * w for k in range(3))
+                    a1, a2, a3 = lerp(p0, p1, t0, t1), lerp(p1, p2, t1, t2), lerp(p2, p3, t2, t3)
+                    b1, b2 = lerp(a1, a2, t0, t2), lerp(a2, a3, t1, t3)
+                    dense.append(lerp(b1, b2, t1, t2))
+            dense.append(ctrl[-1])
+            total = sum(math.dist(dense[i], dense[i + 1]) for i in range(len(dense) - 1))
+            n = max(2, round(total / WISP_SPACING) + 1)
+            strand, walked, want, k = [dense[0]], 0.0, total / (n - 1), 1
+            for i in range(len(dense) - 1):
+                seg = math.dist(dense[i], dense[i + 1])
+                while k < n - 1 and walked + seg >= want * k:
+                    w = (want * k - walked) / seg if seg else 0
+                    strand.append(tuple(dense[i][j] + (dense[i + 1][j] - dense[i][j]) * w for j in range(3)))
+                    k += 1
+                walked += seg
+            strand.append(dense[-1])
+            strands.append(strand)
+        return strands
 
     @staticmethod
     def cylinder_point(f):
@@ -281,15 +358,31 @@ class Level:
     def write(self, path, source):
         L = [f"-- Generated by tools/mission2level.py from {source}. Do not edit by hand; regenerate.", "",
              "function DetermChunk()"]
+        salvage = set()
         for name, htype, p, owner, rot, src in self.squadrons:
-            L.append(f'    addSquadron("{name}", "{htype}", {vec(p)}, {owner}, {vec(rot)}, 0, 0) -- {src}')
+            if htype.lower() in SALVAGE_TYPES:
+                # a salvage object a Worker tows home (install_base.py make_salvage): no name, no owner; its team is
+                # found by the runtime (KAS_Salvage in _paths.lua)
+                L.append(f'    addSalvage("{htype}", {vec(p)}, 100, {", ".join(fmt(c) for c in rot)}, 0) -- {src}')
+                salvage.add(name)
+                self.salvage.append((name, htype, p))
+            else:
+                L.append(f'    addSquadron("{name}", "{htype}", {vec(p)}, {owner}, {vec(rot)}, 0, 0) -- {src}')
         L.append("")
         for g, members in self.groups.items():
             L.append(f'    createSOBGroup("{g}")')
-            L += [f'    addToSOBGroup("{m}", "{g}")' for m in members]
+            L += [f'    addToSOBGroup("{m}", "{g}")' for m in members if m not in salvage]
+            self.salvage_group.update({m: g for m in members if m in salvage})
         L.append("")
         for t, p, rot in self.asteroids:
             L.append(f'    addAsteroid("{t}", {vec(p)}, {ru_percent(t)}, {fmt(rot[0])}, {fmt(rot[1])}, {fmt(rot[2])}, 0)')
+        # nebula wisps (--wisps): Nebula0 on each strand's points and its tendrils between them (HWRM's HW1 Gardens of
+        # Kadesh, mission07: addNebulaWithResources + addTendrils); our Nebula0 is never harvested (make_wisps.py)
+        for strand in self.wisp_strands():
+            for p in strand:
+                L.append(f'    addNebulaWithResources("CatWisps", "Nebula0", {vec(p)}, 200, {{255, 255, 255, 163}}, 0, '
+                         f'{fmt(WISP_SIZE)}, 0)')
+            L.append("    addTendrils(" + ", ".join(vec(p) for p in strand) + ")")
         for name, p, r in self.spheres:
             L.append(f'    addSphere("{name}", {vec(p)}, {fmt(r)})')
         for name, p, size in self.boxes:
@@ -309,8 +402,9 @@ class Level:
             inner = (SCALE * s["smUniverseSizeX"], SCALE * s["smUniverseSizeZ"], SCALE * s["smUniverseSizeY"])
             L.append(f"    setWorldBoundsInner({{0, 0, 0}}, {vec(inner)})")
             L.append(f"    setWorldBoundsOuter({{0, 0, 0}}, {vec(tuple(OUTER * v for v in inner))})")
-        L += ["end", "", "function NonDetermChunk()", "    fogSetActive(0)", "    setGlareIntensity(0.0)",
-              "    setLevelShadowColour(0, 0, 0, 1)"]
+        L += ["end", "", "function NonDetermChunk()"]
+        L += ["    fogSetActive(0)", "    setGlareIntensity(0.0)"]
+        L += ["    setLevelShadowColour(0, 0, 0, 1)"]
         if "Background" in s:
             L.append(f'    loadBackground("{s["Background"]}")')
         L.append("    setSensorsManagerCameraDistances(10500, 87500)")
@@ -411,9 +505,11 @@ if __name__ == "__main__":
     ap.add_argument("--player-start-ship")
     ap.add_argument("--player-fleet")
     ap.add_argument("--arrival-yaw", type=float, default=0.0, help="degrees the Kuun-Lan turns left on arrival")
+    ap.add_argument("--wisps", action="store_true", help="nebula wisps along the asteroid cylinders (add_wisps)")
     ap.add_argument("--disguise-teams", default="", help="teams placed as the disguisable corvette (make_disguise.py)")
     a = ap.parse_args()
     DISGUISE_TEAMS.update(t for t in a.disguise_teams.split(",") if t)
+    WISPS = a.wisps
     ARRIVAL_YAW = a.arrival_yaw
     lv = convert(a.mission_dir, a.out, load_shipmap(a.shipmap), a.placeholder,
                  {0: a.player_race, 1: a.enemy_race, 2: a.ally_race},
@@ -443,6 +539,12 @@ if __name__ == "__main__":
                 f.write(f'\t{{ group = "{st["group"]}", n = {st["n"]}, v = {vec(st["v"])}, '
                         f'ext = {vec((SCALE * e[0], SCALE * e[2], SCALE * e[1]))} }},\n')
             f.write("}\n")
+        # salvage objects (SALVAGE_TYPES): each one's team and where the level puts it, for the runtime to find it
+        # (cataclysmkas.lua KAS_SalvageFind)
+        f.write("KAS_Salvage = {\n")
+        for name, htype, p in lv.salvage:
+            f.write(f'\t{{ team = "{lv.salvage_group.get(name, name)}", type = "{htype}", pos = {vec(p)} }},\n')
+        f.write("}\n")
         f.write("KAS_TeamSchemes = {\n")
         for team, n in sorted(lv.schemes.items()):
             f.write(f'\t["{team}"] = {n},\n')

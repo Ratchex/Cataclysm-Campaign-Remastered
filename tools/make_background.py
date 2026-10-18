@@ -99,11 +99,22 @@ BACKGROUNDS = {}
 # Stock skies relit with a Cataclysm mission's lights (user: Mission 1 looked harshly lit and shadowed; Cataclysm's
 # mission01.hsf has a high pale-yellow ambient, a moderate orange key and a weak red fill, stock ez14 two key lights
 # above 1.0 and little ambient). Written to data/background/<sky>/<sky>_light.hod by tools/install_base.py.
-RELIGHT = {"ez14": "mission01"}
+RELIGHT = {"ez14": "mission01", "ez16": "mission02"}
 # ...and with a glow in their sky texture dimmed: sky -> (u, v centre, u, v radius (Gaussian sigma), r, g, b cut at the
 # centre). ez14: the bright glow behind its main nebula (user: the nebula is supposed to be a dark smear; reduce the
 # light behind it a decent amount). Blue cut most, red least: cut evenly the white core went grey.
-DARKEN = {"ez14": (0.533, 0.508, 0.13, 0.15, (0.35, 0.5, 0.65))}
+# A sky has a list of patches (u, v, u radius, v radius, r g b cut). ez16 (user 2026-10-18): the bright glow behind its
+# central nebula ("the nebula is supposed to be very dark in the original, reduce the light behind it by a bunch") and
+# its sun (u 0.143, v 0.566: level 247 on a sky median of 67; "way too bright"). Cut hard and blue far more than red, so
+# a white core goes dark orange-brown: an even cut (0.5, 0.6, 0.7) left the sun a grey disc, and blending towards a
+# colour flattened the glow to an olive blob without its clouds
+DARKEN = {"ez14": [(0.533, 0.508, 0.13, 0.15, (0.35, 0.5, 0.65))],
+          "ez16": [(0.53, 0.45, 0.2, 0.14, (0.6, 0.75, 0.9)),
+                   (0.143, 0.566, 0.1, 0.14, (0.45, 0.6, 0.75))]}   # (sun: wide, past its halo: narrower left a dark hole in a bright ring)
+# Skies drawn with another stock sky's model, for its planets (its sphere, planets and their shaders, its planet spin
+# animation), their own sky texture and lens-flare joints swapped in: sky -> the model's sky. Mission01 (user: "get the
+# planets added to mission 1's skybox", from Mission02's ez16: its homeworld and moon). Both 4096 x 2048 8888.
+COMPOSITE = {"ez14": "ez16"}
 HSF_DIR = r"C:\Modding\Cataclysm-decomp\extracted\big\hsf"
 BIGFILE = r"C:\Program Files (x86)\Steam\steamapps\common\Homeworld\HomeworldRM\Data\HWBackgrounds.big"
 
@@ -137,12 +148,7 @@ def relight(sky, mission):
     ez14 ambient 0.25 = its HW1 .hsf value). LITE: u32 count; per light name, u32 type (2 directional, 0 ambient),
     position 3f, colour 3f, specular 3f, 2f. Returns the written path relative to data/."""
     src = os.path.join(STOCK, sky, sky + "_light.hod")
-    if not os.path.exists(src):
-        import subprocess
-        import sys
-        subprocess.run([sys.executable, r"C:\Modding\Cataclysm-decomp\tools\hw2big.py", BIGFILE,
-                        os.path.dirname(STOCK), sky + "_light.hod"], check=True)
-    d = bytearray(open(src, "rb").read())
+    d = bytearray(composite(sky, COMPOSITE[sky]) if sky in COMPOSITE else stock_file(sky, "_light.hod"))
     i = d.index(b"LITE")
     end = i + 8 + struct.unpack(">I", d[i + 4:i + 8])[0]
     lights = read_hsf(os.path.join(HSF_DIR, mission + ".hsf"))
@@ -174,16 +180,67 @@ def relight(sky, mission):
         print(f"  {sky} {name}: {'off' if light is None else tuple(round(c, 3) for c in light[2])}")
         q = f + 44
     if sky in DARKEN:
-        d = darken(bytes(d), *DARKEN[sky])
+        d = darken(bytes(d), DARKEN[sky])
     out = os.path.join(MOD, "data", "background", sky, sky + "_light.hod")
     os.makedirs(os.path.dirname(out), exist_ok=True)
     open(out, "wb").write(d)
-    return [f"background/{sky}/{sky}_light.hod"]
+    written = [f"background/{sky}/{sky}_light.hod"]
+    if sky in COMPOSITE:     # the model's planet spin (its .mad; the anims block: data/background/<sky>/<sky>_extra.lua)
+        open(out[:-4] + ".mad", "wb").write(stock_file(COMPOSITE[sky], "_light.mad"))
+        written.append(f"background/{sky}/{sky}_light.mad")
+    return written
 
 
-def darken(hod, cu, cv, ru, rv, cut):
-    """The sky texture (one 8888 LMIP, RGBA, its pixels in the compressed POOL: tools/hodpool.py) with a Gaussian
-    patch dimmed by <cut> per channel at its centre; mips rebuilt from it; stored unpacked."""
+def stock_file(sky, ext):
+    """a stock sky's background/<sky>/<sky><ext>, extracted from HWBackgrounds.big when missing"""
+    src = os.path.join(STOCK, sky, sky + ext)
+    if not os.path.exists(src):
+        import subprocess
+        import sys
+        subprocess.run([sys.executable, r"C:\Modding\Cataclysm-decomp\tools\hw2big.py", BIGFILE,
+                        os.path.dirname(STOCK), sky + ext], check=True)
+    return open(src, "rb").read()
+
+
+def sky_texture(hod):
+    """(mip sizes, bytes of every mip) of the first LMIP: the sky sphere's 8888 texture"""
+    i = hod.index(b"LMIP")
+    n = struct.unpack_from("<I", hod, i + 8)[0]
+    if hod[i + 12 + n:i + 16 + n] != b"8888":
+        raise SystemExit(f"sky texture format {hod[i + 12 + n:i + 16 + n]}, only 8888")
+    mips = struct.unpack_from("<I", hod, i + 16 + n)[0]
+    dims = [struct.unpack_from("<II", hod, i + 20 + n + 8 * k) for k in range(mips)]
+    return dims, sum(w * h * 4 for w, h in dims)
+
+
+def joint_floats(hod, name):
+    """offset of joint <name>'s 9 floats in the HIER (u32 length, name, u32 length, parent, 9 floats)"""
+    key = struct.pack("<I", len(name)) + name.encode()
+    i = hod.index(key, hod.index(b"HIER"))
+    q = i + len(key)
+    return q + 4 + struct.unpack_from("<I", hod, q)[0]
+
+
+def composite(sky, model):
+    """stock <model>_light.hod with <sky>'s sky texture (every mip; the planets' textures after it in the pool kept)
+    and <sky>'s Flare_Key / Flare_Fill joints (its <sky>.lua lens flares sit on its own sun)"""
+    import hodpool
+    own, base = stock_file(sky, "_light.hod"), stock_file(model, "_light.hod")
+    (dims, n), (bdims, bn) = sky_texture(own), sky_texture(base)
+    if dims != bdims:
+        raise SystemExit(f"composite {sky} on {model}: sky textures {dims[0]} / {bdims[0]} differ")
+    base = hodpool.replace_texture_data(base, hodpool.texture_data(own)[:n] + hodpool.texture_data(base)[n:])
+    base = bytearray(base)
+    for j in ("Flare_Key", "Flare_Fill"):
+        o, b = joint_floats(own, j), joint_floats(base, j)
+        base[b:b + 36] = own[o:o + 36]
+    print(f"  {sky}: {model}'s model (planets) with {sky}'s sky texture and flare joints")
+    return bytes(base)
+
+
+def darken(hod, patches):
+    """The sky texture (one 8888 LMIP, RGBA, its pixels in the compressed POOL: tools/hodpool.py) with Gaussian patches
+    (DARKEN) dimmed by a cut per channel at their centre; mips rebuilt; stored unpacked."""
     import numpy as np
     from PIL import Image
     import hodpool
@@ -198,13 +255,16 @@ def darken(hod, cu, cv, ru, rv, cut):
     w, h = dims[0]
     img = np.frombuffer(data[:w * h * 4], np.uint8).reshape(h, w, 4).astype(np.float32)
     v, u = np.mgrid[0:h, 0:w]
-    g = np.exp(-(((u / w - cu) / ru) ** 2 + ((v / h - cv) / rv) ** 2) / 2)[:, :, None]
-    img[:, :, :3] *= 1 - np.array(cut, np.float32) * g
+    for cu, cv, ru, rv, cut in patches:
+        du = np.abs(u / w - cu)
+        du = np.minimum(du, 1 - du)          # the sky wraps at u 0 / 1 (ez16's sun patch past u 0 left a seam: user)
+        g = np.exp(-((du / ru) ** 2 + ((v / h - cv) / rv) ** 2) / 2)[:, :, None]
+        img[:, :, :3] *= 1 - np.array(cut, np.float32) * g
+        print(f"  darkened: glow at ({cu}, {cv}), cut {cut}")
     top = Image.fromarray(img.clip(0, 255).astype(np.uint8), "RGBA")
     out = b"".join(top.resize((mw, mh), Image.BOX).tobytes() if k else top.tobytes()
                    for k, (mw, mh) in enumerate(dims))
-    print(f"  darkened: glow at ({cu}, {cv}), cut {cut}, {mips} mips")
-    return hodpool.replace_texture_data(hod, out)
+    return hodpool.replace_texture_data(hod, out + data[len(out):])     # (other textures after it: COMPOSITE)
 
 
 def convert(btg, name, theta=0.0, phi=0.0):

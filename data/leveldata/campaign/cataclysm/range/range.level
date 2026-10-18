@@ -24,6 +24,15 @@ function DetermChunk()
     createSOBGroup("Recon")
     addToSOBGroup("Recon0", "Recon")
 
+    -- Mission02's derelict message pod (cat_messagepod) for the Worker's salvage (its SALVAGE upgrade, HW1's capture
+    -- latch), behind the Workers: one the pirates' player owns, as Mission02 places it, one neutral (owner -1)
+    addSquadron("MessagePodEnemy", "cat_messagepod", {-2400, 0, 300}, 1, {0, -90, 0}, 0, 0)
+    addSquadron("MessagePodNeutral", "cat_messagepod", {-3000, 0, 300}, -1, {0, -90, 0}, 0, 0)
+    createSOBGroup("MessagePodEnemy")
+    addToSOBGroup("MessagePodEnemy", "MessagePodEnemy")
+    createSOBGroup("MessagePodNeutral")
+    addToSOBGroup("MessagePodNeutral", "MessagePodNeutral")
+
     -- asteroids off the port side
     for row = 0, 1 do
         for i = 0, 3 do
@@ -132,6 +141,19 @@ function DetermChunk()
     addToSOBGroup("KAS_Meteors0_23", "KAS_Meteors0")
     createSOBGroup("KAS_Meteors0_23g")
     addToSOBGroup("KAS_Meteors0_23", "KAS_Meteors0_23g")
+
+    -- TEST (2026-10-18): nebula wisps (tools/make_wisps.py): Nebula0 (overridden: never harvested) with tendrils
+    addNebulaWithResources("NebulaGroup0", "Nebula0", {-7813, 179, -4146}, 200, {212, 138, 1, 163}, 0, 85.75, 0)
+    addNebulaWithResources("NebulaGroup0", "Nebula0", {-7559, 9, -1889}, 200, {89, 232, 84, 163}, 0, 85.75, 0)
+    addNebulaWithResources("NebulaGroup0", "Nebula0", {-6745, -1107, -106}, 200, {72, 223, 60, 163}, 0, 85.75, 0)
+    addNebulaWithResources("NebulaGroup0", "Nebula0", {-6966, -353, 1910}, 200, {206, 25, 229, 163}, 0, 85.75, 0)
+    addNebulaWithResources("NebulaGroup0", "Nebula0", {-6866, -927, 4206}, 200, {2, 214, 225, 163}, 0, 85.75, 0)
+    addNebulaWithResources("NebulaGroup0", "Nebula0", {-6632, -556, 6264}, 200, {59, 125, 90, 163}, 0, 85.75, 0)
+    addNebulaWithResources("NebulaGroup0", "Nebula0", {-8245, -699, 7750}, 200, {65, 100, 114, 163}, 0, 85.75, 0)
+    addNebulaWithResources("NebulaGroup0", "Nebula0", {-7317, -508, 10274}, 200, {21, 131, 50, 163}, 0, 85.75, 0)
+    addNebulaWithResources("NebulaGroup0", "Nebula0", {-7515, -708, 12290}, 200, {101, 73, 214, 163}, 0, 85.75, 0)
+    addTendrils({-7813, 179, -4146}, {-7559, 9, -1889}, {-6745, -1107, -106}, {-6966, -353, 1910}, {-6866, -927, 4206}, {-6632, -556, 6264}, {-8245, -699, 7750}, {-7317, -508, 10274}, {-7515, -708, 12290})
+
 
     addSquadron("TargetCollector0", "tai_resourcecollector", {1500, 0, 5000}, 1, {0, 180, 0}, 0, 0)
     addSquadron("TargetCollector1", "tai_resourcecollector", {2100, 0, 5000}, 1, {0, 180, 0}, 0, 0)

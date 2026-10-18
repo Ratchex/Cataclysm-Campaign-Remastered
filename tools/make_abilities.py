@@ -45,7 +45,12 @@ ABILITIES = {
     # (the Mimic shows its disguises on itself: shiprules.lua CatMimic_*; the disguise types are no longer used)
     "unmimic": (None, "Unmimic", ["smt_mimic"], "", "", "CatUnmimic_Start",
                 "cmd_ico_cancel.dds"),
+    # the Worker's Salvage (its SALVAGE upgrade, strMenuSalvageDesc): HWRM's salvage capture (SalCapCommand), its
+    # button sending the native button's own event (CLICK below), so the native one stays the Ramming Frigate's Ram
+    "salvage": (None, "Salvage", ["smt_worker"], "", "SALVAGE", "CatNoop", "cmd_ico_resource.dds"),
 }
+
+CLICK = {"salvage": '"MainUI_UserEventData( eSalCap, 0)"'}   # ability -> its click (default: CatAbility)
 # disguise buttons, shown while the Mimic menu is open: all the Mimic button's icon (user), told apart by their labels
 DISGUISE_ICON = "cmd_ico_cloak.dds"
 MENU = {}       # ability -> the menu it is in ("mimic": shown only while the Mimic menu is open)
@@ -78,6 +83,8 @@ def main():
         if cid is not None:
             click = (f'"MainUI_UserEventData( eCustomActivate, {cid} );", '
                      f'"MainUI_UserEventData( eCustomDeActivate, {cid} );"')
+        elif name in CLICK:
+            click = CLICK[name]
         else:
             click = '"MainUI_ScarEvent( \\"CatAbility(\'%s\')\\" )"' % name
         ui.append(f'CAT_BTN_{name.upper()} = GetCommandButton("btnCat_{name}", "{label}", nil, "{ICONS}{icon}", {click})')
@@ -86,8 +93,9 @@ def main():
             # (cooldownProgress 24 of 100: a number and a fifth of the button shaded, user); removed. Native ones
             # keep it (their energy bar)
             ui.append(f"CAT_BTN_{name.upper()}[1] = nil")
-    # the salvage-capture button is the Ramming Frigate's Ram (its only user here: shiprules.lua CatRam_Tick):
-    # Cataclysm's name (strMenuSpecialRamDesc "Ram") and the harvest button's icon (user)
+    # the salvage-capture button: the Ramming Frigate's Ram (shiprules.lua CatRam_Tick); its label is fixed
+    # (UI_SetButtonText didn't change it), so the Worker has its own Salvage button on the same event (CLICK above;
+    # user: the frigate showed Salvage). The harvest button's icon (user)
     ui.append(f'BTN_CMD_SALCAP = GetCommandButton("btnSalCap", "Ram", 180, "{ICONS}cmd_ico_resource.dds", '
               '"MainUI_UserEventData( eSalCap, 0)")')
     folder = os.path.join(MOD, "data", "ui", "newui", "taskbar")
@@ -106,6 +114,11 @@ def main():
         f.write("-- Stock HWRM newtaskbar.lua with Cataclysm's ability buttons (tools/make_abilities.py)\n" + text)
 
     text = open(os.path.join(STOCK_UI, "commanduidefines.lua"), encoding="latin-1").read().rstrip()
+    # the salvage-capture command without its button: tied to it the engine showed btnSalCap (Ram) on every ship with
+    # SalCapCommand (user: upgraded Workers showed Ram beside Salvage); CatAbilityTick shows it for Ramming Frigates
+    salcap = '\t\tactivateButtonName = "btnSalCap",\n'
+    assert text.count(salcap) == 1
+    text = text.replace(salcap, "")
     assert text.endswith("}")
     entries = "".join(f'    -- Cataclysm-HWRM (tools/make_abilities.py)\n    {{\n        commandID = INFO_CustomStart + {cid},\n'
                       f'        activateButtonName = "btnCat_{name}",\n        rightClickDisplayName = "{label}",\n    }},\n'

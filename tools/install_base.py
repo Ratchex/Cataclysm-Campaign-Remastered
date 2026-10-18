@@ -59,6 +59,9 @@ TEMPLATES = {
     "bst_missilecorvette": "tai_multiguncorvette", "bst_mothership": "tai_mothership",
     "bst_multibeamfrigate": "tai_ioncannonfrigate", "bst_multiguncorvette": "tai_multiguncorvette",
     "bst_rammingfrigate": "tai_assaultfrigate", "bst_swarmer": "tai_interceptor",
+    # derelicts: Mission02's message pod (dMessagePod), towed home by a Worker's capture latch (HW1's salvage):
+    # Gearbox's salvageable cryo tray (HW1 Mission03's, SalCap on SalvagePoint1), on our model
+    "cat_messagepod": "kus_cryotray_m03",
 }
 
 # Our races: (stock race it is made from, display name, ship prefix, strike group tags)
@@ -150,7 +153,7 @@ def gen_ship(ship, template):
                                   "\n".join("-- " + line for line in m.group(0).split("\n")),
                                   text, flags=re.M | re.S)
                 # our race's own build families (FAMILY_SUFFIX): built by our builders, not the Kushan / Taiidan ones
-                text = re.sub(r"\b(%s)_(?:Kus|Tai)\b" % "|".join(BUILD_FAMILIES), r"\1_" + FAMILY_SUFFIX[ship[:4]],
+                text = re.sub(r"\b(%s)_(Kus|Tai)\b" % "|".join(BUILD_FAMILIES), r"\1_" + FAMILY_SUFFIX.get(ship[:4], r"\2"),
                               text)
                 text = f"{MARK}{template} (tools/install_base.py)\n" + text
             open(dst, "w", encoding="latin-1", newline="").write(text)
@@ -344,6 +347,20 @@ def patch_worker(text):
     model's LatchOrientation joint, not by the Harvest ability: tools/build_ship.sh --latch.) No NLIPS (its icon
     and selection box scaled up with distance: user)."""
     text = re.sub(r"^(\s*NewShipType\.nlips(?:Range|Far|FarRange)?\s*=\s*)[\d.]+", r"\g<1>0", text, flags=re.M)
+    # Its dock family stays the collector's (Utility), so it latches on the Processor's RU pads. After a salvage
+    # capture latches, SalCap needs a carrier with a plain path for the salvager's family and no latch path for it
+    # (FUN_004b14d7 / FUN_004b0a9e mode 5): as Utility the Kuun-Lan's nose RU latch paths made it let go every time,
+    # so the Kuun-Lan has none for now (build_kuunlan.sh --no-res: Workers unload in its hangar, "Corvette, Utility";
+    # the Processor's Utility latch paths rule it out as a carrier). (As Corvette, 2026-10-17, salvage worked but the
+    # Worker nosed into the Processor's pads, or with plain paths vanished inside: user, the Processor is a release
+    # blocker; 2026-10-18)
+    # and salvages as HW1 did (its SALVAGE upgrade; Cataclysm's capturing is HW1's): stock kus_salvagecorvette's
+    # capture latch, SalCapCommand, latched by its LatchOrientation (tools/build_ship.sh cat_messagepod), declared
+    # off (enable flag 0: switched off from script only, it salvaged before the upgrade, user) and switched on by the
+    # upgrade (shiprules.lua CatGated_Tick, AB_SalCap). Not the HW2 salvage-object order its template has
+    # (SalvageCommand: it harvested containers like rocks, never towed them, user)
+    text = re.sub(r'^[ \t]*addAbility\(NewShipType,\s*"(?:SalvageCommand|SalCapCommand)"[^\n]*\n?', "", text, flags=re.M)
+    text = text.rstrip("\n") + '\naddAbility(NewShipType,"SalCapCommand",0,500,0,0);   -- Cataclysm-HWRM: salvage\n'
     return repair_order(text, "worker")
 
 
@@ -559,7 +576,21 @@ def set_support_units():
     return made + [rel]
 
 
+def patch_messagepod(text):
+    """Cataclysm's dmessagepod.shp maxhealth 8000 (tools/make_damage.py covers the races' ships, not derelicts). Its
+    dock family Utility, docked into the Kuun-Lan's medium bay (geo2dae.py PATH_FAMILIES). After the latch SalCap looks
+    for a carrier for the docking ship (FUN_004b14d7: one with a plain path for its family and no latch path,
+    FUN_004b0a9e mode 5) and lets go when there is none: a Worker (Utility, the Kuun-Lan's RU latch paths) was let go
+    every time; made Corvette it latched, towed and docked this pod (user, 2026-10-17; tools/install_base.py
+    patch_worker). (Pod Corvette or Controller with a Utility Worker: let go, user. The cryo tray's SuperCap has no
+    path on the Kuun-Lan: towed home, never docked, user.)"""
+    text = re.sub(r'^(\s*NewShipType\.DockFamily\s*=\s*)"[^"]*"', r'\g<1>"Utility"', text, count=1, flags=re.M)
+    return re.sub(r'^(\s*NewShipType\.maxhealth\s*=\s*)[^\n]*', r'\g<1>8000   -- Cataclysm-HWRM: dmessagepod.shp', text,
+                  count=1, flags=re.M)
+
+
 PATCHES = {
+    "ship/cat_messagepod/cat_messagepod.ship": patch_messagepod,
     "scripts/races/somtaaw/singleplayer/unitcaps/singleplayer.lua": patch_sp_unitcaps,
     "ui/newui/build/finalbuild.lua": patch_build_menu,
     "ship/smt_rammingfrigate/smt_rammingfrigate.ship": patch_rammingfrigate,
@@ -587,6 +618,8 @@ OUR_MODELS = {
     "smt_mimic": ("som_mimic", {}),
     "smt_processor": ("som_processor", {}),
     "smt_rammingfrigate": ("som_rammingfrigate", {}),
+    # its salvage point is Cataclysm's Tow0 (geo2dae.py: the .shp's DPT_SalvageLatch points)
+    "cat_messagepod": ("cat_messagepod", {}),
 }
 # Weapons on our models' gun joints (Cataclysm's guns, GUN<n> in the .shp's order; tools/build_ship.sh): stock HWRM
 # weapons, their damage set to Cataclysm's by tools/make_damage.py. The Kuun-Lan's are patch_ms_sp's, the Acolyte's
@@ -829,6 +862,10 @@ def use_our_model(ship, ours, joints):
     text = open(path, encoding="latin-1").read()
     for theirs, mine in joints.items():
         text = re.sub(r'"%s"' % theirs, '"%s"' % mine, text)
+    # a template that loads another type's model (LoadSharedModel: the salvageable cryo tray uses Kus_CryoTray's) loads
+    # its own, ours (user: the message pod still showed the cryo tray)
+    text = re.sub(r'^([ \t]*)LoadSharedModel\(NewShipType,\s*"[^"]*"\);', r"\1LoadModel(NewShipType,1);", text,
+                  flags=re.M)
     # our models have one level of detail: their LOD switches (made for theirs) left ours invisible past the first
     # (user: the Mimic vanished zooming out)
     text = re.sub(r'^\s*NewShipType(\.|\[")(upLOD|downLOD)\b.*\n', "", text, flags=re.M)

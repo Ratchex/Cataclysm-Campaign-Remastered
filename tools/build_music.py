@@ -4,7 +4,7 @@ Cataclysm's .wxh/.wxd, in stream order):
                                             regardless of their header, as with speech)
   data/sound/music/cataclysm/music_NN.lua   Relic Audio Tool sidecar, as Cataclysm Remastered's music has
 kasfMusicPlay(n) plays stream n (cataclysm.exe FUN_00523480 indexes the stream table directly; n = 1102 picks
-0-16 at random). The runtime side is K_497000 / K_498c10 in scripts/scar/cataclysmkas.lua.
+0-16 at random). The runtime side is K_497000 in scripts/scar/cataclysmkas.lua.
 
 Each track is levelled to the same median loudness (--loudness, 16-bit RMS of one-second windows), never past
 clipping: one gain for all (0.5) left the quiet ones lost under the battle (Mission02's track 1, 3-5x quieter than

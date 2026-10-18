@@ -241,6 +241,7 @@ function CatShip_Update(g, p, id)
     if (rec.t == "smt_worker" or rec.t == "smt_processor") and rec.filled and rec.p and SobGroup_Empty(g) == 0 then
         CatRepair_Tick(rec, g, id, now)
         if rec.t == "smt_processor" then CatProcessor_Tick(rec, g, id, now) end
+        if rec.t == "smt_worker" then CatWorkerClamps_Tick(rec, g, id, now) end
     end
     if rec.t == "smt_rammingfrigate" and rec.filled and rec.p and SobGroup_Empty(g) == 0 then
         CatRam_Tick(rec, g, id, now)
@@ -445,6 +446,8 @@ CatDevUpgrades = {}   -- e.g. { ORDINANCE = 600 } (game time includes the openin
 
 function CatUpgrade_Researched(p, name)
     if p == 0 and CatDevUpgrades[name] and Universe_GameTime() >= CatDevUpgrades[name] then return 1 end
+    -- a computer player's: what the mission marked researched (kasfTechSetResearched, cataclysmkas.lua K_498c10)
+    if p ~= 0 and KAS_CPUTechs and KAS_CPUTechs[CatUpgradeTech[name]] then return 1 end
     return Player_HasResearch(p, CatUpgradeTech[name])
 end
 
@@ -491,7 +494,17 @@ function CatUpgrade_Start(g, p, id)
     local rec = CatShips[id]
     if not rec or rec.gone or rec.upg or not CatUpgradeType[rec.t] then return end
     local list, armour = CatUpgrade_Pending(rec)
-    if getn(list) == 0 and armour == rec.armour then return end
+    if getn(list) == 0 and armour == rec.armour then
+        -- TEST: why an Upgrade press did nothing (user: upgrading a Worker did nothing): each ability, researched?
+        local u, s = CatUpgradeType[rec.t], ""
+        for i = 1, getn(u.abilities) do
+            local n = u.abilities[i]
+            s = s .. " " .. n .. (rec.up[n] and " has" or (" research " .. tostring(CatUpgradeTech[n]) .. " "
+                .. CatUpgrade_Researched(rec.p, n)))
+        end
+        print("CATACLYSM upgrade: ship " .. id .. " (" .. rec.t .. ") nothing to upgrade:" .. s)
+        return
+    end
     rec.upg = { time = CatUpgrade_Time(rec, list, armour), since = Universe_GameTime() }
     if CatUpgradeType[rec.t].dock == 1 and SobGroup_IsDocked(g) ~= 1 then
         rec.upg.dock = 1
@@ -1190,6 +1203,40 @@ CAT_RAM_PUSH = 30              -- RamPushTime
 CAT_RAM_WAIT = 10              -- RamWaitAfterPushTime
 CAT_RAM_BEAM = 20              -- cuttingBeamDamagePerSecond (60 upgraded: not yet)
 CAT_RAM_SALCAP = 22            -- SobGroup_GetCurrentOrder while salvage-capturing
+
+-- The Worker's docking clamps out (and its boom stowed) from the start of a salvage capture, as it flies in, through
+-- the latch and the tow, until it goes idle or is given an attack order (docked, the madstate's Docked opens them
+-- anyway). (smt_worker.madstate DockPathOpen3 / DockPathClosed3: the engine never sent the madstate's CaptureActive;
+-- user, 2026-10-18: deploy approaching the target. Closing when the order left 22 shut them seconds in: the capture
+-- runs on as order 4, logged.)
+function CatWorkerClamps_Tick(rec, g, id, now)
+    if not CatOrdersLogged then   -- (the order numbers, for the record)
+        CatOrdersLogged = 1
+        local names = { "Idle", "Move", "Attack", "Dock", "Guard", "SalCap", "Salvage", "Launch", "Repair",
+                        "WaypointMove", "StrikeCraftDock", "Hyperspace", "MoveCancelled", "ForceAttack" }
+        local s = ""
+        for i = 1, getn(names) do
+            local v = getglobal("COMMAND_" .. names[i])
+            if v then s = s .. " " .. names[i] .. "=" .. v end
+        end
+        print("CATACLYSM orders:" .. s)
+    end
+    local order = SobGroup_GetCurrentOrder(g)
+    if order == CAT_RAM_SALCAP then
+        if not rec.clamps then
+            rec.clamps = 1
+            SobGroup_SetMadState(g, "DockPathOpen3")
+            -- its salvage acknowledgement, "Salvaging." / "Target acquired." / "Locked on." (event 150, FUN_004490b0:
+            -- the ships given the order; HWRM's speech logic stays silent for SalCapCommand)
+            CatSay(150, g, rec.p)
+            print("CATACLYSM worker " .. id .. ": clamps out (salvage capture)")
+        end
+    elseif rec.clamps and (order == (COMMAND_Idle or 0) or order == (COMMAND_Attack or 2)) then
+        rec.clamps = nil
+        SobGroup_SetMadState(g, "DockPathClosed3")
+        print("CATACLYSM worker " .. id .. ": clamps in (order " .. order .. ")")
+    end
+end
 CAT_RAM_NEAR = 150             -- latched: an enemy this close to its centre (seen: 18-32 latched by the centre)...
 CAT_RAM_STILL = 0.5            -- ...and still (speed under 10) this long
 CAT_RAM_PUSH_SPEED = 252       -- the push, units a second (the frigate's top speed; Cataclysm adds 500000 force a frame,
@@ -1467,7 +1514,8 @@ end
 -- Repair and salvage (Cataclysm: the Worker's and Processor's REPAIR, the Worker's SALVAGE ability bits, from the
 -- Repair / Salvage research and upgrade): HWRM's own repair / salvage orders switched on only once the ship has the
 -- ability (user)
-CatGatedAbilities = { REPAIR = "AB_Repair", SALVAGE = "AB_Salvage" }
+-- (SALVAGE is the Worker's SalCapCommand, HW1's capture latch: AB_SalCap; install_base.py patch_worker)
+CatGatedAbilities = { REPAIR = "AB_Repair", SALVAGE = "AB_SalCap" }
 
 function CatGated_Tick(rec)
     local u = CatUpgradeType[rec.t]

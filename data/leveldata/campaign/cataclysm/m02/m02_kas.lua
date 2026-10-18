@@ -1301,7 +1301,7 @@ function F_5df420(TeamName)
   KAS_ScopeKind = 1
   KAS_Scope = KAS_TeamHash(TeamName)
   K_4984c0(TeamName, 1)  -- kasfShipsParalyze
-  K_498c10(8979808)  -- kasfMusicStop
+  K_498c10("TECH_MIMIC")  -- kasfTechSetResearched
   K_498c70(TeamName)  -- kasfShipsUpgrade
   K_497fd0(TeamName, "kAdvanceSupportFrigate", 0)
   K_49aae0(TeamName, 5)  -- kasfShipsSetColor
@@ -2416,7 +2416,7 @@ function F_5de2e0(TeamName)
   KAS_Scope = KAS_TeamHash(TeamName)
   K_49aae0(TeamName, 5)  -- kasfShipsSetColor
   K_491d30(332667, 1)  -- lock; kasfVarCreateSet
-  K_498c10(8980124)  -- kasfMusicStop
+  K_498c10("TECH_SALVAGE")  -- kasfTechSetResearched
   p2 = TeamName
   iVar1 = KAS_GS("Pirates")
   K_495bd0(iVar1, p2)  -- kasfShipsAdd

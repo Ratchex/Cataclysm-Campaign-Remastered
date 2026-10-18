@@ -205,7 +205,6 @@ CustomCommandDefinitions =
     },
     {
         commandID = INFO_CMD_SalCap,
-		activateButtonName = "btnSalCap",
         rightClickDisplayName = "$3178",
         mainUIDefine = MUI_SalCapCommand,
     },

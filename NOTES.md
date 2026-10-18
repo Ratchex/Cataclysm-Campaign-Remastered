@@ -167,6 +167,27 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
   Cataclysm has no bloom; the user watches it.
 - Our converted sky (tools/make_background.py, BTG -> textured sphere + stock ez01 LITE) looked wrong in game and
   is off (BACKGROUNDS = {}); the BTG / HWRM .hod format notes stay in its docstring.
+- 2026-10-18: stock skies are 4096 x 2048 equirectangular 8888 textures (RGBA; hodread.py decodes them), so a
+  render_page of a .btg compares straight against them too (all 33 extracted to reference/hwrm/bg). Pattern scores
+  only shortlist (Mission 1's ez14 ranked 5th): decide by eye on a contact sheet. **02 -> ez16**: Cataclysm's sky
+  is HW1's ez16 (two touching glows, sun beside a dark streak) with its black painted over in haze; HWRM's ez16 fills
+  the sky too, mirrored against Cataclysm's. ez16 brought ez16_extra.lua's dimming as ez14 (user: too bright).
+- Planets (UNTESTED): ez16's _light.hod has POST_Homeworld / POST_Moon meshes (planet shaders: CLD1, WARP, GLOW,
+  SPEC, NORM) and spins them (ez16_light.mad + an anims block "PlanetSpin" in its _extra.lua). make_background.py
+  COMPOSITE puts them on another sky without HODOR: that sky's texture swapped into the model's pool (same size and
+  mips; the planets' textures after it kept) and its Flare_Key / Flare_Fill joint floats copied (HIER: u32 length,
+  name, u32 length, parent, 9 floats). Written as the sky's own _light.hod, so its stock .lua / cube maps still load.
+- Nebula: HW2's Terah fog + clouds on Mission02 looked bad and are removed (user, 2026-10-18; the --atmosphere
+  mechanism is gone). Trying instead: HW1's nebula tendrils as HWRM draws them in the Gardens of Kadesh (HW1 mission07
+  / 08: addTendrils({p1}, {p2}, ...) along a path of points, Nebula0 resources (addNebulaWithResources) on the same
+  points; mission08 adds addDustCloudWithResources DustCloud0-3). Range test (user, 2026-10-18): addTendrils alone
+  draws NOTHING; the Nebula0 resources are what shows: white wispy smoke, harvestable (their colour argument didn't
+  tint it). Cataclysm's Mission02 has no such resources (RU would change the economy). Earlier notes:
+  Cataclysm missions put none in space (mission02's Fog line is all zeros; the thickness is the sky
+  art). HW2's: level fog (fogSetActive / Start / End / Colour / Type / Density) and addNebula clouds; Terah
+  (multiplayer 6p_terah) is the thick orange one: linear 800-18000, (0.30, 0.16, 0.10), density 0.48, 125
+  MP_Bentusi_Radiation clouds in a band. build_mission.py ATMOSPHERES / mission2level.py --atmosphere copy both,
+  the clouds re-placed over 90% of the map's radius (seeded by the mission).
 
 ## Mission start: the fleet's hyperspace arrival (confirmed in game, Mission01)
 - kasfStartLevelByHyperspacingShips (all 17 missions) = exe SP flow state 9: the fleet arrives at StartPointPlayer.
@@ -342,6 +363,38 @@ Learned in Phase 0.1 (2026-10-07). Each was confirmed in game.
   the storm's velocity (60-75 a check), meteors ghosted (SobGroup_SetGhost: HWRM's collision nudged them).
 - **Unit caps:** HWRM allows a queue while the count is below the limit, whatever the unit costs; a limit of 400
   held at ~250. The unit cap popup (UnitCapInfoPopup) shows a family only with supplyShow "Always".
+- **Salvage capture (SalCapCommand, 2026-10-17, user-tested; decompiled in project_hwrm):**
+  - Latch joints load from their Heading / Left children's positions (FUN_00669ed3), not the joint's own rotation.
+    The latch code (FormationLatchCommand, FUN_004d0bca / 004d0e50 / 004d1280) picks SalvageOrientation only for salvage
+    objects; a SalCap capture of a ship latches by **LatchOrientation** (the harvest joint) on the target's
+    SalvagePoint. The salvager comes in nose first against the point's Up, its up along the point's Heading, and stays
+    so latched. LatchInfo (tuning.lua): stop within 16, restart past sqrt 400.
+  - "Arrived" needs position within the ship's tolerance and heading / up matched (FUN_00640f81 / 00641016).
+  - After the latch SalCap looks for a carrier (FUN_004b14d7): the docking ship is the salvager if it has a Guard
+    order (order 0x16 in the exe's list FUN_0047f500; Lua's order numbers differ) or the target's dock family ranks
+    below its own (familylist.lua: Mover 0, Fighter 1, Corvette 2, Frigate 3, Utility 4, Controller 5...), else the
+    target; FUN_004b0a9e mode 5 wants a plain path for that family and **no latch path** for it. No carrier: it lets
+    go (a snap onto the point and a hop off every second or so, forever). Workers (Utility) failed on the Kuun-Lan's
+    RU latch paths; as Corvette they latch, tow and dock. Plain RU paths: every ship finishing one is docked inside
+    (Workers vanished at the nose). A subsystem's dock paths are ignored (RU paths on a Kuun-Lan module: hangar).
+  - The engine shows btnSalCap on every ship with SalCapCommand through commanduidefines.lua's activateButtonName;
+    UI_SetElementVisible can't hide it while that is set.
+- **Hyperspaced-out ships stay in their SobGroups** (SobGroup_EnterHyperSpaceOffMap; Cataclysm removes them from
+  the universe, so from every selection): Mission02's "Pirates" stayed at 1 after the carrier jumped out and the
+  mission never ended. cataclysmkas.lua KAS_Departed / KAS_Present leave them out of kasfShipsCount / kasfTeamCount
+  (2026-10-18, untested).
+- **0x498270 is "ships die"**, not a disguise reset (FUN_0044a150: each ship gets a death time now + a random fraction
+  of a second; the ship update FUN_00545b80 kills it). Mission02 removes patrols by skill at start and the
+  undiscovered raiders once the pod is taken (K_498270 / KAS_DoomTick, user-confirmed they die).
+- **Skill:** Cataclysm's kasfMissionSkillGet is 0-4, default 2 (DAT_008941a0); HWRM's Player_GetLevelOfDifficulty
+  is 0-2, so K_493b90 returns it + 1 (raw 0 took Cataclysm's easiest branch: every patrol removed).
+- **HODOR builds a collision mesh around every mesh** when the DAE has none, hidden joints included: the disguised
+  corvette (corvette + every disguise model) was hit on the frigate's outline. Give such models a ROOT_COL >
+  COL[Root] mesh (geo2dae.py / hod2dae.py --col-slices: boxes following the hull from the visible body only).
+- **SalCapCommand gets no order acknowledgement** from HWRM's speech logic: the Worker's "Salvaging." (Cataclysm event
+  150, 0x4000896, FUN_004490b0) is played by the ship rules (CatSay) when they see the order (user-tested).
+- **Research calls:** Player_UnrestrictResearchOption fails ("unable to unrestrict") unless the item is restricted;
+  Player_GrantResearchOption fails ("unable to grant") once it is researched (FUN_005f6221 / 005f635c).
 
 ## The Mimic (2026-10-10, confirmed in game)
 - Cataclysm (FUN_005b8d70 mode 0 unmimic / 1 ship / 2 asteroid; state machine at ship +0x760, FUN_005b8f30): a phase

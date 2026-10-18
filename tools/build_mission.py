@@ -26,6 +26,7 @@ DECOMP = r"C:\Modding\Cataclysm-decomp"
 # comparing per pixel at every rotation, then by eye: most Cataclysm skies are new art. HWRM can't rotate a sky, so
 # Cataclysm's theta (200 for most missions) is lost. Missions not listed: no equivalent yet (decide when we get there).
 BACKGROUNDS = {"01": "ez14",      # orange haze, bright core, arc above (ez12 scores the same but has big rings)
+               "02": "ez16",      # Cataclysm's is HW1's ez16 (sun beside a dark streak) with its black filled by haze
                "13": "ez08"}      # HW1's ez08 almost exactly
 # Degrees the Kuun-Lan turns left once out of hyperspace (it comes in bow +Z whatever the start point's heading):
 # Mission01's faces straight away from the sensor net (user)
@@ -42,6 +43,9 @@ ALLY_ON_SWITCH = {"02": 1}
 INTROS = {"01": "n01"}
 # Teams the mission disguises (kasfShipsDisguise, cataclysm.exe 0x497fd0: all p1StandardCorvette): placed as the
 # corvette with the disguises on its model (tools/make_disguise.py, tur_standardcorvette_disguise)
+# Missions with nebula wisps along their asteroid cylinders (mission2level.py --wisps, tools/make_wisps.py): Mission02's
+# fields read as tendrils in Cataclysm's sensors view, lost at our scale (user, 2026-10-18)
+WISPS = {"02"}
 DISGUISE_TEAMS = {"02": ["pTricky"],
                   "10": [f"pSalCorvette{n}" for n in range(1, 7)] + ["pMSMimic1", "pMSMimic2"],
                   "12": [f"pMimicAst{n}" for n in range(1, 5)] + ["pMimicPlayer1", "pMimicPlayer2", "pSalvage1"]}
@@ -181,6 +185,8 @@ def main():
     lvl += ["--arrival-yaw", str(ARRIVAL_YAW.get(nn, 0))]
     if DISGUISE_TEAMS.get(nn):
         lvl += ["--disguise-teams", ",".join(DISGUISE_TEAMS[nn])]
+    if nn in WISPS:
+        lvl += ["--wisps"]
     run(os.path.join(HERE, "mission2level.py"), src, os.path.join(out, f"m{nn}.level"), *lvl)
     run(os.path.join(HERE, "kas2lua.py"), DECOMP, f"Mission{nn}", src, os.path.join(out, f"m{nn}_kas.lua"))
     # the teams with a damage factor HWRM's multiplier can't give get weaker weapon copies (make_variants.py)

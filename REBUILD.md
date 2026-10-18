@@ -1,5 +1,7 @@
 # Rebuild without Cataclysm Remastered / HWU (started 2026-10-14)
 
+**2026-10-17 update:** the HWCR lead developer brought the user aboard (unreleased dev build in C:\Modding\HWCR, from his server). Plan: once Mission 2 works, publish on the Steam Workshop with HWCR as a required item, using their content through that requirement (confirm with them before bundling any of their files). Our converted models and Cataclysm-data pipeline stay; which HWCR assets to bring back is decided case by case.
+
 Goal: no file from Cataclysm Remastered (workshop 2195601016, HWU-derived) in the mod. Everything comes from
 Cataclysm's own data (Cataclysm-decomp/extracted), stock HWRM (Gearbox's HW1/HW2 files as templates and stand-ins),
 the Players Patch (kept: user, 2026-10-14) and our own tools. Work happens on main (user).

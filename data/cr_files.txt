@@ -1,6 +1,8 @@
 art/fx/hyperspace fx/hyperspace_effect_beam_kad.tga
 art/fx/hyperspace_gate_kad.lua
 background/ez14/ez14_light.hod
+background/ez14/ez14_light.mad
+background/ez16/ez16_light.hod
 missile/hgn_clustertorpedoa/hgn_clustertorpedoa.miss
 missile/hgn_clustertorpedob/hgn_clustertorpedob.miss
 missile/hgn_longrangetorpedo/hgn_longrangetorpedo.miss
@@ -402,6 +404,8 @@ ship/bst_swarmer/bst_swarmer.mad
 ship/bst_swarmer/bst_swarmer.madstate
 ship/bst_swarmer/bst_swarmer.ship
 ship/bst_swarmer/deathmatch/tags/gbx.lua
+ship/cat_messagepod/cat_messagepod.hod
+ship/cat_messagepod/cat_messagepod.ship
 ship/cat_sufiller1/cat_sufiller1.ship
 ship/cat_sufiller25/cat_sufiller25.ship
 ship/cat_sufiller5/cat_sufiller5.ship

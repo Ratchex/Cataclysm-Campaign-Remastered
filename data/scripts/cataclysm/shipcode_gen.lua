@@ -23,6 +23,7 @@ CatClass = {
     ["bst_multiguncorvette"] = 5,
     ["bst_rammingfrigate"] = 4,
     ["bst_swarmer"] = 11,
+    ["cat_messagepod"] = 8,
     ["kus_attackbomber"] = 6,
     ["kus_carrier"] = 2,
     ["kus_cloakgenerator"] = 8,
@@ -92,6 +93,7 @@ CatName = {
     ["bst_multiguncorvette"] = "Multigun Corvette",
     ["bst_rammingfrigate"] = "Ramming Frigate",
     ["bst_swarmer"] = "Swarmer",
+    ["cat_messagepod"] = "Derelict",
     ["kus_attackbomber"] = "Attack Bomber",
     ["kus_carrier"] = "Carrier",
     ["kus_cloakgenerator"] = "Cloak Generator",
@@ -163,6 +165,9 @@ function CatCmd_mimic_Finish(g, p, id) end
 function CatCmd_unmimic_Start(g, p, id) CatAbility_Run("unmimic", g, p, id) end
 function CatCmd_unmimic_Do(g, p, id) end
 function CatCmd_unmimic_Finish(g, p, id) end
+function CatCmd_salvage_Start(g, p, id) CatAbility_Run("salvage", g, p, id) end
+function CatCmd_salvage_Do(g, p, id) end
+function CatCmd_salvage_Finish(g, p, id) end
 function CatCmd_mimic_bst_acolyte_Start(g, p, id) CatAbility_Run("mimic_bst_acolyte", g, p, id) end
 function CatCmd_mimic_bst_acolyte_Do(g, p, id) end
 function CatCmd_mimic_bst_acolyte_Finish(g, p, id) end
@@ -361,6 +366,16 @@ function CatUpdate_bst_swarmer(g, p, id)
     CatShip_Update(g, p, id)
 end
 function CatDestroy_bst_swarmer(g, p, id)
+    CatShip_Destroy(g, p, id)
+end
+
+function CatCreate_cat_messagepod(g, p, id)
+    CatShip_Create(g, p, id, "cat_messagepod")
+end
+function CatUpdate_cat_messagepod(g, p, id)
+    CatShip_Update(g, p, id)
+end
+function CatDestroy_cat_messagepod(g, p, id)
     CatShip_Destroy(g, p, id)
 end
 

@@ -24,6 +24,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import hodpool  # noqa: E402
 import hodtex  # noqa: E402
 
+DECODE_DXT = True   # False: DXT textures left undecoded (slow in pure Python), "image" None
+
 
 class Reader:
     def __init__(self, path):
@@ -99,8 +101,11 @@ class Reader:
             else:
                 n = w * h * 4
             data = self.take(0, n, inline)
-            if k == 0 and fmt in ("DXT1", "DXT5"):
+            if k == 0 and fmt in ("DXT1", "DXT5") and DECODE_DXT:
                 img = hodtex.decode(data, w, h, fmt)
+            elif k == 0 and fmt == "8888":   # uncompressed RGBA (stock skies' sphere textures: ez14 orange)
+                import numpy as np
+                img = np.frombuffer(bytes(data), np.uint8).reshape(h, w, 4)
         self.textures.append({"name": name, "format": fmt, "image": img})
 
     def read_stat(self, p, ver):

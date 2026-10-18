@@ -48,7 +48,9 @@ def joint(k):
 
 def dae():
     assert len(TARGETS) <= len(STATES), "more disguises than mad states"
-    args = [sys.executable, os.path.join(HERE, "hod2dae.py"), OUT, NAME, "--body", BODY_HOD, "--body-joint", BODY]
+    # collision from the corvette alone (user: shots hit the disguise's outline, HODOR's took in every disguise)
+    args = [sys.executable, os.path.join(HERE, "hod2dae.py"), OUT, NAME, "--body", BODY_HOD, "--body-joint", BODY,
+            "--col-slices", "10"]
     for k, (_, scheme, hod) in enumerate(TARGETS):
         args += ["--part", f"{joint(k)}@{hod}@{scheme}"]
     subprocess.check_call(args)

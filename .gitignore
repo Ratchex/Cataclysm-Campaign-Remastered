@@ -15,6 +15,7 @@ data/animatics/*.webm
 
 # Meteor ships (tools/make_meteor.py): copies of stock HWRM asteroid models
 data/ship/cat_meteor*/*.hod
+data/resource/nebula/nebula0/*.hod
 
 # The disguisable pirate corvette (tools/build_disguise.sh): built from stock HWRM / CR models
 data/ship/tur_standardcorvette_disguise/*.hod

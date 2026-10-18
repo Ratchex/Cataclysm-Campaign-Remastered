@@ -19,6 +19,7 @@ CatHull["bst_multibeamfrigate"] = { box = { -18.8, -14.6, -45.9, 18.8, 29.1, 91.
 CatHull["bst_multiguncorvette"] = { box = { -10.6, -6.8, -28.7, 10.6, 11.7, 11.4 }, sp = { {0.0, 8.4, 0.0} } }
 CatHull["bst_rammingfrigate"] = { box = { -19.3, -15.2, -47.0, 19.2, 29.7, 52.4 }, sp = { {16.4, -1.0, 6.9}, {-12.7, -1.4, 12.1} }, regen = 2500 }
 CatHull["bst_swarmer"] = { box = { -4.7, -3.2, -9.3, 4.1, 2.1, 10.7 }, sp = { {0.0, 2.1, 0.0} } }
+CatHull["cat_messagepod"] = { box = { -38.2, -10.9, -39.1, 38.2, 26.8, 36.2 }, sp = { {-0.0, -10.9, -0.0} } }
 CatHull["cat_meteor0"] = { box = { -11.0, -6.5, -7.5, 10.8, 8.0, 7.3 }, sp = {  } }
 CatHull["cat_meteor1"] = { box = { -11.0, -6.5, -7.5, 10.8, 8.0, 7.3 }, sp = {  } }
 CatHull["cat_meteor2"] = { box = { -30.1, -31.8, -48.3, 25.5, 31.2, 52.8 }, sp = {  } }

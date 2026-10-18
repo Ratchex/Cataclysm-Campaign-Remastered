@@ -1,7 +1,7 @@
 fx = {
 style = "STYLE_RING",
 properties = {
-property_00 = { name = "Radius", type = "VARTYPE_ARRAY_TIMEFLOAT", value = { 0.0000, 1.0000, 1.0000, 1.8897, }, },
+property_00 = { name = "Radius", type = "VARTYPE_ARRAY_TIMEFLOAT", value = { 0.0000, 1.0000, 1.0000, 4.7243, }, },
 property_01 = { name = "Offset", type = "VARTYPE_ARRAY_TIMEVECTOR3", value = { entry_00 = { 0, 0, 0, 0, }, entry_01 = { 1, 0, 0, 0, }, }, },
 property_02 = { name = "SpinX", type = "VARTYPE_ARRAY_TIMEFLOAT", value = { 0, 0, 1, 0, }, },
 property_03 = { name = "SpinY", type = "VARTYPE_ARRAY_TIMEFLOAT", value = { 0, 0, 1, 0, }, },

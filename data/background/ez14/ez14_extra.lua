@@ -43,3 +43,12 @@ refl_scale=0.683
 
 }
 
+
+-- Cataclysm-HWRM: ez16's planet spin (its homeworld and moon are on this sky: make_background.py COMPOSITE)
+anims = {
+	{
+		Anim_Name = "PlanetSpin",
+		Anim_Loops = -1,
+		Anim_Rate = 0.000225;
+	},
+}

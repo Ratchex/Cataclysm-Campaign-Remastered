@@ -1,6 +1,6 @@
 # Session handoff: Cataclysm → HWRM port
 
-Last updated 2026-10-17. Read this first, then `C:\Modding\Cataclysm-decomp\PORT_PLAN.md` (plan and decisions),
+Last updated 2026-10-18. Read this first, then `C:\Modding\Cataclysm-decomp\PORT_PLAN.md` (plan and decisions),
 `NOTES.md` (HWRM engine rules learned in game) and `C:\Modding\Cataclysm-decomp\MODLOG.md` (reverse-engineering
 findings).
 
@@ -98,7 +98,61 @@ findings).
 - Balance: Taiidan collectors at Cataclysm's 0.5 RU/s; Worker on the collector ratio (144); two extra Kushan
   main-guard ion frigates (tools/level_extras.py).
 
-## RESUME HERE (2026-10-17: all committed and pushed; commit only when the user says)
+## RESUME HERE (2026-10-18: committed ("Worker salvage (HW1 SalCap, Tow0 underneath)...", after 394eafb), not pushed; commit only when the user says)
+**Next test (user plays Mission 2 normally; the shortcut test was removed at the user's request):**
+- Pod captured -> carrier jumps out -> log "pCarrier departed", "CKAS: Pirates 0 left" -> "Destroy Turanic Raiders"
+  completes -> Hyperspace objective / "~ End of Mission". If not: the "Pirates n left:" line says what still counts.
+- Patrols by difficulty: the last run logged HWRM 0 -> skill 1 (pPatrol3-5 removed, two left); skill 2 keeps three.
+- Disguised corvettes: hits land on the corvette itself (body-only collision); their unmasking shell at 2x (Mimic 3x).
+**Then:** remove the TEST traces (list below, plus the "Pirates n left" print in K_492d20 and the worker clamp order
+log), commit when the user says, Kuun-Lan nose RU pads, engine work (SU fit / queued count, Veterancy UI, Upgrade UI).
+**2026-10-17/18 session (user-tested unless marked):**
+- Worker salvage clamps and voice DONE (user-tested 2026-10-18): shiprules.lua CatWorkerClamps_Tick sends
+  DockPathOpen3 on the salvage order (22; madstate: clamps out, boom stowed, harvest states skipped) and
+  DockPathClosed3 on Idle / Attack; the order also barks event 150 ("Salvaging." etc., CatSay, FUN_004490b0).
+  Mission02 visuals (ez16 seam / darkening, orange wisps) DONE, user-tested.
+- Worker salvage WORKS (HW1 SalCap, user: "latched correctly and deposited at the kuun-lan"; on the pod's Tow0 side, the
+  Worker upside down under it, user-tested 2026-10-18: "worked like a charm"). Workers latch by their
+  **LatchOrientation** (the harvest joint 45 ahead of the nose; SalCap uses it for ship targets, SalvageOrientation
+  only for salvage objects), a joint's frame comes from its Heading / Left children (FUN_00669ed3). The pod's
+  SalvagePoint1 sits where that joint is with the Worker level on the pod's top (build_ship.sh cat_messagepod
+  --salvage-at; geo2dae.py --salvage-at X,Y,Z@Up@Heading). Workers are dock family **Corvette** (engine work below:
+  they unload RU in the hangar). Not re-tested since the Worker got its own flight model back (the "roll and reset"
+  was the latch being released, not its flight). Mission02's salvaged-pod check: capturing the pod didn't end Mission 2
+  (user, 2026-10-18): K_498cb0("dMessagePod", 0) took the team for a type (always 0); a team now counts its ships
+  the player owns (user-tested: the capture is seen and Fleet Intel's line plays). It still didn't end: the end
+  (Objectives pc 67) also needs "DestroyPirates" done, which pCarrier's F_5dd2d0 sends once GS_Pirates (pCarrier,
+  Kamikaze, pFighter1-3, pSalvage, pGuard) is empty. Once the pod is taken the undiscovered raiders and pSalvage run
+  0x498270, which is **ships die** (FUN_0044a150: a death time now + rand fraction of 1 s, the ship update kills it,
+  FUN_00545b80), not the "disguise state reset" no-op it was; Init_Mission02 uses it too, removing pPatrol1-5 by
+  difficulty. K_498270 / KAS_DoomTick now kill them (UNTESTED; TEST trace "CKAS: Pirates n left: ..." in K_492d20,
+  watch whether the carrier that hyperspaced out still counts). User run: the raiders died, but "Pirates 1 left:
+  pCarrier=1": HWRM keeps a ship that jumped out in its groups (Cataclysm removes it from the universe). K_493800
+  now puts a team that hyperspaces out mid-mission in KAS_Departed, which KAS_Present leaves out of kasfShipsCount /
+  kasfTeamCount (K_492d20 / K_492ce0); K_493600 / K_493630 take it back out (UNTESTED). Also K_493b90: HWRM's
+  difficulty 0-2 -> Cataclysm skill 1-3 (raw 0 = skill 0 removed every patrol at start).
+  Disguised corvettes (tur_standardcorvette_disguise): collision from the corvette body only (hod2dae.py
+  --col-slices; HODOR's took in every disguise, shots hit the frigate's outline, user) and a 2x shell
+  (make_mimicfx.py SCRIPT_SHELL 2.0, user: 3x then 2x). UNTESTED.
+- Buttons: the Worker has its own Salvage button (make_abilities.py "salvage", CLICK sends eSalCap); the native
+  btnSalCap is the Ramming Frigate's Ram only (its commanduidefines entry has no activateButtonName, so the engine
+  no longer shows it on every SalCap ship; CatAbilityTick shows it). User-tested.
+- Research errors fixed (UNTESTED, see the Mission 2 block below): kasfTechSetResearched; KAS_Unrestrict / KAS_Grant.
+- Backgrounds (UNTESTED after the last fixes): Mission02 = **ez16** (Cataclysm's mission02.btg is HW1's ez16 repainted:
+  sun beside a dark streak, black filled with haze), relit with mission02.hsf; dimmed like ez14 (data/background/ez16/
+  ez16_extra.lua: god rays 0.5, bloom threshold 0.855). User 2026-10-18: STILL TOO BRIGHT. The Terah fog + clouds are
+  removed (user: they looked bad; the --atmosphere mechanism is gone); HW1 nebula tendrils (Kadesh) on test in the
+  range (range.level: west strand with Nebula0 resources, east tendrils only); the user is checking OG Cataclysm for
+  the atmosphere to aim at.
+  Mission01's ez14 now carries ez16's homeworld + moon (make_background.py COMPOSITE: ez16's model with ez14's texture
+  and flare joints, ez16's PlanetSpin .mad + anims in ez14_extra.lua). User asked for the planets; check them, the
+  flare on ez14's sun, Mission 2's brightness and cloud spread.
+- Tools: tools/hodread.py decodes 8888 textures (RGBA) and can skip DXT (DECODE_DXT); Cataclysm-decomp/scripts/
+  StringRefsFile.java (search strings from a file: cmd mangles parentheses / %).
+- Left over: CatUpgrade_Start's "nothing to upgrade" TEST print (shiprules.lua); KAS_SalvageFind (unused, called at
+  start); range.lua RANGE_POD_TRACE; geo2dae.py Latch<k> nodes on salvage points (harmless) and GEO2DAE_LIST_DOCKS;
+  the Worker's dock clamp animation has never played (smt_worker.madstate CaptureActive / CaptureInActive).
+
 **Cataclysm Remastered / HWU removed (user, 2026-10-14):** no CR file in the mod; plan + status in `REBUILD.md`.
 `tools/install_cr.py` is now `tools/install_base.py` (Players Patch + Somtaaw/Beast ships from stock HW1 templates,
 TEMPLATES; our 9 models via OUR_MODELS/OUR_WEAPONS; stand-ins keep the template model). Rerun it after any model
@@ -165,8 +219,12 @@ Costs / providers: `tools/make_supportunits.py` -> `data/scripts/cataclysm/suppo
   ACV's burst attack and the Hive Frigate's repair commented out (install_base.py TEMPLATE_DROP, whole statement),
   the Recon's Speed Burst kept with enable flag 0 (Cataclysm Remastered's way). Worker keeps its kamikaze (user).
 - 0x4984c0 is INVULNERABILITY (not paralyse): K_4984c0 = SobGroup_SetInvulnerability, re-applied every second
-  (KAS_InvulnerableTick: a despawn / respawn cleared it). Mission02: the BUSHAN-RE from arrival to Fleet Intel's
-  ambush briefing (fail state only after the ambush, user); the disguised corvettes / decoy while disguised. Mission01's
+  (KAS_InvulnerableTick: a despawn / respawn cleared it). Mission02: the BUSHAN-RE from arrival; Fleet Intel's
+  briefing right after it is FOUND switches it off (not the ambush's, as first thought), and the pirates killed it
+  while the Worker flew there. So a disabled ship keeps it until a repair first holds it still (user: protection ends
+  when the Worker gets there; K_4984c0 / KAS_DisabledTick, KAS_InvulnerableHeld; DONE, user-tested 2026-10-18: two
+  pirate wings on it, never below ~8k). The disguised corvettes /
+  decoy while disguised. Mission01's
   Kushan destroyer uses it too (untested since).
 - Ambush (technically working, user; polish built, UNTESTED): disguised team switched to the allied player while
   disguised (shows friendly; left out of the pirates' "Enemy"), visible through the fog (KAS_DisguiseVisible), stops
@@ -174,18 +232,36 @@ Costs / providers: `tools/make_supportunits.py` -> `data/scripts/cataclysm/suppo
   drops the disguise with our Mimic's Unmimic shell (MimicOut_kadvancesupportfrigate: make_mimicfx.py
   SCRIPT_DISGUISES; shell from Cataclysm's model, HWRM shows the Remastered one). Far camera focus reveals for 45 s.
 - Pirates' "Enemy" leaves out player 2 until it joins where the level starts it unallied (KAS_FillHumanSide).
+- Research (2026-10-18, UNTESTED): 0x498c10 is kasfTechSetResearched (cataclysm.exe: marks a tech researched for the
+  computer player, "" clears; its args are string addresses, TECH_MIMIC / TECH_SALVAGE for Mission02's pirates), not
+  kasfMusicStop (Cataclysm-decomp/out/kas_api.tsv; K_498c10 keeps KAS_CPUTechs, read by CatUpgrade_Researched).
+  "unable to unrestrict / grant" were calls on techs already done (HWRM unrestricts only a restricted item and grants
+  only an unresearched one): KAS_Unrestrict / KAS_Grant check first. Link's research is fine (needs the Hangar).
 - Open: the intermittent access violation loading a mission (NOTES.md; launch with ProcDump attached to catch it);
-  0x498c10 ("kasfMusicStop") takes a technology name (hash 8979808 unmatched); "unable to unrestrict TECH_LINK /
-  TECH_DRIVE_FIGHTER" and "unable to grant CAT_ACOLYTE_MISSILES" at Mission02's start (Link's research may never
-  work); Mission 2 BUSHAN-RE visuals; autosave "invalid key for next".
-- Next: test the ambush polish (friendly display, the stop at the sensor edge, the transform), then the research
-  errors above, then the rest of Mission 2 against the original.
+  autosave "invalid key for next". The BUSHAN-RE stays as it is (stock kus_destroyer; user: HWRM models wherever one
+  exists).
+- Next: the user checks the skies (Mission 1 planets, Mission 2 brightness / clouds); then a Mission 2 run: research
+  (pirates' Mimic / Salvage, no unrestrict / grant warnings), the ambush polish (friendly display, the stop at the
+  sensor edge, the transform), the message pod salvaged into the Kuun-Lan and Mission 2's salvaged check; then the
+  rest of Mission 2 against the original.
 
 **Engine work (later, with the Veterancy rank stars and the Upgrade UI displays; user, 2026-10-17):**
 - Support Units: Cataclysm's queue rule (a unit only if its whole cost fits; HWRM checks count < limit only), the
   build menu's SU line counting every queued unit (Player_HasQueuedBuild is 0/1 per type), and a limit above ~250.
 - Veterancy: rank stars as real UI beside the stance icon (script can only message).
 - Upgrade UI displays.
+- Worker salvage vs RU unloading (2026-10-18, UNTESTED): Workers are back to dock family **Utility** (user: the
+  Processor working is a release blocker; as Corvette they nosed into its pads, or with plain paths vanished inside).
+  Salvage's carrier rule (FUN_004b14d7 / FUN_004b0a9e mode 5: a plain path for the family and no latch path for it)
+  had ruled the Kuun-Lan out through its nose RU latch paths, so the Kuun-Lan has none for now (geo2dae.py --no-res,
+  build_kuunlan.sh): Workers unload in its hangar (medium bay, plain "Corvette, Utility") and latch on the Processor's
+  pads (Utility latch paths, which also rule the Processor out as a carrier). The nose pads come back later (user).
+  Earlier tries (2026-10-17): pod Corvette / Controller (+ no Guard, bay taking Controller); RU paths plain (every
+  docking vanished at the nose); RU paths on the Upper Engines module (subsystem dock paths are ignored); Workers as
+  Corvette (salvage worked; the Processor didn't). No scripted tow (user). The nosing into the Processor's pads was
+  NOT the family: every Processor rebuild since geo2dae.py's .shp latch branch (made for the Kuun-Lan's nose pads)
+  faced the Worker wrong; that branch is now opt-in (--shp-latch, the Kuun-Lan only) and the Processor's RES paths
+  match its old working model again.
 
 **Other open items:** speech.dat "colliding name" in the log (subtitle file, pre-existing); Carrier Support Modules;
 stand-in capitals keep stock damage (turret subsystems shared with Kushan); model conversions for the 23 stand-ins
@@ -279,7 +355,7 @@ is off); Siege Cannon; engine loss slowing the Kuun-Lan; Kuun-Lan arrival headin
 ## Repositories
 | Path | What |
 |---|---|
-| `C:\Modding\Cataclysm-decomp` | Ghidra project, decompile exports (`out/`), extractors (`tools/`), catalogue, plan. `extracted/` and `reference/` are git-ignored. |
+| `C:\Modding\Cataclysm-decomp` | Ghidra project, decompile exports (`out/`), extractors (`tools/`), catalogue, plan. Public: github.com/Ratchex/Cataclysm-DECOMP (2026-10-18, user). Never pushed: `bin/*.exe` (stripped from history), `project/`, `project_hwrm/`, `out/hwrm/`, `extracted/`, `reference/` (other games' and mods' files). |
 | `C:\Modding\Cataclysm-HWRM` | The mod. `data/` is junctioned into the game as `HomeworldRM\DataCataclysm`. `tools/` builds it. |
 | `C:\Modding\Homeworld\gardens-of-kadesh-1.2.2` | HW1 source (KAS, kas2c, audio codec); referenced, not modified. |
 

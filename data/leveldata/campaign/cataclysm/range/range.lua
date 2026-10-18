@@ -50,6 +50,7 @@ function OnInit()
     if RANGE_GRANT_ALL == 1 then Rule_AddInterval("Range_Upgrade", 2) end
     if RANGE_BEAM_TEST == 1 then Rule_AddInterval("Range_BeamTest", 1) end
     if RANGE_CRUISER_TEST == 1 then Rule_AddInterval("Range_Cruiser", 1) end
+    if RANGE_POD_TRACE == 1 then Rule_AddInterval("Range_PodTrace", 5) end
 end
 
 -- SobGroup_GetCoordSys's layout: its 9 numbers beside the engine's own columns, for the tilted Recon
@@ -70,6 +71,22 @@ function Range_Damage()
     Rule_Remove("Range_Damage")
     SobGroup_SetHealth("Workers", 0.5)
     print("CATACLYSM range: Workers at half health")
+end
+
+-- Mission02's message pods (range.level MessagePodEnemy / MessagePodNeutral, captured as in HW1): every 5 s each
+-- one's owner, position, whether it is docked, and how many the player owns (Mission02's "salvaged" check, K_498cb0)
+RANGE_POD_TRACE = 1
+function Range_PodTrace()
+    for _, g in { "MessagePodEnemy", "MessagePodNeutral" } do
+        if SobGroup_Count(g) > 0 then
+            local p = SobGroup_GetPosition(g)
+            print(format("CATACLYSM range: %s owner %d at %.0f %.0f %.0f docked %d health %.2f", g,
+                SobGroup_GetPlayerOwner(g), p[1], p[2], p[3], SobGroup_IsDocked(g), SobGroup_HealthPercentage(g)))
+        else
+            print("CATACLYSM range: " .. g .. " gone")
+        end
+    end
+    print("CATACLYSM range: pods the player owns " .. K_498cb0("dMessagePod", 0))
 end
 
 -- the ships placed with the level were created before the research: upgrade them (kasfShipsUpgrade)

@@ -57,7 +57,14 @@ SMT_WORKER_NIS01_OnSet = function(ship)
 end
 
 -- RESOURCE COLLECTION: boom out (as for repairs), harvest beam, blades turning ----
+-- (not while salvaging: HWRM runs a salvage capture through these collector states, which swung the boom out and back
+-- on a salvage order, user 2026-10-18; SMT_WORKER_Salvaging, set by DockPathOpen3 below)
+SMT_WORKER_Salvaging = {}
 SMT_WORKER_ResourceStart_OnSet = function(ship)
+    if(SMT_WORKER_Salvaging[ship]) then
+        setState(ship, "ResourceStart", 1)
+        return
+    end
     -- held until the boom is out (ResourceStart_OnPause), as for repairs: the beam starts at its tip
     setState(ship, "ResourceStart", 0)
     endEffect(ship, "Resourcing")
@@ -69,6 +76,10 @@ SMT_WORKER_ResourceStart_OnPause = function(ship)
 end
 
 SMT_WORKER_ResourceDo_OnSet = function(ship)
+    if(SMT_WORKER_Salvaging[ship]) then
+        setState(ship, "ResourceDo", 1)
+        return
+    end
     SMT_WORKER_Swap(ship, "JackClose", "JackOut")
     if(isAnimRunning(ship, "BladesSpin") == 0) then
         startAnim(ship, "BladesSpin")
@@ -78,6 +89,10 @@ SMT_WORKER_ResourceDo_OnSet = function(ship)
 end
 
 SMT_WORKER_ResourceEnd_OnSet = function(ship)
+    if(SMT_WORKER_Salvaging[ship]) then
+        setState(ship, "ResourceEnd", 1)
+        return
+    end
     stopAnim(ship, "BladesSpin")
     SMT_WORKER_Swap(ship, "JackOut", "JackClose")
     endEffect(ship, "Resourcing")
@@ -125,13 +140,30 @@ SMT_WORKER_DockPathOpen1_OnSet = function(ship)
     SMT_WORKER_Swap(ship, "JackOut", "JackClose")
 end
 
--- CAPTURING: the jack, as Cataclysm Remastered's extend / retract ----------------
+-- CAPTURING (its SALVAGE upgrade: HW1's capture latch, SalCapCommand): Cataclysm's Worker carries what it salvages
+-- in its docking clamps (sworker.mad DockOpen / DockClose), the jackhammer boom stowed (user: it swung the boom)
 SMT_WORKER_CaptureActive_OnSet = function(ship)
     setState(ship, "CaptureActive", 0)
-    SMT_WORKER_Swap(ship, "JackClose", "JackOut")
+    endEffect(ship, "Resourcing")
+    SMT_WORKER_Swap(ship, "JackOut", "JackClose")
+    SMT_WORKER_OpenClamps(ship)
+    setState(ship, "CaptureActive", 1)
 end
 
 SMT_WORKER_CaptureInActive_OnSet = function(ship)
-    setState(ship, "CaptureActive", 1)
+    SMT_WORKER_CloseClamps(ship)
+    setState(ship, "CaptureInActive", 1)
+end
+-- (the engine never sent CaptureActive to the Worker: the ship rules send these instead, shiprules.lua
+-- CatWorkerClamps_Tick: DockPathOpen3 = clamps out and the boom stowed as it nears its salvage target, user
+-- 2026-10-18; DockPathClosed3 = clamps in once the capture is over)
+SMT_WORKER_DockPathOpen3_OnSet = function(ship)
+    SMT_WORKER_Salvaging[ship] = 1
+    endEffect(ship, "Resourcing")
     SMT_WORKER_Swap(ship, "JackOut", "JackClose")
+    SMT_WORKER_OpenClamps(ship)
+end
+SMT_WORKER_DockPathClosed3_OnSet = function(ship)
+    SMT_WORKER_Salvaging[ship] = nil
+    SMT_WORKER_CloseClamps(ship)
 end

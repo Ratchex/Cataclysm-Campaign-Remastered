@@ -29,6 +29,14 @@ case "$NAME" in
     # at scale 1 (stock kus_resourcecollector's beam marker to its LatchOrientation plane), scaled 1.3 in
     # smt_worker.events. Cataclysm held 400 HW1 units (140) off, far beyond the stock cone.
     GEO2DAE_ARGS="$GEO2DAE_ARGS --latch 0,28.5,44.8"
+    # salvage (its SALVAGE upgrade: HW1's capture latch, SalCapCommand): Cataclysm's Worker carries what it salvages in
+    # its docking clamps underneath, 14.4 below its centre (Mission02's message pod, Tow0). (There it latched onto the
+    # stock cryo tray, user). Unused by its salvage capture: that latches by LatchOrientation (the harvest point
+    # above; cat_messagepod's salvage point is placed for it)
+    GEO2DAE_ARGS="$GEO2DAE_ARGS --salvage-latch 0,-14.4,0"
+    # a collision mesh following its hull: with none the engine kept it off the pod by a rough bound (user: it only
+    # bumped the pod, never latched), as the Ramming Frigate's latch needed
+    GEO2DAE_ARGS="$GEO2DAE_ARGS --col-slices 10"
     # its repair beam as a heal weapon from the tip (install_base.py repair_order: ranged, no latching)
     GEO2DAE_ARGS="$GEO2DAE_ARGS --weapon Repair@$TIP@0,0,1"
     CLIPS="JackOut,JackSpin,JackClose,DockOpen,DockClose,BladesSpin"
@@ -42,6 +50,19 @@ case "$NAME" in
     # its landing pads glow over their cyan areas (user: lit like the Kuun-Lan's); engines geo2dae's own glow quad
     GEO2DAE_ARGS="$GEO2DAE_ARGS --glow-cyan 0pro20"
     PROCBEAM=1
+    ;;
+  cat_messagepod)
+    # Mission02's derelict, towed home by a Worker: a hull-following collision mesh so the Worker can reach its
+    # salvage point (Tow0, on its underside; with none it only bumped the pod, user)
+    GEO2DAE_ARGS="$GEO2DAE_ARGS --col-slices 10"
+    # its salvage point on Cataclysm's side, Tow0 underneath (user-tested 2026-10-18: "worked like a charm"). HWRM's
+    # salvager latches by its LatchOrientation (a Worker's: its harvest joint, 28.5 up and 44.8 ahead of its centre),
+    # comes in nose first against the point's Up with its up along the point's Heading (geo2dae.py), and holds that
+    # pose: the point sits where that joint is with the Worker upside down under the pod, its belly 1.8 below the
+    # pod's bottom (y -10.9: centre at -25.3), nose to the pod's front, so the joint is at y -53.8; Up back, Heading
+    # down. Towing, the pod hangs upside down under its clamps, as Cataclysm's. (On the pod's top, the Worker level on
+    # it, 0,68.9,44.8@0,0,-1@0,1,0 worked too; the earlier failures underneath were the carrier release, NOTES.md.)
+    GEO2DAE_ARGS="$GEO2DAE_ARGS --salvage-at 0,-53.8,44.8@0,0,-1@0,-1,0"
     ;;
   som_mothership)
     # the command module's gravity generator spins (smothershipcommand.mad GravRotate: a full turn every 12 s, looped

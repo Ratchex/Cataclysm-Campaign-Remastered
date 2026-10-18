@@ -207,6 +207,9 @@ def main():
     ap.add_argument("--body-joint")
     ap.add_argument("--body-scheme", type=int)
     ap.add_argument("--part", action="append", default=[])
+    ap.add_argument("--col-slices", type=float, help="a collision mesh from the body alone: boxes following its hull "
+                    "every this many units along its length (geo2dae.py's); without one HODOR's took in every --part "
+                    "too (the disguised corvettes were hit on their disguise's outline, user 2026-10-18)")
     a = ap.parse_args()
     os.makedirs(a.out_dir, exist_ok=True)
     w = Writer(a.out_dir, a.name)
@@ -288,6 +291,46 @@ def main():
                 nodes += w.mesh(model, joint, part, scheme, xf)
         root_inner += jnode(f"JNT[{joint}]", (0, 0, 0), nodes)
         print(f"  part {joint}: {os.path.basename(path)}, {len(model.meshes)} meshes")
+    col_node = ""
+    if a.col_slices:
+        bw = world_frames(body)
+        cv = []
+        for m in body.meshes:
+            if skip_mesh(body, m):
+                continue
+            R, t = bw(m["parent"])
+            for part in m["lods"].get(0, []):
+                cv += [tuple(v) for v in (np.array(part["pos"], float)[:, :3] @ R.T + t)]
+        P, I = [], []
+
+        def box(x0, y0, z, x1, y1, ze):
+            b = len(P)
+            P.extend([(x0, y0, z), (x1, y0, z), (x1, y1, z), (x0, y1, z),
+                      (x0, y0, ze), (x1, y0, ze), (x1, y1, ze), (x0, y1, ze)])
+            for q in ((0, 3, 2, 1), (4, 5, 6, 7), (0, 1, 5, 4), (2, 3, 7, 6), (1, 2, 6, 5), (0, 4, 7, 3)):
+                I.extend([b + q[0], b + q[1], b + q[2], b + q[0], b + q[2], b + q[3]])   # outward winding
+        z0, z1 = min(v[2] for v in cv), max(v[2] for v in cv)
+        z = z0
+        while z < z1 - 1e-6:
+            ze = min(z + a.col_slices, z1)
+            sl = [v for v in cv if z - 1e-3 <= v[2] <= ze + 1e-3]
+            if sl:
+                box(min(v[0] for v in sl), min(v[1] for v in sl), z, max(v[0] for v in sl), max(v[1] for v in sl), ze)
+            z = ze
+        flat = [c for v in P for c in v]
+        cid = "COL[Root]"
+        w.geoms.append(f'<geometry id="{cid}-lib" name="{cid}"><mesh>'
+                       f'<source id="{cid}-pos"><float_array id="{cid}-pos-a" count="{len(flat)}">{fl(flat)}</float_array>'
+                       f'<technique_common><accessor source="#{cid}-pos-a" count="{len(P)}" stride="3"><param name="X" '
+                       f'type="float"/><param name="Y" type="float"/><param name="Z" type="float"/></accessor>'
+                       f'</technique_common></source><vertices id="{cid}-v"><input semantic="POSITION" '
+                       f'source="#{cid}-pos"/></vertices><triangles count="{len(I) // 3}"><input semantic="VERTEX" '
+                       f'offset="0" source="#{cid}-v"/><p>{" ".join(map(str, I))}</p></triangles></mesh></geometry>')
+        col_node = (f'<node name="ROOT_COL" id="ROOT_COL" sid="ROOT_COLE"><translate sid="translate">0 0 0</translate>'
+                    f'<node name="{cid}" id="{cid}" sid="{cid}E"><translate sid="translate">0 0 0</translate>'
+                    f'<instance_geometry url="#{cid}-lib"/></node></node>\n')
+        print(f"collision mesh (body only): {len(P) // 8} boxes, x {min(v[0] for v in P):.1f}..{max(v[0] for v in P):.1f}"
+              f" y {min(v[1] for v in P):.1f}..{max(v[1] for v in P):.1f} z {z0:.1f}..{z1:.1f}")
     dae = os.path.join(a.out_dir, a.name + ".dae")
     with open(dae, "w", encoding="utf-8", newline="\n") as f:
         f.write('<?xml version="1.0" encoding="utf-8"?>\n'
@@ -301,7 +344,7 @@ def main():
                 '<library_visual_scenes><visual_scene id="scene" name="scene">\n'
                 '<node name="ROOT_LOD[0]" id="ROOT_LOD[0]" sid="ROOT_LOD[0]E"><translate sid="translate">0 0 0</translate>\n'
                 '<node name="JNT[Root]" id="JNT[Root]" sid="JNT[Root]E"><translate sid="translate">0 0 0</translate>\n'
-                + root_inner + '\n</node>\n</node>\n'
+                + root_inner + '\n</node>\n</node>\n' + col_node +
                 '<node name="ROOT_INFO" id="ROOT_INFO" sid="ROOT_INFOE"><translate sid="translate">0 0 0</translate>'
                 '<node name="Class[MultiMesh]_Version[512]" id="Class[MultiMesh]_Version[512]" sid="ClassE"/>'
                 '<node name="UVSets[1]" id="UVSets[1]" sid="UVSetsE"/></node>\n'

@@ -275,12 +275,49 @@ function K_4949b0(msg)                                                          
 end
 
 -- ------------------------------------------------------------------ team, selection and misc queries
-function K_492ce0() return SobGroup_Count(KAS_Team) end                                             -- kasfTeamCount
+-- ships that hyperspaced out mid-mission (K_493800): Cataclysm takes them out of the universe, so out of every
+-- selection; HWRM keeps them in their groups (Mission02: the raider carrier that jumped out kept "Pirates" at 1 and the
+-- mission from ending, user 2026-10-18). Not counted; back when their team hyperspaces in (K_493600 / K_493630).
+function KAS_Present(sel)
+    local n = SobGroup_Count(sel)
+    if n == 0 or SobGroup_Exists("KAS_Departed") == 0 or SobGroup_Count("KAS_Departed") == 0 then return n end
+    SobGroup_CreateIfNotExist("KAS_PresentTmp")
+    SobGroup_Clear("KAS_PresentTmp")
+    SobGroup_FillSubtract("KAS_PresentTmp", sel, "KAS_Departed")
+    return SobGroup_Count("KAS_PresentTmp")
+end
+function KAS_Returned(team)
+    if SobGroup_Exists("KAS_Departed") == 0 then return end
+    SobGroup_CreateIfNotExist("KAS_PresentTmp")
+    SobGroup_Clear("KAS_PresentTmp")
+    SobGroup_FillSubtract("KAS_PresentTmp", "KAS_Departed", team)
+    SobGroup_Clear("KAS_Departed")
+    SobGroup_SobGroupAdd("KAS_Departed", "KAS_PresentTmp")
+end
+function K_492ce0() return KAS_Present(KAS_Team) end                                                -- kasfTeamCount
 function K_492d10(sel) SobGroup_Clear(sel) end                                                      -- kasfGrowSelectionClear
-function K_492d20(sel) return SobGroup_Count(sel) end                                               -- kasfShipsCount
+function K_492d20(sel)                                                                              -- kasfShipsCount
+    local n = KAS_Present(sel)
+    -- TEST: Mission02 ends when "Pirates" empties (F_5dd2d0); log each change
+    if sel == "GS_Pirates" and n ~= KAS_PiratesLast then
+        KAS_PiratesLast = n
+        local s = ""
+        for _, t in { "pCarrier", "Kamikaze", "pFighter1", "pFighter2", "pFighter3", "pSalvage", "pGuard" } do
+            if SobGroup_Exists(t) == 1 then s = s .. " " .. t .. "=" .. SobGroup_Count(t) end
+        end
+        print("CKAS: Pirates " .. n .. " left:" .. s)
+    end
+    return n
+end
 function K_493de0(team) return KAS_B(team == KAS_Team) end                                          -- kasfThisTeamIs
 function K_492910(lo, hi) return RandomIntRange(hi, lo) end                                         -- kasfRandom
-function K_493b90() return Player_GetLevelOfDifficulty(0) end                                       -- kasfMissionSkillGet
+-- kasfMissionSkillGet: Cataclysm's skill 0-4, its default 2 (exe DAT_008941a0); HWRM's campaign difficulty is 0-2
+-- (Easy / Normal / Hard), so 1 / 2 / 3 (raw, Mission02's patrols at skill 0 all died: user's run 2026-10-18)
+function K_493b90()
+    local d = Player_GetLevelOfDifficulty(0)
+    if KAS_SkillSaid == nil then KAS_SkillSaid = 1 print("CKAS: HWRM difficulty " .. d .. " -> Cataclysm skill " .. (d + 1)) end
+    return d + 1
+end
 
 function K_495bd0(a, b)                                                                             -- kasfShipsAdd
     if a ~= b then SobGroup_SobGroupAdd(a, b) end
@@ -824,12 +861,12 @@ function KAS_RestrictTechs()
     if KAS_Techs == nil then return end
     local i = 1
     while i <= getn(KAS_Techs) do
-        Player_RestrictResearchOption(0, KAS_Techs[i])
+        if Player_HasResearch(0, KAS_Techs[i]) ~= 1 then Player_RestrictResearchOption(0, KAS_Techs[i]) end
         i = i + 1
     end
     i = 1
     while i <= getn(KAS_DevTechs) do
-        Player_UnrestrictResearchOption(0, KAS_DevTechs[i])
+        KAS_Unrestrict(KAS_DevTechs[i])
         print("CKAS: DEV research unlocked " .. KAS_DevTechs[i])
         i = i + 1
     end
@@ -1021,6 +1058,11 @@ function CatAbilityTick()
             CatAbilityShown[a.name] = show
         end
     end
+    -- HWRM's salvage-capture button, the Ramming Frigate's Ram: every tick, as the buttons above (the taskbar's rebuild
+    -- for a new selection undid a change made once); the Worker's Salvage is its own button (btnCat_salvage, the same
+    -- event: make_abilities.py CLICK; user: the frigate's showed Salvage)
+    local ram = SobGroup_Count(sel) > 0 and SobGroup_AreAnyOfTheseTypes(sel, "smt_rammingfrigate") == 1
+    UI_SetElementVisible("NewTaskbar", "btnSalCap", ram and 1 or 0)
 end
 
 -- research the player starts the mission with (the mission's KAS_StartResearch, build_mission.py START_RESEARCH;
@@ -1029,8 +1071,8 @@ function KAS_GrantStartResearch()
     if KAS_StartResearch == nil then return end
     local i = 1
     while i <= getn(KAS_StartResearch) do
-        Player_UnrestrictResearchOption(0, KAS_StartResearch[i])
-        Player_GrantResearchOption(0, KAS_StartResearch[i])
+        KAS_Unrestrict(KAS_StartResearch[i])
+        KAS_Grant(KAS_StartResearch[i])
         print("CKAS: start research " .. KAS_StartResearch[i])
         i = i + 1
     end
@@ -1041,7 +1083,7 @@ end
 function KAS_GrantRuntimeResearch()
     local i = 1
     while i <= getn(KAS_RuntimeResearch) do
-        Player_GrantResearchOption(0, KAS_RuntimeResearch[i])
+        KAS_Grant(KAS_RuntimeResearch[i])
         i = i + 1
     end
 end
@@ -1326,6 +1368,7 @@ function KAS_StartEngine()
     Rule_AddInterval("KAS_DestroyerTrace", 5)   -- TEST
     Rule_AddInterval("KAS_ResourcerTrace", 10)  -- TEST
     KAS_MeteorInit()
+    KAS_SalvageFind()
     Rule_AddInterval("KAS_JettisonWatch", 0.25)
     Rule_AddInterval("KAS_RURegen", KAS_RU_REGEN_SECONDS)
 end
@@ -1519,10 +1562,11 @@ end
 -- tools/make_unitspeech.py).
 dofilepath("data:soundscripts/cataclysm/catspeech_gen.lua")
 -- the ship rules' barks (shiprules.lua CatSay: cat_say_<event>): Link, Unlink, mimic, unmimic, kamikaze, disguise
--- assumed, the Ram order (attack): pilot chatter, 0 s wait (FUN_00467ae0, 00468580, 005b8f30; 167 / 168 by the same
--- pattern; the Ram order's attack acknowledgement as the selection acks, FUN_00523040)
+-- assumed, the Ram order (attack), the Worker's salvage order: pilot chatter, 0 s wait (FUN_00467ae0, 00468580,
+-- 005b8f30; 167 / 168 by the same pattern; the Ram order's attack acknowledgement as the selection acks, FUN_00523040;
+-- salvage FUN_004490b0)
 CatSayEvents = { [156] = 71305372, [157] = 71305373, [165] = 71305381, [166] = 71305382, [167] = 71305383,
-                 [168] = 71305384, [5] = 67110917 }   -- 0x400089c, 0x400089d, 0x40008a5-a8, 0x4000805
+                 [168] = 71305384, [5] = 67110917, [150] = 67111062 }   -- 0x400089c, 0x400089d, 0x40008a5-a8, 0x4000805, 0x4000896
 CatTechHad = nil
 KAS_CODE_MODULE_ONLINE = 33558576     -- 0x2001030: event 48, Fleet Command, 5 s (FUN_004f4530)
 KAS_CODE_TECHNOLOGY = 33558716        -- 0x20010bc: event 188, 5 s (FUN_004f2a20)
@@ -1963,8 +2007,17 @@ function K_4939d0(sel) KAS_NoOp("4939d0", "kasfShipsClearRepairFactor") end
 -- while disguised (frozen, they never flew in: user, 2026-10-17); Mission01: a Kushan destroyer until its patrol
 -- Kept on the ships and set again every second: HWRM's flag didn't survive the BUSHAN-RE's first-frame jump out and
 -- back (it took fire once found: user, 2026-10-17); Cataclysm's stays on the ship
-KAS_Invulnerable = {}
+-- A disabled ship (K_49a2d0, a derelict) keeps it until a repair first holds it still (KAS_DisabledTick): Mission02's
+-- Fleet Intel makes the BUSHAN-RE vulnerable in the briefing after it is found, and the pirates killed it while the
+-- Worker flew to it (user, 2026-10-18: protection ends when the Worker gets there)
+KAS_Invulnerable, KAS_InvulnerableHeld = {}, {}
 function K_4984c0(sel, on)
+    if on == 0 and KAS_Invulnerable[sel] and KAS_Disabled[sel] and KAS_Disabled[sel].held == nil then
+        KAS_InvulnerableHeld[sel] = 1
+        print("CKAS: " .. sel .. " stays invulnerable until a repair reaches it")
+        return
+    end
+    KAS_InvulnerableHeld[sel] = nil
     if on ~= 0 then KAS_Invulnerable[sel] = 1 else KAS_Invulnerable[sel] = nil end
     if SobGroup_Count(sel) > 0 then SobGroup_SetInvulnerability(sel, on ~= 0 and 1 or 0) end
     if on ~= 0 and Rule_Exists("KAS_InvulnerableTick") == 0 then Rule_AddInterval("KAS_InvulnerableTick", 1) end
@@ -2280,19 +2333,25 @@ end
 -- ------------------------------------------------------------------ economy, research, trading, music
 function K_496e20(player, ru) Player_SetRU(player, ru) end                                       -- kasfRUsSet
 function K_496e40() return Universe_GetWorldResources() end                                      -- kasfGetWorldResources
-function K_496cf0(tech) Player_UnrestrictResearchOption(0, tech) print("CKAS: research allowed " .. tech) end   -- kasfAllowPlayerToResearch
-function K_496d10(tech) Player_UnrestrictResearchOption(0, tech) print("CKAS: purchase allowed " .. tech) end   -- kasfAllowPlayerToPurchase
+-- HWRM unrestricts only a restricted item and grants only one not yet researched ("unable to unrestrict" /
+-- "unable to grant" otherwise: FUN_005f6221 / FUN_005f635c), e.g. Mission02 allowing the fighter drive it starts with
+function KAS_Unrestrict(tech)
+    if Player_HasResearch(0, tech) == 1 or Player_ResearchOptionIsRestricted(0, tech) ~= 1 then return end
+    Player_UnrestrictResearchOption(0, tech)
+end
+function KAS_Grant(tech)
+    if Player_HasResearch(0, tech) ~= 1 then Player_GrantResearchOption(0, tech) end
+end
+function K_496cf0(tech) KAS_Unrestrict(tech) print("CKAS: research allowed " .. tech) end         -- kasfAllowPlayerToResearch
+function K_496d10(tech) KAS_Unrestrict(tech) print("CKAS: purchase allowed " .. tech) end         -- kasfAllowPlayerToPurchase
 function K_497710(i, text) KAS_NoOp("497710", "kasfSetTraderDialog") end
 function K_4977a0(scale) KAS_NoOp("4977a0", "kasfSetTraderPriceScale") end
 function K_497800(off) KAS_NoOp("497800", "kasfSetTraderDisabled") end
 -- kasfMusicPlay(trackNum): Cataclysm stream trackNum (tools/build_music.py), 1102 = a random one of 0-16.
--- HWRM has no music stop: kasfMusicStop goes back to the previous track, as Gearbox's HW1 KAS port does.
-KAS_MusicPrevious, KAS_MusicCurrent = "", ""
 function K_497000(track)
     if track == 1102 then track = random(0, 16) end
     if track < 0 or track > 61 then return end
     local path = format("data:sound/music/cataclysm/music_%02d", track)
-    KAS_MusicPrevious, KAS_MusicCurrent = KAS_MusicCurrent, path
     -- held while HWRM's arrival of the carried-over fleet runs, and played once the mothership is out (KAS_ArrivalWatch),
     -- as Gearbox's HW1 Mission02 starts its music only after singlePlayerPauseUntilHyperspaceComplete: Mission02's
     -- track, started at time 0, was silenced by the arrival, and asking for it again did nothing (user, 2026-10-17)
@@ -2304,11 +2363,14 @@ function K_497000(track)
     print("CKAS: music " .. path)
     Sound_MusicPlayType(path, MUS_Ambient)
 end
-function K_498c10(fadeTime)                                                                      -- kasfMusicStop
-    if KAS_MusicPrevious ~= "" then
-        KAS_MusicCurrent, KAS_MusicPrevious = KAS_MusicPrevious, ""
-        Sound_MusicPlayType(KAS_MusicCurrent, MUS_Ambient)
-    end
+-- kasfTechSetResearched(techName) (cataclysm.exe 0x498c10; first named kasfMusicStop): marks a technology researched
+-- for the computer player (its tech table at 0x00b6dcd4, refreshed by FUN_00514140), "" clears them all; Mission02
+-- gives the pirates' ambush team TECH_MIMIC and TECH_SALVAGE before kasfShipsUpgrade (K_498c70). Kept per tech for
+-- every computer player (shiprules.lua CatUpgrade_Researched): their races have no Somtaaw research to grant
+KAS_CPUTechs = {}
+function K_498c10(tech)
+    if tech == "" then KAS_CPUTechs = {} else KAS_CPUTechs[tech] = 1 end
+    print("CKAS: computer tech " .. (tech == "" and "cleared" or tech))
 end
 
 -- kasfEnableShipConstruction(type, race, enabled)
@@ -2510,8 +2572,11 @@ end
 -- 0x4991d0(dst, src, dist): dst = src + a random direction x dist (Mission02's patrols pick waypoints so), each
 -- axis clamped to the universe (the exe clamps to DAT_00892d20..28: Mission02's ambushers came in 23600 from the
 -- BUSHAN-RE, itself 46800 from the centre of a 65625 map)
+-- KAS_RandomVecScale: teams whose random points sit nearer than Cataclysm's (Mission02's decoys hyperspace in 45000 out
+-- from the BUSHAN-RE: closer in, user 2026-10-17)
+KAS_RandomVecScale = { pTricky = 0.75 }
 function K_4991d0(dst, src, dist)
-    local p, d, r = KAS_Pos(src), KAS_RandomDir(), KAS_Dist(dist)
+    local p, d, r = KAS_Pos(src), KAS_RandomDir(), KAS_Dist(dist) * (KAS_RandomVecScale[KAS_Team] or 1)
     local q = { p[1] + d[1] * r, p[2] + d[2] * r, p[3] + d[3] * r }
     if KAS_Universe then
         for k = 1, 3 do
@@ -2538,9 +2603,9 @@ function K_492870() KAS_Form("Sphere") end                                      
 -- AIM_INTERCEPT_FINISH_DISTSQ (Cataclysm's aiplayer.script: 16000000, 4000 away), the destination re-aimed every few
 -- seconds. KAS_InterceptStop: targets the interceptors stop further out from, at the edge of their sensors (Mission02:
 -- the disguised corvettes stop where the BUSHAN-RE's sensors (kstandarddestroyer.shp fowRadius 9000) pick them up and
--- transform there, user 2026-10-17; they flew right up to it)
+-- transform there, user 2026-10-17; they flew right up to it; then slightly closer, 8000, user)
 KAS_InterceptFinish, KAS_InterceptRecalc = 4000, 3
-KAS_InterceptStop = { kDestroyer = 9000 }
+KAS_InterceptStop = { kDestroyer = 8000 }
 KAS_Intercepts = {}
 function K_4924e0(sel)
     KAS_EndPatrol()
@@ -2847,6 +2912,7 @@ end
 -- kasfTeamHyperspaceIn(vec) / kasfTeamHyperspaceInNear(vec, dist) / kasfTeamHyperspaceOut (Gearbox's KAS_Team*)
 function K_493600(vec)
     print("CKAS: " .. KAS_Team .. " hyperspaces in")
+    KAS_Returned(KAS_Team)
     SobGroup_HyperspaceToVector(KAS_Team, KAS_Pos(vec))
     SobGroup_SetHidden(KAS_Team, 0)
     if Universe_GameTime() < 1 then
@@ -2882,10 +2948,18 @@ end
 function K_493630(vec, dist)
     local p, d, r = KAS_Pos(vec), KAS_RandomDir(), KAS_Dist(dist)
     print("CKAS: " .. KAS_Team .. " hyperspaces in near")
+    KAS_Returned(KAS_Team)
     SobGroup_HyperspaceToVector(KAS_Team, { p[1] + d[1] * r, p[2] + d[2] * r, p[3] + d[3] * r })
     SobGroup_SetHidden(KAS_Team, 0)
 end
-function K_493800() KAS_TeamHyperspaceOut(KAS_Team) end
+function K_493800()
+    KAS_TeamHyperspaceOut(KAS_Team)
+    if Universe_GameTime() >= 1 then     -- (at frame 0 a despawn, the team hyperspaces in later)
+        SobGroup_CreateIfNotExist("KAS_Departed")
+        SobGroup_SobGroupAdd("KAS_Departed", KAS_Team)
+        print("CKAS: " .. KAS_Team .. " departed (" .. SobGroup_Count(KAS_Team) .. " ships no longer counted)")
+    end
+end
 -- kasfShipsSetMaxVelocity / ClearMaxVelocity (0x4938f0 / 493940): Mission02 holds the crippled destroyer at 1
 function K_4938f0(sel, v)
     if v <= 10 then SobGroup_SetSpeed(sel, 0) else KAS_NoOp("4938f0", "max velocity " .. v) end
@@ -3220,9 +3294,91 @@ function KAS_DisguiseTick()
         end
     end
 end
-function K_498270(sel) KAS_NoOp("498270", "disguise state reset") end
+-- 0x498270(ships): the ships die (FUN_0044a150: each gets a death time, now + a random fraction of a second, and the
+-- ship update destroys it then, FUN_0054a6xx 0x2fc; a disguised one is unmimicked first). Mission02: once the pod is
+-- taken, the raiders not yet discovered and the salvage corvettes go, so "Pirates" can empty and the mission end
+-- (user 2026-10-18: the capture never ended it, the no-op left them alive)
+KAS_Doomed = {}
+KAS_DoomN = 0
+function K_498270(sel)
+    local now = Universe_GameTime()
+    local n = SobGroup_Count(sel)
+    print("CKAS: " .. sel .. " dies (" .. n .. " ships)")
+    for i = 0, n - 1 do
+        KAS_DoomN = KAS_DoomN + 1
+        local g = "KAS_Doom" .. KAS_DoomN
+        SobGroup_CreateIfNotExist(g)
+        SobGroup_Clear(g)
+        SobGroup_FillShipsByIndexRange(g, sel, i, 1)
+        KAS_Doomed[g] = now + random()
+    end
+    if n > 0 and Rule_Exists("KAS_DoomTick") == 0 then Rule_AddInterval("KAS_DoomTick", 0.1) end
+end
+function KAS_DoomTick()
+    local now, due, left = Universe_GameTime(), {}, 0
+    for g, t in KAS_Doomed do
+        if now >= t then tinsert(due, g) else left = left + 1 end
+    end
+    for i = 1, getn(due) do
+        local g = due[i]
+        if SobGroup_Count(g) > 0 then
+            SobGroup_SetInvulnerability(g, 0)
+            SobGroup_SetHealth(g, 0)
+        end
+        KAS_Doomed[g] = nil
+    end
+    if left == 0 then Rule_Remove("KAS_DoomTick") end
+end
 -- 0x498cb0(type, player): how many of that type the player has
+-- Salvage objects (tools/mission2level.py SALVAGE_TYPES / KAS_Salvage in the mission's _paths.lua: Mission02's
+-- message pod, a Worker tows it home with SalvageCommand): the level places them unnamed, so each one's team is
+-- filled from a volume round where it starts (KAS_SalvageFind); "the player owns one" (K_498cb0) means a delivery
+-- (Gearbox's salvage counter, Stats_GatheredRUSalvage, rose: each is worth 1 RU, install_base.py make_salvage)
+KAS_SalvageTypes = {}   -- (none: Mission02's pod is a ship, captured as in HW1)
+function KAS_SalvageFind()
+    if KAS_Salvage == nil then return end
+    KAS_SalvageBase = Stats_GatheredRUSalvage(0)
+    for i = 1, getn(KAS_Salvage) do
+        local s = KAS_Salvage[i]
+        local v = "KAS_SalvageVol" .. i
+        Volume_AddSphere(v, s.pos, 300)
+        SobGroup_CreateIfNotExist(s.team)
+        Player_FillSobGroupInVolume(s.team, -1, v)
+        print("CKAS: salvage " .. s.type .. " for team " .. s.team .. ": " .. SobGroup_Count(s.team) .. " found")
+        Volume_Delete(v)
+    end
+end
+-- a mission team's name (Gearbox's KASTeams), not a ship type
+function KAS_IsTeam(t)
+    local i = 0
+    while KASNumberTeams and i < KASNumberTeams do
+        if KASTeams[i] == t then return 1 end
+        i = i + 1
+    end
+    return nil
+end
 function K_498cb0(t, p)
+    -- (cataclysm.exe: FUN_004d6e30 the type's index, -1 for a name that is no ship type, then FUN_00540030 the
+    -- player's count of that type in its stats table, every type summed for -1: Mission02 passes its pod's TEAM,
+    -- "dMessagePod", so it asks how many ships the player has taken, non-zero once the pod is captured. As a type
+    -- it was always 0: capturing the pod never ended the mission, user 2026-10-18.) A team: its ships the player owns
+    -- (the pod's group keeps it through the capture: its switch-owner flag was cleared when it changed sides)
+    if KAS_IsTeam(t) then
+        SobGroup_CreateIfNotExist("KAS_CountTmp")
+        SobGroup_Clear("KAS_CountTmp")
+        SobGroup_FilterInclude("KAS_CountTmp", t, "PlayerOwner", "" .. p)
+        local n = SobGroup_Count("KAS_CountTmp")
+        KAS_TeamTaken = KAS_TeamTaken or {}
+        if KAS_TeamTaken[t] ~= n then
+            KAS_TeamTaken[t] = n
+            print("CKAS: team " .. t .. ": " .. n .. " of " .. SobGroup_Count(t) .. " owned by player " .. p)
+        end
+        return n
+    end
+    if KAS_SalvageTypes[strlower(KAS_HWRMType(t))] then
+        if p ~= 0 or KAS_SalvageBase == nil then return 0 end
+        return Stats_GatheredRUSalvage(0) - KAS_SalvageBase
+    end
     SobGroup_CreateIfNotExist("KAS_CountTmp")
     SobGroup_Clear("KAS_CountTmp")
     Player_FillShipsByType("KAS_CountTmp", p, KAS_HWRMType(t))
@@ -3285,6 +3441,11 @@ function K_49a2d0(sel, on)
     else
         SobGroup_SetROE(sel, DefensiveROE)
         KAS_Disabled[sel] = nil
+        if KAS_InvulnerableHeld[sel] then   -- enabled before any repair held it: the mission's switch-off now
+            KAS_InvulnerableHeld[sel] = nil
+            KAS_Invulnerable[sel] = nil
+            SobGroup_SetInvulnerability(sel, 0)
+        end
     end
     print("CKAS: " .. sel .. ((on == 1 and " disabled") or " enabled"))
 end
@@ -3310,6 +3471,12 @@ function KAS_DisabledTick()
             w.check = now + 0.5
             local held = KAS_BeingRepaired(sel)
             if held ~= w.held then print("CKAS: " .. sel .. ((held and " held still for repairs") or " drifting again")) end
+            if held and KAS_InvulnerableHeld[sel] then   -- the switch-off the mission asked for earlier (K_4984c0)
+                KAS_InvulnerableHeld[sel] = nil
+                KAS_Invulnerable[sel] = nil
+                SobGroup_SetInvulnerability(sel, 0)
+                print("CKAS: " .. sel .. " vulnerable now (a repair reached it)")
+            end
             w.held = held
         end
         if dt > 0 and SobGroup_Count(sel) > 0 and w.held == nil then
@@ -3395,4 +3562,3 @@ function KAS_MoveFireTick()
         i = i + 1
     end
 end
-

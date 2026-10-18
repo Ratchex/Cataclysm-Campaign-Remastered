@@ -231,6 +231,10 @@ def joint_frames(objs, names):
 # Dock paths built from Cataclysm dock points (distances in HW1 units, scaled with the model):
 # entry = approach along the point's normal, then onto the point; exit = the reverse.
 DOCK_KINDS = [  # (dock point name prefix, HWRM dock family, path flags, approach distances)
+    # Latch: collectors unload hanging on them. (Plain, a salvage capture's Worker found its carrier and docked what it
+    # towed, but every ship finishing one is docked inside: Workers flew to the nose and vanished, user, 2026-10-17.
+    # After the latch SalCap needs a carrier with a plain path for the salvager's family and no latch path for it:
+    # FUN_004b14d7 / FUN_004b0a9e mode 5, so a Worker (Utility) is let go here.)
     ("RES", "Utility", "Latch", (1200, 350)),
     ("DBSMALLIN", "Fighter", "", (900, 250)),
     ("DBMEDIN", "Corvette", "", (1200, 350)),
@@ -265,8 +269,13 @@ def in_clip_box(xyz):
 # heading, up)}. Filled by main; the collector paths take their distances and the docked ship's heading / up from it
 # (user: the Kuun-Lan's paths from Cataclysm's own files).
 SHP_DOCKS = {}
+# --shp-latch: collector latch paths take the docked facing and approach distances from the .shp's dock points (the
+# Kuun-Lan's nose pads: Res0 nose up, top forward). Off by default: on the Processor it turned the docked Worker so it
+# nosed into the pads (user, 2026-10-18; its working model predated this, with the generic latch_rotation)
+SHP_LATCH = False
 HW1_DIRS = {0: (1, 0, 0), 1: (0, 1, 0), 2: (0, 0, 1), 4: (-1, 0, 0), 5: (0, -1, 0), 6: (0, 0, -1)}
 CONVN = None   # HW1 direction -> ours (main's convn)
+LATCH_OUT = 12   # a salvage object's Latch<n> this far off its hull (model units)
 
 
 def read_shp_docks(path):
@@ -369,7 +378,7 @@ def dock_nodes(points, conv, extra="", skip=()):
             # latch_rotation): with the stock flags they never unloaded, without rotations they stopped short.
             rot = latch_rotation(pos, nrm) if fam == "Utility" else None
             shp = SHP_DOCKS.get(lbl.lower())
-            if fam == "Utility" and shp and CONVN:
+            if fam == "Utility" and shp and CONVN and SHP_LATCH:
                 # Cataclysm's own: the docked Worker faces the point's heading with its top along its up (Res0: nose
                 # up, top forward; Res1: nose down), approached from its max / min distance along the normal
                 _, _, dmin, dmax, hd, ud = shp
@@ -635,6 +644,8 @@ def main():
     ap.add_argument("--scale", type=float, default=0.35)
     ap.add_argument("--no-hodor", action="store_true")
     ap.add_argument("--dock-from", help="take the collector (Utility) dock paths from this HOD instead of RES*")
+    ap.add_argument("--no-res", action="store_true", help="no RES (RU unloading) dock paths (build_kuunlan.sh)")
+    ap.add_argument("--shp-latch", action="store_true", help="latch paths faced as the .shp's dock points (SHP_LATCH)")
     ap.add_argument("--dock-scale", type=float, default=1.0, help="position scale for --dock-from paths")
     ap.add_argument("--hardpoint", action="append", default=[],
                     help="extra subsystem hardpoint joint set: NAME at the origin, NAME@x,y,z (HWRM units), "
@@ -662,6 +673,9 @@ def main():
                          "(the effect marker); tools/make_procbeam.py animates _Yaw / _Pitch (the Processor's beams)")
     ap.add_argument("--latch", help="LatchOrientation joint at x,y,z (HWRM units): the point a collector puts on "
                                     "the asteroid's surface while harvesting")
+    ap.add_argument("--salvage-at", action="append", default=[],
+                    help="a salvage point X,Y,Z@UX,UY,UZ (HWRM units: where, and out of the hull) in place of the .shp's "
+                         "DPT_SalvageLatch dock points")
     ap.add_argument("--col-slices", type=float, help="a collision mesh: boxes following the hull every this many "
                                                      "units along Z (else HODOR writes none)")
     ap.add_argument("--col-box", action="append", metavar="X0,Y0,Z0,X1,Y1,Z1", nargs="?", const="",
@@ -727,8 +741,9 @@ def main():
     s = a.scale
     conv = lambda x, y, z: (-y * s, x * s, z * s)
     convn = lambda x, y, z: (-y, x, z)
-    global CONVN
+    global CONVN, SHP_LATCH
     CONVN = convn
+    SHP_LATCH = a.shp_latch
     parts_rel = rel.replace("\\", "/").split("/")
     if len(parts_rel) >= 2:   # race_sect/smothership/rl0/lod0 -> race_sect/smothership.shp
         SHP_DOCKS.update(read_shp_docks(os.path.join(DECOMP, "extracted", "big", parts_rel[0], parts_rel[1] + ".shp")))
@@ -911,6 +926,10 @@ def main():
         engine_geo.update({id(pt): g for pt in extra_pts})
         points += extra_pts
     dok_points = {pt[1]: pt for pt in points if pt[0] == "Dok"}
+    if os.environ.get("GEO2DAE_LIST_DOCKS"):   # each dock point in our model space: position, normal
+        for lbl, pt in dok_points.items():
+            print("dock", lbl, SHP_DOCKS.get(lbl.lower(), ("",))[0], [round(c, 2) for c in conv(*pt[2])],
+                  [round(c, 3) for c in convn(*pt[3])])
     if a.no_docks:
         points = [pt for pt in points if pt[0] != "Dok"]
     weapons, nweap = weapon_nodes(points, conv, convn,
@@ -933,6 +952,11 @@ def main():
             x, n = borrowed_dock_nodes(a.dock_from, a.dock_scale, fam, exact=True, onto=ours)
             extra, nextra = extra + x, nextra + n
         skip = ("RES", "DBSMALLIN", "DBMEDIN")
+    if a.no_res:
+        # the Kuun-Lan for now: a Worker's salvage needs a carrier with no latch path for its family (Utility), so its
+        # nose RU latch points are left out and Workers unload in its hangar (install_base.py patch_worker; user,
+        # 2026-10-18: the nose pads to come back later)
+        skip = tuple(skip) + ("RES",)
     hold_dock, ndock = dock_nodes(points, conv, extra, skip)
     ndock += nextra
     # Engine nozzles from the .mex Eng chunks: JNT[EngineNozzle<n>] (setEngineTrail index n-1 / setEngineBurn).
@@ -1108,6 +1132,48 @@ def main():
             rp = f"RepairPoint{k}"
             weapons += jnode(f"JNT[{rp}]", at, jnode(f"JNT[{rp}Heading]", (0, 0, 10))
                              + jnode(f"JNT[{rp}Left]", (10, 0, 0)) + jnode(f"JNT[{rp}Up]", (0, 10, 0)))
+        # salvage points (stock layout, SalvagePoint1...): the dock points the ship's .shp makes DPT_SalvageLatch
+        # (Cataclysm's message pod: Tow0, where a Worker latches to tow it), for its SalCap latch list
+        tows = sorted(lbl for lbl in dok_points if SHP_DOCKS.get(lbl.lower(), ("",))[0] == "DPT_SalvageLatch")
+        # The frame as stock targets' (kus_cryotray, kus_resourcecollector, kus_assaultfrigate): Up out of the hull
+        # (the dock point's normal), Heading along it (the ship's up, or its forward where the normal is vertical),
+        # Left = Up x Heading; the salvager lines its latch up with it (an identity frame on the pod's underside had
+        # the Worker nose in, turn and snap back, user)
+        spots = [(conv(*dok_points[lbl][2]), convn(*dok_points[lbl][3]), None) for lbl in tows]
+        # --salvage-at in their place: HWRM turns the salvager to the point's frame the whole way in (FUN_004d0e50) and
+        # levels ships, so a Worker never turned over to reach the pod's underside (Tow0; user): on its top it comes in
+        # upright and carries the pod under its clamps, as Cataclysm's
+        # A salvage-capturing ship latches by its LatchOrientation (SalCap passes the latch code flag 0 for a ship
+        # target: FUN_005fa398 -> FUN_004d0e50; SalvageOrientation is for salvage objects), its frame from the
+        # joint's Heading / Left children (FUN_00669ed3), Heading into the point against its Up, its up along the
+        # point's Heading (the stock corvette nosed up into Tow0; Gearbox's cryo tray: Up out of its rear end, Heading
+        # up, so salvagers fly in level): @HX,HY,HZ sets the Heading
+        if a.salvage_at:
+            spots = [tuple(tuple(float(c) for c in v.split(",")) for v in spec.split("@")) for spec in a.salvage_at]
+            spots = [(sp[0], sp[1], sp[2] if len(sp) > 2 else None) for sp in spots]
+        for k, (pos, nrm, head) in enumerate(spots, 1):
+            sp = f"SalvagePoint{k}"
+            up = list(nrm)
+            ln = math.sqrt(sum(c * c for c in up)) or 1.0
+            up = [c / ln for c in up]
+            ref = head or ((0.0, 1.0, 0.0) if abs(up[1]) < 0.9 else (0.0, 0.0, 1.0))
+            dot = sum(ref[i] * up[i] for i in range(3))
+            hd = [ref[i] - dot * up[i] for i in range(3)]
+            ln = math.sqrt(sum(c * c for c in hd))
+            hd = [c / ln for c in hd]
+            lf = [up[1] * hd[2] - up[2] * hd[1], up[2] * hd[0] - up[0] * hd[2], up[0] * hd[1] - up[1] * hd[0]]
+            weapons += jnode(f"JNT[{sp}]", pos,
+                             jnode(f"JNT[{sp}Heading]", tuple(10 * c for c in hd))
+                             + jnode(f"JNT[{sp}Left]", tuple(10 * c for c in lf))
+                             + jnode(f"JNT[{sp}Up]", tuple(10 * c for c in up)))
+            # and as a salvage object's latch (Latch<n>, as Gearbox's container: Heading into the object, Left
+            # across), for a collector's SalvageCommand (Mission02's message pod, user)
+            # off the hull along its normal (on it the Worker had to push into the pod to reach it: nearly docked,
+            # then backed off, user); Cataclysm Remastered's crystal's sits ~13 out, Gearbox's container's ~1
+            at = [a + LATCH_OUT * u for a, u in zip(pos, up)]
+            weapons += jnode(f"JNT[Latch{k}]", tuple(at),
+                             jnode(f"JNT[Latch{k}Heading]", tuple(-10 * c for c in up))
+                             + jnode(f"JNT[Latch{k}Left]", tuple(10 * c for c in lf)))
 
     # collision mesh (ROOT_COL > COL[Root]): without one the engine held other ships well off this one (the Ramming
     # Frigate's latched target sat ~17 off its ram plate, user: doesn't touch). Boxes following the hull's width

@@ -37,7 +37,9 @@ import geo2obj  # noqa: E402
 MOD = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BIG = r"C:\Modding\Cataclysm-decomp\extracted\big"
 PHASE_TIME = 20 / 16      # 1 / 0.05 updates at 16 a second
-SHELL = 1.2               # _DAT_0087813c
+SHELL = 3.0               # the Mimic's shell at its largest, x the larger ship radius, for Mimic and Unmimic alike
+                          # (Cataclysm: 1.2, _DAT_0087813c; user 2026-10-18: 3x)
+SCRIPT_SHELL = 2.0        # the mission disguises' (Mission02's corvettes; Cataclysm: 1.2; user 2026-10-18: 2x)
 SWAP = 1.0                # shiprules.lua CAT_MIMIC_SWAP
 COLOUR = (1.0, 1.0, 1.0)  # the shell's tint over its texture
 ALPHA = 0.85              # the shell's brightness when formed (additive, as the Keeper's: it fades by colour)
@@ -187,7 +189,7 @@ def main():
         print(f"{target}: radius {rt:.1f} (Mimic {rm:.1f}), shell from x{s0:.2f}")
     for target, (model, hidden, _) in sorted(SCRIPT_DISGUISES.items()):
         rt, rh = radius(model), radius(hidden)
-        s0 = SHELL * max(rt, rh) / rt
+        s0 = SCRIPT_SHELL * max(rt, rh) / rt
         copy_mesh(target)
         write(f"cat_mimic_out_{target}", f"DATA:ART/FX/CAT_MIMIC/{target.upper()}.HOD", PHASE_TIME,
               [(0, 1), (1, s0)], [(0, ALPHA), (1, 0)])

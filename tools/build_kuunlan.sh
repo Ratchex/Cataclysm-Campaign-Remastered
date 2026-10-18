@@ -29,6 +29,6 @@ done
 COLBOX=$(python tools/kl_bounds.py)
 HARDPOINTS="Hardpoint_Research $(python tools/make_modules.py --list-hardpoints)" \
 GEO2DAE_ARGS="--points-from $SECT/smothershipengineslower/rl0/lod0/smothershipengineslower.geo \
---points-from $SECT/smothershipenginesupper/rl0/lod0/smothershipenginesupper.geo --col-box $COLBOX" \
+--points-from $SECT/smothershipenginesupper/rl0/lod0/smothershipenginesupper.geo --col-box $COLBOX --no-res --shp-latch" \
     bash tools/build_ship.sh race_sect/smothership som_mothership $(python tools/make_modules.py --list-core) | tail -1
 python tools/make_modules.py   # installs the module models (data/subsystem, data/ship/*_dummy)
