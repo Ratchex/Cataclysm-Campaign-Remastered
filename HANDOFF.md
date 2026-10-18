@@ -98,7 +98,7 @@ findings).
 - Balance: Taiidan collectors at Cataclysm's 0.5 RU/s; Worker on the collector ratio (144); two extra Kushan
   main-guard ion frigates (tools/level_extras.py).
 
-## RESUME HERE (2026-10-18: committed ("Worker salvage (HW1 SalCap, Tow0 underneath)...", after 394eafb), not pushed; commit only when the user says)
+## RESUME HERE (2026-10-18: committed ("Worker salvage (HW1 SalCap, Tow0 underneath)...", after 394eafb), pushed; commit only when the user says)
 **Next test (user plays Mission 2 normally; the shortcut test was removed at the user's request):**
 - Pod captured -> carrier jumps out -> log "pCarrier departed", "CKAS: Pirates 0 left" -> "Destroy Turanic Raiders"
   completes -> Hyperspace objective / "~ End of Mission". If not: the "Pirates n left:" line says what still counts.
